@@ -1,12 +1,200 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import ProductCard from "@/components/ProductCard";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Search, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { Product } from "@/types/product";
+
+const PRODUCTS_PER_PAGE = 8;
 
 const Index = () => {
+  const { addToCart, getCartItemCount } = useCart();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      
+      const formattedProducts = (data || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || "",
+        price: Number(p.price),
+        originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        category: p.category,
+        image: p.image
+      }));
+      
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen flex flex-col">
+      <Header cartItemCount={getCartItemCount()} />
+      
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-primary/10 to-background py-8 sm:py-12 md:py-16 px-4 transition-all duration-300">
+        <div className="container">
+          <div className="max-w-3xl mx-auto text-center space-y-3 sm:space-y-4">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary animate-fade-in">
+              ARIS STATIONARIES
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-semibold text-foreground animate-fade-in">
+              Quality You Need, Prices You Will Love
+            </p>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground animate-fade-in">
+              Your trusted source for affordable, high-quality stationery supplies
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Search Section */}
+      <section className="container py-4 sm:py-6 md:py-8 px-4">
+        <div className="max-w-xl mx-auto relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+          <Input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 sm:pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary"
+          />
+        </div>
+      </section>
+
+      {/* Products Section */}
+      <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-4">
+        {isLoading ? (
+          <div className="text-center py-12 sm:py-16">
+            <p className="text-lg sm:text-xl text-muted-foreground">Loading products...</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-12 sm:py-16">
+            <p className="text-lg sm:text-xl text-muted-foreground">No products found</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 min-h-[600px]">
+              {currentProducts.map((product, index) => (
+                <div 
+                  key={product.id}
+                  className="animate-fade-in h-full"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <ProductCard
+                    product={product}
+                    onAddToCart={addToCart}
+                  />
+                </div>
+              ))}
+            </div>
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 sm:gap-4 mt-8 sm:mt-12">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handlePrevPage}
+                  disabled={currentPage === 1}
+                  className="h-9 w-9 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50"
+                >
+                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+                
+                <div className="flex items-center gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? "default" : "outline"}
+                      size="icon"
+                      onClick={() => {
+                        setCurrentPage(page);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      className={`h-9 w-9 sm:h-10 sm:w-10 transition-all duration-200 ${
+                        currentPage === page ? 'scale-110' : ''
+                      }`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleNextPage}
+                  disabled={currentPage === totalPages}
+                  className="h-9 w-9 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50"
+                >
+                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              </div>
+            )}
+            
+            <div className="text-center mt-4 text-sm text-muted-foreground">
+              Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+            </div>
+          </>
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 };
