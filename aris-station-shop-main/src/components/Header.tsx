@@ -2,6 +2,7 @@ import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import logo from "@/assets/logo.png";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -12,11 +13,10 @@ const Header = ({ cartItemCount }: HeaderProps) => {
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
         <div className="container flex h-14 sm:h-16 items-center justify-between px-4">
-          <Link to="/" className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105">
-            <img src="/logo.png" alt="ARIS STATIONARIES" className="h-8 sm:h-10" />
+          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 transition-transform duration-200 hover:scale-105">
+            <img src={logo} alt="ARIS STATIONARIES Logo" className="h-8 sm:h-10 md:h-12" />
             <span className="hidden sm:inline-block text-lg sm:text-xl md:text-2xl font-bold text-primary">ARIS STATIONARIES</span>
-          <span className="text-xs text-muted-foreground hidden md:inline">Free delivery to UoN hostels, Qejani & Qwetu. Other areas free for KSH 500+.</span>
-        </Link>
+          </Link>
           
           <div className="flex items-center gap-2 sm:gap-4">
             <Link to="/cart" className="hidden md:block">
@@ -31,8 +31,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                   </Badge>
                 )}
               </Button>
-            <span className="text-xs text-muted-foreground hidden md:inline">Free delivery to UoN hostels, Qejani & Qwetu. Other areas free for KSH 500+.</span>
-        </Link>
+            </Link>
           </div>
         </div>
       </header>
@@ -51,7 +50,6 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           >
             {cartItemCount}
           </Badge>
-        <span className="text-xs text-muted-foreground hidden md:inline">Free delivery to UoN hostels, Qejani & Qwetu. Other areas free for KSH 500+.</span>
         </Link>
       )}
     </>
