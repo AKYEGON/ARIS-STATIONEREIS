@@ -16,30 +16,36 @@ export type Database = {
     Tables: {
       order_items: {
         Row: {
+          cost_price: number | null
           created_at: string
           id: string
           order_id: string
           price: number
           product_image: string
           product_name: string
+          profit: number | null
           quantity: number
         }
         Insert: {
+          cost_price?: number | null
           created_at?: string
           id?: string
           order_id: string
           price: number
           product_image: string
           product_name: string
+          profit?: number | null
           quantity: number
         }
         Update: {
+          cost_price?: number | null
           created_at?: string
           id?: string
           order_id?: string
           price?: number
           product_image?: string
           product_name?: string
+          profit?: number | null
           quantity?: number
         }
         Relationships: [
@@ -54,37 +60,46 @@ export type Database = {
       }
       orders: {
         Row: {
+          completed_at: string | null
           created_at: string
           customer_email: string
           customer_name: string
           customer_phone: string
           delivery_address: string
           id: string
+          profit: number | null
           status: string
+          subtotal: number | null
           tags: string[] | null
           total: number
           updated_at: string
         }
         Insert: {
+          completed_at?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
           customer_phone: string
           delivery_address: string
           id?: string
+          profit?: number | null
           status?: string
+          subtotal?: number | null
           tags?: string[] | null
           total: number
           updated_at?: string
         }
         Update: {
+          completed_at?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
           customer_phone?: string
           delivery_address?: string
           id?: string
+          profit?: number | null
           status?: string
+          subtotal?: number | null
           tags?: string[] | null
           total?: number
           updated_at?: string
@@ -94,6 +109,7 @@ export type Database = {
       products: {
         Row: {
           category: string
+          cost_price: number | null
           created_at: string
           description: string | null
           id: string
@@ -101,10 +117,12 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          stock: number | null
           updated_at: string
         }
         Insert: {
           category: string
+          cost_price?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -112,10 +130,12 @@ export type Database = {
           name: string
           original_price?: number | null
           price: number
+          stock?: number | null
           updated_at?: string
         }
         Update: {
           category?: string
+          cost_price?: number | null
           created_at?: string
           description?: string | null
           id?: string
@@ -123,9 +143,45 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          stock?: number | null
           updated_at?: string
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          change: number
+          created_at: string
+          id: string
+          notes: string | null
+          product_id: string
+          reason: string
+        }
+        Insert: {
+          change: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id: string
+          reason: string
+        }
+        Update: {
+          change?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          product_id?: string
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -153,6 +209,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      adjust_stock: {
+        Args: {
+          p_change: number
+          p_notes?: string
+          p_product_id: string
+          p_reason: string
+        }
+        Returns: undefined
+      }
+      calculate_product_profit: {
+        Args: { product_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
