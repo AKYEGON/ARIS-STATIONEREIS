@@ -80,7 +80,8 @@ const Cart = () => {
             ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
             : `Pickup at ${data.university} - ${data.branch}`,
           total: total,
-          status: "pending"
+          subtotal: total,
+          status: "Pending"
         })
         .select()
         .single();

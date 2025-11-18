@@ -14,9 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
 import { Product } from "@/types/product";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
+import { SalesDashboard } from "@/components/admin/SalesDashboard";
 
 interface OrderItem {
   product_name: string;
@@ -59,6 +61,8 @@ const Admin = () => {
     description: "",
     price: "",
     originalPrice: "",
+    costPrice: "",
+    stock: "",
     category: "",
     image: "/placeholder.svg"
   });
@@ -175,6 +179,8 @@ const Admin = () => {
       description: "",
       price: "",
       originalPrice: "",
+      costPrice: "",
+      stock: "",
       category: "",
       image: "/placeholder.svg"
     });
@@ -328,6 +334,8 @@ const Admin = () => {
       description: product.description,
       price: product.price.toString(),
       originalPrice: product.originalPrice?.toString() || "",
+      costPrice: (product as any).cost_price?.toString() || "0",
+      stock: (product as any).stock?.toString() || "0",
       category: product.category,
       image: product.image
     });
@@ -402,13 +410,88 @@ const Admin = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from("orders")
-        .update({ status: newStatus })
-        .eq("id", orderId);
+      // If status is being changed to Fulfilled, handle stock reduction and profit calculation
+      if (newStatus === "Fulfilled") {
+        // Get the order items
+        const { data: orderItems, error: itemsError } = await supabase
+          .from("order_items")
+          .select("*")
+          .eq("order_id", orderId);
 
-      if (error) throw error;
+        if (itemsError) throw itemsError;
 
+        let totalProfit = 0;
+        let totalSales = 0;
+
+        // Process each item
+        for (const item of orderItems || []) {
+          // Get the product to access cost_price and current stock
+          const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("id, cost_price, stock, name")
+            .eq("name", item.product_name)
+            .single();
+
+          if (productError || !product) {
+            console.warn(`Product not found for: ${item.product_name}`);
+            continue;
+          }
+
+          // Calculate profit for this item
+          const itemProfit = (Number(item.price) - Number(product.cost_price || 0)) * item.quantity;
+          totalProfit += itemProfit;
+          totalSales += Number(item.price) * item.quantity;
+
+          // Update order_items with cost_price and profit
+          await supabase
+            .from("order_items")
+            .update({
+              cost_price: product.cost_price,
+              profit: itemProfit
+            })
+            .eq("id", item.id);
+
+          // Reduce stock using the adjust_stock function
+          const { error: stockError } = await supabase.rpc("adjust_stock", {
+            p_product_id: product.id,
+            p_change: -item.quantity,
+            p_reason: "sale",
+            p_notes: `Order #${orderId.substring(0, 8)}`
+          });
+
+          if (stockError) {
+            console.error(`Error adjusting stock for ${product.name}:`, stockError);
+            throw new Error(`Failed to adjust stock for ${product.name}`);
+          }
+        }
+
+        // Update the order with profit, subtotal, and completed_at
+        const { error: orderError } = await supabase
+          .from("orders")
+          .update({
+            status: newStatus,
+            subtotal: totalSales,
+            profit: totalProfit,
+            completed_at: new Date().toISOString()
+          })
+          .eq("id", orderId);
+
+        if (orderError) throw orderError;
+
+        toast.success("Order fulfilled! Stock updated and profit calculated.");
+      } else {
+        // For other status changes, just update the status
+        const { error } = await supabase
+          .from("orders")
+          .update({ status: newStatus })
+          .eq("id", orderId);
+
+        if (error) throw error;
+
+        toast.success("Status updated successfully");
+      }
+
+      // Refresh orders list and selected order
       setOrdersList(ordersList.map(order =>
         order.id === orderId ? { ...order, status: newStatus } : order
       ));
@@ -416,11 +499,12 @@ const Admin = () => {
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus });
       }
-      
-      toast.success("Status updated successfully");
-    } catch (error) {
+
+      // Refresh data to show updated values
+      await fetchOrders();
+    } catch (error: any) {
       console.error("Error updating status:", error);
-      toast.error("Failed to update order status");
+      toast.error(error.message || "Failed to update order status");
     }
   };
 
@@ -450,16 +534,34 @@ const Admin = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="flex items-center gap-2">
+              <Warehouse className="h-4 w-4" />
+              Inventory
+            </TabsTrigger>
+            <TabsTrigger value="sales" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Sales & Profit
             </TabsTrigger>
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               Orders
             </TabsTrigger>
           </TabsList>
+
+          {/* Inventory Tab */}
+          <TabsContent value="inventory" className="space-y-6">
+            <InventoryDashboard />
+          </TabsContent>
+
+          {/* Sales Dashboard Tab */}
+          <TabsContent value="sales" className="space-y-6">
+            <SalesDashboard />
+          </TabsContent>
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
@@ -514,6 +616,26 @@ const Admin = () => {
                         value={formData.originalPrice}
                         onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                         placeholder="Leave empty if no discount"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="costPrice">Cost Price (KSh) *</Label>
+                      <Input
+                        id="costPrice"
+                        type="number"
+                        value={formData.costPrice}
+                        onChange={(e) => setFormData({...formData, costPrice: e.target.value})}
+                        placeholder="0.00"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="stock">Initial Stock</Label>
+                      <Input
+                        id="stock"
+                        type="number"
+                        value={formData.stock}
+                        onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                        placeholder="0"
                       />
                     </div>
                     <div>
@@ -775,6 +897,26 @@ const Admin = () => {
                   value={formData.originalPrice}
                   onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                   placeholder="Leave empty if no discount"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-costPrice">Cost Price (KSh) *</Label>
+                <Input
+                  id="edit-costPrice"
+                  type="number"
+                  value={formData.costPrice}
+                  onChange={(e) => setFormData({...formData, costPrice: e.target.value})}
+                  placeholder="0.00"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-stock">Stock</Label>
+                <Input
+                  id="edit-stock"
+                  type="number"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({...formData, stock: e.target.value})}
+                  placeholder="0"
                 />
               </div>
               <div>
