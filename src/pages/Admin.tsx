@@ -423,8 +423,8 @@ const Admin = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
-      // If status is being changed to Fulfilled, handle stock reduction and profit calculation
-      if (newStatus === "Fulfilled") {
+      // If status is being changed to delivered, handle stock reduction and profit calculation
+      if (newStatus === "delivered") {
         // Get the order items
         const { data: orderItems, error: itemsError } = await supabase
           .from("order_items")
@@ -491,7 +491,7 @@ const Admin = () => {
 
         if (orderError) throw orderError;
 
-        toast.success("Order fulfilled! Stock updated and profit calculated.");
+        toast.success("Order delivered! Stock reduced and profit calculated.");
       } else {
         // For other status changes, just update the status
         const { error } = await supabase
