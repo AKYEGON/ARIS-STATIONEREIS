@@ -166,7 +166,14 @@ const Admin = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setOrdersList(data || []);
+      
+      // Normalize tags to ensure it's never null
+      const normalizedOrders = (data || []).map(order => ({
+        ...order,
+        tags: order.tags || []
+      }));
+      
+      setOrdersList(normalizedOrders);
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Failed to load orders");
@@ -363,7 +370,7 @@ const Admin = () => {
     const order = ordersList.find(o => o.id === orderId);
     if (!order) return;
 
-    const updatedTags = [...order.tags, newTag.trim()];
+    const updatedTags = [...(order.tags || []), newTag.trim()];
 
     try {
       const { error } = await supabase
@@ -391,7 +398,7 @@ const Admin = () => {
     const order = ordersList.find(o => o.id === orderId);
     if (!order) return;
 
-    const updatedTags = order.tags.filter(tag => tag !== tagToRemove);
+    const updatedTags = (order.tags || []).filter(tag => tag !== tagToRemove);
 
     try {
       const { error } = await supabase
@@ -827,14 +834,14 @@ const Admin = () => {
                           <TableCell className="text-xs sm:text-sm font-semibold">KSh {order.total.toFixed(2)}</TableCell>
                           <TableCell className="hidden lg:table-cell">
                             <div className="flex gap-1 flex-wrap">
-                              {order.tags.slice(0, 2).map((tag, i) => (
+                              {(order.tags || []).slice(0, 2).map((tag, i) => (
                                 <Badge key={i} variant="secondary" className="text-xs">
                                   {tag}
                                 </Badge>
                               ))}
-                              {order.tags.length > 2 && (
+                              {(order.tags?.length || 0) > 2 && (
                                 <Badge variant="outline" className="text-xs">
-                                  +{order.tags.length - 2}
+                                  +{(order.tags?.length || 0) - 2}
                                 </Badge>
                               )}
                             </div>
@@ -1066,7 +1073,7 @@ const Admin = () => {
                 <div>
                   <Label className="text-muted-foreground mb-2 block">Tags</Label>
                   <div className="flex gap-2 flex-wrap mb-3">
-                    {selectedOrder.tags.map((tag, i) => (
+                    {(selectedOrder.tags || []).map((tag, i) => (
                       <Badge key={i} variant="secondary" className="flex items-center gap-1">
                         {tag}
                         <X 
