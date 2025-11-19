@@ -99,6 +99,8 @@ const Admin = () => {
         description: p.description || "",
         price: Number(p.price),
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        costPrice: p.cost_price ? Number(p.cost_price) : 0,
+        stock: p.stock || 0,
         category: p.category,
         image: p.image
       }));
@@ -234,6 +236,8 @@ const Admin = () => {
         description: formData.description,
         price: parseFloat(formData.price),
         original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+        cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
+        stock: formData.stock ? parseInt(formData.stock) : 0,
         category: formData.category,
         image: imageUrl
       };
@@ -290,6 +294,8 @@ const Admin = () => {
           description: formData.description,
           price: parseFloat(formData.price),
           original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
+          cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
+          stock: formData.stock ? parseInt(formData.stock) : 0,
           category: formData.category,
           image: imageUrl
         })
@@ -334,8 +340,8 @@ const Admin = () => {
       description: product.description,
       price: product.price.toString(),
       originalPrice: product.originalPrice?.toString() || "",
-      costPrice: (product as any).cost_price?.toString() || "0",
-      stock: (product as any).stock?.toString() || "0",
+      costPrice: product.costPrice?.toString() || "0",
+      stock: product.stock?.toString() || "0",
       category: product.category,
       image: product.image
     });
