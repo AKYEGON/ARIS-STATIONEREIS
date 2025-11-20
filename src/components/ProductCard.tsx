@@ -29,7 +29,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         />
       </div>
       <CardContent className="p-3 sm:p-4">
-        <h3 className="font-semibold text-base sm:text-lg mb-1 line-clamp-1">{product.name}</h3>
+        <h3 className="font-semibold text-base sm:text-lg mb-1 line-clamp-2 min-h-[2.5rem]">{product.name}</h3>
         <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">{product.description}</p>
         {product.originalPrice && product.originalPrice > product.price ? (
           <div className="flex flex-col gap-1">
