@@ -128,18 +128,18 @@ const Index = () => {
       </section>
 
       {/* Products Section */}
-      <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-4">
+      <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
         {isLoading ? (
           <div className="text-center py-12 sm:py-16">
-            <p className="text-lg sm:text-xl text-muted-foreground">Loading products...</p>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Loading products...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12 sm:py-16">
-            <p className="text-lg sm:text-xl text-muted-foreground">No products found</p>
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">No products found</p>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 min-h-[600px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6 min-h-[600px]">
               {currentProducts.map((product, index) => (
                 <div 
                   key={product.id}
@@ -156,18 +156,18 @@ const Index = () => {
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 sm:gap-4 mt-8 sm:mt-12">
+              <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-8 sm:mt-12">
                 <Button
                   variant="outline"
                   size="icon"
                   onClick={handlePrevPage}
                   disabled={currentPage === 1}
-                  className="h-9 w-9 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50"
+                  className="h-10 w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation"
                 >
-                  <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <ChevronLeft className="h-5 w-5" />
                 </Button>
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <Button
                       key={page}
@@ -177,7 +177,7 @@ const Index = () => {
                         setCurrentPage(page);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className={`h-9 w-9 sm:h-10 sm:w-10 transition-all duration-200 ${
+                      className={`h-10 w-10 text-sm sm:text-base transition-all duration-200 touch-manipulation ${
                         currentPage === page ? 'scale-110' : ''
                       }`}
                     >
@@ -191,9 +191,9 @@ const Index = () => {
                   size="icon"
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages}
-                  className="h-9 w-9 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50"
+                  className="h-10 w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation"
                 >
-                  <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <ChevronRight className="h-5 w-5" />
                 </Button>
               </div>
             )}
