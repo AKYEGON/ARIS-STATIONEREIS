@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
 import { Product } from "@/types/product";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
@@ -523,6 +523,89 @@ const Admin = () => {
     }
   };
 
+  const exportProductsToCSV = () => {
+    try {
+      // Define CSV headers
+      const headers = ['Name', 'Description', 'Category', 'Price', 'Original Price', 'Cost Price', 'Stock', 'Created At'];
+      
+      // Convert products to CSV rows
+      const rows = productList.map(product => [
+        product.name,
+        product.description || '',
+        product.category,
+        product.price.toFixed(2),
+        product.originalPrice ? product.originalPrice.toFixed(2) : '',
+        product.costPrice ? product.costPrice.toFixed(2) : '',
+        product.stock || 0,
+        new Date().toISOString().split('T')[0]
+      ]);
+      
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+      
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `products_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Products exported successfully!');
+    } catch (error) {
+      console.error('Error exporting products:', error);
+      toast.error('Failed to export products');
+    }
+  };
+
+  const exportOrdersToCSV = () => {
+    try {
+      // Define CSV headers
+      const headers = ['Order ID', 'Customer Name', 'Email', 'Phone', 'Delivery Address', 'Total', 'Status', 'Tags', 'Created At'];
+      
+      // Convert orders to CSV rows
+      const rows = ordersList.map(order => [
+        order.id,
+        order.customer_name,
+        order.customer_email,
+        order.customer_phone,
+        order.delivery_address,
+        order.total.toFixed(2),
+        order.status,
+        (order.tags || []).join('; '),
+        new Date(order.created_at).toLocaleDateString()
+      ]);
+      
+      // Combine headers and rows
+      const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n');
+      
+      // Create blob and download
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `orders_export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Orders exported successfully!');
+    } catch (error) {
+      console.error('Error exporting orders:', error);
+      toast.error('Failed to export orders');
+    }
+  };
+
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -728,13 +811,21 @@ const Admin = () => {
                 <CardTitle className="text-lg sm:text-xl">Product Management</CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <div className="mb-4">
+                <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                   <Input
                     placeholder="Search products by name, category, or description..."
                     value={productSearchQuery}
                     onChange={(e) => setProductSearchQuery(e.target.value)}
                     className="max-w-md"
                   />
+                  <Button
+                    onClick={exportProductsToCSV}
+                    variant="outline"
+                    className="gap-2 w-full sm:w-auto"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </Button>
                 </div>
                 <div className="overflow-x-auto">
                   <Table>
@@ -817,13 +908,21 @@ const Admin = () => {
                 <CardTitle className="text-lg sm:text-xl">Orders Management</CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <div className="mb-4">
+                <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
                   <Input
                     placeholder="Search orders by ID, customer name, email, or phone..."
                     value={orderSearchQuery}
                     onChange={(e) => setOrderSearchQuery(e.target.value)}
                     className="max-w-md"
                   />
+                  <Button
+                    onClick={exportOrdersToCSV}
+                    variant="outline"
+                    className="gap-2 w-full sm:w-auto"
+                  >
+                    <Download className="h-4 w-4" />
+                    Export CSV
+                  </Button>
                 </div>
                 <div className="overflow-x-auto">
                 {isLoadingOrders ? (
