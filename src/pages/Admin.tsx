@@ -55,6 +55,8 @@ const Admin = () => {
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [orderSearchQuery, setOrderSearchQuery] = useState("");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -725,7 +727,15 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">Product Management</CardTitle>
               </CardHeader>
-              <CardContent className="p-0 sm:p-6">
+              <CardContent className="p-4 sm:p-6">
+                <div className="mb-4">
+                  <Input
+                    placeholder="Search products by name, category, or description..."
+                    value={productSearchQuery}
+                    onChange={(e) => setProductSearchQuery(e.target.value)}
+                    className="max-w-md"
+                  />
+                </div>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -738,7 +748,17 @@ const Admin = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {productList.map((product, index) => (
+                      {productList
+                        .filter(product => {
+                          if (!productSearchQuery) return true;
+                          const query = productSearchQuery.toLowerCase();
+                          return (
+                            product.name.toLowerCase().includes(query) ||
+                            product.category.toLowerCase().includes(query) ||
+                            (product.description && product.description.toLowerCase().includes(query))
+                          );
+                        })
+                        .map((product, index) => (
                         <TableRow 
                           key={product.id}
                           className="animate-fade-in"
@@ -796,12 +816,32 @@ const Admin = () => {
               <CardHeader>
                 <CardTitle className="text-lg sm:text-xl">Orders Management</CardTitle>
               </CardHeader>
-              <CardContent className="p-0 sm:p-6">
+              <CardContent className="p-4 sm:p-6">
+                <div className="mb-4">
+                  <Input
+                    placeholder="Search orders by ID, customer name, email, or phone..."
+                    value={orderSearchQuery}
+                    onChange={(e) => setOrderSearchQuery(e.target.value)}
+                    className="max-w-md"
+                  />
+                </div>
                 <div className="overflow-x-auto">
                 {isLoadingOrders ? (
                   <div className="text-center py-8">Loading orders...</div>
-                ) : ordersList.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">No orders yet</div>
+                ) : ordersList.filter(order => {
+                  if (!orderSearchQuery) return true;
+                  const query = orderSearchQuery.toLowerCase();
+                  return (
+                    order.id.toLowerCase().includes(query) ||
+                    order.customer_name.toLowerCase().includes(query) ||
+                    order.customer_email.toLowerCase().includes(query) ||
+                    order.customer_phone.toLowerCase().includes(query) ||
+                    order.status.toLowerCase().includes(query)
+                  );
+                }).length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    {orderSearchQuery ? 'No orders match your search' : 'No orders yet'}
+                  </div>
                 ) : (
                   <Table>
                     <TableHeader>
@@ -815,7 +855,19 @@ const Admin = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {ordersList.map((order, index) => (
+                      {ordersList
+                        .filter(order => {
+                          if (!orderSearchQuery) return true;
+                          const query = orderSearchQuery.toLowerCase();
+                          return (
+                            order.id.toLowerCase().includes(query) ||
+                            order.customer_name.toLowerCase().includes(query) ||
+                            order.customer_email.toLowerCase().includes(query) ||
+                            order.customer_phone.toLowerCase().includes(query) ||
+                            order.status.toLowerCase().includes(query)
+                          );
+                        })
+                        .map((order, index) => (
                         <TableRow 
                           key={order.id}
                           className="animate-fade-in"
