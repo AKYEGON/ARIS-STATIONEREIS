@@ -162,6 +162,14 @@ All colors MUST be HSL.
     break-inside: avoid !important;
   }
   
+  /* Ensure row containers don't break */
+  .contents {
+    display: grid !important;
+    grid-column: 1 / -1 !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+  
   /* Prevent orphans and widows */
   p, h1, h2, h3, h4, h5, h6 {
     orphans: 3;
