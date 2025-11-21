@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Truck, MapPin } from "lucide-react";
+import { Truck } from "lucide-react";
 
 interface Props {
   className?: string;
@@ -28,27 +28,13 @@ export default function DeliveryBanner({ className = "", onOpenDetails }: Props)
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-start sm:items-center justify-between gap-4">
           {/* Main content */}
-          <div className="flex-1 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-            {/* Free delivery section */}
-            <div className="flex items-center gap-2">
-              <Truck className="w-5 h-5 flex-shrink-0" />
-              <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
-                <span className="font-bold text-base sm:text-lg">FREE DELIVERY</span>
-                <span className="text-xs sm:text-sm text-emerald-100">
-                  UoN Hostels, Qejani & Qwetu
-                </span>
-              </div>
-            </div>
-
-            {/* Divider */}
-            <div className="hidden sm:block h-6 w-px bg-emerald-400"></div>
-
-            {/* Other areas section */}
-            <div className="flex items-start gap-2 text-xs sm:text-sm">
-              <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <div className="text-emerald-50">
-                <span className="font-semibold">Other areas:</span> Free on orders KSh 500+
-              </div>
+          <div className="flex-1 flex items-center gap-3">
+            <Truck className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span className="font-bold text-base sm:text-lg">FREE DELIVERY</span>
+              <span className="text-xs sm:text-sm text-emerald-50">
+                within campus areas including <strong>UoN Hostels, Qejani & Qwetu</strong> — no minimum order
+              </span>
             </div>
           </div>
 
