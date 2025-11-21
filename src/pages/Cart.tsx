@@ -288,7 +288,7 @@ const Cart = () => {
                     size="lg"
                     onClick={handleCheckout}
                   >
-                    Proceed to Checkout
+                    Complete Your Order
                   </Button>
                   <Link to="/">
                     <Button className="w-full mt-2 transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90">
