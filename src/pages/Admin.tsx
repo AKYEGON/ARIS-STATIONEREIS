@@ -14,12 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
 import { Product } from "@/types/product";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
+import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 
 interface OrderItem {
   product_name: string;
@@ -64,6 +65,7 @@ const Admin = () => {
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
   const [discountValue, setDiscountValue] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
+  const [isQuickSaleOpen, setIsQuickSaleOpen] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -698,12 +700,18 @@ const Admin = () => {
       <Header cartItemCount={getCartItemCount()} />
       
       <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
-        <div className="flex justify-between items-center mb-6 sm:mb-8">
+        <div className="flex justify-between items-center mb-6 sm:mb-8 gap-4">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Admin Portal</h1>
-          <Button variant="outline" onClick={handleSignOut} className="gap-2">
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setIsQuickSaleOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
+              <Store className="h-4 w-4" />
+              <span className="hidden sm:inline">Quick Sale</span>
+            </Button>
+            <Button variant="outline" onClick={handleSignOut} className="gap-2">
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
+          </div>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -1397,6 +1405,17 @@ const Admin = () => {
       </main>
       
       <Footer />
+
+      {/* Quick Sale Dialog */}
+      <QuickSaleDialog
+        open={isQuickSaleOpen}
+        onClose={() => setIsQuickSaleOpen(false)}
+        products={productList}
+        onSaleCompleted={() => {
+          fetchProducts();
+          fetchOrders();
+        }}
+      />
     </div>
   );
 };
