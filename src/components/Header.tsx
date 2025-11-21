@@ -40,7 +40,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
       {cartItemCount > 0 && (
         <Link 
           to="/cart" 
-          className="md:hidden fixed bottom-20 right-6 z-[100] bg-primary text-primary-foreground p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 animate-scale-in"
+          className="md:hidden fixed bottom-6 right-6 z-[100] bg-primary text-primary-foreground p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 animate-scale-in"
           style={{ boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)' }}
         >
           <ShoppingCart className="h-6 w-6" />
