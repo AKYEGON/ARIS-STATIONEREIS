@@ -106,50 +106,31 @@ const Cart = () => {
       // Prepare WhatsApp message
       const orderDetails = cartItems
         .map((item) => `${item.name} x${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`)
-        .join("%0A");
+        .join("\n");
       
-      let message = `New Order from ARIS STATIONARIES%0A%0A`;
-      message += `Order ID: ${order.id.slice(0, 8)}%0A%0A`;
-      message += `Customer Details:%0A`;
-      message += `Name: ${data.name}%0A`;
-      message += `Phone: ${data.phone}%0A`;
-      message += `University: ${data.university}%0A`;
-      message += `Branch: ${data.branch}%0A%0A`;
-      message += `Order Details:%0A${orderDetails}%0A%0A`;
-      message += `Total Amount: KSh ${total.toFixed(2)}%0A%0A`;
-      message += `Delivery Method: ${data.deliveryMethod === "pickup" ? "Pickup in Person" : "Delivery"}%0A`;
+      let message = `New Order from ARIS STATIONARIES\n\n`;
+      message += `Order ID: ${order.id.slice(0, 8)}\n\n`;
+      message += `Customer Details:\n`;
+      message += `Name: ${data.name}\n`;
+      message += `Phone: ${data.phone}\n`;
+      message += `University: ${data.university}\n`;
+      message += `Branch: ${data.branch}\n\n`;
+      message += `Order Details:\n${orderDetails}\n\n`;
+      message += `Total Amount: KSh ${total.toFixed(2)}\n\n`;
+      message += `Delivery Method: ${data.deliveryMethod === "pickup" ? "Pickup in Person" : "Delivery"}\n`;
       
       if (data.deliveryMethod === "delivery" && data.deliveryAddress) {
-        message += `Delivery Address: ${data.deliveryAddress}%0A`;
+        message += `Delivery Address: ${data.deliveryAddress}\n`;
       }
       
-      // Send WhatsApp message with fallback
-      const whatsappUrl = `https://wa.me/254707222419?text=${encodeURIComponent(message.replace(/%0A/g, '\n'))}`;
+      // Send WhatsApp message with proper encoding
+      const whatsappUrl = `https://wa.me/254707222419?text=${encodeURIComponent(message)}`;
       
-      // Try opening in new tab, with fallback to current window
-      try {
-        const whatsappWindow = window.open(whatsappUrl, "_blank");
-        if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed === 'undefined') {
-          // Popup was blocked, use current window
-          window.location.href = whatsappUrl;
-        }
-      } catch (error) {
-        console.error("WhatsApp redirect error:", error);
-        // Fallback to direct navigation
-        window.location.href = whatsappUrl;
-      }
+      // Open WhatsApp - try new tab first, fallback to same window
+      window.location.href = whatsappUrl;
 
       clearCart();
-      setShowCheckoutDialog(false);
-      form.reset();
-      toast.success(`Order #${order.id.slice(0, 8)} placed successfully! Redirecting to WhatsApp...`);
-      
-      // Only navigate if WhatsApp opened in new tab
-      setTimeout(() => {
-        if (window.location.pathname === "/cart") {
-          navigate("/");
-        }
-      }, 1500);
+      toast.success(`Order #${order.id.slice(0, 8)} placed! Opening WhatsApp...`);
     } catch (error) {
       console.error("Order error:", error);
       toast.error("Failed to place order. Please try again.");
