@@ -78,10 +78,14 @@ const Cart = () => {
     console.log("Starting order submission...", { total, itemCount: cartItems.length });
 
     try {
+      // Generate order ID client-side to avoid RLS SELECT issues
+      const orderId = crypto.randomUUID();
+      
       // Create order in database
-      const { data: order, error: orderError } = await supabase
+      const { error: orderError } = await supabase
         .from("orders")
         .insert({
+          id: orderId,
           customer_name: data.name,
           customer_email: data.phone + "@temp.com", // Use phone as temp email since field is required
           customer_phone: data.phone,
@@ -91,20 +95,18 @@ const Cart = () => {
           total: total,
           subtotal: total,
           status: "Pending"
-        })
-        .select()
-        .single();
+        });
 
       if (orderError) {
         console.error("Order creation error:", orderError);
         throw orderError;
       }
 
-      console.log("Order created successfully:", order.id);
+      console.log("Order created successfully:", orderId);
 
       // Create order items
       const orderItems = cartItems.map(item => ({
-        order_id: order.id,
+        order_id: orderId,
         product_name: item.name,
         product_image: item.image,
         quantity: item.quantity,
@@ -130,7 +132,7 @@ const Cart = () => {
         .join("\n");
       
       let message = `New Order from ARIS STATIONARIES\n\n`;
-      message += `Order ID: ${order.id.slice(0, 8)}\n\n`;
+      message += `Order ID: ${orderId.slice(0, 8)}\n\n`;
       message += `Customer Details:\n`;
       message += `Name: ${data.name}\n`;
       message += `Phone: ${data.phone}\n`;
@@ -147,7 +149,7 @@ const Cart = () => {
       const whatsappUrl = `https://wa.me/254707222419?text=${encodeURIComponent(message)}`;
       
       // Show success and cleanup state BEFORE redirect
-      toast.success(`Order #${order.id.slice(0, 8)} placed! Redirecting to WhatsApp...`);
+      toast.success(`Order #${orderId.slice(0, 8)} placed! Redirecting to WhatsApp...`);
       setShowCheckoutDialog(false);
       clearCart();
       
