@@ -66,7 +66,10 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivery_address: string
+          discount_amount: number | null
+          discount_type: string | null
           id: string
+          original_total: number | null
           profit: number | null
           status: string
           subtotal: number | null
@@ -81,7 +84,10 @@ export type Database = {
           customer_name: string
           customer_phone: string
           delivery_address: string
+          discount_amount?: number | null
+          discount_type?: string | null
           id?: string
+          original_total?: number | null
           profit?: number | null
           status?: string
           subtotal?: number | null
@@ -96,7 +102,10 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           delivery_address?: string
+          discount_amount?: number | null
+          discount_type?: string | null
           id?: string
+          original_total?: number | null
           profit?: number | null
           status?: string
           subtotal?: number | null
