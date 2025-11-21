@@ -103,3 +103,32 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Print Styles for Brochure */
+@media print {
+  @page {
+    size: A4;
+    margin: 1cm;
+  }
+  
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  .brochure-page {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .page-break-inside-avoid {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Optimize colors for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+}

@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight, Shield } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import heroBackground from "@/assets/hero-background.jpg";
@@ -115,15 +115,26 @@ const Index = () => {
 
       {/* Search Section */}
       <section className="container py-4 sm:py-6 md:py-8 px-4">
-        <div className="max-w-xl mx-auto relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
-          <Input
-            type="text"
-            placeholder="Search products..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 sm:pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary"
-          />
+        <div className="max-w-xl mx-auto space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 sm:pl-10 transition-all duration-200 focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          
+          <div className="flex justify-center md:hidden">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/brochure">
+                <FileText className="h-4 w-4 mr-2" />
+                View Product Brochure
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
