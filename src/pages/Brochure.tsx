@@ -243,8 +243,17 @@ const Brochure = () => {
 
           <main className="container mx-auto px-2 py-2 print:py-1">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 print:grid-cols-6 print:gap-2">
-              {products.map((product) => (
-                <BrochureProduct key={product.id} product={product} />
+              {products.reduce((acc, product, index) => {
+                const rowIndex = Math.floor(index / 6);
+                if (!acc[rowIndex]) acc[rowIndex] = [];
+                acc[rowIndex].push(product);
+                return acc;
+              }, [] as Product[][]).map((row, rowIndex) => (
+                <div key={`row-${rowIndex}`} className="contents print:block print:break-inside-avoid print:mb-2">
+                  {row.map((product) => (
+                    <BrochureProduct key={product.id} product={product} />
+                  ))}
+                </div>
               ))}
             </div>
           </main>
