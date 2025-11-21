@@ -4,7 +4,7 @@ import { Product } from "@/types/product";
 import BrochureCover from "@/components/brochure/BrochureCover";
 import BrochureProduct from "@/components/brochure/BrochureProduct";
 import { Button } from "@/components/ui/button";
-import { Printer, ArrowLeft, Download, Loader2 } from "lucide-react";
+import { Printer, ArrowLeft, Download, Loader2, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import html2pdf from "html2pdf.js";
 import { toast } from "@/hooks/use-toast";
@@ -102,6 +102,66 @@ const Brochure = () => {
     }
   };
 
+  const handleShare = async () => {
+    if (!brochureRef.current) return;
+    
+    try {
+      setIsDownloading(true);
+      
+      const element = brochureRef.current;
+      const opt = {
+        margin: 0.5,
+        filename: 'ARIS-Stationaries-Catalog.pdf',
+        image: { type: 'jpeg' as const, quality: 0.95 },
+        html2canvas: { 
+          scale: window.innerWidth < 768 ? 1.5 : 2,
+          useCORS: true,
+          logging: false,
+          windowWidth: 1200
+        },
+        jsPDF: { 
+          unit: 'cm', 
+          format: 'a4', 
+          orientation: 'portrait' as const,
+          compress: true
+        }
+      };
+
+      const pdf = await html2pdf().set(opt).from(element).output('blob');
+      
+      const file = new File([pdf], 'ARIS-Stationaries-Catalog.pdf', { type: 'application/pdf' });
+      
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: 'ARIS Stationaries Catalog',
+          text: 'Check out our product catalog!'
+        });
+        
+        toast({
+          title: "Shared Successfully!",
+          description: "Brochure has been shared.",
+        });
+      } else {
+        // Fallback to download
+        await html2pdf().set(opt).from(element).save();
+        toast({
+          title: "Share not available",
+          description: "Downloaded the brochure instead.",
+        });
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+      toast({
+        title: "Share Failed",
+        description: "Please try downloading instead.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -123,10 +183,24 @@ const Brochure = () => {
           </Link>
           <div className="flex gap-2 w-full sm:w-auto">
             <Button 
+              onClick={handleShare} 
+              size="sm" 
+              variant="default" 
+              className="flex-1 sm:flex-initial sm:hidden"
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Share2 className="h-4 w-4 mr-2" />
+              )}
+              Share
+            </Button>
+            <Button 
               onClick={handleDownload} 
               size="sm" 
               variant="default" 
-              className="flex-1 sm:flex-initial"
+              className="flex-1 sm:flex-initial hidden sm:flex"
               disabled={isDownloading}
             >
               {isDownloading ? (
