@@ -8,7 +8,7 @@ const BrochureProduct = ({ product }: BrochureProductProps) => {
   const hasDiscount = product.originalPrice && product.originalPrice > product.price;
 
   return (
-    <div className="bg-card border border-border rounded p-2 page-break-inside-avoid hover:shadow-md transition-shadow print:shadow-none print:p-1.5 print:rounded-sm flex flex-col">
+    <div className="bg-card border border-border rounded p-2 hover:shadow-md transition-shadow print:shadow-none print:p-1.5 print:rounded-sm flex flex-col print:break-inside-avoid">
       <div className="aspect-square bg-muted rounded mb-1.5 overflow-hidden print:mb-1">
         <img
           src={product.image}
@@ -18,7 +18,7 @@ const BrochureProduct = ({ product }: BrochureProductProps) => {
       </div>
 
       <div className="space-y-1 flex-1 flex flex-col justify-between">
-        <h3 className="font-semibold text-[11px] text-foreground leading-snug print:text-[9px] print:leading-tight break-words min-h-[32px]">
+        <h3 className="font-semibold text-[11px] text-foreground leading-snug print:text-[8px] print:leading-tight break-words overflow-visible">
           {product.name}
         </h3>
 
