@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
-import BrochureHeader from "@/components/brochure/BrochureHeader";
+import BrochureCover from "@/components/brochure/BrochureCover";
 import BrochureProduct from "@/components/brochure/BrochureProduct";
-import BrochureFooter from "@/components/brochure/BrochureFooter";
 import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 const Brochure = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -76,17 +76,37 @@ const Brochure = () => {
 
       {/* Brochure Content */}
       <div className="brochure-page">
-        <BrochureHeader />
+        {/* Cover Page */}
+        <BrochureCover />
 
-        <main className="container mx-auto px-4 py-4 print:py-2">
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 print:grid-cols-6 print:gap-2">
-            {products.map((product) => (
-              <BrochureProduct key={product.id} product={product} />
-            ))}
-          </div>
-        </main>
+        {/* Products Page */}
+        <div className="min-h-screen bg-background print:min-h-0">
+          {/* Compact Header for products page */}
+          <header className="bg-primary/5 border-b border-border py-2 print:py-1">
+            <div className="container mx-auto px-2 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <img src={logo} alt="Logo" className="h-6 w-6 print:h-5 print:w-5" />
+                <span className="font-bold text-sm print:text-xs">ARIS STATIONARIES</span>
+              </div>
+              <span className="text-xs text-muted-foreground print:text-[8px]">Product Catalog</span>
+            </div>
+          </header>
 
-        <BrochureFooter />
+          <main className="container mx-auto px-2 py-2 print:py-1">
+            <div className="grid grid-cols-4 md:grid-cols-6 gap-2 print:grid-cols-8 print:gap-1">
+              {products.map((product) => (
+                <BrochureProduct key={product.id} product={product} />
+              ))}
+            </div>
+          </main>
+
+          {/* Compact Footer */}
+          <footer className="border-t border-border py-2 mt-4 print:py-1 print:mt-2">
+            <div className="container mx-auto px-2 text-center text-[10px] text-muted-foreground print:text-[8px]">
+              <p>📞 +254 123 456 789 | ✉️ info@arisstationaries.com | 📍 Nairobi, Kenya</p>
+            </div>
+          </footer>
+        </div>
       </div>
     </div>
   );
