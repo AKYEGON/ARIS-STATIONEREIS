@@ -66,6 +66,7 @@ const Admin = () => {
   const [discountValue, setDiscountValue] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [isQuickSaleOpen, setIsQuickSaleOpen] = useState(false);
+  const [isRecalculating, setIsRecalculating] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -535,6 +536,38 @@ const Admin = () => {
     }
   };
 
+  const recalculateAllProfits = async () => {
+    if (!confirm("This will recalculate profits for ALL orders with discounts. This may take a moment. Continue?")) {
+      return;
+    }
+
+    setIsRecalculating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('recalculate-profits', {
+        headers: {
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success(
+        `✅ Recalculation complete!\n📦 ${data.ordersProcessed} orders updated\n📝 ${data.itemsUpdated} items updated`,
+        { duration: 5000 }
+      );
+
+      // Refresh orders to show updated data
+      if (activeTab === "orders" || activeTab === "analytics") {
+        await fetchOrders();
+      }
+    } catch (error: any) {
+      console.error("Error recalculating profits:", error);
+      toast.error(`Failed to recalculate profits: ${error.message || 'Unknown error'}`);
+    } finally {
+      setIsRecalculating(false);
+    }
+  };
+
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       // If status is being changed to delivered, handle stock reduction and profit calculation
@@ -776,6 +809,21 @@ const Admin = () => {
 
           {/* Sales Dashboard Tab */}
           <TabsContent value="sales" className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <div>
+                <h3 className="text-lg font-semibold">Sales Analytics</h3>
+                <p className="text-sm text-muted-foreground">View sales performance and profit data</p>
+              </div>
+              <Button
+                onClick={recalculateAllProfits}
+                disabled={isRecalculating}
+                variant="outline"
+                className="gap-2"
+              >
+                <TrendingUp className="h-4 w-4" />
+                {isRecalculating ? "Recalculating..." : "Fix Historical Profits"}
+              </Button>
+            </div>
             <SalesDashboard />
           </TabsContent>
 
