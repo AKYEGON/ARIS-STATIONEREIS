@@ -68,13 +68,22 @@ const Cart = () => {
     setIsSubmitting(true);
     const total = getCartTotal();
 
+    // Validate cart has items
+    if (cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      setIsSubmitting(false);
+      return;
+    }
+
+    console.log("Starting order submission...", { total, itemCount: cartItems.length });
+
     try {
       // Create order in database
       const { data: order, error: orderError } = await supabase
         .from("orders")
         .insert({
           customer_name: data.name,
-          customer_email: "", // Not collected in current form
+          customer_email: data.phone + "@temp.com", // Use phone as temp email since field is required
           customer_phone: data.phone,
           delivery_address: data.deliveryMethod === "delivery" 
             ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
@@ -86,7 +95,12 @@ const Cart = () => {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Order creation error:", orderError);
+        throw orderError;
+      }
+
+      console.log("Order created successfully:", order.id);
 
       // Create order items
       const orderItems = cartItems.map(item => ({
@@ -97,11 +111,18 @@ const Cart = () => {
         price: item.price
       }));
 
+      console.log("Inserting order items...", orderItems.length);
+
       const { error: itemsError } = await supabase
         .from("order_items")
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error("Order items creation error:", itemsError);
+        throw itemsError;
+      }
+
+      console.log("Order items created successfully");
 
       // Prepare WhatsApp message
       const orderDetails = cartItems
@@ -129,11 +150,23 @@ const Cart = () => {
       // Open WhatsApp - try new tab first, fallback to same window
       window.location.href = whatsappUrl;
 
+      console.log("Order completed, redirecting to WhatsApp...");
       clearCart();
+      setShowCheckoutDialog(false);
       toast.success(`Order #${order.id.slice(0, 8)} placed! Opening WhatsApp...`);
-    } catch (error) {
-      console.error("Order error:", error);
-      toast.error("Failed to place order. Please try again.");
+    } catch (error: any) {
+      console.error("Order submission failed:", error);
+      console.error("Error details:", {
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+        code: error?.code
+      });
+      
+      // Show specific error message if available
+      const errorMessage = error?.message || "Failed to place order. Please try again.";
+      toast.error(errorMessage);
+      // Keep dialog open so user can retry
     } finally {
       setIsSubmitting(false);
     }
