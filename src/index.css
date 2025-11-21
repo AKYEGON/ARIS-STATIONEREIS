@@ -104,7 +104,6 @@ All colors MUST be HSL.
   }
 }
 
-/* Print Styles for Brochure */
 @media print {
   @page {
     size: A4;
@@ -118,6 +117,11 @@ All colors MUST be HSL.
   .print\:page-break-after {
     page-break-after: always !important;
     break-after: page !important;
+  }
+  
+  .print\:break-inside-avoid {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   .brochure-page {
@@ -139,5 +143,11 @@ All colors MUST be HSL.
   
   body {
     background: white !important;
+  }
+  
+  /* Ensure product cards don't break */
+  .product-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 }
