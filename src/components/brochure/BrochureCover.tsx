@@ -1,12 +1,19 @@
 import logo from "@/assets/logo.png";
+import stationeryBg from "@/assets/stationery-background.png";
 
 const BrochureCover = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-8 print:page-break-after">
-      {/* Background with green brand color */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/80 to-primary/60"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.2)_0%,transparent_50%)]"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.15)_0%,transparent_50%)]"></div>
+      {/* Stationery Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-30"
+        style={{ backgroundImage: `url(${stationeryBg})` }}
+      ></div>
+      
+      {/* Faded Green Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-primary/30 to-primary/25"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.15)_0%,transparent_50%)]"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,255,255,0.1)_0%,transparent_50%)]"></div>
       
       <div className="relative text-center space-y-12 z-10">
         {/* Larger Logo */}
