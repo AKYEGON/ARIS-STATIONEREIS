@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import BrochureHeader from "@/components/brochure/BrochureHeader";
-import BrochureCategory from "@/components/brochure/BrochureCategory";
+import BrochureProduct from "@/components/brochure/BrochureProduct";
 import BrochureFooter from "@/components/brochure/BrochureFooter";
 import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft } from "lucide-react";
@@ -44,14 +44,6 @@ const Brochure = () => {
     }
   };
 
-  const groupedProducts = products.reduce((acc, product) => {
-    if (!acc[product.category]) {
-      acc[product.category] = [];
-    }
-    acc[product.category].push(product);
-    return acc;
-  }, {} as Record<string, Product[]>);
-
   const handlePrint = () => {
     window.print();
   };
@@ -87,13 +79,11 @@ const Brochure = () => {
         <BrochureHeader />
 
         <main className="container mx-auto px-4 py-4 print:py-2">
-          {Object.entries(groupedProducts).map(([category, categoryProducts]) => (
-            <BrochureCategory
-              key={category}
-              category={category}
-              products={categoryProducts}
-            />
-          ))}
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 print:grid-cols-6 print:gap-2">
+            {products.map((product) => (
+              <BrochureProduct key={product.id} product={product} />
+            ))}
+          </div>
         </main>
 
         <BrochureFooter />
