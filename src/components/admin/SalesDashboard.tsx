@@ -56,11 +56,11 @@ export const SalesDashboard = () => {
         startDate.setMonth(now.getMonth() - 1);
       }
 
-      // Fetch completed orders
+      // Fetch completed orders (including walk-in sales with status "delivered")
       const { data: orders, error: ordersError } = await supabase
         .from("orders")
         .select("*")
-        .eq("status", "Fulfilled")
+        .in("status", ["Fulfilled", "delivered"])
         .gte("completed_at", startDate.toISOString());
 
       if (ordersError) throw ordersError;

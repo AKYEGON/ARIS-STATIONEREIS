@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Product } from "@/types/product";
-import { Plus, Minus, Trash2, Search, ShoppingCart, Percent, DollarSign } from "lucide-react";
+import { Plus, Minus, Trash2, Search, ShoppingCart, Percent, DollarSign, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -188,18 +188,18 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
+      <DialogContent className="max-w-[95vw] md:max-w-6xl h-[85vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b">
+          <DialogTitle className="flex items-center gap-2 text-xl">
+            <ShoppingCart className="h-6 w-6" />
             Quick Sale - Walk-in Customer
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-2 gap-4 flex-1 overflow-hidden">
+        <div className="grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-hidden">
           {/* Left: Product Selection */}
-          <div className="flex flex-col gap-3 overflow-hidden">
-            <div>
+          <div className="flex flex-col border-r">
+            <div className="px-4 py-3 border-b bg-muted/30">
               <Label className="text-sm font-semibold mb-2 block">Select Products</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -207,182 +207,190 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 h-9"
                 />
               </div>
             </div>
 
-            <ScrollArea className="flex-1 border rounded-lg p-2">
-              <div className="space-y-2">
-                {filteredProducts.map(product => (
-                  <div
-                    key={product.id}
-                    className="flex items-center gap-3 p-2 border rounded hover:bg-accent cursor-pointer transition-colors"
-                    onClick={() => addProductToSale(product)}
-                  >
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{product.name}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <span>KSh {product.price.toFixed(2)}</span>
-                        <span>•</span>
-                        <span className={product.stock && product.stock > 0 ? "text-green-600" : "text-red-600"}>
-                          Stock: {product.stock || 0}
-                        </span>
-                      </div>
-                    </div>
-                    <Plus className="h-4 w-4 text-primary" />
+            <ScrollArea className="flex-1 h-[calc(85vh-200px)]">
+              <div className="p-3 space-y-2">
+                {filteredProducts.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Package className="h-12 w-12 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm">No products found</p>
                   </div>
-                ))}
+                ) : (
+                  filteredProducts.map(product => (
+                    <button
+                      key={product.id}
+                      className="w-full flex items-center gap-3 p-2.5 border rounded-lg hover:bg-accent hover:border-primary/50 cursor-pointer transition-all text-left"
+                      onClick={() => addProductToSale(product)}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-12 h-12 object-cover rounded border"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{product.name}</p>
+                        <div className="flex items-center gap-2 text-xs mt-0.5">
+                          <span className="font-semibold text-primary">KSh {product.price.toFixed(2)}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className={product.stock && product.stock > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                            {product.stock || 0} in stock
+                          </span>
+                        </div>
+                      </div>
+                      <Plus className="h-5 w-5 text-primary flex-shrink-0" />
+                    </button>
+                  ))
+                )}
               </div>
             </ScrollArea>
           </div>
 
           {/* Right: Sale Details */}
-          <div className="flex flex-col gap-3 overflow-hidden">
-            <Label className="text-sm font-semibold">Sale Items ({selectedItems.length})</Label>
+          <div className="flex flex-col">
+            <div className="px-4 py-3 border-b bg-muted/30">
+              <Label className="text-sm font-semibold">
+                Cart Items {selectedItems.length > 0 && `(${selectedItems.length})`}
+              </Label>
+            </div>
             
-            <ScrollArea className="flex-1 border rounded-lg p-2">
-              {selectedItems.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  <ShoppingCart className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                  <p>No items added yet</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {selectedItems.map(item => (
-                    <div key={item.product.id} className="flex items-center gap-2 p-2 border rounded">
-                      <img
-                        src={item.product.image}
-                        alt={item.product.name}
-                        className="w-10 h-10 object-cover rounded"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{item.product.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          KSh {item.product.price.toFixed(2)} each
+            <ScrollArea className="flex-1 h-[calc(85vh-420px)]">
+              <div className="p-3">
+                {selectedItems.length === 0 ? (
+                  <div className="text-center py-16 text-muted-foreground">
+                    <ShoppingCart className="h-16 w-16 mx-auto mb-3 opacity-20" />
+                    <p className="font-medium">No items in cart</p>
+                    <p className="text-sm mt-1">Select products to add them</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedItems.map(item => (
+                      <div key={item.product.id} className="flex items-center gap-2 p-2.5 border rounded-lg bg-background">
+                        <img
+                          src={item.product.image}
+                          alt={item.product.name}
+                          className="w-12 h-12 object-cover rounded border"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{item.product.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            KSh {item.product.price.toFixed(2)} each
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 bg-muted/50 rounded-md p-1">
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 hover:bg-background"
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          >
+                            <Minus className="h-3 w-3" />
+                          </Button>
+                          <span className="w-8 text-center text-sm font-semibold">{item.quantity}</span>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-7 w-7 hover:bg-background"
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          >
+                            <Plus className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <p className="font-bold text-sm min-w-[70px] text-right">
+                          KSh {(item.product.price * item.quantity).toFixed(2)}
                         </p>
-                      </div>
-                      <div className="flex items-center gap-1">
                         <Button
                           size="icon"
-                          variant="outline"
-                          className="h-7 w-7"
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          variant="ghost"
+                          className="h-8 w-8 hover:bg-destructive/10"
+                          onClick={() => removeItem(item.product.id)}
                         >
-                          <Minus className="h-3 w-3" />
-                        </Button>
-                        <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-7 w-7"
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        >
-                          <Plus className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
-                      <p className="font-semibold text-sm min-w-[60px] text-right">
-                        KSh {(item.product.price * item.quantity).toFixed(2)}
-                      </p>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-7 w-7"
-                        onClick={() => removeItem(item.product.id)}
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    ))}
+                  </div>
+                )}
+              </div>
             </ScrollArea>
 
-            <Separator />
-
-            {/* Customer Info */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold">Customer Details (Optional)</Label>
+            <div className="border-t p-4 space-y-3 bg-muted/20">
+              {/* Customer Info - Compact */}
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  placeholder="Name"
+                  placeholder="Customer Name"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="text-sm"
+                  className="text-sm h-9"
                 />
                 <Input
-                  placeholder="Phone"
+                  placeholder="Phone Number"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="text-sm"
+                  className="text-sm h-9"
                 />
               </div>
-            </div>
 
-            {/* Discount */}
-            <div className="space-y-2">
-              <Label className="text-xs font-semibold">Discount</Label>
-              <RadioGroup
-                value={discountType}
-                onValueChange={(v) => setDiscountType(v as "percentage" | "fixed")}
-                className="flex gap-3"
+              {/* Discount - Compact */}
+              <div className="flex gap-2">
+                <RadioGroup
+                  value={discountType}
+                  onValueChange={(v) => setDiscountType(v as "percentage" | "fixed")}
+                  className="flex gap-2"
+                >
+                  <div className="flex items-center space-x-1.5 border rounded px-3 py-1.5 bg-background">
+                    <RadioGroupItem value="percentage" id="quick-percentage" />
+                    <Label htmlFor="quick-percentage" className="text-xs cursor-pointer flex items-center gap-1">
+                      <Percent className="h-3 w-3" />%
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-1.5 border rounded px-3 py-1.5 bg-background">
+                    <RadioGroupItem value="fixed" id="quick-fixed" />
+                    <Label htmlFor="quick-fixed" className="text-xs cursor-pointer flex items-center gap-1">
+                      <DollarSign className="h-3 w-3" />KSh
+                    </Label>
+                  </div>
+                </RadioGroup>
+                <Input
+                  type="number"
+                  placeholder="Discount value"
+                  value={discountValue}
+                  onChange={(e) => setDiscountValue(e.target.value)}
+                  className="text-sm h-9 flex-1"
+                />
+              </div>
+
+              {/* Total Section */}
+              <div className="space-y-2 p-3 bg-background rounded-lg border-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal:</span>
+                  <span className="font-medium">KSh {calculateSubtotal().toFixed(2)}</span>
+                </div>
+                {calculateDiscount() > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-green-600 dark:text-green-400">Discount:</span>
+                    <span className="text-green-600 dark:text-green-400 font-medium">-KSh {calculateDiscount().toFixed(2)}</span>
+                  </div>
+                )}
+                <Separator />
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-lg">Total:</span>
+                  <span className="font-bold text-2xl text-primary">KSh {calculateTotal().toFixed(2)}</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={completeSale}
+                disabled={selectedItems.length === 0 || isProcessing}
+                className="w-full h-11 text-base font-semibold"
+                size="lg"
               >
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="percentage" id="quick-percentage" />
-                  <Label htmlFor="quick-percentage" className="text-xs cursor-pointer flex items-center gap-1">
-                    <Percent className="h-3 w-3" />
-                    %
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <RadioGroupItem value="fixed" id="quick-fixed" />
-                  <Label htmlFor="quick-fixed" className="text-xs cursor-pointer flex items-center gap-1">
-                    <DollarSign className="h-3 w-3" />
-                    KSh
-                  </Label>
-                </div>
-              </RadioGroup>
-              <Input
-                type="number"
-                placeholder="Enter discount"
-                value={discountValue}
-                onChange={(e) => setDiscountValue(e.target.value)}
-                className="text-sm"
-              />
+                {isProcessing ? "Processing..." : "Complete Sale"}
+              </Button>
             </div>
-
-            {/* Total Calculation */}
-            <div className="space-y-1 p-3 bg-muted/50 rounded border">
-              <div className="flex justify-between text-sm">
-                <span>Subtotal:</span>
-                <span>KSh {calculateSubtotal().toFixed(2)}</span>
-              </div>
-              {calculateDiscount() > 0 && (
-                <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                  <span>Discount:</span>
-                  <span>-KSh {calculateDiscount().toFixed(2)}</span>
-                </div>
-              )}
-              <Separator className="my-1" />
-              <div className="flex justify-between font-bold text-lg">
-                <span>Total:</span>
-                <span className="text-primary">KSh {calculateTotal().toFixed(2)}</span>
-              </div>
-            </div>
-
-            <Button
-              onClick={completeSale}
-              disabled={selectedItems.length === 0 || isProcessing}
-              className="w-full bg-primary hover:bg-primary/90"
-              size="lg"
-            >
-              {isProcessing ? "Processing..." : "Complete Sale"}
-            </Button>
           </div>
         </div>
       </DialogContent>
