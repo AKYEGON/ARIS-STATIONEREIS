@@ -144,16 +144,33 @@ const Cart = () => {
         message += `Delivery Address: ${data.deliveryAddress}\n`;
       }
       
-      // Send WhatsApp message with proper encoding
       const whatsappUrl = `https://wa.me/254707222419?text=${encodeURIComponent(message)}`;
       
-      // Open WhatsApp - try new tab first, fallback to same window
-      window.location.href = whatsappUrl;
-
-      console.log("Order completed, redirecting to WhatsApp...");
-      clearCart();
+      // Show success and cleanup state BEFORE redirect
+      toast.success(`Order #${order.id.slice(0, 8)} placed! Redirecting to WhatsApp...`);
       setShowCheckoutDialog(false);
-      toast.success(`Order #${order.id.slice(0, 8)} placed! Opening WhatsApp...`);
+      clearCart();
+      
+      // Small delay to ensure state cleanup completes and toast shows
+      setTimeout(() => {
+        try {
+          console.log("Attempting WhatsApp redirect...");
+          // Try opening in new tab first (better UX, less likely to be blocked)
+          const newWindow = window.open(whatsappUrl, '_blank');
+          
+          // If popup was blocked, fall back to same window
+          if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
+            console.log("Popup blocked, using fallback redirect");
+            window.location.href = whatsappUrl;
+          } else {
+            console.log("WhatsApp opened in new tab");
+          }
+        } catch (error) {
+          console.error("Redirect error:", error);
+          // Final fallback
+          window.location.href = whatsappUrl;
+        }
+      }, 500);
     } catch (error: any) {
       console.error("Order submission failed:", error);
       console.error("Error details:", {
