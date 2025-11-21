@@ -14,7 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
 import { Product } from "@/types/product";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
@@ -38,6 +39,9 @@ interface Order {
   tags: string[];
   created_at: string;
   order_items?: OrderItem[];
+  discount_amount?: number;
+  discount_type?: string;
+  original_total?: number;
 }
 
 const Admin = () => {
@@ -57,6 +61,9 @@ const Admin = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
+  const [discountValue, setDiscountValue] = useState("");
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -363,7 +370,75 @@ const Admin = () => {
   const openOrderDialog = (order: Order) => {
     setSelectedOrder(order);
     setNewTag("");
+    setDiscountValue("");
+    setDiscountType("percentage");
     setIsOrderDialogOpen(true);
+  };
+
+  const applyDiscount = async (orderId: string) => {
+    if (!discountValue || parseFloat(discountValue) <= 0) {
+      toast.error("Please enter a valid discount value");
+      return;
+    }
+
+    const order = ordersList.find(o => o.id === orderId);
+    if (!order) return;
+
+    setApplyingDiscount(true);
+    try {
+      const originalTotal = order.original_total || order.total;
+      let discountAmount = 0;
+      let newTotal = originalTotal;
+
+      if (discountType === "percentage") {
+        const percentage = parseFloat(discountValue);
+        if (percentage < 0 || percentage > 100) {
+          toast.error("Percentage must be between 0 and 100");
+          return;
+        }
+        discountAmount = originalTotal * (percentage / 100);
+        newTotal = originalTotal - discountAmount;
+      } else {
+        discountAmount = parseFloat(discountValue);
+        if (discountAmount > originalTotal) {
+          toast.error("Discount cannot exceed order total");
+          return;
+        }
+        newTotal = originalTotal - discountAmount;
+      }
+
+      const { error } = await supabase
+        .from("orders")
+        .update({
+          discount_amount: discountAmount,
+          discount_type: discountType,
+          original_total: originalTotal,
+          total: newTotal
+        })
+        .eq("id", orderId);
+
+      if (error) throw error;
+
+      // Update local state
+      const updatedOrder = {
+        ...order,
+        discount_amount: discountAmount,
+        discount_type: discountType,
+        original_total: originalTotal,
+        total: newTotal
+      };
+
+      setOrdersList(ordersList.map(o => o.id === orderId ? updatedOrder : o));
+      setSelectedOrder(updatedOrder);
+      
+      toast.success("Discount applied successfully");
+      setDiscountValue("");
+    } catch (error) {
+      console.error("Error applying discount:", error);
+      toast.error("Failed to apply discount");
+    } finally {
+      setApplyingDiscount(false);
+    }
   };
 
   const addTagToOrder = async (orderId: string) => {
@@ -1244,6 +1319,75 @@ const Admin = () => {
                     <Button onClick={() => addTagToOrder(selectedOrder.id)} size="sm" className="bg-primary hover:bg-primary/90">
                       <Plus className="h-4 w-4" />
                     </Button>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4">
+                  <Label className="text-muted-foreground mb-3 block">Apply Discount</Label>
+                  
+                  {selectedOrder.discount_amount && selectedOrder.discount_amount > 0 && (
+                    <div className="mb-3 p-3 bg-green-50 dark:bg-green-950/20 rounded border border-green-200 dark:border-green-900">
+                      <div className="flex items-center gap-2 text-green-700 dark:text-green-400 mb-1">
+                        <Badge variant="outline" className="bg-green-100 dark:bg-green-950">
+                          Discount Applied
+                        </Badge>
+                      </div>
+                      <div className="text-sm space-y-1">
+                        <p>Original Total: <span className="line-through">KSh {selectedOrder.original_total?.toFixed(2)}</span></p>
+                        <p className="font-semibold text-green-700 dark:text-green-400">
+                          Discount: -KSh {selectedOrder.discount_amount.toFixed(2)} 
+                          {selectedOrder.discount_type === "percentage" && ` (${((selectedOrder.discount_amount / (selectedOrder.original_total || 1)) * 100).toFixed(0)}%)`}
+                        </p>
+                        <p className="font-bold text-base">Final Total: KSh {selectedOrder.total.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-sm mb-2 block">Discount Type</Label>
+                      <RadioGroup value={discountType} onValueChange={(v) => setDiscountType(v as "percentage" | "fixed")} className="flex gap-4">
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="percentage" id="percentage" />
+                          <Label htmlFor="percentage" className="flex items-center gap-1 cursor-pointer">
+                            <Percent className="h-4 w-4" />
+                            Percentage
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="fixed" id="fixed" />
+                          <Label htmlFor="fixed" className="flex items-center gap-1 cursor-pointer">
+                            <DollarSign className="h-4 w-4" />
+                            Fixed Amount
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <div className="flex-1">
+                        <Label htmlFor="discount-value" className="text-sm">
+                          {discountType === "percentage" ? "Discount Percentage" : "Discount Amount (KSh)"}
+                        </Label>
+                        <Input
+                          id="discount-value"
+                          type="number"
+                          placeholder={discountType === "percentage" ? "e.g., 10" : "e.g., 100"}
+                          value={discountValue}
+                          onChange={(e) => setDiscountValue(e.target.value)}
+                          min="0"
+                          max={discountType === "percentage" ? "100" : undefined}
+                          step={discountType === "percentage" ? "1" : "0.01"}
+                        />
+                      </div>
+                      <Button 
+                        onClick={() => applyDiscount(selectedOrder.id)} 
+                        className="mt-6 bg-primary hover:bg-primary/90"
+                        disabled={applyingDiscount || !discountValue}
+                      >
+                        {applyingDiscount ? "Applying..." : "Apply"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
