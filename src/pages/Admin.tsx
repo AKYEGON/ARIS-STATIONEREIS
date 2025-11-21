@@ -409,13 +409,47 @@ const Admin = () => {
         newTotal = originalTotal - discountAmount;
       }
 
+      // Fetch order items to recalculate profit
+      const { data: orderItems, error: itemsError } = await supabase
+        .from("order_items")
+        .select("*")
+        .eq("order_id", orderId);
+
+      if (itemsError) throw itemsError;
+
+      // Recalculate profit for each item with discount distribution
+      let newTotalProfit = 0;
+
+      if (orderItems && orderItems.length > 0) {
+        for (const item of orderItems) {
+          const itemSubtotal = Number(item.price) * item.quantity;
+          const itemProportion = originalTotal > 0 ? itemSubtotal / originalTotal : 0;
+          const itemDiscount = discountAmount * itemProportion;
+          const itemActualRevenue = itemSubtotal - itemDiscount;
+          const itemCost = Number(item.cost_price || 0) * item.quantity;
+          const itemProfit = itemActualRevenue - itemCost;
+          
+          newTotalProfit += itemProfit;
+
+          // Update item profit
+          const { error: updateItemError } = await supabase
+            .from("order_items")
+            .update({ profit: itemProfit })
+            .eq("id", item.id);
+
+          if (updateItemError) throw updateItemError;
+        }
+      }
+
+      // Update order with discount and new profit
       const { error } = await supabase
         .from("orders")
         .update({
           discount_amount: discountAmount,
           discount_type: discountType,
           original_total: originalTotal,
-          total: newTotal
+          total: newTotal,
+          profit: newTotalProfit
         })
         .eq("id", orderId);
 
@@ -427,13 +461,14 @@ const Admin = () => {
         discount_amount: discountAmount,
         discount_type: discountType,
         original_total: originalTotal,
-        total: newTotal
+        total: newTotal,
+        profit: newTotalProfit
       };
 
       setOrdersList(ordersList.map(o => o.id === orderId ? updatedOrder : o));
       setSelectedOrder(updatedOrder);
       
-      toast.success("Discount applied successfully");
+      toast.success(`Discount applied! New profit: KSh ${newTotalProfit.toFixed(2)}`);
       setDiscountValue("");
     } catch (error) {
       console.error("Error applying discount:", error);

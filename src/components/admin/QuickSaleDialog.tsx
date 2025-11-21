@@ -135,11 +135,25 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
 
       if (orderError) throw orderError;
 
-      // Calculate total profit and insert order items
+      // Calculate total profit with discount distribution
       let totalProfit = 0;
 
       for (const item of selectedItems) {
-        const itemProfit = (item.product.price - (item.product.costPrice || 0)) * item.quantity;
+        // Calculate item's subtotal
+        const itemSubtotal = item.product.price * item.quantity;
+        
+        // Calculate item's proportion of total and its share of discount
+        const itemProportion = subtotal > 0 ? itemSubtotal / subtotal : 0;
+        const itemDiscount = discountAmount * itemProportion;
+        
+        // Calculate actual revenue after discount for this item
+        const itemActualRevenue = itemSubtotal - itemDiscount;
+        
+        // Calculate cost for this item
+        const itemCost = (item.product.costPrice || 0) * item.quantity;
+        
+        // Calculate real profit (revenue - cost)
+        const itemProfit = itemActualRevenue - itemCost;
         totalProfit += itemProfit;
 
         // Insert order item
