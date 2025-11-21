@@ -4,14 +4,16 @@ import { Product } from "@/types/product";
 import BrochureCover from "@/components/brochure/BrochureCover";
 import BrochureProduct from "@/components/brochure/BrochureProduct";
 import { Button } from "@/components/ui/button";
-import { Printer, ArrowLeft, Download } from "lucide-react";
+import { Printer, ArrowLeft, Download, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import html2pdf from "html2pdf.js";
+import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 
 const Brochure = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const brochureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,17 +54,52 @@ const Brochure = () => {
 
   const handleDownload = async () => {
     if (!brochureRef.current) return;
+    
+    try {
+      setIsDownloading(true);
+      
+      toast({
+        title: "Generating PDF...",
+        description: "Please wait while we create your brochure.",
+      });
 
-    const element = brochureRef.current;
-    const opt = {
-      margin: 0.5,
-      filename: 'ARIS-Stationaries-Catalog.pdf',
-      image: { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'cm', format: 'a4', orientation: 'portrait' as const }
-    };
+      const element = brochureRef.current;
+      
+      // Mobile-optimized settings
+      const opt = {
+        margin: 0.5,
+        filename: 'ARIS-Stationaries-Catalog.pdf',
+        image: { type: 'jpeg' as const, quality: 0.95 },
+        html2canvas: { 
+          scale: window.innerWidth < 768 ? 1.5 : 2, // Lower scale for mobile
+          useCORS: true,
+          logging: false,
+          windowWidth: 1200 // Fixed width for consistent rendering
+        },
+        jsPDF: { 
+          unit: 'cm', 
+          format: 'a4', 
+          orientation: 'portrait' as const,
+          compress: true
+        }
+      };
 
-    html2pdf().set(opt).from(element).save();
+      await html2pdf().set(opt).from(element).save();
+      
+      toast({
+        title: "Download Complete!",
+        description: "Your brochure has been downloaded successfully.",
+      });
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      toast({
+        title: "Download Failed",
+        description: "There was an error generating the PDF. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   if (isLoading) {
@@ -85,9 +122,24 @@ const Brochure = () => {
             </Button>
           </Link>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button onClick={handleDownload} size="sm" variant="default" className="flex-1 sm:flex-initial">
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
+            <Button 
+              onClick={handleDownload} 
+              size="sm" 
+              variant="default" 
+              className="flex-1 sm:flex-initial"
+              disabled={isDownloading}
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  Download PDF
+                </>
+              )}
             </Button>
             <Button onClick={handlePrint} size="sm" variant="outline" className="flex-1 sm:flex-initial">
               <Printer className="h-4 w-4 mr-2" />
