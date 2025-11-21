@@ -107,7 +107,7 @@ All colors MUST be HSL.
 @media print {
   @page {
     size: A4;
-    margin: 0.5cm;
+    margin: 0.8cm;
   }
   
   .print\:hidden {
@@ -127,11 +127,13 @@ All colors MUST be HSL.
   .brochure-page {
     background: white !important;
     color: black !important;
+    width: 100%;
+    max-width: none;
   }
   
   .page-break-inside-avoid {
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
   
   /* Optimize colors for print */
@@ -145,9 +147,24 @@ All colors MUST be HSL.
     background: white !important;
   }
   
-  /* Ensure product cards don't break */
-  .product-card {
+  /* Ensure product cards and all grid items never break */
+  .product-card,
+  [class*="bg-card"] {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    display: block !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Force grid items to stay together */
+  .grid > * {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Prevent orphans and widows */
+  p, h1, h2, h3, h4, h5, h6 {
+    orphans: 3;
+    widows: 3;
   }
 }
