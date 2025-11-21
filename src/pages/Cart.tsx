@@ -103,7 +103,7 @@ const Cart = () => {
 
       if (itemsError) throw itemsError;
 
-      // Also send WhatsApp message
+      // Prepare WhatsApp message
       const orderDetails = cartItems
         .map((item) => `${item.name} x${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`)
         .join("%0A");
@@ -123,14 +123,33 @@ const Cart = () => {
         message += `Delivery Address: ${data.deliveryAddress}%0A`;
       }
       
-      const whatsappUrl = `https://wa.me/254707222419?text=${message}`;
-      window.open(whatsappUrl, "_blank");
+      // Send WhatsApp message with fallback
+      const whatsappUrl = `https://wa.me/254707222419?text=${encodeURIComponent(message.replace(/%0A/g, '\n'))}`;
+      
+      // Try opening in new tab, with fallback to current window
+      try {
+        const whatsappWindow = window.open(whatsappUrl, "_blank");
+        if (!whatsappWindow || whatsappWindow.closed || typeof whatsappWindow.closed === 'undefined') {
+          // Popup was blocked, use current window
+          window.location.href = whatsappUrl;
+        }
+      } catch (error) {
+        console.error("WhatsApp redirect error:", error);
+        // Fallback to direct navigation
+        window.location.href = whatsappUrl;
+      }
 
       clearCart();
       setShowCheckoutDialog(false);
       form.reset();
-      toast.success(`Order #${order.id.slice(0, 8)} placed successfully!`);
-      navigate("/");
+      toast.success(`Order #${order.id.slice(0, 8)} placed successfully! Redirecting to WhatsApp...`);
+      
+      // Only navigate if WhatsApp opened in new tab
+      setTimeout(() => {
+        if (window.location.pathname === "/cart") {
+          navigate("/");
+        }
+      }, 1500);
     } catch (error) {
       console.error("Order error:", error);
       toast.error("Failed to place order. Please try again.");

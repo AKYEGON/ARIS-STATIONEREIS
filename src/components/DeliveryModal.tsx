@@ -18,14 +18,16 @@ export default function DeliveryModal({ open, onClose }: Props) {
       <div className="relative z-10 max-w-lg w-full bg-white rounded-lg shadow-lg p-6">
         <h3 className="text-lg font-semibold mb-3">Delivery information — ARIS STATIONARIES</h3>
 
-        <div className="text-sm leading-relaxed text-gray-700 space-y-2">
-          <p><strong>UoN hostels, Qejani & Qwetu:</strong> Delivery is <strong>FREE for all orders</strong> — no minimum required.</p>
-
-          <p><strong>Other locations:</strong> Delivery is <strong>FREE for orders of KSH 500 or more</strong>. For orders below KSH 500, the delivery fee will be <strong>negotiated</strong> between ARIS STATIONARIES and the buyer.</p>
+        <div className="text-sm leading-relaxed text-gray-700 space-y-3">
+          <p className="text-base font-semibold text-emerald-700">
+            ✓ FREE DELIVERY within campus areas
+          </p>
+          
+          <p><strong>Free delivery includes:</strong> All UoN hostels, Qejani, and Qwetu — <strong>no minimum order required</strong>.</p>
 
           <p><strong>Payment:</strong> On pickup or on delivery.</p>
 
-          <p><strong>Need delivery outside these areas?</strong> Contact us before ordering so we can confirm cost and timing.</p>
+          <p className="text-muted-foreground"><strong>Need delivery outside these areas?</strong> Contact us before ordering so we can confirm availability, cost, and timing.</p>
         </div>
 
         <div className="mt-6 flex justify-end">
