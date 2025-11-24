@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import StarRating from "./StarRating";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Play } from "lucide-react";
 import { useState } from "react";
@@ -41,23 +40,23 @@ const TestimonialCard = ({ testimonial, onOpenStory }: TestimonialCardProps) => 
           )}
         </div>
         <CardContent className="p-6">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h3 className="font-semibold text-lg">{testimonial.customer_name}</h3>
-              {testimonial.product_name && (
-                <Badge variant="secondary" className="mt-1">
-                  {testimonial.product_name}
-                </Badge>
-              )}
-            </div>
-            <StarRating rating={testimonial.rating} />
+          <div className="mb-3">
+            <h3 className="font-semibold text-lg">{testimonial.customer_name}</h3>
+            {testimonial.product_name && (
+              <Badge variant="secondary" className="mt-1">
+                {testimonial.product_name}
+              </Badge>
+            )}
           </div>
           <p className="text-muted-foreground">
             {showFullReview ? testimonial.review_text : truncatedReview}
           </p>
           {testimonial.review_text.length > 150 && (
             <button
-              onClick={() => setShowFullReview(!showFullReview)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowFullReview(!showFullReview);
+              }}
               className="text-primary text-sm mt-2 hover:underline"
             >
               {showFullReview ? "Show less" : "Read more"}

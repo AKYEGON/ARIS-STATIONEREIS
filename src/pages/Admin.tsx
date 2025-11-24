@@ -1632,26 +1632,6 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="rating">Rating *</Label>
-                      <div className="flex gap-2 items-center mt-2">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setTestimonialFormData({...testimonialFormData, rating: star as 1 | 2 | 3 | 4 | 5})}
-                            className="transition-transform hover:scale-110"
-                          >
-                            {star <= testimonialFormData.rating ? (
-                              <span className="text-2xl">⭐</span>
-                            ) : (
-                              <span className="text-2xl text-muted">☆</span>
-                            )}
-                          </button>
-                        ))}
-                        <span className="ml-2 text-sm text-muted-foreground">{testimonialFormData.rating} stars</span>
-                      </div>
-                    </div>
-                    <div>
                       <Label htmlFor="customer_photo">Customer Photo *</Label>
                       <Input
                         id="customer_photo"
@@ -1790,7 +1770,6 @@ const Admin = () => {
                           <TableHead>Photo</TableHead>
                           <TableHead>Customer</TableHead>
                           <TableHead>Product</TableHead>
-                          <TableHead>Rating</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -1817,12 +1796,6 @@ const Admin = () => {
                             </TableCell>
                             <TableCell className="font-medium">{testimonial.customer_name}</TableCell>
                             <TableCell>{testimonial.product_name || "-"}</TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <span className="text-yellow-400">⭐</span>
-                                <span>{testimonial.rating}</span>
-                              </div>
-                            </TableCell>
                             <TableCell>
                               <div className="flex gap-1">
                                 {testimonial.is_published && <Badge variant="default">Published</Badge>}
