@@ -1,4 +1,4 @@
-import { ShoppingCart, FileText } from "lucide-react";
+import { ShoppingCart, FileText, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -19,6 +19,13 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </Link>
           
           <div className="flex items-center gap-2 sm:gap-4">
+            <Link to="/testimonials" className="hidden md:block">
+              <Button variant="outline" size="sm">
+                <Users className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Happy Customers</span>
+              </Button>
+            </Link>
+            
             <Link to="/brochure" className="hidden md:block">
               <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-2" />

@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer className="border-t border-border bg-black mt-auto transition-all duration-300">
       <div className="container py-6 sm:py-8 px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           <div className="flex flex-col items-start gap-3">
             <img src={logo} alt="ARIS STATIONARIES Logo" className="h-12 sm:h-14" />
             <div>
@@ -16,6 +16,24 @@ const Footer = () => {
               <p className="text-xs sm:text-sm text-white/70">
                 Quality you need, prices you will love
               </p>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base text-white">Quick Links</h4>
+            <div className="space-y-2">
+              <Link 
+                to="/testimonials" 
+                className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all duration-200 block"
+              >
+                Happy Customers
+              </Link>
+              <Link 
+                to="/brochure" 
+                className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all duration-200 block"
+              >
+                Brochure
+              </Link>
             </div>
           </div>
           

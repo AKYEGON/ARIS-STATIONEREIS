@@ -14,7 +14,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
 import { Product, ProductMedia } from "@/types/product";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash } from "lucide-react";
+import { CustomerTestimonial } from "@/types/testimonial";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,6 +69,25 @@ const Admin = () => {
   const [isQuickSaleOpen, setIsQuickSaleOpen] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
   
+  // Testimonials state
+  const [testimonialsList, setTestimonialsList] = useState<CustomerTestimonial[]>([]);
+  const [isTestimonialDialogOpen, setIsTestimonialDialogOpen] = useState(false);
+  const [editingTestimonial, setEditingTestimonial] = useState<CustomerTestimonial | null>(null);
+  const [testimonialFormData, setTestimonialFormData] = useState({
+    customer_name: "",
+    product_name: "",
+    review_text: "",
+    rating: 5 as 1 | 2 | 3 | 4 | 5,
+    is_featured: false,
+    is_published: false,
+    display_order: 0
+  });
+  const [testimonialPhotoFile, setTestimonialPhotoFile] = useState<File | null>(null);
+  const [testimonialPhotoPreview, setTestimonialPhotoPreview] = useState("");
+  const [testimonialVideoFile, setTestimonialVideoFile] = useState<File | null>(null);
+  const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
+  const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -100,6 +120,9 @@ const Admin = () => {
       fetchProducts();
       if (activeTab === "orders") {
         fetchOrders();
+      }
+      if (activeTab === "testimonials") {
+        fetchTestimonials();
       }
     }
   }, [activeTab, isAdmin]);
@@ -214,6 +237,181 @@ const Admin = () => {
     } finally {
       setIsLoadingOrders(false);
     }
+  };
+
+  const fetchTestimonials = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("customer_testimonials")
+        .select("*")
+        .order("display_order", { ascending: false })
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setTestimonialsList((data || []).map(t => ({
+        ...t,
+        rating: t.rating as 1 | 2 | 3 | 4 | 5
+      })));
+    } catch (error) {
+      console.error("Error fetching testimonials:", error);
+      toast.error("Failed to load testimonials");
+    }
+  };
+
+  const resetTestimonialForm = () => {
+    setTestimonialFormData({
+      customer_name: "",
+      product_name: "",
+      review_text: "",
+      rating: 5,
+      is_featured: false,
+      is_published: false,
+      display_order: 0
+    });
+    setTestimonialPhotoFile(null);
+    setTestimonialPhotoPreview("");
+    setTestimonialVideoFile(null);
+    setTestimonialVideoPreview("");
+    setEditingTestimonial(null);
+  };
+
+  const handleTestimonialFileUpload = async (file: File, bucket: string): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(bucket)
+      .upload(fileName, file);
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(fileName);
+
+    return data.publicUrl;
+  };
+
+  const handleAddTestimonial = async () => {
+    if (!testimonialFormData.customer_name || !testimonialFormData.review_text || !testimonialPhotoFile) {
+      toast.error("Please fill in all required fields and upload a photo");
+      return;
+    }
+
+    try {
+      const photoUrl = await handleTestimonialFileUpload(testimonialPhotoFile, 'customer-photos');
+      let videoUrl = null;
+      
+      if (testimonialVideoFile) {
+        videoUrl = await handleTestimonialFileUpload(testimonialVideoFile, 'testimonial-videos');
+      }
+
+      const { error } = await supabase
+        .from("customer_testimonials")
+        .insert({
+          customer_name: testimonialFormData.customer_name,
+          customer_photo: photoUrl,
+          product_name: testimonialFormData.product_name || null,
+          review_text: testimonialFormData.review_text,
+          rating: testimonialFormData.rating,
+          video_url: videoUrl,
+          display_order: testimonialFormData.display_order,
+          is_featured: testimonialFormData.is_featured,
+          is_published: testimonialFormData.is_published
+        });
+
+      if (error) throw error;
+
+      toast.success("Testimonial added successfully!");
+      setIsTestimonialDialogOpen(false);
+      resetTestimonialForm();
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error adding testimonial:", error);
+      toast.error("Failed to add testimonial");
+    }
+  };
+
+  const handleUpdateTestimonial = async () => {
+    if (!editingTestimonial || !testimonialFormData.customer_name || !testimonialFormData.review_text) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      let photoUrl = editingTestimonial.customer_photo;
+      let videoUrl = editingTestimonial.video_url;
+
+      if (testimonialPhotoFile) {
+        photoUrl = await handleTestimonialFileUpload(testimonialPhotoFile, 'customer-photos');
+      }
+
+      if (testimonialVideoFile) {
+        videoUrl = await handleTestimonialFileUpload(testimonialVideoFile, 'testimonial-videos');
+      }
+
+      const { error } = await supabase
+        .from("customer_testimonials")
+        .update({
+          customer_name: testimonialFormData.customer_name,
+          customer_photo: photoUrl,
+          product_name: testimonialFormData.product_name || null,
+          review_text: testimonialFormData.review_text,
+          rating: testimonialFormData.rating,
+          video_url: videoUrl,
+          display_order: testimonialFormData.display_order,
+          is_featured: testimonialFormData.is_featured,
+          is_published: testimonialFormData.is_published
+        })
+        .eq("id", editingTestimonial.id);
+
+      if (error) throw error;
+
+      toast.success("Testimonial updated successfully!");
+      setIsTestimonialDialogOpen(false);
+      resetTestimonialForm();
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error updating testimonial:", error);
+      toast.error("Failed to update testimonial");
+    }
+  };
+
+  const handleDeleteTestimonial = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this testimonial?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("customer_testimonials")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Testimonial deleted successfully!");
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error deleting testimonial:", error);
+      toast.error("Failed to delete testimonial");
+    }
+  };
+
+  const openTestimonialEditDialog = (testimonial: CustomerTestimonial) => {
+    setEditingTestimonial(testimonial);
+    setTestimonialFormData({
+      customer_name: testimonial.customer_name,
+      product_name: testimonial.product_name || "",
+      review_text: testimonial.review_text,
+      rating: testimonial.rating,
+      is_featured: testimonial.is_featured,
+      is_published: testimonial.is_published,
+      display_order: testimonial.display_order
+    });
+    setTestimonialPhotoPreview(testimonial.customer_photo);
+    if (testimonial.video_url) {
+      setTestimonialVideoPreview(testimonial.video_url);
+    }
+    setIsTestimonialDialogOpen(true);
   };
 
   const resetForm = () => {
@@ -875,7 +1073,7 @@ const Admin = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -891,6 +1089,10 @@ const Admin = () => {
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
               Orders
+            </TabsTrigger>
+            <TabsTrigger value="testimonials" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Testimonials
             </TabsTrigger>
           </TabsList>
 
@@ -1371,6 +1573,281 @@ const Admin = () => {
                     </TableBody>
                   </Table>
                 )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Testimonials Tab */}
+          <TabsContent value="testimonials" className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <p className="text-muted-foreground">Manage customer testimonials and reviews</p>
+              
+              <Dialog open={isTestimonialDialogOpen} onOpenChange={(open) => {
+                setIsTestimonialDialogOpen(open);
+                if (!open) resetTestimonialForm();
+              }}>
+                <DialogTrigger asChild>
+                  <Button onClick={() => resetTestimonialForm()} className="w-full sm:w-auto">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add Testimonial
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{editingTestimonial ? "Edit Testimonial" : "Add New Testimonial"}</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="customer_name">Customer Name *</Label>
+                      <Input
+                        id="customer_name"
+                        value={testimonialFormData.customer_name}
+                        onChange={(e) => setTestimonialFormData({...testimonialFormData, customer_name: e.target.value})}
+                        placeholder="Enter customer name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="product_name">Product Name</Label>
+                      <Input
+                        id="product_name"
+                        value={testimonialFormData.product_name}
+                        onChange={(e) => setTestimonialFormData({...testimonialFormData, product_name: e.target.value})}
+                        placeholder="Which product did they buy? (optional)"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="review_text">Review / Testimonial *</Label>
+                      <Textarea
+                        id="review_text"
+                        value={testimonialFormData.review_text}
+                        onChange={(e) => setTestimonialFormData({...testimonialFormData, review_text: e.target.value})}
+                        placeholder="Enter customer review or testimonial"
+                        rows={5}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="rating">Rating *</Label>
+                      <div className="flex gap-2 items-center mt-2">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button
+                            key={star}
+                            type="button"
+                            onClick={() => setTestimonialFormData({...testimonialFormData, rating: star as 1 | 2 | 3 | 4 | 5})}
+                            className="transition-transform hover:scale-110"
+                          >
+                            {star <= testimonialFormData.rating ? (
+                              <span className="text-2xl">⭐</span>
+                            ) : (
+                              <span className="text-2xl text-muted">☆</span>
+                            )}
+                          </button>
+                        ))}
+                        <span className="ml-2 text-sm text-muted-foreground">{testimonialFormData.rating} stars</span>
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="customer_photo">Customer Photo *</Label>
+                      <Input
+                        id="customer_photo"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setTestimonialPhotoFile(file);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setTestimonialPhotoPreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="cursor-pointer"
+                      />
+                      {testimonialPhotoPreview && (
+                        <div className="mt-2">
+                          <img 
+                            src={testimonialPhotoPreview} 
+                            alt="Preview"
+                            className="w-32 h-32 object-cover rounded border"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="testimonial_video">Video (Optional)</Label>
+                      <Input
+                        id="testimonial_video"
+                        type="file"
+                        accept="video/mp4,video/webm"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setTestimonialVideoFile(file);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setTestimonialVideoPreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="cursor-pointer"
+                      />
+                      {testimonialVideoPreview && (
+                        <div className="mt-2">
+                          <video 
+                            src={testimonialVideoPreview} 
+                            className="w-32 h-32 object-cover rounded border"
+                            controls
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="display_order">Display Order</Label>
+                      <Input
+                        id="display_order"
+                        type="number"
+                        value={testimonialFormData.display_order}
+                        onChange={(e) => setTestimonialFormData({...testimonialFormData, display_order: parseInt(e.target.value) || 0})}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="flex gap-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="is_featured"
+                          checked={testimonialFormData.is_featured}
+                          onChange={(e) => setTestimonialFormData({...testimonialFormData, is_featured: e.target.checked})}
+                          className="cursor-pointer"
+                        />
+                        <Label htmlFor="is_featured" className="cursor-pointer">Featured</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="is_published"
+                          checked={testimonialFormData.is_published}
+                          onChange={(e) => setTestimonialFormData({...testimonialFormData, is_published: e.target.checked})}
+                          className="cursor-pointer"
+                        />
+                        <Label htmlFor="is_published" className="cursor-pointer">Published</Label>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2 mt-4">
+                    <Button variant="outline" onClick={() => {
+                      setIsTestimonialDialogOpen(false);
+                      resetTestimonialForm();
+                    }}>
+                      Cancel
+                    </Button>
+                    <Button onClick={editingTestimonial ? handleUpdateTestimonial : handleAddTestimonial}>
+                      {editingTestimonial ? "Update" : "Add"} Testimonial
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Testimonials Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="mb-4">
+                  <Input
+                    placeholder="Search testimonials by name or product..."
+                    value={testimonialSearchQuery}
+                    onChange={(e) => setTestimonialSearchQuery(e.target.value)}
+                    className="max-w-md"
+                  />
+                </div>
+                <div className="overflow-x-auto">
+                  {testimonialsList.filter(t => {
+                    if (!testimonialSearchQuery) return true;
+                    const query = testimonialSearchQuery.toLowerCase();
+                    return (
+                      t.customer_name.toLowerCase().includes(query) ||
+                      (t.product_name && t.product_name.toLowerCase().includes(query)) ||
+                      t.review_text.toLowerCase().includes(query)
+                    );
+                  }).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      {testimonialSearchQuery ? 'No testimonials match your search' : 'No testimonials yet'}
+                    </div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Photo</TableHead>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Product</TableHead>
+                          <TableHead>Rating</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {testimonialsList
+                          .filter(t => {
+                            if (!testimonialSearchQuery) return true;
+                            const query = testimonialSearchQuery.toLowerCase();
+                            return (
+                              t.customer_name.toLowerCase().includes(query) ||
+                              (t.product_name && t.product_name.toLowerCase().includes(query)) ||
+                              t.review_text.toLowerCase().includes(query)
+                            );
+                          })
+                          .map((testimonial, index) => (
+                          <TableRow key={testimonial.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.03}s` }}>
+                            <TableCell>
+                              <img 
+                                src={testimonial.customer_photo} 
+                                alt={testimonial.customer_name}
+                                className="w-12 h-12 object-cover rounded-full"
+                              />
+                            </TableCell>
+                            <TableCell className="font-medium">{testimonial.customer_name}</TableCell>
+                            <TableCell>{testimonial.product_name || "-"}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <span className="text-yellow-400">⭐</span>
+                                <span>{testimonial.rating}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
+                                {testimonial.is_published && <Badge variant="default">Published</Badge>}
+                                {testimonial.is_featured && <Badge variant="secondary">Featured</Badge>}
+                                {!testimonial.is_published && <Badge variant="outline">Draft</Badge>}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  onClick={() => openTestimonialEditDialog(testimonial)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+                                  onClick={() => handleDeleteTestimonial(testimonial.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </div>
               </CardContent>
             </Card>

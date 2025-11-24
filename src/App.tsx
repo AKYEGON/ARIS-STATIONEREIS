@@ -9,6 +9,7 @@ import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Brochure from "./pages/Brochure";
+import Testimonials from "./pages/Testimonials";
 import NotFound from "./pages/NotFound";
 
 import DeliveryBanner from "@/components/DeliveryBanner";
@@ -31,13 +32,15 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/brochure" element={<Brochure />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
+      <Route path="/" element={<Index />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/admin" element={<Admin />} />
+      <Route path="/brochure" element={<Brochure />} />
+      <Route path="/testimonials" element={<Testimonials />} />
+      <Route path="/happy-customers" element={<Testimonials />} />
+      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+      <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </CartProvider>
