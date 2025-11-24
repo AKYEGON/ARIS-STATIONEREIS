@@ -202,7 +202,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] md:max-w-6xl h-[90vh] md:h-[85vh] flex flex-col p-0">
+      <DialogContent className="max-w-[95vw] md:max-w-6xl h-[95vh] md:h-[85vh] flex flex-col p-0">
         <DialogHeader className="px-4 md:px-6 pt-4 md:pt-6 pb-3 md:pb-4 border-b">
           <DialogTitle className="flex items-center gap-2 text-lg md:text-xl">
             <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
@@ -210,10 +210,10 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-y-auto md:overflow-hidden">
+        <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-hidden">
           {/* Left: Product Selection (Bottom on mobile, Left on desktop) */}
-          <div className="flex flex-col md:border-r border-t md:border-t-0 md:border-b-0">
-            <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-muted/30 sticky top-0 z-10">
+          <div className="flex flex-col md:border-r border-t-4 border-t-primary/20 md:border-t-0 md:border-b-0 bg-muted/5">
+            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b bg-gradient-to-r from-muted/50 to-muted/30 sticky top-0 z-10 backdrop-blur-sm">
               <Label className="text-xs md:text-sm font-semibold mb-1.5 md:mb-2 block">Select Products</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
@@ -226,9 +226,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
               </div>
             </div>
 
-            <ScrollArea className="flex-1 md:h-[calc(85vh-200px)]">
-              <div className="min-h-[30vh] md:min-h-0">
-              </div>
+            <ScrollArea className="flex-1 h-[35vh] md:h-[calc(85vh-200px)]">
               <div className="p-2 md:p-3 space-y-1.5 md:space-y-2">
                 {filteredProducts.length === 0 ? (
                   <div className="text-center py-8 md:py-12 text-muted-foreground">
@@ -237,9 +235,9 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
                   </div>
                 ) : (
                   filteredProducts.map(product => (
-                    <button
+                     <button
                       key={product.id}
-                      className="w-full flex items-center gap-2 md:gap-3 p-2 md:p-2.5 border rounded-lg hover:bg-accent hover:border-primary/50 cursor-pointer transition-all text-left active:scale-95"
+                      className="w-full flex items-center gap-2 md:gap-3 p-2.5 md:p-3 border rounded-lg hover:bg-accent hover:border-primary/50 cursor-pointer transition-all text-left active:scale-[0.98] hover:shadow-sm"
                       onClick={() => addProductToSale(product)}
                     >
                       <img
@@ -266,17 +264,15 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
           </div>
 
           {/* Right: Sale Details (Top on mobile, Right on desktop) */}
-          <div className="flex flex-col border-b md:border-b-0">
-            <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-primary/10 sticky top-0 md:top-auto z-10">
+          <div className="flex flex-col bg-background">
+            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b-2 bg-gradient-to-r from-primary/15 to-primary/5 sticky top-0 z-10 backdrop-blur-sm">
               <Label className="text-xs md:text-sm font-semibold flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4" />
-                Cart Items {selectedItems.length > 0 && <Badge variant="secondary" className="text-xs">{selectedItems.length}</Badge>}
+                Cart Items {selectedItems.length > 0 && <Badge variant="default" className="text-xs animate-scale-in">{selectedItems.length}</Badge>}
               </Label>
             </div>
             
-            <ScrollArea className="flex-1 md:h-[calc(85vh-420px)]">
-              <div className="min-h-[25vh] md:min-h-0">
-              </div>
+            <ScrollArea className="flex-1 h-[25vh] md:h-[calc(85vh-420px)]">
               <div className="p-2 md:p-3">
                 {selectedItems.length === 0 ? (
                   <div className="text-center py-8 md:py-16 text-muted-foreground">
@@ -286,8 +282,8 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
                   </div>
                 ) : (
                   <div className="space-y-1.5 md:space-y-2">
-                    {selectedItems.map(item => (
-                      <div key={item.product.id} className="flex items-center gap-1.5 md:gap-2 p-2 md:p-2.5 border rounded-lg bg-background">
+                     {selectedItems.map(item => (
+                      <div key={item.product.id} className="flex items-center gap-1.5 md:gap-2 p-2 md:p-2.5 border rounded-lg bg-card shadow-sm animate-fade-in">
                         <img
                           src={item.product.image}
                           alt={item.product.name}
@@ -299,23 +295,23 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
                             KSh {item.product.price.toFixed(2)} each
                           </p>
                         </div>
-                        <div className="flex items-center gap-0.5 md:gap-1 bg-muted/50 rounded-md p-0.5 md:p-1">
+                         <div className="flex items-center gap-0.5 md:gap-1 bg-muted/50 rounded-md p-0.5 md:p-1">
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-6 w-6 md:h-7 md:w-7 hover:bg-background"
+                            className="h-7 w-7 md:h-8 md:w-8 hover:bg-background active:scale-90 transition-transform"
                             onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                           >
-                            <Minus className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                            <Minus className="h-3 w-3 md:h-3.5 md:w-3.5" />
                           </Button>
-                          <span className="w-6 md:w-8 text-center text-xs md:text-sm font-semibold">{item.quantity}</span>
+                          <span className="w-7 md:w-9 text-center text-xs md:text-sm font-semibold">{item.quantity}</span>
                           <Button
                             size="icon"
                             variant="ghost"
-                            className="h-6 w-6 md:h-7 md:w-7 hover:bg-background"
+                            className="h-7 w-7 md:h-8 md:w-8 hover:bg-background active:scale-90 transition-transform"
                             onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
                           >
-                            <Plus className="h-2.5 w-2.5 md:h-3 md:w-3" />
+                            <Plus className="h-3 w-3 md:h-3.5 md:w-3.5" />
                           </Button>
                         </div>
                         <p className="font-bold text-xs md:text-sm min-w-[60px] md:min-w-[70px] text-right">
@@ -324,7 +320,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
                         <Button
                           size="icon"
                           variant="ghost"
-                          className="h-7 w-7 md:h-8 md:w-8 hover:bg-destructive/10"
+                          className="h-8 w-8 md:h-9 md:w-9 hover:bg-destructive/10 active:scale-90 transition-transform"
                           onClick={() => removeItem(item.product.id)}
                         >
                           <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4 text-destructive" />
@@ -336,7 +332,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
               </div>
             </ScrollArea>
 
-            <div className="border-t p-3 md:p-4 space-y-2 md:space-y-3 bg-muted/20">
+            <div className="border-t-2 p-3 md:p-4 space-y-2 md:space-y-3 bg-gradient-to-b from-muted/30 to-muted/10 sticky bottom-0 backdrop-blur-sm">
               {/* Customer Info - Compact */}
               <div className="grid grid-cols-2 gap-1.5 md:gap-2">
                 <Input
@@ -383,7 +379,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
               </div>
 
               {/* Total Section */}
-              <div className="space-y-1.5 md:space-y-2 p-2 md:p-3 bg-background rounded-lg border-2">
+              <div className="space-y-1.5 md:space-y-2 p-2.5 md:p-3 bg-gradient-to-br from-primary/5 to-background rounded-lg border-2 border-primary/20 shadow-sm">
                 <div className="flex justify-between text-xs md:text-sm">
                   <span className="text-muted-foreground">Subtotal:</span>
                   <span className="font-medium">KSh {calculateSubtotal().toFixed(2)}</span>
@@ -404,7 +400,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
               <Button
                 onClick={completeSale}
                 disabled={selectedItems.length === 0 || isProcessing}
-                className="w-full h-10 md:h-11 text-sm md:text-base font-semibold active:scale-95"
+                className="w-full h-11 md:h-12 text-sm md:text-base font-semibold shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
                 size="lg"
               >
                 {isProcessing ? "Processing..." : "Complete Sale"}
