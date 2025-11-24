@@ -229,13 +229,13 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
 
               {/* Review text overlay - Only show for non-video or when video is paused */}
               {(!testimonial.video_url || isPaused) && (
-                <div className="absolute bottom-24 md:bottom-32 left-0 right-0 px-4 md:px-8 z-10">
-                  <div className="max-w-4xl mx-auto bg-gradient-to-t from-black/80 to-black/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl">
-                    <p className="text-white text-lg md:text-2xl lg:text-3xl font-medium leading-relaxed text-center">
+                <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8 z-10 pointer-events-none">
+                  <div className="max-w-4xl mx-auto bg-gradient-to-t from-black/80 to-black/60 backdrop-blur-sm rounded-2xl p-4 md:p-6 border border-white/10 shadow-2xl">
+                    <p className="text-white text-base md:text-xl lg:text-2xl font-medium leading-relaxed text-center">
                       "{testimonial.review_text}"
                     </p>
-                    <div className="mt-4 flex items-center justify-center gap-3">
-                      <div className="h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden border-2 border-white/30">
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                      <div className="h-7 w-7 md:h-9 md:w-9 rounded-full overflow-hidden border-2 border-white/30">
                         <img
                           src={testimonial.customer_photo}
                           alt={testimonial.customer_name}
@@ -243,11 +243,11 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                         />
                       </div>
                       <div className="text-left">
-                        <p className="text-white font-semibold text-sm md:text-base">
+                        <p className="text-white font-semibold text-xs md:text-sm">
                           {testimonial.customer_name}
                         </p>
                         {testimonial.product_name && (
-                          <p className="text-white/70 text-xs md:text-sm">
+                          <p className="text-white/70 text-xs">
                             {testimonial.product_name}
                           </p>
                         )}
@@ -257,9 +257,10 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                 </div>
               )}
 
-              {/* Click areas for navigation */}
-              <div className="absolute inset-y-0 left-0 w-1/3 z-20" onClick={handlePrevious} />
-              <div className="absolute inset-y-0 right-0 w-1/3 z-20" onClick={handleNext} />
+              {/* Click areas for navigation - Full screen tap to advance */}
+              <div className="absolute inset-y-0 left-0 w-1/3 z-20 cursor-pointer" onClick={handlePrevious} />
+              <div className="absolute inset-y-0 left-1/3 right-1/3 z-20 cursor-pointer" onClick={handleNext} />
+              <div className="absolute inset-y-0 right-0 w-1/3 z-20 cursor-pointer" onClick={handleNext} />
             </div>
           ))}
         </div>
@@ -293,9 +294,9 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
       </div>
 
       {/* Bottom instruction text */}
-      <div className="absolute bottom-4 left-0 right-0 text-center text-white/60 text-xs md:text-sm">
-        <p className="md:hidden">Tap sides to navigate • Tap center to pause</p>
-        <p className="hidden md:block">Click sides to navigate • Space to pause • ESC to close</p>
+      <div className="absolute bottom-2 left-0 right-0 text-center text-white/60 text-xs pointer-events-none">
+        <p className="md:hidden">Tap left to go back • Tap right/center to skip</p>
+        <p className="hidden md:block">Click left to go back • Click right/center to skip • Space to pause • ESC to close</p>
       </div>
     </div>
   );
