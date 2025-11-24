@@ -1,14 +1,18 @@
-import { ShoppingCart, FileText, Users } from "lucide-react";
+import { ShoppingCart, FileText, Users, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import logo from "@/assets/logo.png";
+import { useState } from "react";
 
 interface HeaderProps {
   cartItemCount: number;
 }
 
 const Header = ({ cartItemCount }: HeaderProps) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
@@ -19,6 +23,54 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </Link>
           
           <div className="flex items-center gap-2 sm:gap-4">
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" className="md:hidden">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right">
+                <SheetHeader>
+                  <SheetTitle>Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="flex flex-col gap-4 mt-6">
+                  <Link 
+                    to="/" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    Shop
+                  </Link>
+                  <Link 
+                    to="/testimonials" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
+                  >
+                    <Users className="h-5 w-5" />
+                    Happy Customers
+                  </Link>
+                  <Link 
+                    to="/brochure" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
+                  >
+                    <FileText className="h-5 w-5" />
+                    Brochure
+                  </Link>
+                  <Link 
+                    to="/cart" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
+                  >
+                    <ShoppingCart className="h-5 w-5" />
+                    Cart {cartItemCount > 0 && `(${cartItemCount})`}
+                  </Link>
+                </nav>
+              </SheetContent>
+            </Sheet>
+            
             <Link to="/testimonials" className="hidden md:block">
               <Button variant="outline" size="sm">
                 <Users className="h-4 w-4 mr-2" />
