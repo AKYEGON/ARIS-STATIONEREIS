@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import ProductImageGallery from "@/components/cart/ProductImageGallery";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -221,11 +222,10 @@ const Cart = () => {
                 >
                   <CardContent className="p-3 sm:p-4">
                     <div className="flex gap-3 sm:gap-4">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        loading="lazy"
-                        className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded transition-transform duration-200 hover:scale-105"
+                      <ProductImageGallery
+                        primaryImage={item.image}
+                        productName={item.name}
+                        media={item.media}
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate">{item.name}</h3>
