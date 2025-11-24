@@ -10,4 +10,9 @@ export interface CustomerTestimonial {
   is_featured: boolean;
   is_published: boolean;
   created_at: string;
+  views?: number;
+  completed_views?: number;
+  completion_rate?: number;
+  average_view_duration?: number;
+  engagement_score?: number;
 }
