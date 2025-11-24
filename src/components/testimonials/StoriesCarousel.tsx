@@ -192,54 +192,74 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
       <div ref={emblaRef} className="h-full overflow-hidden">
         <div className="flex h-full">
           {testimonials.map((testimonial, idx) => (
-            <div key={testimonial.id} className="flex-[0_0_100%] min-w-0 h-full relative">
-              {/* Background image with overlay */}
-              <div className="absolute inset-0 bg-black flex items-center justify-center">
-                <img
-                  src={testimonial.customer_photo}
-                  alt={testimonial.customer_name}
-                  className="w-full h-full object-contain"
-                />
-                <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
-              </div>
-
-              {/* Content overlay - Centered review text */}
-              <div className="absolute inset-0 flex items-center justify-center px-6 md:px-12">
-                <div className="max-w-3xl w-full bg-black/60 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/10">
-                  <p className="text-white text-xl md:text-3xl lg:text-4xl font-medium leading-relaxed text-center">
-                    "{testimonial.review_text}"
-                  </p>
-                  <div className="mt-4 text-center">
-                    <p className="text-white/80 text-sm md:text-base font-semibold">
-                      — {testimonial.customer_name}
-                    </p>
-                    {testimonial.product_name && (
-                      <p className="text-white/60 text-xs md:text-sm mt-1">
-                        {testimonial.product_name}
-                      </p>
-                    )}
-                  </div>
+            <div key={testimonial.id} className="flex-[0_0_100%] min-w-0 h-full relative bg-black">
+              {/* Media display - Video or Image */}
+              {testimonial.video_url ? (
+                // Video Story
+                <div className="absolute inset-0 flex items-center justify-center bg-black">
+                  {idx === currentIndex ? (
+                    <video
+                      src={testimonial.video_url}
+                      className="w-full h-full object-contain"
+                      controls
+                      autoPlay
+                      playsInline
+                      onPlay={() => setIsPaused(true)}
+                      onPause={() => setIsPaused(false)}
+                      onEnded={() => setIsPaused(false)}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="text-white/50 text-4xl">▶️</div>
+                    </div>
+                  )}
                 </div>
-              </div>
-
-              {/* Video overlay if exists */}
-              {testimonial.video_url && idx === currentIndex && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <video
-                    src={testimonial.video_url}
-                    className="max-w-full max-h-full"
-                    controls
-                    autoPlay
-                    onPlay={() => setIsPaused(true)}
-                    onPause={() => setIsPaused(false)}
-                    onEnded={() => setIsPaused(false)}
+              ) : (
+                // Image Story
+                <div className="absolute inset-0">
+                  <img
+                    src={testimonial.customer_photo}
+                    alt={testimonial.customer_name}
+                    className="w-full h-full object-cover"
                   />
+                  {/* Gradient overlays for better text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/70" />
+                </div>
+              )}
+
+              {/* Review text overlay - Only show for non-video or when video is paused */}
+              {(!testimonial.video_url || isPaused) && (
+                <div className="absolute bottom-24 md:bottom-32 left-0 right-0 px-4 md:px-8 z-10">
+                  <div className="max-w-4xl mx-auto bg-gradient-to-t from-black/80 to-black/60 backdrop-blur-sm rounded-2xl p-6 md:p-8 border border-white/10 shadow-2xl">
+                    <p className="text-white text-lg md:text-2xl lg:text-3xl font-medium leading-relaxed text-center">
+                      "{testimonial.review_text}"
+                    </p>
+                    <div className="mt-4 flex items-center justify-center gap-3">
+                      <div className="h-8 w-8 md:h-10 md:w-10 rounded-full overflow-hidden border-2 border-white/30">
+                        <img
+                          src={testimonial.customer_photo}
+                          alt={testimonial.customer_name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-white font-semibold text-sm md:text-base">
+                          {testimonial.customer_name}
+                        </p>
+                        {testimonial.product_name && (
+                          <p className="text-white/70 text-xs md:text-sm">
+                            {testimonial.product_name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
               {/* Click areas for navigation */}
-              <div className="absolute inset-y-0 left-0 w-1/3" onClick={handlePrevious} />
-              <div className="absolute inset-y-0 right-0 w-1/3" onClick={handleNext} />
+              <div className="absolute inset-y-0 left-0 w-1/3 z-20" onClick={handlePrevious} />
+              <div className="absolute inset-y-0 right-0 w-1/3 z-20" onClick={handleNext} />
             </div>
           ))}
         </div>
