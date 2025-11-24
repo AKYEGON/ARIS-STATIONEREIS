@@ -210,61 +210,9 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-y-auto md:overflow-hidden">
-          {/* Left: Product Selection (Bottom on mobile, Left on desktop) */}
-          <div className="flex flex-col md:border-r border-t-4 border-t-primary/20 md:border-t-0 md:border-b-0 bg-muted/5 min-h-0">
-            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b bg-gradient-to-r from-muted/50 to-muted/30 sticky top-0 z-10 backdrop-blur-sm">
-              <Label className="text-xs md:text-sm font-semibold mb-1.5 md:mb-2 block">Select Products</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 md:pl-9 h-8 md:h-9 text-sm"
-                />
-              </div>
-            </div>
-
-            <ScrollArea className="flex-1 min-h-[35vh] md:h-[calc(85vh-200px)]">
-              <div className="p-2 md:p-3 space-y-1.5 md:space-y-2">
-                {filteredProducts.length === 0 ? (
-                  <div className="text-center py-8 md:py-12 text-muted-foreground">
-                    <Package className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-1.5 md:mb-2 opacity-30" />
-                    <p className="text-xs md:text-sm">No products found</p>
-                  </div>
-                ) : (
-                  filteredProducts.map(product => (
-                     <button
-                      key={product.id}
-                      className="w-full flex items-center gap-2 md:gap-3 p-2.5 md:p-3 border rounded-lg hover:bg-accent hover:border-primary/50 cursor-pointer transition-all text-left active:scale-[0.98] hover:shadow-sm"
-                      onClick={() => addProductToSale(product)}
-                    >
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="w-10 h-10 md:w-12 md:h-12 object-cover rounded border"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-xs md:text-sm truncate">{product.name}</p>
-                        <div className="flex items-center gap-1.5 md:gap-2 text-xs mt-0.5">
-                          <span className="font-semibold text-primary">KSh {product.price.toFixed(2)}</span>
-                          <span className="text-muted-foreground">•</span>
-                          <span className={product.stock && product.stock > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
-                            {product.stock || 0} in stock
-                          </span>
-                        </div>
-                      </div>
-                      <Plus className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
-                    </button>
-                  ))
-                )}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Right: Sale Details (Top on mobile, Right on desktop) */}
-          <div className="flex flex-col bg-background min-h-0">
+        <div className="flex flex-col md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-y-auto md:overflow-hidden">
+          {/* Cart Section (Top on mobile, Right on desktop) */}
+          <div className="flex flex-col bg-background border-b-4 border-b-primary/20 md:border-b-0 md:order-2">
             <div className="px-3 md:px-4 py-2.5 md:py-3 border-b-2 bg-gradient-to-r from-primary/15 to-primary/5 sticky top-0 z-10 backdrop-blur-sm">
               <Label className="text-xs md:text-sm font-semibold flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4" />
@@ -272,7 +220,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
               </Label>
             </div>
             
-            <ScrollArea className="flex-1 min-h-[25vh] md:h-[calc(85vh-420px)]">
+            <ScrollArea className="flex-1 max-h-[30vh] md:max-h-[calc(85vh-420px)]">
               <div className="p-2 md:p-3">
                 {selectedItems.length === 0 ? (
                   <div className="text-center py-8 md:py-16 text-muted-foreground">
@@ -406,6 +354,58 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
                 {isProcessing ? "Processing..." : "Complete Sale"}
               </Button>
             </div>
+          </div>
+
+          {/* Product Selection (Bottom on mobile, Left on desktop) */}
+          <div className="flex flex-col md:border-r bg-muted/5 md:order-1">
+            <div className="px-3 md:px-4 py-2.5 md:py-3 border-b bg-gradient-to-r from-muted/50 to-muted/30 sticky top-0 z-10 backdrop-blur-sm">
+              <Label className="text-xs md:text-sm font-semibold mb-1.5 md:mb-2 block">Select Products</Label>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 md:pl-9 h-8 md:h-9 text-sm"
+                />
+              </div>
+            </div>
+
+            <ScrollArea className="flex-1 max-h-[40vh] md:max-h-[calc(85vh-200px)]">
+              <div className="p-2 md:p-3 space-y-1.5 md:space-y-2">
+                {filteredProducts.length === 0 ? (
+                  <div className="text-center py-8 md:py-12 text-muted-foreground">
+                    <Package className="h-8 w-8 md:h-12 md:w-12 mx-auto mb-1.5 md:mb-2 opacity-30" />
+                    <p className="text-xs md:text-sm">No products found</p>
+                  </div>
+                ) : (
+                  filteredProducts.map(product => (
+                     <button
+                      key={product.id}
+                      className="w-full flex items-center gap-2 md:gap-3 p-2.5 md:p-3 border rounded-lg hover:bg-accent hover:border-primary/50 cursor-pointer transition-all text-left active:scale-[0.98] hover:shadow-sm"
+                      onClick={() => addProductToSale(product)}
+                    >
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-10 h-10 md:w-12 md:h-12 object-cover rounded border"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-xs md:text-sm truncate">{product.name}</p>
+                        <div className="flex items-center gap-1.5 md:gap-2 text-xs mt-0.5">
+                          <span className="font-semibold text-primary">KSh {product.price.toFixed(2)}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className={product.stock && product.stock > 0 ? "text-green-600 font-medium" : "text-red-600 font-medium"}>
+                            {product.stock || 0} in stock
+                          </span>
+                        </div>
+                      </div>
+                      <Plus className="h-4 w-4 md:h-5 md:w-5 text-primary flex-shrink-0" />
+                    </button>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
           </div>
         </div>
       </DialogContent>
