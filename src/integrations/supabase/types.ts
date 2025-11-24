@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      customer_testimonials: {
+        Row: {
+          created_at: string | null
+          customer_name: string
+          customer_photo: string
+          display_order: number | null
+          id: string
+          is_featured: boolean | null
+          is_published: boolean | null
+          product_name: string | null
+          rating: number
+          review_text: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_name: string
+          customer_photo: string
+          display_order?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          product_name?: string | null
+          rating: number
+          review_text: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_name?: string
+          customer_photo?: string
+          display_order?: number | null
+          id?: string
+          is_featured?: boolean | null
+          is_published?: boolean | null
+          product_name?: string | null
+          rating?: number
+          review_text?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           cost_price: number | null
