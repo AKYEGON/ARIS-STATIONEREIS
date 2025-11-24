@@ -210,9 +210,9 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-y-auto md:overflow-hidden">
-          {/* Left: Product Selection */}
-          <div className="flex flex-col md:border-r border-b md:border-b-0">
+        <div className="flex flex-col-reverse md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-y-auto md:overflow-hidden">
+          {/* Left: Product Selection (Bottom on mobile, Left on desktop) */}
+          <div className="flex flex-col md:border-r border-t md:border-t-0 md:border-b-0">
             <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-muted/30 sticky top-0 z-10">
               <Label className="text-xs md:text-sm font-semibold mb-1.5 md:mb-2 block">Select Products</Label>
               <div className="relative">
@@ -227,7 +227,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
             </div>
 
             <ScrollArea className="flex-1 md:h-[calc(85vh-200px)]">
-              <div className="min-h-[35vh] md:min-h-0">
+              <div className="min-h-[30vh] md:min-h-0">
               </div>
               <div className="p-2 md:p-3 space-y-1.5 md:space-y-2">
                 {filteredProducts.length === 0 ? (
@@ -265,8 +265,8 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
             </ScrollArea>
           </div>
 
-          {/* Right: Sale Details */}
-          <div className="flex flex-col">
+          {/* Right: Sale Details (Top on mobile, Right on desktop) */}
+          <div className="flex flex-col border-b md:border-b-0">
             <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-primary/10 sticky top-0 md:top-auto z-10">
               <Label className="text-xs md:text-sm font-semibold flex items-center gap-2">
                 <ShoppingCart className="h-4 w-4" />
@@ -275,7 +275,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
             </div>
             
             <ScrollArea className="flex-1 md:h-[calc(85vh-420px)]">
-              <div className="min-h-[40vh] md:min-h-0">
+              <div className="min-h-[25vh] md:min-h-0">
               </div>
               <div className="p-2 md:p-3">
                 {selectedItems.length === 0 ? (
