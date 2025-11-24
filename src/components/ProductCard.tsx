@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardFooter } from "./ui/card";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Images } from "lucide-react";
 import { Product } from "@/types/product";
+import ProductMediaViewer from "./ProductMediaViewer";
 
 interface ProductCardProps {
   product: Product;
@@ -11,23 +12,39 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [viewerOpen, setViewerOpen] = useState(false);
+
+  const hasMultipleMedia = product.media && product.media.length > 0;
+  const totalMediaCount = 1 + (product.media?.length || 0);
 
   return (
-    <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
-      <div className="aspect-square overflow-hidden bg-muted relative">
-        {!imageLoaded && (
-          <div className="absolute inset-0 bg-muted animate-pulse" />
-        )}
-        <img
-          src={product.image}
-          alt={product.name}
-          loading="lazy"
-          onLoad={() => setImageLoaded(true)}
-          className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-110 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-      </div>
+    <>
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
+        <div 
+          className="aspect-square overflow-hidden bg-muted relative cursor-pointer"
+          onClick={() => hasMultipleMedia && setViewerOpen(true)}
+        >
+          {!imageLoaded && (
+            <div className="absolute inset-0 bg-muted animate-pulse" />
+          )}
+          <img
+            src={product.image}
+            alt={product.name}
+            loading="lazy"
+            onLoad={() => setImageLoaded(true)}
+            className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-110 ${
+              imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+          
+          {/* Gallery indicator badge */}
+          {hasMultipleMedia && (
+            <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium backdrop-blur-sm">
+              <Images className="h-3 w-3" />
+              <span>{totalMediaCount}</span>
+            </div>
+          )}
+        </div>
       <CardContent className="p-2 sm:p-4 md:p-5 flex-1 flex flex-col">
         <h3 className="font-semibold text-xs sm:text-sm md:text-base mb-1 sm:mb-2 line-clamp-3 min-h-[2.5rem] sm:min-h-[3rem] leading-tight">
           {product.name}
@@ -61,6 +78,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         </Button>
       </CardFooter>
     </Card>
+
+      {/* Media Viewer Dialog */}
+      <ProductMediaViewer
+        product={product}
+        open={viewerOpen}
+        onClose={() => setViewerOpen(false)}
+      />
+    </>
   );
 };
 

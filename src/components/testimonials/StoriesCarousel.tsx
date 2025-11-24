@@ -203,12 +203,22 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
               </div>
 
-              {/* Content overlay */}
-              <div className="relative h-full flex flex-col justify-end p-6 pb-20">
-                <div className="max-w-2xl">
-                  <p className="text-white text-lg md:text-2xl leading-relaxed mb-4">
+              {/* Content overlay - Centered review text */}
+              <div className="absolute inset-0 flex items-center justify-center px-6 md:px-12">
+                <div className="max-w-3xl w-full bg-black/60 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/10">
+                  <p className="text-white text-xl md:text-3xl lg:text-4xl font-medium leading-relaxed text-center">
                     "{testimonial.review_text}"
                   </p>
+                  <div className="mt-4 text-center">
+                    <p className="text-white/80 text-sm md:text-base font-semibold">
+                      — {testimonial.customer_name}
+                    </p>
+                    {testimonial.product_name && (
+                      <p className="text-white/60 text-xs md:text-sm mt-1">
+                        {testimonial.product_name}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 

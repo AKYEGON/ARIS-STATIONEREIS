@@ -28,7 +28,10 @@ const Index = () => {
     try {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          media:product_media(*)
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -40,7 +43,11 @@ const Index = () => {
         price: Number(p.price),
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
         category: p.category,
-        image: p.image
+        image: p.image,
+        media: (p.media || []).map(m => ({
+          ...m,
+          media_type: m.media_type as 'image' | 'video'
+        }))
       }));
       
       setProducts(formattedProducts);
