@@ -70,39 +70,94 @@ const Testimonials = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-b from-background via-primary/5 to-background">
       <Header cartItemCount={getCartItemCount()} />
       
-      {/* Hero Section with Story Circles */}
-      <section className="bg-gradient-to-br from-primary/5 to-primary/10 py-12">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">Customer Stories</h1>
-          <p className="text-center text-muted-foreground mb-6">
-            Tap to watch what our customers say
-          </p>
+      {/* Hero Section with Animation */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 py-16 md:py-20">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+        <div className="container mx-auto px-4 relative">
+          <div className="text-center mb-8 animate-fade-in">
+            <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4 animate-scale-in">
+              <span className="text-2xl">⭐</span>
+              <span className="font-semibold">Real Stories from Real Customers</span>
+            </div>
+            <h1 className="text-4xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-primary via-primary to-accent bg-clip-text text-transparent">
+              Happy Customers
+            </h1>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-2">
+              See why thousands love shopping with ARIS STATIONARIES
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Tap any story to watch • Auto-plays on mobile 📱
+            </p>
+          </div>
+
+          {/* Social Proof Metrics */}
+          {testimonials.length > 0 && (
+            <div className="grid grid-cols-3 gap-4 max-w-3xl mx-auto mb-12 animate-fade-in">
+              <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 text-center border border-primary/20 hover-scale">
+                <div className="text-3xl font-bold text-primary mb-1">
+                  {testimonials.reduce((sum, t) => sum + t.views, 0)}+
+                </div>
+                <div className="text-sm text-muted-foreground">Story Views</div>
+              </div>
+              <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 text-center border border-primary/20 hover-scale">
+                <div className="text-3xl font-bold text-primary mb-1">
+                  {testimonials.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Happy Customers</div>
+              </div>
+              <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 text-center border border-primary/20 hover-scale">
+                <div className="text-3xl font-bold text-primary mb-1">5.0⭐</div>
+                <div className="text-sm text-muted-foreground">Avg Rating</div>
+              </div>
+            </div>
+          )}
           
           {testimonials.length > 0 ? (
             <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-semibold mb-2">🎬 Customer Stories</h3>
+                <p className="text-sm text-muted-foreground">Tap any circle to start watching</p>
+              </div>
               <StoryCircles 
                 testimonials={testimonials} 
                 onStoryClick={openStories}
               />
             </div>
           ) : (
-            <div className="text-center py-12 text-muted-foreground">
-              No stories available yet. Check back soon!
+            <div className="text-center py-12 text-muted-foreground bg-background/50 rounded-2xl backdrop-blur-sm">
+              <div className="text-6xl mb-4">📱</div>
+              <p className="text-lg font-semibold mb-2">No stories available yet</p>
+              <p>Check back soon for amazing customer experiences!</p>
             </div>
           )}
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="container mx-auto px-4 py-12 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold mb-4">Share Your Experience</h2>
-          <p className="text-muted-foreground mb-6">
-            Had a great experience with ARIS STATIONARIES? We'd love to hear from you!
-          </p>
+      {/* CTA Section with Better Design */}
+      <section className="container mx-auto px-4 py-16 md:py-20">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-accent/10 rounded-3xl p-8 md:p-12 text-center border border-primary/20 shadow-lg hover:shadow-xl transition-shadow">
+            <div className="text-5xl mb-4 animate-scale-in">💬</div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Share Your Experience</h2>
+            <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Had a great experience with ARIS STATIONARIES? We'd love to feature your story and help others discover quality stationery!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="bg-background/80 backdrop-blur-sm rounded-xl p-6 flex-1 max-w-xs hover-scale">
+                <div className="text-3xl mb-2">⭐⭐⭐⭐⭐</div>
+                <div className="font-semibold">5-Star Service</div>
+                <div className="text-sm text-muted-foreground mt-1">Quality products & fast delivery</div>
+              </div>
+              <div className="bg-background/80 backdrop-blur-sm rounded-xl p-6 flex-1 max-w-xs hover-scale">
+                <div className="text-3xl mb-2">🎁</div>
+                <div className="font-semibold">Free Gifts</div>
+                <div className="text-sm text-muted-foreground mt-1">Surprise gifts with every order</div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
