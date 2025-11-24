@@ -13,7 +13,37 @@ interface StoriesCarouselProps {
 
 const STORY_DURATION = 5000; // 5 seconds per image story
 
+// Helper function to expand testimonials with both photo and video into separate slides
+const expandTestimonials = (testimonials: CustomerTestimonial[]) => {
+  const expanded: Array<CustomerTestimonial & { slideType?: 'photo' | 'video' }> = [];
+  
+  testimonials.forEach((testimonial) => {
+    if (testimonial.video_url) {
+      // If testimonial has video, create photo slide first, then video slide
+      expanded.push({
+        ...testimonial,
+        slideType: 'photo',
+        video_url: undefined, // Remove video URL for photo slide
+      });
+      expanded.push({
+        ...testimonial,
+        slideType: 'video',
+      });
+    } else {
+      // Photo-only testimonial
+      expanded.push({
+        ...testimonial,
+        slideType: 'photo',
+      });
+    }
+  });
+  
+  return expanded;
+};
+
 const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCarouselProps) => {
+  const expandedTestimonials = expandTestimonials(testimonials);
+  
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     loop: false,
     startIndex: initialIndex,
@@ -28,8 +58,8 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
   const viewedStoriesRef = useRef<Set<string>>(new Set());
   const sessionIdRef = useRef<string>(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
-  const currentTestimonial = testimonials[currentIndex];
-  const isVideoStory = !!currentTestimonial?.video_url;
+  const currentTestimonial = expandedTestimonials[currentIndex];
+  const isVideoStory = currentTestimonial?.slideType === 'video';
 
   // Track view when story is displayed
   const trackView = useCallback(async (testimonial: CustomerTestimonial, completed: boolean) => {
@@ -73,7 +103,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
           }
           
           // Move to next story
-          if (currentIndex < testimonials.length - 1) {
+          if (currentIndex < expandedTestimonials.length - 1) {
             emblaApi?.scrollNext();
           } else {
             onClose();
@@ -85,7 +115,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     }, 100);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused, isVideoStory, testimonials.length, emblaApi, onClose, currentTestimonial, trackView]);
+  }, [currentIndex, isPaused, isVideoStory, expandedTestimonials.length, emblaApi, onClose, currentTestimonial, trackView]);
 
   // Reset progress and video ref when story changes
   useEffect(() => {
@@ -109,12 +139,12 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     }
     
     // Move to next story
-    if (currentIndex < testimonials.length - 1) {
+    if (currentIndex < expandedTestimonials.length - 1) {
       emblaApi?.scrollNext();
     } else {
       onClose();
     }
-  }, [currentTestimonial, currentIndex, testimonials.length, emblaApi, onClose, trackView]);
+  }, [currentTestimonial, currentIndex, expandedTestimonials.length, emblaApi, onClose, trackView]);
 
   // Handle pause/play for videos
   const togglePause = useCallback(() => {
@@ -149,12 +179,12 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
   }, [emblaApi, currentIndex]);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < testimonials.length - 1) {
+    if (currentIndex < expandedTestimonials.length - 1) {
       emblaApi?.scrollNext();
     } else {
       onClose();
     }
-  }, [emblaApi, currentIndex, testimonials.length, onClose]);
+  }, [emblaApi, currentIndex, expandedTestimonials.length, onClose]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "ArrowLeft") handlePrevious();
@@ -177,7 +207,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     <div className="fixed inset-0 z-50 bg-black">
       {/* Progress bars at top */}
       <div className="absolute top-0 left-0 right-0 z-10 flex gap-1 p-2">
-        {testimonials.map((_, idx) => (
+        {expandedTestimonials.map((_, idx) => (
           <div key={idx} className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden">
             <div
               className="h-full bg-white transition-all duration-100"
@@ -230,7 +260,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
       {/* Main carousel */}
       <div ref={emblaRef} className="h-full overflow-hidden">
         <div className="flex h-full">
-          {testimonials.map((testimonial, idx) => (
+          {expandedTestimonials.map((testimonial, idx) => (
             <div key={testimonial.id} className="flex-[0_0_100%] min-w-0 h-full relative bg-black">
               {/* Media display - Video or Image */}
               {testimonial.video_url ? (
@@ -326,7 +356,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
       </div>
       
       <div className="hidden md:flex absolute inset-y-0 right-4 items-center z-10">
-        {currentIndex < testimonials.length - 1 && (
+        {currentIndex < expandedTestimonials.length - 1 && (
           <Button
             variant="ghost"
             size="icon"
