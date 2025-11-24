@@ -104,6 +104,16 @@ All colors MUST be HSL.
   }
 }
 
+@layer utilities {
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 @media print {
   @page {
     size: A4;
