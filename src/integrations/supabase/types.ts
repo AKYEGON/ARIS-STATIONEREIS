@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       customer_testimonials: {
         Row: {
+          completed_views: number | null
           created_at: string | null
           customer_name: string
           customer_photo: string
@@ -23,12 +24,15 @@ export type Database = {
           id: string
           is_featured: boolean | null
           is_published: boolean | null
+          last_viewed_at: string | null
           product_name: string | null
           rating: number
           review_text: string
           video_url: string | null
+          views: number | null
         }
         Insert: {
+          completed_views?: number | null
           created_at?: string | null
           customer_name: string
           customer_photo: string
@@ -36,12 +40,15 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
+          last_viewed_at?: string | null
           product_name?: string | null
           rating: number
           review_text: string
           video_url?: string | null
+          views?: number | null
         }
         Update: {
+          completed_views?: number | null
           created_at?: string | null
           customer_name?: string
           customer_photo?: string
@@ -49,10 +56,12 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
+          last_viewed_at?: string | null
           product_name?: string | null
           rating?: number
           review_text?: string
           video_url?: string | null
+          views?: number | null
         }
         Relationships: []
       }
@@ -269,6 +278,41 @@ export type Database = {
           },
         ]
       }
+      story_views: {
+        Row: {
+          completed: boolean | null
+          id: string
+          testimonial_id: string
+          user_session_id: string | null
+          view_duration: number | null
+          viewed_at: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          id?: string
+          testimonial_id: string
+          user_session_id?: string | null
+          view_duration?: number | null
+          viewed_at?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          id?: string
+          testimonial_id?: string
+          user_session_id?: string | null
+          view_duration?: number | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "story_views_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "customer_testimonials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -314,6 +358,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_testimonial_view: {
+        Args: { is_completed?: boolean; testimonial_id: string }
+        Returns: undefined
       }
     }
     Enums: {

@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { X, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import useEmblaCarousel from "embla-carousel-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface StoriesCarouselProps {
   testimonials: CustomerTestimonial[];
@@ -21,8 +22,40 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const viewStartTimeRef = useRef<number>(Date.now());
+  const viewedStoriesRef = useRef<Set<string>>(new Set());
+  const sessionIdRef = useRef<string>(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
   const currentTestimonial = testimonials[currentIndex];
+
+  // Track view when story is displayed
+  const trackView = useCallback(async (testimonial: CustomerTestimonial, completed: boolean) => {
+    const viewDuration = Date.now() - viewStartTimeRef.current;
+    
+    try {
+      await supabase.functions.invoke('track-story-view', {
+        body: {
+          testimonialId: testimonial.id,
+          completed,
+          viewDuration,
+          sessionId: sessionIdRef.current
+        }
+      });
+      
+      console.log('View tracked:', testimonial.customer_name, 'Completed:', completed);
+    } catch (error) {
+      console.error('Error tracking view:', error);
+    }
+  }, []);
+
+  // Track view when entering a new story
+  useEffect(() => {
+    if (currentTestimonial && !viewedStoriesRef.current.has(currentTestimonial.id)) {
+      viewedStoriesRef.current.add(currentTestimonial.id);
+      viewStartTimeRef.current = Date.now();
+      trackView(currentTestimonial, false);
+    }
+  }, [currentTestimonial, trackView]);
 
   // Auto-advance functionality
   useEffect(() => {
@@ -31,6 +64,11 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 100) {
+          // Track completed view before moving to next
+          if (currentTestimonial) {
+            trackView(currentTestimonial, true);
+          }
+          
           // Move to next story
           if (currentIndex < testimonials.length - 1) {
             emblaApi?.scrollNext();
@@ -44,7 +82,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     }, 100);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused, testimonials.length, emblaApi, onClose]);
+  }, [currentIndex, isPaused, testimonials.length, emblaApi, onClose, currentTestimonial, trackView]);
 
   // Reset progress when story changes
   useEffect(() => {
