@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import FeaturedTestimonial from "@/components/testimonials/FeaturedTestimonial";
 import TestimonialCard from "@/components/testimonials/TestimonialCard";
 import StoriesCarousel from "@/components/testimonials/StoriesCarousel";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
@@ -47,10 +46,6 @@ const Testimonials = () => {
 
   const featuredTestimonials = testimonials.filter(t => t.is_featured);
   const regularTestimonials = testimonials.filter(t => !t.is_featured);
-
-  const filterByRating = (rating: number) => {
-    return regularTestimonials.filter(t => t.rating === rating);
-  };
 
   const openStories = (index: number = 0) => {
     setStoriesStartIndex(index);
@@ -105,57 +100,21 @@ const Testimonials = () => {
         </section>
       )}
 
-      {/* All Testimonials with Filters */}
+      {/* All Testimonials */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold mb-8 text-center">Customer Reviews</h2>
         
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-6 mb-8">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="5">⭐ 5</TabsTrigger>
-            <TabsTrigger value="4">⭐ 4</TabsTrigger>
-            <TabsTrigger value="3">⭐ 3</TabsTrigger>
-            <TabsTrigger value="2">⭐ 2</TabsTrigger>
-            <TabsTrigger value="1">⭐ 1</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="all">
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {regularTestimonials.map((testimonial, idx) => (
-                <TestimonialCard 
-                  key={testimonial.id} 
-                  testimonial={testimonial}
-                  onOpenStory={() => openStories(idx)}
-                />
-              ))}
-            </div>
-          </TabsContent>
-
-          {[5, 4, 3, 2, 1].map((rating) => (
-            <TabsContent key={rating} value={rating.toString()}>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filterByRating(rating).length > 0 ? (
-                  filterByRating(rating).map((testimonial, idx) => {
-                    const absoluteIndex = regularTestimonials.findIndex(t => t.id === testimonial.id);
-                    return (
-                      <TestimonialCard 
-                        key={testimonial.id} 
-                        testimonial={testimonial}
-                        onOpenStory={() => openStories(absoluteIndex)}
-                      />
-                    );
-                  })
-                ) : (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    No {rating}-star reviews yet
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-
-        {testimonials.length === 0 && (
+        {regularTestimonials.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {regularTestimonials.map((testimonial, idx) => (
+              <TestimonialCard 
+                key={testimonial.id} 
+                testimonial={testimonial}
+                onOpenStory={() => openStories(idx)}
+              />
+            ))}
+          </div>
+        ) : (
           <div className="text-center py-12 text-muted-foreground">
             No testimonials available yet. Check back soon!
           </div>

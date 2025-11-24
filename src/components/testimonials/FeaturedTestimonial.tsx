@@ -1,6 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import StarRating from "./StarRating";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Play } from "lucide-react";
 import { useState } from "react";
@@ -40,7 +39,6 @@ const FeaturedTestimonial = ({ testimonial }: FeaturedTestimonialProps) => {
                 Purchased: <span className="font-semibold">{testimonial.product_name}</span>
               </p>
             )}
-            <StarRating rating={testimonial.rating} size={24} />
             <p className="text-lg mt-6 leading-relaxed">
               "{testimonial.review_text}"
             </p>
