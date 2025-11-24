@@ -3,13 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { CustomerTestimonial } from "@/types/testimonial";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import FeaturedTestimonial from "@/components/testimonials/FeaturedTestimonial";
-import TestimonialCard from "@/components/testimonials/TestimonialCard";
 import StoriesCarousel from "@/components/testimonials/StoriesCarousel";
-import { Button } from "@/components/ui/button";
+import StoryCircles from "@/components/testimonials/StoryCircles";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
-import { Play } from "lucide-react";
 
 const Testimonials = () => {
   const { getCartItemCount } = useCart();
@@ -44,13 +41,21 @@ const Testimonials = () => {
     }
   };
 
-  const featuredTestimonials = testimonials.filter(t => t.is_featured);
-  const regularTestimonials = testimonials.filter(t => !t.is_featured);
-
   const openStories = (index: number = 0) => {
     setStoriesStartIndex(index);
     setShowStories(true);
   };
+
+  // Auto-open stories if there are testimonials and user hasn't seen them yet
+  useEffect(() => {
+    if (testimonials.length > 0 && !showStories) {
+      const hasSeenStories = sessionStorage.getItem('hasSeenStories');
+      if (!hasSeenStories) {
+        setShowStories(true);
+        sessionStorage.setItem('hasSeenStories', 'true');
+      }
+    }
+  }, [testimonials.length]);
 
   if (loading) {
     return (
@@ -68,57 +73,37 @@ const Testimonials = () => {
     <div className="min-h-screen">
       <Header cartItemCount={getCartItemCount()} />
       
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/5 to-primary/10 py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Happy Customers</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-            See why customers love shopping with ARIS STATIONARIES
+      {/* Hero Section with Story Circles */}
+      <section className="bg-gradient-to-br from-primary/5 to-primary/10 py-12">
+        <div className="container mx-auto px-4">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 text-center">Customer Stories</h1>
+          <p className="text-center text-muted-foreground mb-6">
+            Tap to watch what our customers say
           </p>
-          {testimonials.length > 0 && (
-            <Button 
-              onClick={() => openStories(0)}
-              size="lg"
-              className="gap-2 animate-scale-in"
-            >
-              <Play className="h-5 w-5" />
-              Watch Customer Stories
-            </Button>
+          
+          {testimonials.length > 0 ? (
+            <div className="max-w-4xl mx-auto">
+              <StoryCircles 
+                testimonials={testimonials} 
+                onStoryClick={openStories}
+              />
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              No stories available yet. Check back soon!
+            </div>
           )}
         </div>
       </section>
 
-      {/* Featured Testimonials */}
-      {featuredTestimonials.length > 0 && (
-        <section className="container mx-auto px-4 py-16">
-          <h2 className="text-3xl font-bold mb-8 text-center">Featured Stories</h2>
-          <div className="grid gap-8 max-w-5xl mx-auto">
-            {featuredTestimonials.map((testimonial) => (
-              <FeaturedTestimonial key={testimonial.id} testimonial={testimonial} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* All Testimonials */}
-      <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold mb-8 text-center">Customer Reviews</h2>
-        
-        {regularTestimonials.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {regularTestimonials.map((testimonial, idx) => (
-              <TestimonialCard 
-                key={testimonial.id} 
-                testimonial={testimonial}
-                onOpenStory={() => openStories(idx)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 text-muted-foreground">
-            No testimonials available yet. Check back soon!
-          </div>
-        )}
+      {/* CTA Section */}
+      <section className="container mx-auto px-4 py-12 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Share Your Experience</h2>
+          <p className="text-muted-foreground mb-6">
+            Had a great experience with ARIS STATIONARIES? We'd love to hear from you!
+          </p>
+        </div>
       </section>
 
       <Footer />
