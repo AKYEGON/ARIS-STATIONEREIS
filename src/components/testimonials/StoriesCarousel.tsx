@@ -11,7 +11,7 @@ interface StoriesCarouselProps {
   onClose: () => void;
 }
 
-const STORY_DURATION = 5000; // 5 seconds per story
+const STORY_DURATION = 5000; // 5 seconds per image story
 
 const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCarouselProps) => {
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
@@ -22,11 +22,14 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [progress, setProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoDuration, setVideoDuration] = useState(0);
   const viewStartTimeRef = useRef<number>(Date.now());
   const viewedStoriesRef = useRef<Set<string>>(new Set());
   const sessionIdRef = useRef<string>(`session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`);
 
   const currentTestimonial = testimonials[currentIndex];
+  const isVideoStory = !!currentTestimonial?.video_url;
 
   // Track view when story is displayed
   const trackView = useCallback(async (testimonial: CustomerTestimonial, completed: boolean) => {
@@ -57,9 +60,9 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     }
   }, [currentTestimonial, trackView]);
 
-  // Auto-advance functionality
+  // Auto-advance functionality for IMAGE stories only
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || isVideoStory) return;
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -82,12 +85,48 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     }, 100);
 
     return () => clearInterval(interval);
-  }, [currentIndex, isPaused, testimonials.length, emblaApi, onClose, currentTestimonial, trackView]);
+  }, [currentIndex, isPaused, isVideoStory, testimonials.length, emblaApi, onClose, currentTestimonial, trackView]);
 
-  // Reset progress when story changes
+  // Reset progress and video ref when story changes
   useEffect(() => {
     setProgress(0);
+    setVideoDuration(0);
+    videoRef.current = null;
   }, [currentIndex]);
+
+  // Handle video time updates for progress sync
+  const handleVideoTimeUpdate = useCallback((video: HTMLVideoElement) => {
+    if (video.duration && !isPaused) {
+      const currentProgress = (video.currentTime / video.duration) * 100;
+      setProgress(currentProgress);
+    }
+  }, [isPaused]);
+
+  // Handle video end
+  const handleVideoEnd = useCallback(() => {
+    if (currentTestimonial) {
+      trackView(currentTestimonial, true);
+    }
+    
+    // Move to next story
+    if (currentIndex < testimonials.length - 1) {
+      emblaApi?.scrollNext();
+    } else {
+      onClose();
+    }
+  }, [currentTestimonial, currentIndex, testimonials.length, emblaApi, onClose, trackView]);
+
+  // Handle pause/play for videos
+  const togglePause = useCallback(() => {
+    if (isVideoStory && videoRef.current) {
+      if (isPaused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+    setIsPaused(!isPaused);
+  }, [isPaused, isVideoStory]);
 
   // Update current index when carousel changes
   useEffect(() => {
@@ -123,9 +162,9 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
     if (e.key === "Escape") onClose();
     if (e.key === " ") {
       e.preventDefault();
-      setIsPaused((prev) => !prev);
+      togglePause();
     }
-  }, [handlePrevious, handleNext, onClose]);
+  }, [handlePrevious, handleNext, onClose, togglePause]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -172,7 +211,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsPaused(!isPaused)}
+            onClick={togglePause}
             className="text-white hover:bg-white/20"
           >
             {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
@@ -199,14 +238,20 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                 <div className="absolute inset-0 flex items-center justify-center bg-black">
                   {idx === currentIndex ? (
                     <video
+                      ref={videoRef}
                       src={testimonial.video_url}
                       className="w-full h-full object-contain"
                       controls
                       autoPlay
                       playsInline
-                      onPlay={() => setIsPaused(true)}
-                      onPause={() => setIsPaused(false)}
-                      onEnded={() => setIsPaused(false)}
+                      onLoadedMetadata={(e) => {
+                        const video = e.currentTarget;
+                        setVideoDuration(video.duration);
+                      }}
+                      onTimeUpdate={(e) => handleVideoTimeUpdate(e.currentTarget)}
+                      onEnded={handleVideoEnd}
+                      onPlay={() => setIsPaused(false)}
+                      onPause={() => setIsPaused(true)}
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
