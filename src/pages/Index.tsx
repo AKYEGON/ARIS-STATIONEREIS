@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import heroBackground from "@/assets/hero-background.jpg";
@@ -129,9 +129,9 @@ const Index = () => {
           
           <div className="flex justify-center md:hidden">
             <Button variant="outline" size="sm" asChild>
-              <Link to="/brochure">
-                <FileText className="h-4 w-4 mr-2" />
-                View Product Brochure
+              <Link to="/testimonials">
+                <Users className="h-4 w-4 mr-2" />
+                Happy Customers
               </Link>
             </Button>
           </div>
