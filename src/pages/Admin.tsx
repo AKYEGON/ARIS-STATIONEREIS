@@ -13,8 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
-import { Product } from "@/types/product";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store } from "lucide-react";
+import { Product, ProductMedia } from "@/types/product";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -82,6 +82,14 @@ const Admin = () => {
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imageInputMode, setImageInputMode] = useState<"file" | "url">("file");
   const [imageUrl, setImageUrl] = useState("");
+  
+  // Additional media state
+  const [additionalImages, setAdditionalImages] = useState<File[]>([]);
+  const [additionalImagePreviews, setAdditionalImagePreviews] = useState<string[]>([]);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string>("");
+  const [existingMedia, setExistingMedia] = useState<ProductMedia[]>([]);
+  const [mediaToDelete, setMediaToDelete] = useState<string[]>([]);
 
   useEffect(() => {
     checkAdminAccess();
@@ -100,7 +108,17 @@ const Admin = () => {
     try {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select(`
+          *,
+          product_media (
+            id,
+            product_id,
+            media_url,
+            media_type,
+            display_order,
+            created_at
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -114,7 +132,11 @@ const Admin = () => {
         costPrice: p.cost_price ? Number(p.cost_price) : 0,
         stock: p.stock || 0,
         category: p.category,
-        image: p.image
+        image: p.image,
+        media: (p.product_media || []).map((m: any) => ({
+          ...m,
+          media_type: m.media_type as 'image' | 'video'
+        }))
       }));
       
       setProductList(formattedProducts);
@@ -208,6 +230,12 @@ const Admin = () => {
     setSelectedImageFile(null);
     setImageUrl("");
     setImageInputMode("file");
+    setAdditionalImages([]);
+    setAdditionalImagePreviews([]);
+    setVideoFile(null);
+    setVideoPreview("");
+    setExistingMedia([]);
+    setMediaToDelete([]);
   };
 
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -275,6 +303,33 @@ const Admin = () => {
         throw error;
       }
 
+      if (data && data[0]) {
+        const productId = data[0].id;
+        
+        // Upload additional images
+        let displayOrder = 0;
+        for (const imgFile of additionalImages) {
+          const imgUrl = await handleImageUpload(imgFile);
+          await supabase.from("product_media").insert({
+            product_id: productId,
+            media_url: imgUrl,
+            media_type: 'image',
+            display_order: displayOrder++
+          });
+        }
+        
+        // Upload video if exists
+        if (videoFile) {
+          const videoUrl = await handleImageUpload(videoFile);
+          await supabase.from("product_media").insert({
+            product_id: productId,
+            media_url: videoUrl,
+            media_type: 'video',
+            display_order: displayOrder
+          });
+        }
+      }
+
       console.log("Product inserted successfully, fetching products...");
       await fetchProducts();
       toast.success("Product added successfully");
@@ -322,6 +377,37 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Delete marked media
+      if (mediaToDelete.length > 0) {
+        await supabase
+          .from("product_media")
+          .delete()
+          .in("id", mediaToDelete);
+      }
+
+      // Upload new additional images
+      let displayOrder = existingMedia.filter(m => !mediaToDelete.includes(m.id)).length;
+      for (const imgFile of additionalImages) {
+        const imgUrl = await handleImageUpload(imgFile);
+        await supabase.from("product_media").insert({
+          product_id: editingProduct.id,
+          media_url: imgUrl,
+          media_type: 'image',
+          display_order: displayOrder++
+        });
+      }
+      
+      // Upload video if exists
+      if (videoFile) {
+        const videoUrl = await handleImageUpload(videoFile);
+        await supabase.from("product_media").insert({
+          product_id: editingProduct.id,
+          media_url: videoUrl,
+          media_type: 'video',
+          display_order: displayOrder
+        });
+      }
+
       await fetchProducts();
       toast.success("Product updated successfully");
       setIsEditDialogOpen(false);
@@ -367,6 +453,12 @@ const Admin = () => {
     setSelectedImageFile(null);
     setImageUrl(product.image);
     setImageInputMode("url");
+    setExistingMedia(product.media || []);
+    setAdditionalImages([]);
+    setAdditionalImagePreviews([]);
+    setVideoFile(null);
+    setVideoPreview("");
+    setMediaToDelete([]);
     setIsEditDialogOpen(true);
   };
 
@@ -960,6 +1052,107 @@ const Admin = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Additional Images Section */}
+                    <div>
+                      <Label className="flex items-center gap-2">
+                        <ImagePlus className="h-4 w-4" />
+                        Additional Images (Max 3)
+                      </Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []).slice(0, 3);
+                          setAdditionalImages(files);
+                          
+                          // Create previews
+                          const previews: string[] = [];
+                          files.forEach(file => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              previews.push(reader.result as string);
+                              if (previews.length === files.length) {
+                                setAdditionalImagePreviews(previews);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          });
+                        }}
+                        className="cursor-pointer"
+                      />
+                      {additionalImagePreviews.length > 0 && (
+                        <div className="flex gap-2 mt-2 flex-wrap">
+                          {additionalImagePreviews.map((preview, idx) => (
+                            <div key={idx} className="relative">
+                              <img 
+                                src={preview} 
+                                alt={`Additional ${idx + 1}`}
+                                className="w-20 h-20 object-cover rounded border"
+                              />
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                                onClick={() => {
+                                  setAdditionalImages(additionalImages.filter((_, i) => i !== idx));
+                                  setAdditionalImagePreviews(additionalImagePreviews.filter((_, i) => i !== idx));
+                                }}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Video Upload Section */}
+                    <div>
+                      <Label className="flex items-center gap-2">
+                        <Video className="h-4 w-4" />
+                        Product Video (Optional)
+                      </Label>
+                      <Input
+                        type="file"
+                        accept="video/mp4,video/webm"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setVideoFile(file);
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              setVideoPreview(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                        className="cursor-pointer"
+                      />
+                      {videoPreview && (
+                        <div className="relative mt-2">
+                          <video 
+                            src={videoPreview} 
+                            className="w-32 h-32 object-cover rounded border"
+                            controls
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                            onClick={() => {
+                              setVideoFile(null);
+                              setVideoPreview("");
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                     <Button 
                       onClick={handleAddProduct} 
                       className="w-full transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90"
@@ -1296,17 +1489,154 @@ const Admin = () => {
                       }}
                     />
                   </TabsContent>
-                </Tabs>
-                {formData.image && formData.image !== "/placeholder.svg" && (
-                  <div className="mt-2">
-                    <img 
-                      src={formData.image} 
-                      alt="Preview" 
-                      className="w-24 h-24 object-cover rounded border"
-                    />
+                  </Tabs>
+                  {formData.image && formData.image !== "/placeholder.svg" && (
+                    <div className="mt-2">
+                      <img 
+                        src={formData.image} 
+                        alt="Preview" 
+                        className="w-24 h-24 object-cover rounded border"
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Existing Media Section */}
+                {existingMedia.length > 0 && (
+                  <div>
+                    <Label>Existing Additional Media</Label>
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      {existingMedia
+                        .filter(m => !mediaToDelete.includes(m.id))
+                        .map((media) => (
+                        <div key={media.id} className="relative">
+                          {media.media_type === 'image' ? (
+                            <img 
+                              src={media.media_url} 
+                              alt="Existing media"
+                              className="w-20 h-20 object-cover rounded border"
+                            />
+                          ) : (
+                            <video 
+                              src={media.media_url} 
+                              className="w-20 h-20 object-cover rounded border"
+                            />
+                          )}
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                            onClick={() => setMediaToDelete([...mediaToDelete, media.id])}
+                          >
+                            <Trash className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
-              </div>
+                
+                {/* Additional Images Section */}
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <ImagePlus className="h-4 w-4" />
+                    Add More Images (Max 3 total)
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []).slice(0, 3);
+                      setAdditionalImages(files);
+                      
+                      // Create previews
+                      const previews: string[] = [];
+                      files.forEach(file => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          previews.push(reader.result as string);
+                          if (previews.length === files.length) {
+                            setAdditionalImagePreviews(previews);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      });
+                    }}
+                    className="cursor-pointer"
+                  />
+                  {additionalImagePreviews.length > 0 && (
+                    <div className="flex gap-2 mt-2 flex-wrap">
+                      {additionalImagePreviews.map((preview, idx) => (
+                        <div key={idx} className="relative">
+                          <img 
+                            src={preview} 
+                            alt={`New ${idx + 1}`}
+                            className="w-20 h-20 object-cover rounded border"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                            onClick={() => {
+                              setAdditionalImages(additionalImages.filter((_, i) => i !== idx));
+                              setAdditionalImagePreviews(additionalImagePreviews.filter((_, i) => i !== idx));
+                            }}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Video Upload Section */}
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Video className="h-4 w-4" />
+                    Add Product Video (Optional)
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="video/mp4,video/webm"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setVideoFile(file);
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setVideoPreview(reader.result as string);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="cursor-pointer"
+                  />
+                  {videoPreview && (
+                    <div className="relative mt-2">
+                      <video 
+                        src={videoPreview} 
+                        className="w-32 h-32 object-cover rounded border"
+                        controls
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                        onClick={() => {
+                          setVideoFile(null);
+                          setVideoPreview("");
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
               <Button 
                 onClick={handleEditProduct} 
                 className="w-full transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90"
