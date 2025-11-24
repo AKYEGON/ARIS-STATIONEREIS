@@ -8,9 +8,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface TestimonialCardProps {
   testimonial: CustomerTestimonial;
+  onOpenStory?: () => void;
 }
 
-const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
+const TestimonialCard = ({ testimonial, onOpenStory }: TestimonialCardProps) => {
   const [showVideo, setShowVideo] = useState(false);
   const [showFullReview, setShowFullReview] = useState(false);
   
@@ -20,7 +21,7 @@ const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={onOpenStory}>
         <div className="relative">
           <img 
             src={testimonial.customer_photo} 
@@ -29,7 +30,10 @@ const TestimonialCard = ({ testimonial }: TestimonialCardProps) => {
           />
           {testimonial.video_url && (
             <button
-              onClick={() => setShowVideo(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowVideo(true);
+              }}
               className="absolute inset-0 bg-black/40 flex items-center justify-center hover:bg-black/50 transition-colors"
             >
               <Play className="w-16 h-16 text-white" fill="white" />

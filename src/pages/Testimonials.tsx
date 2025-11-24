@@ -5,14 +5,19 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FeaturedTestimonial from "@/components/testimonials/FeaturedTestimonial";
 import TestimonialCard from "@/components/testimonials/TestimonialCard";
+import StoriesCarousel from "@/components/testimonials/StoriesCarousel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
+import { Play } from "lucide-react";
 
 const Testimonials = () => {
   const { getCartItemCount } = useCart();
   const [testimonials, setTestimonials] = useState<CustomerTestimonial[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showStories, setShowStories] = useState(false);
+  const [storiesStartIndex, setStoriesStartIndex] = useState(0);
 
   useEffect(() => {
     fetchTestimonials();
@@ -47,6 +52,11 @@ const Testimonials = () => {
     return regularTestimonials.filter(t => t.rating === rating);
   };
 
+  const openStories = (index: number = 0) => {
+    setStoriesStartIndex(index);
+    setShowStories(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -67,9 +77,19 @@ const Testimonials = () => {
       <section className="bg-gradient-to-br from-primary/5 to-primary/10 py-20">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Happy Customers</h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
             See why customers love shopping with ARIS STATIONARIES
           </p>
+          {testimonials.length > 0 && (
+            <Button 
+              onClick={() => openStories(0)}
+              size="lg"
+              className="gap-2 animate-scale-in"
+            >
+              <Play className="h-5 w-5" />
+              Watch Customer Stories
+            </Button>
+          )}
         </div>
       </section>
 
@@ -101,8 +121,12 @@ const Testimonials = () => {
 
           <TabsContent value="all">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {regularTestimonials.map((testimonial) => (
-                <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+              {regularTestimonials.map((testimonial, idx) => (
+                <TestimonialCard 
+                  key={testimonial.id} 
+                  testimonial={testimonial}
+                  onOpenStory={() => openStories(idx)}
+                />
               ))}
             </div>
           </TabsContent>
@@ -111,9 +135,16 @@ const Testimonials = () => {
             <TabsContent key={rating} value={rating.toString()}>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filterByRating(rating).length > 0 ? (
-                  filterByRating(rating).map((testimonial) => (
-                    <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-                  ))
+                  filterByRating(rating).map((testimonial, idx) => {
+                    const absoluteIndex = regularTestimonials.findIndex(t => t.id === testimonial.id);
+                    return (
+                      <TestimonialCard 
+                        key={testimonial.id} 
+                        testimonial={testimonial}
+                        onOpenStory={() => openStories(absoluteIndex)}
+                      />
+                    );
+                  })
                 ) : (
                   <div className="col-span-full text-center py-12 text-muted-foreground">
                     No {rating}-star reviews yet
@@ -132,6 +163,15 @@ const Testimonials = () => {
       </section>
 
       <Footer />
+
+      {/* Stories Carousel */}
+      {showStories && (
+        <StoriesCarousel
+          testimonials={testimonials}
+          initialIndex={storiesStartIndex}
+          onClose={() => setShowStories(false)}
+        />
+      )}
     </div>
   );
 };
