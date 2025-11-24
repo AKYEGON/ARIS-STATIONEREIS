@@ -272,8 +272,8 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                 </div>
               )}
 
-              {/* Review text overlay - Only show for non-video or when video is paused */}
-              {(!testimonial.video_url || isPaused) && (
+              {/* Review text overlay - Only show for image stories (not videos) */}
+              {!testimonial.video_url && (
                 <div className="absolute bottom-8 md:bottom-12 left-0 right-0 px-4 md:px-8 z-10 pointer-events-none">
                   <div className="max-w-4xl mx-auto bg-gradient-to-t from-black/80 to-black/60 backdrop-blur-sm rounded-2xl p-4 md:p-6 border border-white/10 shadow-2xl">
                     <p className="text-white text-base md:text-xl lg:text-2xl font-medium leading-relaxed text-center">
