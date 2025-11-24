@@ -194,11 +194,11 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
           {testimonials.map((testimonial, idx) => (
             <div key={testimonial.id} className="flex-[0_0_100%] min-w-0 h-full relative">
               {/* Background image with overlay */}
-              <div className="absolute inset-0">
+              <div className="absolute inset-0 bg-black flex items-center justify-center">
                 <img
                   src={testimonial.customer_photo}
                   alt={testimonial.customer_name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
               </div>
