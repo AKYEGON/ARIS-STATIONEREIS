@@ -66,6 +66,47 @@ Deno.serve(async (req) => {
       throw incrementError;
     }
 
+    // Calculate enhanced analytics metrics
+    const { data: testimonialData } = await supabaseClient
+      .from('customer_testimonials')
+      .select('views, completed_views')
+      .eq('id', testimonialId)
+      .single();
+
+    if (testimonialData) {
+      const completionRate = testimonialData.views > 0 
+        ? (testimonialData.completed_views / testimonialData.views) * 100 
+        : 0;
+
+      // Get average view duration from all views
+      const { data: viewsData } = await supabaseClient
+        .from('story_views')
+        .select('view_duration')
+        .eq('testimonial_id', testimonialId)
+        .not('view_duration', 'is', null);
+
+      const avgDuration = viewsData && viewsData.length > 0
+        ? Math.round(viewsData.reduce((sum, v) => sum + (v.view_duration || 0), 0) / viewsData.length)
+        : 0;
+
+      // Calculate engagement score (0-100)
+      // Formula: (completion_rate * 0.6) + (views_score * 0.4)
+      const viewsScore = Math.min((testimonialData.views / 50) * 100, 100); // Normalize to 100 max
+      const engagementScore = (completionRate * 0.6) + (viewsScore * 0.4);
+
+      // Update testimonial with calculated metrics
+      await supabaseClient
+        .from('customer_testimonials')
+        .update({
+          completion_rate: Math.round(completionRate * 100) / 100,
+          average_view_duration: avgDuration,
+          engagement_score: Math.round(engagementScore * 100) / 100
+        })
+        .eq('id', testimonialId);
+
+      console.log('Analytics updated:', { completionRate, avgDuration, engagementScore });
+    }
+
     console.log('View tracked successfully');
 
     return new Response(
