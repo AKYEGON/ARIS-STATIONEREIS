@@ -1074,7 +1074,7 @@ const Admin = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -1094,10 +1094,6 @@ const Admin = () => {
             <TabsTrigger value="testimonials" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Testimonials
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
             </TabsTrigger>
           </TabsList>
 
@@ -1829,17 +1825,20 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h3 className="text-lg font-semibold">Story Analytics</h3>
+            {/* Story Analytics Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" />
+                  Story Analytics
+                </CardTitle>
                 <p className="text-sm text-muted-foreground">Track views and engagement for customer testimonials</p>
-              </div>
-            </div>
-            <TestimonialAnalytics />
+              </CardHeader>
+              <CardContent>
+                <TestimonialAnalytics />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
