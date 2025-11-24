@@ -12,6 +12,9 @@ interface TestimonialStats {
   product_name?: string;
   views: number;
   completed_views: number;
+  completion_rate?: number;
+  average_view_duration?: number;
+  engagement_score?: number;
   last_viewed_at?: string;
   is_published: boolean;
   is_featured: boolean;
@@ -38,8 +41,8 @@ const TestimonialAnalytics = () => {
     try {
       const { data, error } = await supabase
         .from("customer_testimonials")
-        .select("id, customer_name, customer_photo, product_name, views, completed_views, last_viewed_at, is_published, is_featured")
-        .order("views", { ascending: false });
+        .select("id, customer_name, customer_photo, product_name, views, completed_views, completion_rate, average_view_duration, engagement_score, last_viewed_at, is_published, is_featured")
+        .order("engagement_score", { ascending: false, nullsFirst: false });
 
       if (error) throw error;
       setStats(data || []);
@@ -79,6 +82,9 @@ const TestimonialAnalytics = () => {
   const totalViews = stats.reduce((sum, stat) => sum + stat.views, 0);
   const totalCompletedViews = stats.reduce((sum, stat) => sum + stat.completed_views, 0);
   const avgCompletionRate = totalViews > 0 ? ((totalCompletedViews / totalViews) * 100).toFixed(1) : 0;
+  const avgWatchTime = stats.length > 0 
+    ? (stats.reduce((sum, stat) => sum + (stat.average_view_duration || 0), 0) / stats.length).toFixed(1)
+    : 0;
 
   if (loading) {
     return <div className="text-center py-8">Loading analytics...</div>;
@@ -87,7 +93,7 @@ const TestimonialAnalytics = () => {
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Views</CardTitle>
@@ -126,6 +132,19 @@ const TestimonialAnalytics = () => {
             </p>
           </CardContent>
         </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Watch Time</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{avgWatchTime}s</div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Average view duration
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Detailed Stats Table */}
@@ -138,18 +157,21 @@ const TestimonialAnalytics = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Rank</TableHead>
                   <TableHead>Customer</TableHead>
                   <TableHead>Product</TableHead>
                   <TableHead className="text-center">Views</TableHead>
                   <TableHead className="text-center">Completed</TableHead>
                   <TableHead className="text-center">Completion %</TableHead>
+                  <TableHead className="text-center">Avg Duration</TableHead>
+                  <TableHead className="text-center">Engagement</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Last Viewed</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {stats.map((stat) => {
-                  const completionRate = stat.views > 0 ? ((stat.completed_views / stat.views) * 100).toFixed(0) : 0;
+                {stats.map((stat, index) => {
+                  const completionRate = stat.completion_rate || (stat.views > 0 ? ((stat.completed_views / stat.views) * 100).toFixed(0) : 0);
+                  const engagementScore = stat.engagement_score || 0;
                   return (
                     <>
                       <TableRow 
@@ -157,6 +179,9 @@ const TestimonialAnalytics = () => {
                         className="cursor-pointer hover:bg-muted/50"
                         onClick={() => handleRowClick(stat.id)}
                       >
+                        <TableCell className="font-bold text-muted-foreground">
+                          #{index + 1}
+                        </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <img 
@@ -172,7 +197,18 @@ const TestimonialAnalytics = () => {
                         <TableCell className="text-center">{stat.completed_views}</TableCell>
                         <TableCell className="text-center">
                           <Badge variant={Number(completionRate) > 70 ? "default" : "secondary"}>
-                            {completionRate}%
+                            {typeof completionRate === 'number' ? completionRate.toFixed(0) : completionRate}%
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center text-muted-foreground">
+                          {stat.average_view_duration ? `${(stat.average_view_duration / 1000).toFixed(1)}s` : "-"}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge 
+                            variant={engagementScore > 70 ? "default" : engagementScore > 40 ? "secondary" : "outline"}
+                            className="font-semibold"
+                          >
+                            {engagementScore.toFixed(0)}
                           </Badge>
                         </TableCell>
                         <TableCell>
@@ -181,21 +217,12 @@ const TestimonialAnalytics = () => {
                             {stat.is_featured && <Badge>Featured</Badge>}
                           </div>
                         </TableCell>
-                        <TableCell>
-                          {stat.last_viewed_at ? (
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(stat.last_viewed_at).toLocaleDateString()}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">Never</span>
-                          )}
-                        </TableCell>
                       </TableRow>
                       
                       {/* Detailed Views Expansion */}
                       {selectedTestimonial === stat.id && detailedViews.length > 0 && (
                         <TableRow>
-                          <TableCell colSpan={7} className="bg-muted/30 p-4">
+                          <TableCell colSpan={9} className="bg-muted/30 p-4">
                             <div className="space-y-2">
                               <h4 className="font-semibold text-sm flex items-center gap-2">
                                 <Clock className="h-4 w-4" />

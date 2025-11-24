@@ -16,11 +16,14 @@ export type Database = {
     Tables: {
       customer_testimonials: {
         Row: {
+          average_view_duration: number | null
           completed_views: number | null
+          completion_rate: number | null
           created_at: string | null
           customer_name: string
           customer_photo: string
           display_order: number | null
+          engagement_score: number | null
           id: string
           is_featured: boolean | null
           is_published: boolean | null
@@ -32,11 +35,14 @@ export type Database = {
           views: number | null
         }
         Insert: {
+          average_view_duration?: number | null
           completed_views?: number | null
+          completion_rate?: number | null
           created_at?: string | null
           customer_name: string
           customer_photo: string
           display_order?: number | null
+          engagement_score?: number | null
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
@@ -48,11 +54,14 @@ export type Database = {
           views?: number | null
         }
         Update: {
+          average_view_duration?: number | null
           completed_views?: number | null
+          completion_rate?: number | null
           created_at?: string | null
           customer_name?: string
           customer_photo?: string
           display_order?: number | null
+          engagement_score?: number | null
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
@@ -311,6 +320,13 @@ export type Database = {
             referencedRelation: "customer_testimonials"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "story_views_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonial_performance"
+            referencedColumns: ["id"]
+          },
         ]
       }
       user_roles: {
@@ -336,7 +352,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      testimonial_performance: {
+        Row: {
+          average_view_duration: number | null
+          completed_views: number | null
+          completion_rate_calc: number | null
+          created_at: string | null
+          customer_name: string | null
+          engagement_score: number | null
+          id: string | null
+          last_viewed_at: string | null
+          product_name: string | null
+          views: number | null
+        }
+        Insert: {
+          average_view_duration?: number | null
+          completed_views?: number | null
+          completion_rate_calc?: never
+          created_at?: string | null
+          customer_name?: string | null
+          engagement_score?: number | null
+          id?: string | null
+          last_viewed_at?: string | null
+          product_name?: string | null
+          views?: number | null
+        }
+        Update: {
+          average_view_duration?: number | null
+          completed_views?: number | null
+          completion_rate_calc?: never
+          created_at?: string | null
+          customer_name?: string | null
+          engagement_score?: number | null
+          id?: string | null
+          last_viewed_at?: string | null
+          product_name?: string | null
+          views?: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       adjust_stock: {
