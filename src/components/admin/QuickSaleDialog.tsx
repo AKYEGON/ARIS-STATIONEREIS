@@ -210,10 +210,10 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
           </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-hidden">
+        <div className="flex flex-col md:grid md:grid-cols-[1fr,1.2fr] gap-0 flex-1 overflow-y-auto md:overflow-hidden">
           {/* Left: Product Selection */}
           <div className="flex flex-col md:border-r border-b md:border-b-0">
-            <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-muted/30">
+            <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-muted/30 sticky top-0 z-10">
               <Label className="text-xs md:text-sm font-semibold mb-1.5 md:mb-2 block">Select Products</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 md:h-4 md:w-4 text-muted-foreground" />
@@ -226,7 +226,9 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
               </div>
             </div>
 
-            <ScrollArea className="flex-1 h-[30vh] md:h-[calc(85vh-200px)]">
+            <ScrollArea className="flex-1 md:h-[calc(85vh-200px)]">
+              <div className="min-h-[35vh] md:min-h-0">
+              </div>
               <div className="p-2 md:p-3 space-y-1.5 md:space-y-2">
                 {filteredProducts.length === 0 ? (
                   <div className="text-center py-8 md:py-12 text-muted-foreground">
@@ -265,13 +267,16 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
 
           {/* Right: Sale Details */}
           <div className="flex flex-col">
-            <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-muted/30">
-              <Label className="text-xs md:text-sm font-semibold">
-                Cart Items {selectedItems.length > 0 && `(${selectedItems.length})`}
+            <div className="px-3 md:px-4 py-2 md:py-3 border-b bg-primary/10 sticky top-0 md:top-auto z-10">
+              <Label className="text-xs md:text-sm font-semibold flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4" />
+                Cart Items {selectedItems.length > 0 && <Badge variant="secondary" className="text-xs">{selectedItems.length}</Badge>}
               </Label>
             </div>
             
-            <ScrollArea className="flex-1 h-[25vh] md:h-[calc(85vh-420px)]">
+            <ScrollArea className="flex-1 md:h-[calc(85vh-420px)]">
+              <div className="min-h-[40vh] md:min-h-0">
+              </div>
               <div className="p-2 md:p-3">
                 {selectedItems.length === 0 ? (
                   <div className="text-center py-8 md:py-16 text-muted-foreground">
