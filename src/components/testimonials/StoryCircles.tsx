@@ -20,7 +20,7 @@ const StoryCircles = ({ testimonials, onStoryClick }: StoryCirclesProps) => {
           className="flex flex-col items-center gap-2 flex-shrink-0 group"
         >
           <div className={cn(
-            "relative p-1 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500",
+            "relative p-1 rounded-full bg-gradient-to-tr from-green-400 via-green-500 to-green-600",
             "hover:scale-110 transition-transform duration-200"
           )}>
             <div className="bg-background p-1 rounded-full">
