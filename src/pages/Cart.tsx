@@ -105,7 +105,7 @@ const Cart = () => {
 
       console.log("Order created successfully:", orderId);
 
-      // Create order items
+      // Create order items for regular products
       const orderItems = cartItems.map(item => ({
         order_id: orderId,
         product_name: item.name,
@@ -113,6 +113,21 @@ const Cart = () => {
         quantity: item.quantity,
         price: item.price
       }));
+
+      // Create order items for bundles (expand to individual products)
+      bundleItems.forEach(bundle => {
+        bundle.items?.forEach(bundleItem => {
+          if (bundleItem.product) {
+            orderItems.push({
+              order_id: orderId,
+              product_name: `${bundle.name} - ${bundleItem.product.name}`,
+              product_image: bundleItem.product.image,
+              quantity: bundleItem.quantity * bundle.quantity,
+              price: bundle.bundle_price / (bundle.items?.length || 1) // Distribute bundle price
+            });
+          }
+        });
+      });
 
       console.log("Inserting order items...", orderItems.length);
 
