@@ -383,6 +383,74 @@ const Admin = () => {
     }
   };
 
+  const handleUpdateBundle = async () => {
+    if (!editingBundle || !bundleFormData.name || !bundleFormData.bundle_price) {
+      toast.error("Please fill required fields");
+      return;
+    }
+
+    try {
+      let imageUrl = bundleFormData.image;
+      if (bundleImageFile) {
+        imageUrl = await handleImageUpload(bundleImageFile);
+      }
+
+      let originalTotal = 0;
+      for (const sp of selectedBundleProducts) {
+        const product = productList.find(p => p.id === sp.product_id);
+        if (product) originalTotal += product.price * sp.quantity;
+      }
+
+      const { error: bundleError } = await supabase
+        .from("bundles")
+        .update({
+          name: bundleFormData.name,
+          description: bundleFormData.description || null,
+          bundle_price: parseFloat(bundleFormData.bundle_price),
+          original_total_price: originalTotal,
+          image: imageUrl,
+          is_active: bundleFormData.is_active,
+          display_order: bundleFormData.display_order
+        })
+        .eq("id", editingBundle.id);
+
+      if (bundleError) throw bundleError;
+
+      // Delete existing items
+      await supabase
+        .from("bundle_items")
+        .delete()
+        .eq("bundle_id", editingBundle.id);
+
+      // Add new items
+      if (selectedBundleProducts.length > 0) {
+        const itemsToInsert = selectedBundleProducts.map(sp => ({
+          bundle_id: editingBundle.id,
+          product_id: sp.product_id,
+          quantity: sp.quantity
+        }));
+
+        const { error: itemsError } = await supabase
+          .from("bundle_items")
+          .insert(itemsToInsert);
+
+        if (itemsError) throw itemsError;
+      }
+
+      toast.success("Bundle updated!");
+      setIsBundleDialogOpen(false);
+      setBundleFormData({ name: "", description: "", bundle_price: "", image: "", is_active: true, display_order: 0 });
+      setBundleImageFile(null);
+      setBundleImagePreview("");
+      setSelectedBundleProducts([]);
+      setEditingBundle(null);
+      fetchBundles();
+    } catch (error) {
+      console.error("Error updating bundle:", error);
+      toast.error("Failed to update bundle");
+    }
+  };
+
   const openBundleEditDialog = (bundle: Bundle) => {
     setEditingBundle(bundle);
     setBundleFormData({
@@ -1683,10 +1751,7 @@ const Admin = () => {
                   ));
                 }
               }}
-              onSave={editingBundle ? () => {
-                // Update logic similar to handleAddBundle
-                handleAddBundle();
-              } : handleAddBundle}
+              onSave={editingBundle ? handleUpdateBundle : handleAddBundle}
               onEdit={openBundleEditDialog}
               onDelete={handleDeleteBundle}
             />
