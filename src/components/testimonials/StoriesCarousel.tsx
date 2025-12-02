@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import useEmblaCarousel from "embla-carousel-react";
 import { supabase } from "@/integrations/supabase/client";
 
+const getInitials = (name: string) => {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+};
+
 interface StoriesCarouselProps {
   testimonials: CustomerTestimonial[];
   initialIndex?: number;
@@ -223,11 +227,17 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
       <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between mt-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
-            <img
-              src={currentTestimonial.customer_photo}
-              alt={currentTestimonial.customer_name}
-              className="w-full h-full object-cover"
-            />
+            {currentTestimonial.customer_photo ? (
+              <img
+                src={currentTestimonial.customer_photo}
+                alt={currentTestimonial.customer_name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-white/20 flex items-center justify-center text-white font-bold text-sm">
+                {getInitials(currentTestimonial.customer_name)}
+              </div>
+            )}
           </div>
           <div className="text-white">
             <p className="font-semibold text-sm">{currentTestimonial.customer_name}</p>
@@ -292,18 +302,31 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
               ) : (
                 // Image Story
                 <div className="absolute inset-0 bg-black flex items-center justify-center">
-                  <img
-                    src={testimonial.customer_photo}
-                    alt={testimonial.customer_name}
-                    className="max-w-full max-h-full object-contain md:object-contain"
-                    style={{
-                      maxHeight: '85vh',
-                      width: 'auto',
-                      height: 'auto'
-                    }}
-                  />
-                  {/* Gradient overlays for better text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
+                  {testimonial.customer_photo ? (
+                    <>
+                      <img
+                        src={testimonial.customer_photo}
+                        alt={testimonial.customer_name}
+                        className="max-w-full max-h-full object-contain md:object-contain"
+                        style={{
+                          maxHeight: '85vh',
+                          width: 'auto',
+                          height: 'auto'
+                        }}
+                      />
+                      {/* Gradient overlays for better text readability */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center w-full h-full">
+                      <div className="text-center text-white">
+                        <div className="w-32 h-32 md:w-48 md:h-48 rounded-full bg-primary/30 flex items-center justify-center text-6xl md:text-8xl font-bold mb-4 mx-auto">
+                          {getInitials(testimonial.customer_name)}
+                        </div>
+                        <p className="text-xl md:text-2xl font-semibold">{testimonial.customer_name}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -316,11 +339,17 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                     </p>
                     <div className="mt-3 flex items-center justify-center gap-2">
                       <div className="h-7 w-7 md:h-9 md:w-9 rounded-full overflow-hidden border-2 border-white/30">
-                        <img
-                          src={testimonial.customer_photo}
-                          alt={testimonial.customer_name}
-                          className="w-full h-full object-cover"
-                        />
+                        {testimonial.customer_photo ? (
+                          <img
+                            src={testimonial.customer_photo}
+                            alt={testimonial.customer_name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-white/20 flex items-center justify-center text-white font-bold text-xs">
+                            {getInitials(testimonial.customer_name)}
+                          </div>
+                        )}
                       </div>
                       <div className="text-left">
                         <p className="text-white font-semibold text-xs md:text-sm">

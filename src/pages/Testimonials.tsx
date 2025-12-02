@@ -5,6 +5,9 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import StoriesCarousel from "@/components/testimonials/StoriesCarousel";
 import StoryCircles from "@/components/testimonials/StoryCircles";
+import ReviewSubmissionForm from "@/components/testimonials/ReviewSubmissionForm";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 
@@ -14,6 +17,7 @@ const Testimonials = () => {
   const [loading, setLoading] = useState(true);
   const [showStories, setShowStories] = useState(false);
   const [storiesStartIndex, setStoriesStartIndex] = useState(0);
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchTestimonials();
@@ -103,6 +107,25 @@ const Testimonials = () => {
           <p className="text-muted-foreground mb-6">
             Had a great experience with ARIS STATIONARIES? We'd love to hear from you!
           </p>
+          
+          <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="gap-2">
+                📝 Submit Your Review
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Submit Your Review</DialogTitle>
+              </DialogHeader>
+              <ReviewSubmissionForm 
+                onSuccess={() => {
+                  setIsSubmitDialogOpen(false);
+                  fetchTestimonials();
+                }} 
+              />
+            </DialogContent>
+          </Dialog>
         </div>
       </section>
 

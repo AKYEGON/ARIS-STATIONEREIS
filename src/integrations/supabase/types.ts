@@ -21,7 +21,7 @@ export type Database = {
           completion_rate: number | null
           created_at: string | null
           customer_name: string
-          customer_photo: string
+          customer_photo: string | null
           display_order: number | null
           engagement_score: number | null
           id: string
@@ -40,7 +40,7 @@ export type Database = {
           completion_rate?: number | null
           created_at?: string | null
           customer_name: string
-          customer_photo: string
+          customer_photo?: string | null
           display_order?: number | null
           engagement_score?: number | null
           id?: string
@@ -59,7 +59,7 @@ export type Database = {
           completion_rate?: number | null
           created_at?: string | null
           customer_name?: string
-          customer_photo?: string
+          customer_photo?: string | null
           display_order?: number | null
           engagement_score?: number | null
           id?: string

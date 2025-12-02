@@ -88,6 +88,7 @@ const Admin = () => {
   const [testimonialVideoFile, setTestimonialVideoFile] = useState<File | null>(null);
   const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
+  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
   
   const [formData, setFormData] = useState({
     name: "",
@@ -294,15 +295,18 @@ const Admin = () => {
   };
 
   const handleAddTestimonial = async () => {
-    if (!testimonialFormData.customer_name || !testimonialFormData.review_text || !testimonialPhotoFile) {
-      toast.error("Please fill in all required fields and upload a photo");
+    if (!testimonialFormData.customer_name || !testimonialFormData.review_text) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
     try {
-      const photoUrl = await handleTestimonialFileUpload(testimonialPhotoFile, 'customer-photos');
-      let videoUrl = null;
+      let photoUrl = null;
+      if (testimonialPhotoFile) {
+        photoUrl = await handleTestimonialFileUpload(testimonialPhotoFile, 'customer-photos');
+      }
       
+      let videoUrl = null;
       if (testimonialVideoFile) {
         videoUrl = await handleTestimonialFileUpload(testimonialVideoFile, 'testimonial-videos');
       }
@@ -397,6 +401,40 @@ const Admin = () => {
     }
   };
 
+  const handleQuickApprove = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("customer_testimonials")
+        .update({ is_published: true })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Review approved and published!");
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error approving testimonial:", error);
+      toast.error("Failed to approve review");
+    }
+  };
+
+  const handleQuickUnpublish = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("customer_testimonials")
+        .update({ is_published: false })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Review unpublished!");
+      fetchTestimonials();
+    } catch (error) {
+      console.error("Error unpublishing testimonial:", error);
+      toast.error("Failed to unpublish review");
+    }
+  };
+
   const openTestimonialEditDialog = (testimonial: CustomerTestimonial) => {
     setEditingTestimonial(testimonial);
     setTestimonialFormData({
@@ -408,7 +446,7 @@ const Admin = () => {
       is_published: testimonial.is_published,
       display_order: testimonial.display_order
     });
-    setTestimonialPhotoPreview(testimonial.customer_photo);
+    setTestimonialPhotoPreview(testimonial.customer_photo || "");
     if (testimonial.video_url) {
       setTestimonialVideoPreview(testimonial.video_url);
     }
@@ -1581,6 +1619,34 @@ const Admin = () => {
 
           {/* Testimonials Tab */}
           <TabsContent value="testimonials" className="space-y-6">
+            {/* Status Filter Tabs */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button 
+                variant={testimonialFilter === "all" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("all")}
+              >
+                All ({testimonialsList.length})
+              </Button>
+              <Button 
+                variant={testimonialFilter === "pending" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("pending")}
+                className="relative"
+              >
+                Pending Review
+                {testimonialsList.filter(t => !t.is_published).length > 0 && (
+                  <Badge className="ml-2 bg-yellow-500 hover:bg-yellow-600">
+                    {testimonialsList.filter(t => !t.is_published).length}
+                  </Badge>
+                )}
+              </Button>
+              <Button 
+                variant={testimonialFilter === "published" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("published")}
+              >
+                Published ({testimonialsList.filter(t => t.is_published).length})
+              </Button>
+            </div>
+
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">Manage customer testimonials and reviews</p>
               
@@ -1627,8 +1693,8 @@ const Admin = () => {
                         rows={5}
                       />
                     </div>
-                    <div>
-                      <Label htmlFor="customer_photo">Customer Photo *</Label>
+                     <div>
+                      <Label htmlFor="customer_photo">Customer Photo (optional)</Label>
                       <Input
                         id="customer_photo"
                         type="file"
@@ -1748,6 +1814,11 @@ const Admin = () => {
                 </div>
                 <div className="overflow-x-auto">
                   {testimonialsList.filter(t => {
+                    // Apply status filter
+                    if (testimonialFilter === "pending" && t.is_published) return false;
+                    if (testimonialFilter === "published" && !t.is_published) return false;
+                    
+                    // Apply search filter
                     if (!testimonialSearchQuery) return true;
                     const query = testimonialSearchQuery.toLowerCase();
                     return (
@@ -1766,6 +1837,7 @@ const Admin = () => {
                           <TableHead>Photo</TableHead>
                           <TableHead>Customer</TableHead>
                           <TableHead>Product</TableHead>
+                          <TableHead>Submitted</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -1773,6 +1845,11 @@ const Admin = () => {
                       <TableBody>
                         {testimonialsList
                           .filter(t => {
+                            // Apply status filter
+                            if (testimonialFilter === "pending" && t.is_published) return false;
+                            if (testimonialFilter === "published" && !t.is_published) return false;
+                            
+                            // Apply search filter
                             if (!testimonialSearchQuery) return true;
                             const query = testimonialSearchQuery.toLowerCase();
                             return (
@@ -1781,44 +1858,104 @@ const Admin = () => {
                               t.review_text.toLowerCase().includes(query)
                             );
                           })
-                          .map((testimonial, index) => (
-                          <TableRow key={testimonial.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.03}s` }}>
-                            <TableCell>
-                              <img 
-                                src={testimonial.customer_photo} 
-                                alt={testimonial.customer_name}
-                                className="w-12 h-12 object-cover rounded-full"
-                              />
-                            </TableCell>
-                            <TableCell className="font-medium">{testimonial.customer_name}</TableCell>
-                            <TableCell>{testimonial.product_name || "-"}</TableCell>
-                            <TableCell>
-                              <div className="flex gap-1">
-                                {testimonial.is_published && <Badge variant="default">Published</Badge>}
-                                {testimonial.is_featured && <Badge variant="secondary">Featured</Badge>}
-                                {!testimonial.is_published && <Badge variant="outline">Draft</Badge>}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => openTestimonialEditDialog(testimonial)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="destructive"
-                                  size="icon"
-                                  onClick={() => handleDeleteTestimonial(testimonial.id)}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                          .map((testimonial, index) => {
+                            const getInitials = (name: string) => {
+                              return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                            };
+                            
+                            return (
+                              <TableRow key={testimonial.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.03}s` }}>
+                                <TableCell>
+                                  {testimonial.customer_photo ? (
+                                    <img 
+                                      src={testimonial.customer_photo} 
+                                      alt={testimonial.customer_name}
+                                      className="w-12 h-12 object-cover rounded-full"
+                                    />
+                                  ) : (
+                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                      {getInitials(testimonial.customer_name)}
+                                    </div>
+                                  )}
+                                </TableCell>
+                                <TableCell className="font-medium">{testimonial.customer_name}</TableCell>
+                                <TableCell>{testimonial.product_name || "-"}</TableCell>
+                                <TableCell className="text-sm text-muted-foreground">
+                                  {new Date(testimonial.created_at).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell>
+                                  <div className="flex gap-1">
+                                    {testimonial.is_published ? (
+                                      <Badge className="bg-green-500 hover:bg-green-600">Published</Badge>
+                                    ) : (
+                                      <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending</Badge>
+                                    )}
+                                    {testimonial.is_featured && <Badge variant="secondary">Featured</Badge>}
+                                  </div>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-2">
+                                    {!testimonial.is_published ? (
+                                      <>
+                                        <Button
+                                          variant="default"
+                                          size="sm"
+                                          onClick={() => handleQuickApprove(testimonial.id)}
+                                          className="bg-green-600 hover:bg-green-700"
+                                          title="Approve & Publish"
+                                        >
+                                          ✓ Approve
+                                        </Button>
+                                        <Button
+                                          variant="destructive"
+                                          size="sm"
+                                          onClick={() => handleDeleteTestimonial(testimonial.id)}
+                                          title="Reject & Delete"
+                                        >
+                                          ✗ Reject
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          onClick={() => openTestimonialEditDialog(testimonial)}
+                                          title="Edit"
+                                        >
+                                          <Pencil className="h-4 w-4" />
+                                        </Button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => handleQuickUnpublish(testimonial.id)}
+                                          title="Unpublish"
+                                        >
+                                          📤 Unpublish
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="icon"
+                                          onClick={() => openTestimonialEditDialog(testimonial)}
+                                          title="Edit"
+                                        >
+                                          <Pencil className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                          variant="destructive"
+                                          size="icon"
+                                          onClick={() => handleDeleteTestimonial(testimonial.id)}
+                                          title="Delete"
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
                       </TableBody>
                     </Table>
                   )}
