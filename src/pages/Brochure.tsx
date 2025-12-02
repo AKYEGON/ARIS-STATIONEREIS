@@ -108,6 +108,11 @@ const Brochure = () => {
     try {
       setIsDownloading(true);
       
+      toast({
+        title: "Preparing to share...",
+        description: "Generating your brochure.",
+      });
+
       const element = brochureRef.current;
       const opt = {
         margin: 0.5,
@@ -127,34 +132,55 @@ const Brochure = () => {
         }
       };
 
+      // Generate PDF as blob
       const pdf = await html2pdf().set(opt).from(element).output('blob');
       
-      const file = new File([pdf], 'ARIS-Stationaries-Catalog.pdf', { type: 'application/pdf' });
-      
-      if (navigator.share && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'ARIS Stationaries Catalog',
-          text: 'Check out our product catalog!'
-        });
+      // Check if Web Share API is available and supports files
+      if (navigator.share) {
+        const file = new File([pdf], 'ARIS-Stationaries-Catalog.pdf', { type: 'application/pdf' });
         
-        toast({
-          title: "Shared Successfully!",
-          description: "Brochure has been shared.",
-        });
-      } else {
-        // Fallback to download
-        await html2pdf().set(opt).from(element).save();
-        toast({
-          title: "Share not available",
-          description: "Downloaded the brochure instead.",
-        });
+        // Check if the browser can share files
+        const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
+        
+        if (canShareFiles) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: 'ARIS Stationaries Catalog',
+              text: 'Check out our product catalog!'
+            });
+            
+            toast({
+              title: "Shared Successfully!",
+              description: "Brochure has been shared.",
+            });
+            return;
+          } catch (shareError: any) {
+            // User cancelled or share failed
+            if (shareError.name === 'AbortError') {
+              toast({
+                title: "Share Cancelled",
+                description: "You cancelled the share action.",
+              });
+              return;
+            }
+            console.error("Share error:", shareError);
+          }
+        }
       }
-    } catch (error) {
-      console.error("Error sharing:", error);
+      
+      // Fallback: Download the PDF instead
+      await html2pdf().set(opt).from(element).save();
       toast({
-        title: "Share Failed",
-        description: "Please try downloading instead.",
+        title: "Downloaded Instead",
+        description: "Sharing is not available on this device. The brochure has been downloaded.",
+      });
+      
+    } catch (error) {
+      console.error("Error in share/download:", error);
+      toast({
+        title: "Action Failed",
+        description: "Unable to share or download. Please try the Download PDF button.",
         variant: "destructive",
       });
     } finally {
