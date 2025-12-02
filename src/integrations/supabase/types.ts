@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      bundle_items: {
+        Row: {
+          bundle_id: string
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+        }
+        Insert: {
+          bundle_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+        }
+        Update: {
+          bundle_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bundle_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bundles: {
+        Row: {
+          bundle_price: number
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image: string
+          is_active: boolean
+          name: string
+          original_total_price: number
+          updated_at: string
+        }
+        Insert: {
+          bundle_price: number
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image: string
+          is_active?: boolean
+          name: string
+          original_total_price: number
+          updated_at?: string
+        }
+        Update: {
+          bundle_price?: number
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image?: string
+          is_active?: boolean
+          name?: string
+          original_total_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customer_testimonials: {
         Row: {
           average_view_duration: number | null
