@@ -291,14 +291,19 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
                 </div>
               ) : (
                 // Image Story
-                <div className="absolute inset-0 bg-black">
+                <div className="absolute inset-0 bg-black flex items-center justify-center">
                   <img
                     src={testimonial.customer_photo}
                     alt={testimonial.customer_name}
-                    className="w-full h-full object-contain"
+                    className="max-w-full max-h-full object-contain md:object-contain"
+                    style={{
+                      maxHeight: '85vh',
+                      width: 'auto',
+                      height: 'auto'
+                    }}
                   />
                   {/* Gradient overlays for better text readability */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70" />
+                  <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70 pointer-events-none" />
                 </div>
               )}
 
