@@ -1,12 +1,17 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { Product, CartItem } from "@/types/product";
+import { Bundle, CartBundle } from "@/types/bundle";
 import { toast } from "sonner";
 
 interface CartContextType {
   cartItems: CartItem[];
+  bundleItems: CartBundle[];
   addToCart: (product: Product) => void;
+  addBundleToCart: (bundle: Bundle) => void;
   removeFromCart: (productId: string) => void;
+  removeBundleFromCart: (bundleId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  updateBundleQuantity: (bundleId: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
   getCartItemCount: () => number;
@@ -16,6 +21,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [bundleItems, setBundleItems] = useState<CartBundle[]>([]);
 
   const addToCart = (product: Product) => {
     setCartItems((prevItems) => {
@@ -50,25 +56,67 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     );
   };
 
+  const addBundleToCart = (bundle: Bundle) => {
+    setBundleItems((prevItems) => {
+      const existingItem = prevItems.find((item) => item.id === bundle.id);
+      if (existingItem) {
+        toast.success("Bundle quantity updated in cart");
+        return prevItems.map((item) =>
+          item.id === bundle.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        );
+      }
+      toast.success("Bundle added to cart");
+      return [...prevItems, { ...bundle, quantity: 1 }];
+    });
+  };
+
+  const removeBundleFromCart = (bundleId: string) => {
+    setBundleItems((prevItems) => prevItems.filter((item) => item.id !== bundleId));
+    toast.success("Bundle removed from cart");
+  };
+
+  const updateBundleQuantity = (bundleId: string, quantity: number) => {
+    if (quantity <= 0) {
+      removeBundleFromCart(bundleId);
+      return;
+    }
+    setBundleItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === bundleId ? { ...item, quantity } : item
+      )
+    );
+  };
+
   const clearCart = () => {
     setCartItems([]);
+    setBundleItems([]);
   };
 
   const getCartTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    const productsTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    const bundlesTotal = bundleItems.reduce((total, item) => total + item.bundle_price * item.quantity, 0);
+    return productsTotal + bundlesTotal;
   };
 
   const getCartItemCount = () => {
-    return cartItems.reduce((count, item) => count + item.quantity, 0);
+    const productsCount = cartItems.reduce((count, item) => count + item.quantity, 0);
+    const bundlesCount = bundleItems.reduce((count, item) => count + item.quantity, 0);
+    return productsCount + bundlesCount;
   };
 
   return (
     <CartContext.Provider
       value={{
         cartItems,
+        bundleItems,
         addToCart,
+        addBundleToCart,
         removeFromCart,
+        removeBundleFromCart,
         updateQuantity,
+        updateBundleQuantity,
         clearCart,
         getCartTotal,
         getCartItemCount,

@@ -10,6 +10,7 @@ import { Search, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import heroBackground from "@/assets/hero-background.jpg";
+import OffersSection from "@/components/OffersSection";
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -119,6 +120,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Offers Section */}
+      <OffersSection />
 
       {/* Search Section */}
       <section className="container py-4 sm:py-6 md:py-8 px-4">

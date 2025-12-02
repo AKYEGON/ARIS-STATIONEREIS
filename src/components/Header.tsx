@@ -1,4 +1,4 @@
-import { ShoppingCart, FileText, Users, Menu, X } from "lucide-react";
+import { ShoppingCart, FileText, Users, Menu, Tag } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
@@ -44,6 +44,14 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                     Shop
                   </Link>
                   <Link 
+                    to="/offers" 
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
+                  >
+                    <Tag className="h-5 w-5" />
+                    Offers
+                  </Link>
+                  <Link 
                     to="/testimonials" 
                     onClick={() => setMobileMenuOpen(false)}
                     className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
@@ -70,6 +78,13 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                 </nav>
               </SheetContent>
             </Sheet>
+            
+            <Link to="/offers" className="hidden md:block">
+              <Button variant="outline" size="sm">
+                <Tag className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Offers</span>
+              </Button>
+            </Link>
             
             <Link to="/testimonials" className="hidden md:block">
               <Button variant="outline" size="sm">

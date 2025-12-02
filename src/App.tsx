@@ -10,6 +10,7 @@ import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import Brochure from "./pages/Brochure";
 import Testimonials from "./pages/Testimonials";
+import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
 
 import DeliveryBanner from "@/components/DeliveryBanner";
@@ -39,6 +40,7 @@ const App = () => {
       <Route path="/brochure" element={<Brochure />} />
       <Route path="/testimonials" element={<Testimonials />} />
       <Route path="/happy-customers" element={<Testimonials />} />
+      <Route path="/offers" element={<Offers />} />
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
             </Routes>

@@ -15,7 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
 import { Product, ProductMedia } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3 } from "lucide-react";
+import { Bundle } from "@/types/bundle";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +24,7 @@ import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
+import { BundlesTab } from "@/components/admin/BundlesTab";
 
 interface OrderItem {
   product_name: string;
@@ -90,6 +92,23 @@ const Admin = () => {
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
   const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
   
+  // Bundles state
+  const [bundlesList, setBundlesList] = useState<Bundle[]>([]);
+  const [isBundleDialogOpen, setIsBundleDialogOpen] = useState(false);
+  const [editingBundle, setEditingBundle] = useState<Bundle | null>(null);
+  const [bundleFormData, setBundleFormData] = useState({
+    name: "",
+    description: "",
+    bundle_price: "",
+    image: "",
+    is_active: true,
+    display_order: 0
+  });
+  const [bundleImageFile, setBundleImageFile] = useState<File | null>(null);
+  const [bundleImagePreview, setBundleImagePreview] = useState("");
+  const [selectedBundleProducts, setSelectedBundleProducts] = useState<Array<{ product_id: string; quantity: number }>>([]);
+  const [bundleSearchQuery, setBundleSearchQuery] = useState("");
+  
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -125,6 +144,9 @@ const Admin = () => {
       }
       if (activeTab === "testimonials") {
         fetchTestimonials();
+      }
+      if (activeTab === "bundles") {
+        fetchBundles();
       }
     }
   }, [activeTab, isAdmin]);
@@ -258,6 +280,127 @@ const Admin = () => {
       console.error("Error fetching testimonials:", error);
       toast.error("Failed to load testimonials");
     }
+  };
+
+  const fetchBundles = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("bundles")
+        .select(`
+          *,
+          items:bundle_items(
+            *,
+            product:products(*)
+          )
+        `)
+        .order("display_order", { ascending: false })
+        .order("created_at", { ascending: false});
+
+      if (error) throw error;
+      setBundlesList(data || []);
+    } catch (error) {
+      console.error("Error fetching bundles:", error);
+      toast.error("Failed to load bundles");
+    }
+  };
+
+  const handleAddBundle = async () => {
+    if (!bundleFormData.name || !bundleFormData.bundle_price || selectedBundleProducts.length === 0) {
+      toast.error("Please fill required fields and select products");
+      return;
+    }
+
+    try {
+      let imageUrl = bundleFormData.image;
+      if (bundleImageFile) {
+        imageUrl = await handleImageUpload(bundleImageFile);
+      }
+
+      let originalTotal = 0;
+      for (const sp of selectedBundleProducts) {
+        const product = productList.find(p => p.id === sp.product_id);
+        if (product) originalTotal += product.price * sp.quantity;
+      }
+
+      const { data: bundleData, error: bundleError } = await supabase
+        .from("bundles")
+        .insert({
+          name: bundleFormData.name,
+          description: bundleFormData.description || null,
+          bundle_price: parseFloat(bundleFormData.bundle_price),
+          original_total_price: originalTotal,
+          image: imageUrl,
+          is_active: bundleFormData.is_active,
+          display_order: bundleFormData.display_order
+        })
+        .select()
+        .single();
+
+      if (bundleError) throw bundleError;
+
+      const itemsToInsert = selectedBundleProducts.map(sp => ({
+        bundle_id: bundleData.id,
+        product_id: sp.product_id,
+        quantity: sp.quantity
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("bundle_items")
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+
+      toast.success("Bundle created!");
+      setIsBundleDialogOpen(false);
+      setBundleFormData({ name: "", description: "", bundle_price: "", image: "", is_active: true, display_order: 0 });
+      setBundleImageFile(null);
+      setBundleImagePreview("");
+      setSelectedBundleProducts([]);
+      setEditingBundle(null);
+      fetchBundles();
+    } catch (error) {
+      console.error("Error adding bundle:", error);
+      toast.error("Failed to create bundle");
+    }
+  };
+
+  const handleDeleteBundle = async (id: string) => {
+    if (!confirm("Delete this bundle?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("bundles")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success("Bundle deleted!");
+      fetchBundles();
+    } catch (error) {
+      console.error("Error deleting bundle:", error);
+      toast.error("Failed to delete bundle");
+    }
+  };
+
+  const openBundleEditDialog = (bundle: Bundle) => {
+    setEditingBundle(bundle);
+    setBundleFormData({
+      name: bundle.name,
+      description: bundle.description || "",
+      bundle_price: bundle.bundle_price.toString(),
+      image: bundle.image,
+      is_active: bundle.is_active,
+      display_order: bundle.display_order
+    });
+    setBundleImagePreview(bundle.image);
+    setSelectedBundleProducts(
+      (bundle.items || []).map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity
+      }))
+    );
+    setIsBundleDialogOpen(true);
   };
 
   const resetTestimonialForm = () => {
@@ -1112,10 +1255,14 @@ const Admin = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-6 mb-6">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
+            </TabsTrigger>
+            <TabsTrigger value="bundles" className="flex items-center gap-2">
+              <Tag className="h-4 w-4" />
+              Bundles
             </TabsTrigger>
             <TabsTrigger value="inventory" className="flex items-center gap-2">
               <Warehouse className="h-4 w-4" />
@@ -1123,7 +1270,7 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="sales" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
-              Sales & Profit
+              Sales
             </TabsTrigger>
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
@@ -1131,7 +1278,7 @@ const Admin = () => {
             </TabsTrigger>
             <TabsTrigger value="testimonials" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
-              Testimonials
+              Reviews
             </TabsTrigger>
           </TabsList>
 
@@ -1495,6 +1642,54 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Bundles Tab */}
+          <TabsContent value="bundles">
+            <BundlesTab
+              bundles={bundlesList}
+              products={productList}
+              isDialogOpen={isBundleDialogOpen}
+              editingBundle={editingBundle}
+              formData={bundleFormData}
+              imagePreview={bundleImagePreview}
+              selectedProducts={selectedBundleProducts}
+              onOpenDialog={() => setIsBundleDialogOpen(true)}
+              onCloseDialog={() => {
+                setIsBundleDialogOpen(false);
+                setBundleFormData({ name: "", description: "", bundle_price: "", image: "", is_active: true, display_order: 0 });
+                setBundleImageFile(null);
+                setBundleImagePreview("");
+                setSelectedBundleProducts([]);
+                setEditingBundle(null);
+              }}
+              onFormChange={(field, value) => setBundleFormData({ ...bundleFormData, [field]: value })}
+              onImageChange={(file) => {
+                setBundleImageFile(file);
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => setBundleImagePreview(reader.result as string);
+                  reader.readAsDataURL(file);
+                }
+              }}
+              onProductAdd={(productId) => setSelectedBundleProducts([...selectedBundleProducts, { product_id: productId, quantity: 1 }])}
+              onProductRemove={(productId) => setSelectedBundleProducts(selectedBundleProducts.filter(sp => sp.product_id !== productId))}
+              onProductQuantityChange={(productId, quantity) => {
+                if (quantity <= 0) {
+                  setSelectedBundleProducts(selectedBundleProducts.filter(sp => sp.product_id !== productId));
+                } else {
+                  setSelectedBundleProducts(selectedBundleProducts.map(sp => 
+                    sp.product_id === productId ? { ...sp, quantity } : sp
+                  ));
+                }
+              }}
+              onSave={editingBundle ? () => {
+                // Update logic similar to handleAddBundle
+                handleAddBundle();
+              } : handleAddBundle}
+              onEdit={openBundleEditDialog}
+              onDelete={handleDeleteBundle}
+            />
           </TabsContent>
 
           {/* Orders Tab */}

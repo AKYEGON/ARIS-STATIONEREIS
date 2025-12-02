@@ -38,7 +38,7 @@ const checkoutFormSchema = z.object({
 });
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeFromCart, getCartTotal, clearCart, getCartItemCount } = useCart();
+  const { cartItems, bundleItems, updateQuantity, updateBundleQuantity, removeFromCart, removeBundleFromCart, getCartTotal, clearCart, getCartItemCount } = useCart();
   const navigate = useNavigate();
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -58,7 +58,7 @@ const Cart = () => {
   const deliveryMethod = form.watch("deliveryMethod");
 
   const handleCheckout = () => {
-    if (cartItems.length === 0) {
+    if (cartItems.length === 0 && bundleItems.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
@@ -70,7 +70,7 @@ const Cart = () => {
     const total = getCartTotal();
 
     // Validate cart has items
-    if (cartItems.length === 0) {
+    if (cartItems.length === 0 && bundleItems.length === 0) {
       toast.error("Your cart is empty");
       setIsSubmitting(false);
       return;
@@ -128,9 +128,20 @@ const Cart = () => {
       console.log("Order items created successfully");
 
       // Prepare WhatsApp message
-      const orderDetails = cartItems
+      const productDetails = cartItems
         .map((item) => `${item.name} x${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`)
         .join("\n");
+      
+      const bundleDetails = bundleItems
+        .map((bundle) => {
+          const itemsList = bundle.items?.map(bi => 
+            `  • ${bi.product?.name || 'Product'} ${bi.quantity > 1 ? `(×${bi.quantity})` : ''}`
+          ).join('\n') || '';
+          return `${bundle.name} (Bundle) x${bundle.quantity} - KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
+        })
+        .join("\n\n");
+      
+      const orderDetails = [productDetails, bundleDetails].filter(Boolean).join("\n\n");
       
       let message = `New Order from ARIS STATIONARIES\n\n`;
       message += `Order ID: ${orderId.slice(0, 8)}\n\n`;
@@ -201,7 +212,7 @@ const Cart = () => {
       <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 md:mb-8 text-primary">Shopping Cart</h1>
         
-        {cartItems.length === 0 ? (
+        {cartItems.length === 0 && bundleItems.length === 0 ? (
           <Card className="text-center py-12 sm:py-16 transition-all duration-300">
             <CardContent className="flex flex-col items-center gap-4">
               <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" />
@@ -214,6 +225,88 @@ const Cart = () => {
         ) : (
           <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
             <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+              {/* Bundle Items */}
+              {bundleItems.length > 0 && (
+                <>
+                  <h2 className="text-xl font-bold text-primary mb-2">Bundle Offers</h2>
+                  {bundleItems.map((bundle, index) => (
+                    <Card 
+                      key={bundle.id} 
+                      className="transition-all duration-300 hover:shadow-md animate-fade-in border-2 border-primary/20"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="flex gap-3 sm:gap-4">
+                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-md">
+                            <img
+                              src={bundle.image}
+                              alt={bundle.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-1 right-1">
+                              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded">
+                                Bundle
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate">{bundle.name}</h3>
+                            {bundle.items && bundle.items.length > 0 && (
+                              <p className="text-xs text-muted-foreground line-clamp-2">
+                                Includes: {bundle.items.map(item => 
+                                  `${item.product?.name || 'Product'} ${item.quantity > 1 ? `(×${item.quantity})` : ''}`
+                                ).join(', ')}
+                              </p>
+                            )}
+                            <div className="flex items-baseline gap-2 mt-1">
+                              <span className="text-xs text-muted-foreground line-through">
+                                KSh {bundle.original_total_price.toFixed(2)}
+                              </span>
+                              <span className="text-base sm:text-lg font-bold text-primary">
+                                KSh {bundle.bundle_price.toFixed(2)}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-2 sm:gap-3">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 sm:h-9 sm:w-9 transition-all duration-200 hover:scale-110 active:scale-95"
+                              onClick={() => removeBundleFromCart(bundle.id)}
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                            <div className="flex items-center gap-1 sm:gap-2">
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-7 w-7 sm:h-9 sm:w-9 transition-all duration-200 active:scale-90"
+                                onClick={() => updateBundleQuantity(bundle.id, bundle.quantity - 1)}
+                              >
+                                <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                              <span className="w-6 sm:w-8 text-center font-semibold text-sm sm:text-base">{bundle.quantity}</span>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-7 w-7 sm:h-9 sm:w-9 transition-all duration-200 active:scale-90"
+                                onClick={() => updateBundleQuantity(bundle.id, bundle.quantity + 1)}
+                              >
+                                <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </>
+              )}
+
+              {/* Individual Products */}
+              {cartItems.length > 0 && bundleItems.length > 0 && (
+                <h2 className="text-xl font-bold text-primary mt-6 mb-2">Individual Products</h2>
+              )}
               {cartItems.map((item, index) => (
                 <Card 
                   key={item.id} 
