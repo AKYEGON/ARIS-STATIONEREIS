@@ -117,22 +117,25 @@ const Header = ({ cartItemCount }: HeaderProps) => {
         </div>
       </header>
       
-      {/* Floating Cart Button for Mobile - Always visible at bottom */}
-      {cartItemCount > 0 && (
-        <Link 
-          to="/cart" 
-          className="md:hidden fixed top-1/2 -translate-y-1/2 right-6 z-[100] bg-primary text-primary-foreground p-4 rounded-full shadow-xl hover:shadow-2xl transition-all duration-200 hover:scale-110 active:scale-95 animate-scale-in"
-          style={{ boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)' }}
-        >
-          <ShoppingCart className="h-6 w-6" />
+      {/* Floating Cart Button for Mobile - Always visible */}
+      <Link 
+        to="/cart" 
+        className={`md:hidden fixed bottom-6 right-4 z-[100] p-4 rounded-full shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 ${
+          cartItemCount > 0 
+            ? 'bg-primary text-primary-foreground animate-bounce-subtle' 
+            : 'bg-background border-2 border-primary text-primary'
+        }`}
+      >
+        <ShoppingCart className="h-6 w-6" />
+        {cartItemCount > 0 && (
           <Badge 
             className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 bg-secondary text-secondary-foreground text-xs font-bold"
             variant="default"
           >
             {cartItemCount}
           </Badge>
-        </Link>
-      )}
+        )}
+      </Link>
     </>
   );
 };
