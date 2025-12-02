@@ -6,6 +6,10 @@ interface StoryCirclesProps {
   onStoryClick: (index: number) => void;
 }
 
+const getInitials = (name: string) => {
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+};
+
 const StoryCircles = ({ testimonials, onStoryClick }: StoryCirclesProps) => {
   return (
     <div className="flex gap-4 overflow-x-auto pb-4 px-4 hide-scrollbar">
@@ -20,11 +24,17 @@ const StoryCircles = ({ testimonials, onStoryClick }: StoryCirclesProps) => {
             "hover:scale-110 transition-transform duration-200"
           )}>
             <div className="bg-background p-1 rounded-full">
-              <img
-                src={testimonial.customer_photo}
-                alt={testimonial.customer_name}
-                className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover"
-              />
+              {testimonial.customer_photo ? (
+                <img
+                  src={testimonial.customer_photo}
+                  alt={testimonial.customer_name}
+                  className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xl">
+                  {getInitials(testimonial.customer_name)}
+                </div>
+              )}
             </div>
           </div>
           <span className="text-xs text-center max-w-[90px] truncate">
