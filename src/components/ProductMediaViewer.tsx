@@ -149,7 +149,8 @@ const ProductMediaViewer = ({ product, open, onClose }: ProductMediaViewerProps)
           )}
 
           {/* Instructions */}
-          <div className="absolute bottom-24 left-0 right-0 text-center text-white/60 text-xs md:text-sm">
+          <div className="absolute bottom-24 left-0 right-0 text-center text-white/60 text-xs md:text-sm px-4">
+            <p className="md:hidden">Tap arrows to navigate</p>
             <p className="hidden md:block">← → Arrow keys to navigate • ESC to close</p>
           </div>
         </div>
