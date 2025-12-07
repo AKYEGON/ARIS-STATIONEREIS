@@ -1115,8 +1115,17 @@ const Admin = () => {
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
+      // Get current order status first to check if already delivered
+      const currentOrder = ordersList.find(o => o.id === orderId);
+      
       // If status is being changed to delivered, handle stock reduction and profit calculation
       if (newStatus === "delivered") {
+        // CRITICAL: Check if order is already delivered to prevent duplicate stock deductions
+        if (currentOrder?.status === "delivered") {
+          toast.info("Order is already marked as delivered");
+          return;
+        }
+
         // Get the order items
         const { data: orderItems, error: itemsError } = await supabase
           .from("order_items")
@@ -1130,15 +1139,34 @@ const Admin = () => {
 
         // Process each item
         for (const item of orderItems || []) {
+          // Extract the actual product name (handle bundle items which have format "Bundle Name - Product Name")
+          const actualProductName = item.product_name.includes(" - ") 
+            ? item.product_name.split(" - ").slice(1).join(" - ").trim()
+            : item.product_name.trim();
+
           // Get the product to access cost_price and current stock
-          const { data: product, error: productError } = await supabase
+          // Try exact match first, then try trimmed match
+          let product = null;
+          const { data: exactMatch } = await supabase
             .from("products")
             .select("id, cost_price, stock, name")
-            .eq("name", item.product_name)
-            .single();
+            .eq("name", item.product_name.trim())
+            .maybeSingle();
+          
+          if (exactMatch) {
+            product = exactMatch;
+          } else {
+            // Try with extracted name (for bundle items)
+            const { data: partialMatch } = await supabase
+              .from("products")
+              .select("id, cost_price, stock, name")
+              .eq("name", actualProductName)
+              .maybeSingle();
+            product = partialMatch;
+          }
 
-          if (productError || !product) {
-            console.warn(`Product not found for: ${item.product_name}`);
+          if (!product) {
+            console.warn(`Product not found for: ${item.product_name} (tried: "${actualProductName}")`);
             continue;
           }
 
