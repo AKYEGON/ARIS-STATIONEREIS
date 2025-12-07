@@ -132,155 +132,158 @@ export const InventoryDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-3">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Products</CardTitle>
+            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg sm:text-2xl font-bold">{products.length}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Stock Units</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Stock Units</CardTitle>
+            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg sm:text-2xl font-bold">
               {products.reduce((sum, p) => sum + p.stock, 0)}
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Inv. Value</CardTitle>
+            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              KSh {getTotalInventoryValue().toFixed(2)}
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg sm:text-2xl font-bold">
+              KSh {getTotalInventoryValue().toFixed(0)}
             </div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Inventory Management</CardTitle>
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Inventory Management</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Stock</TableHead>
-                <TableHead>Cost Price</TableHead>
-                <TableHead>Selling Price</TableHead>
-                <TableHead>Profit/Unit</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((product) => {
-                const profit = calculateProfit(product.price, product.cost_price);
-                return (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <img 
-                          src={product.image} 
-                          alt={product.name}
-                          className="w-10 h-10 object-cover rounded"
-                        />
-                        <div>
-                          <div className="font-medium">{product.name}</div>
-                          <div className="text-sm text-muted-foreground">{product.category}</div>
+        <CardContent className="p-2 sm:p-6 pt-0">
+          <div className="overflow-x-auto -mx-2 sm:mx-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[120px]">Product</TableHead>
+                  <TableHead className="w-[70px]">Stock</TableHead>
+                  <TableHead className="hidden sm:table-cell">Cost</TableHead>
+                  <TableHead className="hidden md:table-cell">Sell</TableHead>
+                  <TableHead className="hidden lg:table-cell">Profit</TableHead>
+                  <TableHead className="text-right w-[100px] sm:w-auto">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product) => {
+                  const profit = calculateProfit(product.price, product.cost_price);
+                  return (
+                    <TableRow key={product.id}>
+                      <TableCell className="p-2 sm:p-4">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <img 
+                            src={product.image} 
+                            alt={product.name}
+                            className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded"
+                          />
+                          <div>
+                            <div className="font-medium text-xs sm:text-sm line-clamp-1">{product.name}</div>
+                            <div className="text-[10px] sm:text-sm text-muted-foreground hidden xs:block">{product.category}</div>
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className={product.stock <= 5 ? "text-destructive font-bold" : ""}>
-                          {product.stock}
+                      </TableCell>
+                      <TableCell className="p-2 sm:p-4">
+                        <div className="flex items-center gap-1">
+                          <span className={`text-xs sm:text-sm ${product.stock <= 5 ? "text-destructive font-bold" : ""}`}>
+                            {product.stock}
+                          </span>
+                          {product.stock <= 5 && (
+                            <AlertTriangle className="h-3 w-3 text-destructive" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm">KSh {product.cost_price.toFixed(0)}</TableCell>
+                      <TableCell className="hidden md:table-cell text-xs sm:text-sm">KSh {product.price.toFixed(0)}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <span className={`text-xs sm:text-sm ${profit > 0 ? "text-green-600 font-medium" : "text-red-600"}`}>
+                          KSh {profit.toFixed(0)}
                         </span>
-                        {product.stock <= 5 && (
-                          <Badge variant="destructive" className="gap-1">
-                            <AlertTriangle className="h-3 w-3" />
-                            Low
-                          </Badge>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>KSh {product.cost_price.toFixed(2)}</TableCell>
-                    <TableCell>KSh {product.price.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <span className={profit > 0 ? "text-green-600 font-medium" : "text-red-600"}>
-                        KSh {profit.toFixed(2)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openAdjustDialog(product, true)}
-                        >
-                          <Plus className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openAdjustDialog(product, false)}
-                        >
-                          <Minus className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openHistoryDialog(product)}
-                        >
-                          History
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      <TableCell className="text-right p-2 sm:p-4">
+                        <div className="flex justify-end gap-1 sm:gap-2">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => openAdjustDialog(product, true)}
+                            className="h-7 w-7 sm:h-8 sm:w-8"
+                          >
+                            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => openAdjustDialog(product, false)}
+                            className="h-7 w-7 sm:h-8 sm:w-8"
+                          >
+                            <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openHistoryDialog(product)}
+                            className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 hidden xs:flex"
+                          >
+                            Hist
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
       {/* Stock Adjustment Dialog */}
       <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Adjust Stock - {selectedProduct?.name}</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">Adjust Stock - {selectedProduct?.name}</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label>Current Stock: {selectedProduct?.stock}</Label>
+              <Label className="text-xs sm:text-sm">Current Stock: {selectedProduct?.stock}</Label>
             </div>
             <div>
-              <Label htmlFor="quantity">Quantity Change (+ or -)</Label>
+              <Label htmlFor="quantity" className="text-xs sm:text-sm">Quantity Change (+ or -)</Label>
               <Input
                 id="quantity"
                 type="number"
                 placeholder="e.g., 10 or -5"
                 value={adjustmentForm.quantity}
                 onChange={(e) => setAdjustmentForm({ ...adjustmentForm, quantity: e.target.value })}
+                className="h-9 sm:h-10 text-sm"
               />
             </div>
             <div>
-              <Label htmlFor="reason">Reason</Label>
+              <Label htmlFor="reason" className="text-xs sm:text-sm">Reason</Label>
               <Select
                 value={adjustmentForm.reason}
                 onValueChange={(value: any) => setAdjustmentForm({ ...adjustmentForm, reason: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9 sm:h-10 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -293,15 +296,16 @@ export const InventoryDashboard = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="notes">Notes (Optional)</Label>
+              <Label htmlFor="notes" className="text-xs sm:text-sm">Notes (Optional)</Label>
               <Input
                 id="notes"
                 placeholder="Add any notes..."
                 value={adjustmentForm.notes}
                 onChange={(e) => setAdjustmentForm({ ...adjustmentForm, notes: e.target.value })}
+                className="h-9 sm:h-10 text-sm"
               />
             </div>
-            <Button onClick={handleAdjustStock} className="w-full">
+            <Button onClick={handleAdjustStock} className="w-full h-9 sm:h-10 text-sm">
               Adjust Stock
             </Button>
           </div>
@@ -310,35 +314,35 @@ export const InventoryDashboard = () => {
 
       {/* Stock History Dialog */}
       <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle>Stock History - {selectedProduct?.name}</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">Stock History - {selectedProduct?.name}</DialogTitle>
           </DialogHeader>
-          <div className="max-h-96 overflow-y-auto">
+          <div className="max-h-64 sm:max-h-96 overflow-y-auto overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Change</TableHead>
-                  <TableHead>Reason</TableHead>
-                  <TableHead>Notes</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                  <TableHead className="text-xs sm:text-sm">Change</TableHead>
+                  <TableHead className="text-xs sm:text-sm hidden xs:table-cell">Reason</TableHead>
+                  <TableHead className="text-xs sm:text-sm hidden sm:table-cell">Notes</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {stockMovements.map((movement) => (
                   <TableRow key={movement.id}>
-                    <TableCell>
+                    <TableCell className="text-xs sm:text-sm p-2 sm:p-4">
                       {new Date(movement.created_at).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>
-                      <span className={movement.change > 0 ? "text-green-600" : "text-red-600"}>
+                    <TableCell className="p-2 sm:p-4">
+                      <span className={`text-xs sm:text-sm ${movement.change > 0 ? "text-green-600" : "text-red-600"}`}>
                         {movement.change > 0 ? "+" : ""}{movement.change}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">{movement.reason}</Badge>
+                    <TableCell className="hidden xs:table-cell p-2 sm:p-4">
+                      <Badge variant="outline" className="text-[10px] sm:text-xs">{movement.reason}</Badge>
                     </TableCell>
-                    <TableCell>{movement.notes || "-"}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-xs sm:text-sm p-2 sm:p-4">{movement.notes || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
