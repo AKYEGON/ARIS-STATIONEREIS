@@ -42,27 +42,27 @@ const Offers = () => {
     <div className="min-h-screen flex flex-col">
       <Header cartItemCount={getCartItemCount()} />
 
-      <main className="flex-1 container py-8 sm:py-12 px-4">
+      <main className="flex-1 container py-6 sm:py-8 md:py-12 px-3 sm:px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-primary">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 text-primary">
             Special Offers
           </h1>
-          <p className="text-lg text-muted-foreground mb-8">
+          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8">
             Save more with our specially curated bundle offers
           </p>
 
           {isLoading ? (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Loading offers...</p>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-base sm:text-lg text-muted-foreground">Loading offers...</p>
             </div>
           ) : bundles.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-base sm:text-lg text-muted-foreground">
                 No offers available at the moment
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 md:gap-6">
               {bundles.map((bundle, index) => (
                 <div
                   key={bundle.id}
