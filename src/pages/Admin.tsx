@@ -1308,47 +1308,56 @@ const Admin = () => {
       <Header cartItemCount={getCartItemCount()} />
       
       <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
-        <div className="flex justify-between items-center mb-6 sm:mb-8 gap-4">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Admin Portal</h1>
-          <div className="flex gap-2">
-            <Button onClick={() => setIsQuickSaleOpen(true)} className="gap-2 bg-primary hover:bg-primary/90">
-              <Store className="h-4 w-4" />
-              <span className="hidden sm:inline">Quick Sale</span>
+        <div className="flex justify-between items-center mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-4">
+          <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-primary">Admin</h1>
+          <div className="flex gap-1.5 sm:gap-2">
+            <Button onClick={() => setIsQuickSaleOpen(true)} className="gap-1.5 sm:gap-2 bg-primary hover:bg-primary/90 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
+              <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Quick Sale</span>
+              <span className="xs:hidden">Sale</span>
             </Button>
-            <Button variant="outline" onClick={handleSignOut} className="gap-2">
-              <LogOut className="h-4 w-4" />
+            <Button variant="outline" onClick={handleSignOut} className="gap-1.5 sm:gap-2 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Sign Out</span>
             </Button>
           </div>
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-6">
-            <TabsTrigger value="products" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Products
-            </TabsTrigger>
-            <TabsTrigger value="bundles" className="flex items-center gap-2">
-              <Tag className="h-4 w-4" />
-              Bundles
-            </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex items-center gap-2">
-              <Warehouse className="h-4 w-4" />
-              Inventory
-            </TabsTrigger>
-            <TabsTrigger value="sales" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Sales
-            </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center gap-2">
-              <ShoppingBag className="h-4 w-4" />
-              Orders
-            </TabsTrigger>
-            <TabsTrigger value="testimonials" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Reviews
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 mb-6">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-6 sm:w-full gap-1">
+              <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Products</span>
+                <span className="xs:hidden">Prod</span>
+              </TabsTrigger>
+              <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Bundles</span>
+                <span className="xs:hidden">Bndl</span>
+              </TabsTrigger>
+              <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Inventory</span>
+                <span className="xs:hidden">Inv</span>
+              </TabsTrigger>
+              <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Sales</span>
+                <span className="xs:hidden">Sale</span>
+              </TabsTrigger>
+              <TabsTrigger value="orders" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Orders</span>
+                <span className="xs:hidden">Ord</span>
+              </TabsTrigger>
+              <TabsTrigger value="testimonials" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Reviews</span>
+                <span className="xs:hidden">Rev</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
@@ -1356,19 +1365,20 @@ const Admin = () => {
           </TabsContent>
 
           {/* Sales Dashboard Tab */}
-          <TabsContent value="sales" className="space-y-6">
-            <div className="flex justify-between items-center mb-4">
+          <TabsContent value="sales" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
               <div>
-                <h3 className="text-lg font-semibold">Sales Analytics</h3>
-                <p className="text-sm text-muted-foreground">View sales performance and profit data</p>
+                <h3 className="text-base sm:text-lg font-semibold">Sales Analytics</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground">View sales performance and profit data</p>
               </div>
               <Button
                 onClick={recalculateAllProfits}
                 disabled={isRecalculating}
                 variant="outline"
-                className="gap-2"
+                className="gap-2 w-full sm:w-auto text-xs sm:text-sm"
+                size="sm"
               >
-                <TrendingUp className="h-4 w-4" />
+                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 {isRecalculating ? "Recalculating..." : "Fix Historical Profits"}
               </Button>
             </div>
@@ -1878,23 +1888,27 @@ const Admin = () => {
           </TabsContent>
 
           {/* Testimonials Tab */}
-          <TabsContent value="testimonials" className="space-y-6">
+          <TabsContent value="testimonials" className="space-y-4 sm:space-y-6">
             {/* Status Filter Tabs */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
               <Button 
                 variant={testimonialFilter === "all" ? "default" : "outline"}
                 onClick={() => setTestimonialFilter("all")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
               >
                 All ({testimonialsList.length})
               </Button>
               <Button 
                 variant={testimonialFilter === "pending" ? "default" : "outline"}
                 onClick={() => setTestimonialFilter("pending")}
-                className="relative"
+                className="relative text-xs sm:text-sm px-2.5 sm:px-4"
+                size="sm"
               >
-                Pending Review
+                <span className="hidden xs:inline">Pending</span>
+                <span className="xs:hidden">Pend</span>
                 {testimonialsList.filter(t => !t.is_published).length > 0 && (
-                  <Badge className="ml-2 bg-yellow-500 hover:bg-yellow-600">
+                  <Badge className="ml-1.5 sm:ml-2 bg-yellow-500 hover:bg-yellow-600 text-[10px] sm:text-xs px-1.5">
                     {testimonialsList.filter(t => !t.is_published).length}
                   </Badge>
                 )}
@@ -1902,8 +1916,12 @@ const Admin = () => {
               <Button 
                 variant={testimonialFilter === "published" ? "default" : "outline"}
                 onClick={() => setTestimonialFilter("published")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
               >
-                Published ({testimonialsList.filter(t => t.is_published).length})
+                <span className="hidden xs:inline">Published</span>
+                <span className="xs:hidden">Pub</span>
+                <span className="ml-1">({testimonialsList.filter(t => t.is_published).length})</span>
               </Button>
             </div>
 
@@ -2094,10 +2112,10 @@ const Admin = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Photo</TableHead>
-                          <TableHead>Customer</TableHead>
-                          <TableHead>Product</TableHead>
-                          <TableHead>Submitted</TableHead>
+                          <TableHead className="w-12 sm:w-16">Photo</TableHead>
+                          <TableHead className="min-w-[80px]">Customer</TableHead>
+                          <TableHead className="hidden sm:table-cell">Product</TableHead>
+                          <TableHead className="hidden md:table-cell">Submitted</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -2125,89 +2143,94 @@ const Admin = () => {
                             
                             return (
                               <TableRow key={testimonial.id} className="animate-fade-in" style={{ animationDelay: `${index * 0.03}s` }}>
-                                <TableCell>
+                                <TableCell className="p-2 sm:p-4">
                                   {testimonial.customer_photo ? (
                                     <img 
                                       src={testimonial.customer_photo} 
                                       alt={testimonial.customer_name}
-                                      className="w-12 h-12 object-cover rounded-full"
+                                      className="w-8 h-8 sm:w-12 sm:h-12 object-cover rounded-full"
                                     />
                                   ) : (
-                                    <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                    <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-xs sm:text-sm">
                                       {getInitials(testimonial.customer_name)}
                                     </div>
                                   )}
                                 </TableCell>
-                                <TableCell className="font-medium">{testimonial.customer_name}</TableCell>
-                                <TableCell>{testimonial.product_name || "-"}</TableCell>
-                                <TableCell className="text-sm text-muted-foreground">
+                                <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-4">{testimonial.customer_name}</TableCell>
+                                <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{testimonial.product_name || "-"}</TableCell>
+                                <TableCell className="hidden md:table-cell text-xs sm:text-sm text-muted-foreground">
                                   {new Date(testimonial.created_at).toLocaleDateString()}
                                 </TableCell>
-                                <TableCell>
-                                  <div className="flex gap-1">
+                                <TableCell className="p-2 sm:p-4">
+                                  <div className="flex flex-col xs:flex-row gap-1">
                                     {testimonial.is_published ? (
-                                      <Badge className="bg-green-500 hover:bg-green-600">Published</Badge>
+                                      <Badge className="bg-green-500 hover:bg-green-600 text-[10px] xs:text-xs">Pub</Badge>
                                     ) : (
-                                      <Badge className="bg-yellow-500 hover:bg-yellow-600">Pending</Badge>
+                                      <Badge className="bg-yellow-500 hover:bg-yellow-600 text-[10px] xs:text-xs">Pend</Badge>
                                     )}
-                                    {testimonial.is_featured && <Badge variant="secondary">Featured</Badge>}
+                                    {testimonial.is_featured && <Badge variant="secondary" className="text-[10px] xs:text-xs hidden xs:inline-flex">★</Badge>}
                                   </div>
                                 </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-2">
+                                <TableCell className="text-right p-2 sm:p-4">
+                                  <div className="flex justify-end gap-1 sm:gap-2">
                                     {!testimonial.is_published ? (
                                       <>
                                         <Button
                                           variant="default"
-                                          size="sm"
+                                          size="icon"
                                           onClick={() => handleQuickApprove(testimonial.id)}
-                                          className="bg-green-600 hover:bg-green-700"
+                                          className="bg-green-600 hover:bg-green-700 h-7 w-7 sm:h-8 sm:w-8"
                                           title="Approve & Publish"
                                         >
-                                          ✓ Approve
+                                          <span className="text-xs">✓</span>
                                         </Button>
                                         <Button
                                           variant="destructive"
-                                          size="sm"
+                                          size="icon"
                                           onClick={() => handleDeleteTestimonial(testimonial.id)}
                                           title="Reject & Delete"
+                                          className="h-7 w-7 sm:h-8 sm:w-8"
                                         >
-                                          ✗ Reject
+                                          <span className="text-xs">✗</span>
                                         </Button>
                                         <Button
                                           variant="outline"
                                           size="icon"
                                           onClick={() => openTestimonialEditDialog(testimonial)}
                                           title="Edit"
+                                          className="h-7 w-7 sm:h-8 sm:w-8"
                                         >
-                                          <Pencil className="h-4 w-4" />
+                                          <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
                                         </Button>
                                       </>
                                     ) : (
                                       <>
                                         <Button
                                           variant="outline"
-                                          size="sm"
+                                          size="icon"
                                           onClick={() => handleQuickUnpublish(testimonial.id)}
                                           title="Unpublish"
+                                          className="h-7 w-7 sm:h-8 sm:w-8"
                                         >
-                                          📤 Unpublish
+                                          <span className="text-xs">📤</span>
                                         </Button>
                                         <Button
                                           variant="outline"
                                           size="icon"
                                           onClick={() => openTestimonialEditDialog(testimonial)}
                                           title="Edit"
+                                          className="h-7 w-7 sm:h-8 sm:w-8"
                                         >
-                                          <Pencil className="h-4 w-4" />
+                                          <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
                                         </Button>
                                         <Button
                                           variant="destructive"
                                           size="icon"
                                           onClick={() => handleDeleteTestimonial(testimonial.id)}
                                           title="Delete"
+                                          className="h-7 w-7 sm:h-8 sm:w-8"
                                         >
-                                          <Trash2 className="h-4 w-4" />
+                                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                                         </Button>
                                       </>
                                     )}

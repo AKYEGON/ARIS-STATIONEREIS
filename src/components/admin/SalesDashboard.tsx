@@ -135,116 +135,120 @@ export const SalesDashboard = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as any)}>
-        <TabsList>
-          <TabsTrigger value="day">Today</TabsTrigger>
-          <TabsTrigger value="week">This Week</TabsTrigger>
-          <TabsTrigger value="month">This Month</TabsTrigger>
+        <TabsList className="h-8 sm:h-10">
+          <TabsTrigger value="day" className="text-xs sm:text-sm px-2.5 sm:px-3">Today</TabsTrigger>
+          <TabsTrigger value="week" className="text-xs sm:text-sm px-2.5 sm:px-3">Week</TabsTrigger>
+          <TabsTrigger value="month" className="text-xs sm:text-sm px-2.5 sm:px-3">Month</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-2 sm:gap-4 grid-cols-2 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
+            <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Total Sales</CardTitle>
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">KSh {stats.totalSales.toFixed(2)}</div>
+          <CardContent className="p-2.5 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-sm xs:text-base sm:text-2xl font-bold">KSh {stats.totalSales.toFixed(0)}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Profit</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
+            <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Profit</CardTitle>
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              KSh {stats.totalProfit.toFixed(2)}
+          <CardContent className="p-2.5 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-sm xs:text-base sm:text-2xl font-bold text-green-600">
+              KSh {stats.totalProfit.toFixed(0)}
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
+            <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Orders</CardTitle>
+            <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalOrders}</div>
+          <CardContent className="p-2.5 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-sm xs:text-base sm:text-2xl font-bold">{stats.totalOrders}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Order Value</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
+            <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Avg Order</CardTitle>
+            <Package className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              KSh {stats.averageOrderValue.toFixed(2)}
+          <CardContent className="p-2.5 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-sm xs:text-base sm:text-2xl font-bold">
+              KSh {stats.averageOrderValue.toFixed(0)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-sm sm:text-base">Top Selling Products</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product</TableHead>
-                  <TableHead>Units Sold</TableHead>
-                  <TableHead>Revenue</TableHead>
-                  <TableHead>Profit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {topProducts.map((product, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{product.product_name}</TableCell>
-                    <TableCell>{product.total_quantity}</TableCell>
-                    <TableCell>KSh {product.total_revenue.toFixed(2)}</TableCell>
-                    <TableCell className="text-green-600 font-medium">
-                      KSh {product.total_profit.toFixed(2)}
-                    </TableCell>
+          <CardContent className="p-2 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs sm:text-sm">Product</TableHead>
+                    <TableHead className="text-xs sm:text-sm w-[50px]">Qty</TableHead>
+                    <TableHead className="text-xs sm:text-sm hidden xs:table-cell">Revenue</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Profit</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {topProducts.map((product, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-4 max-w-[120px] truncate">{product.product_name}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4">{product.total_quantity}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden xs:table-cell">KSh {product.total_revenue.toFixed(0)}</TableCell>
+                      <TableCell className="text-green-600 font-medium text-xs sm:text-sm p-2 sm:p-4">
+                        KSh {product.total_profit.toFixed(0)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Daily Sales</CardTitle>
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-sm sm:text-base">Daily Sales</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Orders</TableHead>
-                  <TableHead>Sales</TableHead>
-                  <TableHead>Profit</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {dailySales.map((day, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{day.date}</TableCell>
-                    <TableCell>{day.order_count}</TableCell>
-                    <TableCell>KSh {day.total_sales.toFixed(2)}</TableCell>
-                    <TableCell className="text-green-600 font-medium">
-                      KSh {day.total_profit.toFixed(2)}
-                    </TableCell>
+          <CardContent className="p-2 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs sm:text-sm">Date</TableHead>
+                    <TableHead className="text-xs sm:text-sm w-[40px]">Ord</TableHead>
+                    <TableHead className="text-xs sm:text-sm hidden xs:table-cell">Sales</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Profit</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {dailySales.map((day, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-4">{day.date}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4">{day.order_count}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden xs:table-cell">KSh {day.total_sales.toFixed(0)}</TableCell>
+                      <TableCell className="text-green-600 font-medium text-xs sm:text-sm p-2 sm:p-4">
+                        KSh {day.total_profit.toFixed(0)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
