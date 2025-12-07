@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -25,6 +25,7 @@ import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 interface OrderItem {
   product_name: string;
@@ -230,7 +231,7 @@ const Admin = () => {
     navigate("/auth");
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setIsLoadingOrders(true);
     try {
       const { data, error } = await supabase
@@ -261,7 +262,11 @@ const Admin = () => {
     } finally {
       setIsLoadingOrders(false);
     }
-  };
+  }, []);
+
+  const handleRefreshOrders = useCallback(async () => {
+    await fetchOrders();
+  }, [fetchOrders]);
 
   const fetchTestimonials = async () => {
     try {
@@ -1769,6 +1774,7 @@ const Admin = () => {
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
+            <PullToRefresh onRefresh={handleRefreshOrders} className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">View and manage customer orders</p>
             </div>
@@ -1885,6 +1891,7 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
+            </PullToRefresh>
           </TabsContent>
 
           {/* Testimonials Tab */}

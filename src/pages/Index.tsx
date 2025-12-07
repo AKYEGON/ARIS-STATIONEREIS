@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/Header";
@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import heroBackground from "@/assets/hero-background.jpg";
 import OffersSection from "@/components/OffersSection";
+import { PullToRefresh } from "@/components/PullToRefresh";
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -21,12 +22,9 @@ const Index = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from("products")
         .select(`
@@ -57,7 +55,15 @@ const Index = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleRefresh = useCallback(async () => {
+    await fetchProducts();
+  }, [fetchProducts]);
 
   const filteredProducts = products.filter(
     (product) =>
@@ -91,7 +97,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen flex flex-col">
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Hero Section */}
@@ -228,7 +234,7 @@ const Index = () => {
       </main>
 
       <Footer />
-    </div>
+    </PullToRefresh>
   );
 };
 
