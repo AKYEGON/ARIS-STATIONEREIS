@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./contexts/CartContext";
+import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
 import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
@@ -45,6 +46,7 @@ const App = () => {
       <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          <Analytics />
         </CartProvider>
       </TooltipProvider>
     </QueryClientProvider>
