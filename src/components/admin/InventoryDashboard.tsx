@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Package, AlertTriangle } from "lucide-react";
+import { Plus, Minus, Package, AlertTriangle, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,6 +32,7 @@ interface StockMovement {
 
 export const InventoryDashboard = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
@@ -41,6 +42,12 @@ export const InventoryDashboard = () => {
     reason: "purchase" as "purchase" | "damage" | "sale" | "correction" | "return",
     notes: ""
   });
+
+  // Filter products based on search query
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   useEffect(() => {
     fetchProducts();
@@ -169,7 +176,19 @@ export const InventoryDashboard = () => {
 
       <Card>
         <CardHeader className="p-3 sm:p-6">
-          <CardTitle className="text-base sm:text-lg">Inventory Management</CardTitle>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <CardTitle className="text-base sm:text-lg">Inventory Management</CardTitle>
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 h-9 text-sm"
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="p-2 sm:p-6 pt-0">
           <div className="overflow-x-auto -mx-2 sm:mx-0">
@@ -185,7 +204,7 @@ export const InventoryDashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {products.map((product) => {
+                {filteredProducts.map((product) => {
                   const profit = calculateProfit(product.price, product.cost_price);
                   return (
                     <TableRow key={product.id}>
