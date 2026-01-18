@@ -11,7 +11,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import heroBackground from "@/assets/hero-background.jpg";
 import OffersSection from "@/components/OffersSection";
-import { PullToRefresh } from "@/components/PullToRefresh";
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -61,9 +60,6 @@ const Index = () => {
     fetchProducts();
   }, [fetchProducts]);
 
-  const handleRefresh = useCallback(async () => {
-    await fetchProducts();
-  }, [fetchProducts]);
 
   const filteredProducts = products.filter(
     (product) =>
@@ -97,7 +93,7 @@ const Index = () => {
   };
 
   return (
-    <PullToRefresh onRefresh={handleRefresh} className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col">
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Hero Section */}
@@ -234,7 +230,7 @@ const Index = () => {
       </main>
 
       <Footer />
-    </PullToRefresh>
+    </div>
   );
 };
 
