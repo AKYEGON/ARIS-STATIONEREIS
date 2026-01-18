@@ -45,13 +45,15 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </div>
           )}
         </div>
-        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1 flex flex-col">
-          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2 min-h-[2rem] xs:min-h-[2.25rem]">
-            {product.name}
-          </h3>
-          <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1 flex-1">
-            {product.description}
-          </p>
+        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1 flex flex-col justify-between">
+          <div>
+            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
+              {product.name}
+            </h3>
+            <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
+              {product.description}
+            </p>
+          </div>
           {product.originalPrice && product.originalPrice > product.price ? (
             <div className="flex flex-col gap-0 mt-auto">
               <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
