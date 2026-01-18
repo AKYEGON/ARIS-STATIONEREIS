@@ -1,7 +1,20 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Product, CartItem } from "@/types/product";
 import { Bundle, CartBundle } from "@/types/bundle";
 import { toast } from "sonner";
+
+const CART_STORAGE_KEY = "aris-cart-items";
+const BUNDLE_STORAGE_KEY = "aris-bundle-items";
+
+// Helper to safely parse JSON from localStorage
+const getStoredItems = <T,>(key: string, fallback: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : fallback;
+  } catch {
+    return fallback;
+  }
+};
 
 interface CartContextType {
   cartItems: CartItem[];
@@ -20,8 +33,22 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [bundleItems, setBundleItems] = useState<CartBundle[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => 
+    getStoredItems<CartItem[]>(CART_STORAGE_KEY, [])
+  );
+  const [bundleItems, setBundleItems] = useState<CartBundle[]>(() => 
+    getStoredItems<CartBundle[]>(BUNDLE_STORAGE_KEY, [])
+  );
+
+  // Persist cart items to localStorage
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  // Persist bundle items to localStorage
+  useEffect(() => {
+    localStorage.setItem(BUNDLE_STORAGE_KEY, JSON.stringify(bundleItems));
+  }, [bundleItems]);
 
   const addToCart = (product: Product) => {
     setCartItems((prevItems) => {
@@ -92,6 +119,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = () => {
     setCartItems([]);
     setBundleItems([]);
+    localStorage.removeItem(CART_STORAGE_KEY);
+    localStorage.removeItem(BUNDLE_STORAGE_KEY);
   };
 
   const getCartTotal = () => {

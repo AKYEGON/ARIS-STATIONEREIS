@@ -14,12 +14,25 @@ import OffersSection from "@/components/OffersSection";
 
 const PRODUCTS_PER_PAGE = 8;
 
+const SEARCH_STORAGE_KEY = "aris-search-query";
+
 const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(() => {
+    try {
+      return sessionStorage.getItem(SEARCH_STORAGE_KEY) || "";
+    } catch {
+      return "";
+    }
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Persist search query to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem(SEARCH_STORAGE_KEY, searchQuery);
+  }, [searchQuery]);
 
   const fetchProducts = useCallback(async () => {
     try {
