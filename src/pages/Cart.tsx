@@ -247,42 +247,73 @@ const Cart = () => {
                   {bundleItems.map((bundle, index) => (
                     <Card 
                       key={bundle.id} 
-                      className="transition-all duration-300 hover:shadow-md animate-fade-in border-2 border-primary/20"
+                      className="transition-all duration-300 hover:shadow-md animate-fade-in border-2 border-primary/20 overflow-hidden"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <CardContent className="p-3 sm:p-4">
-                        <div className="flex gap-3 sm:gap-4">
-                          <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-md">
+                        <div className="flex gap-2 sm:gap-4">
+                          <div className="relative w-16 h-16 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-md">
                             <img
                               src={bundle.image}
                               alt={bundle.name}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute top-1 right-1">
-                              <span className="bg-primary text-primary-foreground text-xs px-2 py-0.5 rounded">
+                            <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1">
+                              <span className="bg-primary text-primary-foreground text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 rounded">
                                 Bundle
                               </span>
                             </div>
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate">{bundle.name}</h3>
+                          <div className="flex-1 min-w-0 overflow-hidden">
+                            <h3 className="font-semibold text-xs sm:text-base md:text-lg line-clamp-2 sm:truncate">{bundle.name}</h3>
                             {bundle.items && bundle.items.length > 0 && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">
+                              <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-2">
                                 Includes: {bundle.items.map(item => 
                                   `${item.product?.name || 'Product'} ${item.quantity > 1 ? `(×${item.quantity})` : ''}`
                                 ).join(', ')}
                               </p>
                             )}
-                            <div className="flex items-baseline gap-2 mt-1">
-                              <span className="text-xs text-muted-foreground line-through">
+                            <div className="flex items-baseline gap-1 sm:gap-2 mt-1">
+                              <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
                                 KSh {bundle.original_total_price.toFixed(2)}
                               </span>
-                              <span className="text-base sm:text-lg font-bold text-primary">
+                              <span className="text-sm sm:text-lg font-bold text-primary">
                                 KSh {bundle.bundle_price.toFixed(2)}
                               </span>
                             </div>
+                            {/* Mobile controls - inline below price */}
+                            <div className="flex items-center justify-between mt-2 sm:hidden">
+                              <div className="flex items-center gap-1">
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-6 w-6 transition-all duration-200 active:scale-90"
+                                  onClick={() => updateBundleQuantity(bundle.id, bundle.quantity - 1)}
+                                >
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                                <span className="w-5 text-center font-semibold text-xs">{bundle.quantity}</span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-6 w-6 transition-all duration-200 active:scale-90"
+                                  onClick={() => updateBundleQuantity(bundle.id, bundle.quantity + 1)}
+                                >
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 transition-all duration-200 hover:scale-110 active:scale-95 text-destructive"
+                                onClick={() => removeBundleFromCart(bundle.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="flex flex-col items-end gap-2 sm:gap-3">
+                          {/* Desktop controls - right side column */}
+                          <div className="hidden sm:flex flex-col items-end gap-2 sm:gap-3 flex-shrink-0">
                             <Button
                               variant="ghost"
                               size="icon"

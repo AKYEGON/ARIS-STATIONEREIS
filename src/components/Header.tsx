@@ -119,10 +119,10 @@ const Header = ({ cartItemCount }: HeaderProps) => {
         </div>
       </header>
       
-      {/* Floating Cart Button for Mobile - Hides when footer is visible */}
+      {/* Floating Cart Button for Mobile - Centered at bottom, hides when footer is visible */}
       <Link 
         to="/cart" 
-        className={`md:hidden fixed bottom-6 right-4 z-[100] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 ${
+        className={`md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 ${
           cartItemCount > 0 
             ? 'bg-primary text-primary-foreground animate-bounce-subtle' 
             : 'bg-background border-2 border-primary text-primary'
