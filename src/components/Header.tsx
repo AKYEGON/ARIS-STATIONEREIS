@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import logo from "@/assets/logo.png";
 import { useState } from "react";
+import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -12,6 +13,7 @@ interface HeaderProps {
 
 const Header = ({ cartItemCount }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isFooterVisible = useFooterVisibility();
 
   return (
     <>
@@ -117,13 +119,17 @@ const Header = ({ cartItemCount }: HeaderProps) => {
         </div>
       </header>
       
-      {/* Floating Cart Button for Mobile - Always visible */}
+      {/* Floating Cart Button for Mobile - Hides when footer is visible */}
       <Link 
         to="/cart" 
-        className={`md:hidden fixed bottom-6 right-4 z-[100] p-4 rounded-full shadow-xl transition-all duration-200 hover:scale-110 active:scale-95 ${
+        className={`md:hidden fixed bottom-6 right-4 z-[100] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 ${
           cartItemCount > 0 
             ? 'bg-primary text-primary-foreground animate-bounce-subtle' 
             : 'bg-background border-2 border-primary text-primary'
+        } ${
+          isFooterVisible 
+            ? 'opacity-0 pointer-events-none translate-y-4' 
+            : 'opacity-100 translate-y-0'
         }`}
       >
         <ShoppingCart className="h-6 w-6" />
