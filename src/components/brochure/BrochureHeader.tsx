@@ -16,7 +16,7 @@ const BrochureHeader = () => {
                 ARIS STATIONARIES
               </h1>
               <p className="text-sm text-muted-foreground print:text-xs">
-                Quality Stationery & Office Supplies
+                Home of Affordable Stationaries
               </p>
             </div>
           </div>

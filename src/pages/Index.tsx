@@ -127,10 +127,10 @@ const Index = () => {
               ARIS STATIONARIES
             </h1>
             <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground animate-fade-in drop-shadow-sm">
-              Quality You Need, Prices You Will Love
+              HOME OF AFFORDABLE STATIONARIES
             </p>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground animate-fade-in max-w-2xl mx-auto">
-              Your trusted source for affordable, high-quality stationery supplies
+              Your trusted partner for all stationery needs
             </p>
           </div>
         </div>
