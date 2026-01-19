@@ -14,7 +14,7 @@ const Footer = () => {
                 ARIS STATIONARIES
               </h3>
               <p className="text-xs sm:text-sm text-white/70">
-                Quality you need, prices you will love
+                Home of Affordable Stationaries
               </p>
             </div>
           </div>

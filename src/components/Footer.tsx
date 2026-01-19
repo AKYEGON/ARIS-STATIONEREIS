@@ -30,7 +30,7 @@ const Footer = () => {
                   ARIS STATIONARIES
                 </h3>
                 <p className="text-sm text-white/70 leading-relaxed">
-                  Quality you need, prices you will love. Your trusted partner for all stationery needs.
+                  Home of affordable stationaries. Your trusted partner for all stationery needs.
                 </p>
               </div>
             </div>
