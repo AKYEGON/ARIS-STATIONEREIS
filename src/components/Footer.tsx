@@ -18,82 +18,77 @@ const Footer = () => {
         {/* Green accent line at top */}
         <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
         
-        <div className="container py-10 sm:py-12 px-4 relative z-10">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-10">
-            {/* Brand Section */}
-            <div className="flex flex-col items-start gap-4 sm:col-span-2 lg:col-span-1">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10">
-                <img src={logo} alt="ARIS STATIONARIES Logo" className="h-14 sm:h-16" />
+        <div className="container py-6 sm:py-12 px-4 relative z-10">
+          {/* Mobile: Compact 2-column layout */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-10">
+            {/* Brand Section - Full width on mobile */}
+            <div className="col-span-2 sm:col-span-2 lg:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-4">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10 flex-shrink-0">
+                <img src={logo} alt="ARIS STATIONARIES Logo" className="h-10 sm:h-16" />
               </div>
-              <div>
-                <h3 className="font-bold text-lg sm:text-xl mb-2 text-primary">
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm sm:text-xl text-primary">
                   ARIS STATIONARIES
                 </h3>
-                <p className="text-sm text-white/70 leading-relaxed">
+                <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
                   Home of affordable stationaries. Your trusted partner for all stationery needs.
                 </p>
+                <p className="text-xs text-white/70 sm:hidden">Home of affordable stationaries</p>
               </div>
             </div>
             
-            {/* Quick Links */}
+            {/* Quick Links - Compact on mobile */}
             <div>
-              <h4 className="font-semibold mb-4 text-base text-white flex items-center gap-2">
-                <span className="w-8 h-0.5 bg-primary rounded-full" />
-                Quick Links
+              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
+                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
+                Links
               </h4>
-              <div className="space-y-3">
-                <Link 
-                  to="/" 
-                  className="text-sm text-white/70 hover:text-primary hover:translate-x-1 transition-all duration-200 block"
-                >
+              <div className="space-y-1.5 sm:space-y-3">
+                <Link to="/" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">
                   Home
                 </Link>
-                <Link 
-                  to="/offers" 
-                  className="text-sm text-white/70 hover:text-primary hover:translate-x-1 transition-all duration-200 block"
-                >
-                  Special Offers
+                <Link to="/offers" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">
+                  Offers
                 </Link>
-                <Link 
-                  to="/testimonials" 
-                  className="text-sm text-white/70 hover:text-primary hover:translate-x-1 transition-all duration-200 block"
-                >
-                  Happy Customers
-                </Link>
-                <Link 
-                  to="/brochure" 
-                  className="text-sm text-white/70 hover:text-primary hover:translate-x-1 transition-all duration-200 block"
-                >
-                  Brochure
+                <Link to="/testimonials" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">
+                  Reviews
                 </Link>
               </div>
             </div>
             
-            {/* Contact */}
+            {/* Contact + Admin combined on mobile */}
             <div>
-              <h4 className="font-semibold mb-4 text-base text-white flex items-center gap-2">
-                <span className="w-8 h-0.5 bg-primary rounded-full" />
-                Contact Us
+              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
+                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
+                Contact
               </h4>
-              <div className="space-y-3">
+              <div className="space-y-1.5 sm:space-y-3">
                 <a 
                   href="https://wa.me/254707222419" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-white/70 hover:text-primary transition-all duration-200"
+                  className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70 hover:text-primary transition-all"
                 >
-                  <Phone className="h-4 w-4" />
-                  +254 707 222419
+                  <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">+254 707 222419</span>
+                  <span className="sm:hidden">WhatsApp</span>
                 </a>
-                <div className="flex items-start gap-2 text-sm text-white/70">
-                  <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                  <span>Nairobi, Kenya</span>
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70">
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <span>Nairobi</span>
                 </div>
+                <Link 
+                  to="/auth" 
+                  className="flex items-center gap-1.5 text-xs sm:text-sm text-primary hover:text-primary/80 transition-all"
+                >
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                  Admin
+                </Link>
               </div>
             </div>
             
-            {/* Admin Section */}
-            <div>
+            {/* Admin Section - Hidden on mobile, shown on larger screens */}
+            <div className="hidden lg:block">
               <h4 className="font-semibold mb-4 text-base text-white flex items-center gap-2">
                 <span className="w-8 h-0.5 bg-primary rounded-full" />
                 Admin Access
@@ -108,12 +103,12 @@ const Footer = () => {
             </div>
           </div>
           
-          {/* Bottom bar */}
-          <div className="mt-10 pt-6 border-t border-white/10">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-white/50">
-              <p>© {new Date().getFullYear()} ARIS STATIONARIES. All rights reserved.</p>
+          {/* Bottom bar - More compact on mobile */}
+          <div className="mt-4 sm:mt-10 pt-3 sm:pt-6 border-t border-white/10">
+            <div className="flex items-center justify-between text-xs sm:text-sm text-white/50">
+              <p>© {new Date().getFullYear()} ARIS STATIONARIES</p>
               <p className="flex items-center gap-1">
-                Made with <Heart className="h-3 w-3 text-red-400 fill-red-400" /> in Kenya
+                <Heart className="h-3 w-3 text-red-400 fill-red-400" /> Kenya
               </p>
             </div>
           </div>
