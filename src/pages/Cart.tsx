@@ -5,6 +5,7 @@ import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import ProductImageGallery from "@/components/cart/ProductImageGallery";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -222,6 +223,11 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Shopping Cart"
+        description="Review your cart and checkout. Fast delivery available in Nairobi from ARIS STATIONARIES."
+        canonicalUrl="/cart"
+      />
       <Header cartItemCount={getCartItemCount()} />
       
       <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">

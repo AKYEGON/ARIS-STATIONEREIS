@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CustomerTestimonial } from "@/types/testimonial";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import SEO from "@/components/SEO";
 import StoriesCarousel from "@/components/testimonials/StoriesCarousel";
 import StoryCircles from "@/components/testimonials/StoryCircles";
 import ReviewSubmissionForm from "@/components/testimonials/ReviewSubmissionForm";
@@ -64,6 +65,11 @@ const Testimonials = () => {
   if (loading) {
     return (
       <div className="min-h-screen">
+        <SEO 
+          title="Customer Reviews & Stories"
+          description="Read what our customers say about ARIS STATIONARIES. Real reviews from happy customers in Nairobi, Kenya."
+          canonicalUrl="/testimonials"
+        />
         <Header cartItemCount={getCartItemCount()} />
         <div className="container mx-auto px-4 py-20 text-center">
           <p className="text-muted-foreground">Loading testimonials...</p>
@@ -75,6 +81,11 @@ const Testimonials = () => {
 
   return (
     <div className="min-h-screen">
+      <SEO 
+        title="Customer Reviews & Stories"
+        description="Read what our customers say about ARIS STATIONARIES. Real reviews from happy customers in Nairobi, Kenya."
+        canonicalUrl="/testimonials"
+      />
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Hero Section with Story Circles */}

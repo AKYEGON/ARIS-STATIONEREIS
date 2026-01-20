@@ -4,6 +4,7 @@ import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
+import SEO from "@/components/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight, Users } from "lucide-react";
@@ -107,6 +108,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="ARIS STATIONARIES - Home of Affordable Stationaries | Nairobi, Kenya"
+        description="Shop quality stationery at affordable prices. ARIS STATIONARIES offers pens, notebooks, office supplies, and more. Fast delivery in Nairobi, Kenya."
+        canonicalUrl="/"
+      />
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Hero Section */}

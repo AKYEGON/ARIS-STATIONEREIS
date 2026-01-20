@@ -3,6 +3,7 @@ import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import BundleCard from "@/components/BundleCard";
+import SEO from "@/components/SEO";
 import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,6 +41,11 @@ const Offers = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <SEO 
+        title="Special Offers & Bundle Deals"
+        description="Save more with our specially curated bundle offers on stationery products. Quality stationery at discounted prices at ARIS STATIONARIES, Nairobi."
+        canonicalUrl="/offers"
+      />
       <Header cartItemCount={getCartItemCount()} />
 
       <main className="flex-1 container py-6 sm:py-8 md:py-12 px-3 sm:px-4">
