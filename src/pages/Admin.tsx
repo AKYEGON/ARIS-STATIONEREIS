@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 import { Product, ProductMedia } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -1902,14 +1902,30 @@ const Admin = () => {
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 transition-all duration-200 hover:scale-105 active:scale-95"
-                              onClick={() => openOrderDialog(order)}
-                            >
-                              View
-                            </Button>
+                            <div className="flex items-center justify-end gap-1">
+                              <a
+                                href={`tel:${order.customer_phone}`}
+                                className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-input bg-background hover:bg-green-50 hover:border-green-300 transition-colors"
+                                title="Call customer"
+                              >
+                                <Phone className="h-4 w-4 text-green-600" />
+                              </a>
+                              <a
+                                href={`sms:${order.customer_phone}`}
+                                className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-input bg-background hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                                title="Text customer"
+                              >
+                                <MessageCircle className="h-4 w-4 text-blue-600" />
+                              </a>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 transition-all duration-200 hover:scale-105 active:scale-95"
+                                onClick={() => openOrderDialog(order)}
+                              >
+                                View
+                              </Button>
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -2591,7 +2607,23 @@ const Admin = () => {
                   </div>
                   <div>
                     <Label className="text-muted-foreground">Phone</Label>
-                    <p>{selectedOrder.customer_phone}</p>
+                    <div className="flex items-center gap-2">
+                      <p>{selectedOrder.customer_phone}</p>
+                      <a
+                        href={`tel:${selectedOrder.customer_phone}`}
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-input bg-background hover:bg-green-50 hover:border-green-300 transition-colors"
+                        title="Call customer"
+                      >
+                        <Phone className="h-3.5 w-3.5 text-green-600" />
+                      </a>
+                      <a
+                        href={`sms:${selectedOrder.customer_phone}`}
+                        className="inline-flex items-center justify-center h-7 w-7 rounded-md border border-input bg-background hover:bg-blue-50 hover:border-blue-300 transition-colors"
+                        title="Text customer"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5 text-blue-600" />
+                      </a>
+                    </div>
                   </div>
                 </div>
 
