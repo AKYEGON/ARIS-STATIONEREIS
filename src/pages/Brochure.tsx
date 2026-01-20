@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import BrochureCover from "@/components/brochure/BrochureCover";
 import BrochureProduct from "@/components/brochure/BrochureProduct";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft, Download, Loader2, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -198,6 +199,11 @@ const Brochure = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO 
+        title="Product Catalog"
+        description="Browse our complete product catalog. Download or print our stationery brochure from ARIS STATIONARIES, Nairobi."
+        canonicalUrl="/brochure"
+      />
       {/* Print/Navigation controls - hidden when printing */}
       <div className="print:hidden sticky top-0 z-50 bg-background border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2">
