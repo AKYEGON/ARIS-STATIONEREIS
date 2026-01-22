@@ -7,7 +7,8 @@ import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft, Download, Loader2, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import html2pdf from "html2pdf.js";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 
@@ -53,40 +54,75 @@ const Brochure = () => {
     window.print();
   };
 
+  const generatePdfBlob = async (): Promise<Blob> => {
+    if (!brochureRef.current) throw new Error("Brochure ref not available");
+
+    const element = brochureRef.current;
+    const scale = window.innerWidth < 768 ? 1.5 : 2;
+
+    const canvas = await html2canvas(element, {
+      scale,
+      useCORS: true,
+      logging: false,
+      windowWidth: 1200,
+    });
+
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+      compress: true,
+    });
+
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 5; // mm
+
+    const imgWidth = pageWidth - margin * 2;
+    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+    let heightLeft = imgHeight;
+    let position = margin;
+
+    // Add first page
+    pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+
+    // Add additional pages if needed
+    while (heightLeft >= 0) {
+      position = heightLeft - imgHeight + margin;
+      pdf.addPage();
+      pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    return pdf.output("blob");
+  };
+
   const handleDownload = async () => {
     if (!brochureRef.current) return;
-    
+
     try {
       setIsDownloading(true);
-      
+
       toast({
         title: "Generating PDF...",
         description: "Please wait while we create your brochure.",
       });
 
-      const element = brochureRef.current;
+      const pdfBlob = await generatePdfBlob();
       
-      // Mobile-optimized settings
-      const opt = {
-        margin: 0.5,
-        filename: 'ARIS-Stationaries-Catalog.pdf',
-        image: { type: 'jpeg' as const, quality: 0.95 },
-        html2canvas: { 
-          scale: window.innerWidth < 768 ? 1.5 : 2, // Lower scale for mobile
-          useCORS: true,
-          logging: false,
-          windowWidth: 1200 // Fixed width for consistent rendering
-        },
-        jsPDF: { 
-          unit: 'cm', 
-          format: 'a4', 
-          orientation: 'portrait' as const,
-          compress: true
-        }
-      };
+      // Create download link
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ARIS-Stationaries-Catalog.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      await html2pdf().set(opt).from(element).save();
-      
       toast({
         title: "Download Complete!",
         description: "Your brochure has been downloaded successfully.",
@@ -105,52 +141,35 @@ const Brochure = () => {
 
   const handleShare = async () => {
     if (!brochureRef.current) return;
-    
+
     try {
       setIsDownloading(true);
-      
+
       toast({
         title: "Preparing to share...",
         description: "Generating your brochure.",
       });
 
-      const element = brochureRef.current;
-      const opt = {
-        margin: 0.5,
-        filename: 'ARIS-Stationaries-Catalog.pdf',
-        image: { type: 'jpeg' as const, quality: 0.95 },
-        html2canvas: { 
-          scale: window.innerWidth < 768 ? 1.5 : 2,
-          useCORS: true,
-          logging: false,
-          windowWidth: 1200
-        },
-        jsPDF: { 
-          unit: 'cm', 
-          format: 'a4', 
-          orientation: 'portrait' as const,
-          compress: true
-        }
-      };
+      const pdfBlob = await generatePdfBlob();
 
-      // Generate PDF as blob
-      const pdf = await html2pdf().set(opt).from(element).output('blob');
-      
       // Check if Web Share API is available and supports files
       if (navigator.share) {
-        const file = new File([pdf], 'ARIS-Stationaries-Catalog.pdf', { type: 'application/pdf' });
-        
+        const file = new File([pdfBlob], "ARIS-Stationaries-Catalog.pdf", {
+          type: "application/pdf",
+        });
+
         // Check if the browser can share files
-        const canShareFiles = navigator.canShare && navigator.canShare({ files: [file] });
-        
+        const canShareFiles =
+          navigator.canShare && navigator.canShare({ files: [file] });
+
         if (canShareFiles) {
           try {
             await navigator.share({
               files: [file],
-              title: 'ARIS Stationaries Catalog',
-              text: 'Check out our product catalog!'
+              title: "ARIS Stationaries Catalog",
+              text: "Check out our product catalog!",
             });
-            
+
             toast({
               title: "Shared Successfully!",
               description: "Brochure has been shared.",
@@ -158,7 +177,7 @@ const Brochure = () => {
             return;
           } catch (shareError: any) {
             // User cancelled or share failed
-            if (shareError.name === 'AbortError') {
+            if (shareError.name === "AbortError") {
               toast({
                 title: "Share Cancelled",
                 description: "You cancelled the share action.",
@@ -169,19 +188,28 @@ const Brochure = () => {
           }
         }
       }
-      
+
       // Fallback: Download the PDF instead
-      await html2pdf().set(opt).from(element).save();
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "ARIS-Stationaries-Catalog.pdf";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
       toast({
         title: "Downloaded Instead",
-        description: "Sharing is not available on this device. The brochure has been downloaded.",
+        description:
+          "Sharing is not available on this device. The brochure has been downloaded.",
       });
-      
     } catch (error) {
       console.error("Error in share/download:", error);
       toast({
         title: "Action Failed",
-        description: "Unable to share or download. Please try the Download PDF button.",
+        description:
+          "Unable to share or download. Please try the Download PDF button.",
         variant: "destructive",
       });
     } finally {
@@ -199,7 +227,7 @@ const Brochure = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEO 
+      <SEO
         title="Product Catalog"
         description="Browse our complete product catalog. Download or print our stationery brochure from ARIS STATIONARIES, Nairobi."
         canonicalUrl="/brochure"
@@ -214,10 +242,10 @@ const Brochure = () => {
             </Button>
           </Link>
           <div className="flex gap-2 w-full sm:w-auto">
-            <Button 
-              onClick={handleShare} 
-              size="sm" 
-              variant="default" 
+            <Button
+              onClick={handleShare}
+              size="sm"
+              variant="default"
               className="flex-1 sm:flex-initial sm:hidden"
               disabled={isDownloading}
             >
@@ -228,10 +256,10 @@ const Brochure = () => {
               )}
               Share
             </Button>
-            <Button 
-              onClick={handleDownload} 
-              size="sm" 
-              variant="default" 
+            <Button
+              onClick={handleDownload}
+              size="sm"
+              variant="default"
               className="flex-1 sm:flex-initial hidden sm:flex"
               disabled={isDownloading}
             >
@@ -247,7 +275,12 @@ const Brochure = () => {
                 </>
               )}
             </Button>
-            <Button onClick={handlePrint} size="sm" variant="outline" className="flex-1 sm:flex-initial">
+            <Button
+              onClick={handlePrint}
+              size="sm"
+              variant="outline"
+              className="flex-1 sm:flex-initial"
+            >
               <Printer className="h-4 w-4 mr-2" />
               Print
             </Button>
@@ -266,35 +299,56 @@ const Brochure = () => {
           <header className="bg-primary/5 border-b border-border py-2 print:py-1">
             <div className="container mx-auto px-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <img src={logo} alt="Logo" className="h-6 w-6 print:h-5 print:w-5" />
-                <span className="font-bold text-sm print:text-xs">ARIS STATIONARIES</span>
+                <img
+                  src={logo}
+                  alt="Logo"
+                  className="h-6 w-6 print:h-5 print:w-5"
+                />
+                <span className="font-bold text-sm print:text-xs">
+                  ARIS STATIONARIES
+                </span>
               </div>
-              <span className="text-xs text-muted-foreground print:text-[8px]">Product Catalog</span>
+              <span className="text-xs text-muted-foreground print:text-[8px]">
+                Product Catalog
+              </span>
             </div>
           </header>
 
           <main className="container mx-auto px-2 py-2 print:py-1">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 print:grid-cols-6 print:gap-2">
-              {products.reduce((acc, product, index) => {
-                const rowIndex = Math.floor(index / 6);
-                if (!acc[rowIndex]) acc[rowIndex] = [];
-                acc[rowIndex].push(product);
-                return acc;
-              }, [] as Product[][]).map((row, rowIndex) => (
-                <div key={`row-${rowIndex}`} className="contents print:block print:break-inside-avoid print:mb-2">
-                  {row.map((product) => (
-                    <BrochureProduct key={product.id} product={product} />
-                  ))}
-                </div>
-              ))}
+              {products
+                .reduce((acc, product, index) => {
+                  const rowIndex = Math.floor(index / 6);
+                  if (!acc[rowIndex]) acc[rowIndex] = [];
+                  acc[rowIndex].push(product);
+                  return acc;
+                }, [] as Product[][])
+                .map((row, rowIndex) => (
+                  <div
+                    key={`row-${rowIndex}`}
+                    className="contents print:block print:break-inside-avoid print:mb-2"
+                  >
+                    {row.map((product) => (
+                      <BrochureProduct key={product.id} product={product} />
+                    ))}
+                  </div>
+                ))}
             </div>
           </main>
 
           {/* Compact Footer */}
           <footer className="border-t border-border py-2 mt-4 print:py-1 print:mt-2">
             <div className="container mx-auto px-2 text-center text-[10px] text-muted-foreground print:text-[8px]">
-              <p className="hidden sm:inline">📞 0707222419 | ✉️ scaler.com@gmail.com | 📍 Nairobi, Kenya</p>
-              <p className="sm:hidden text-xs">📞 0707222419<br/>✉️ scaler.com@gmail.com<br/>📍 Nairobi, Kenya</p>
+              <p className="hidden sm:inline">
+                📞 0707222419 | ✉️ scaler.com@gmail.com | 📍 Nairobi, Kenya
+              </p>
+              <p className="sm:hidden text-xs">
+                📞 0707222419
+                <br />
+                ✉️ scaler.com@gmail.com
+                <br />
+                📍 Nairobi, Kenya
+              </p>
             </div>
           </footer>
         </div>
