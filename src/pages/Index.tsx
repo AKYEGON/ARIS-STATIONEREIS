@@ -109,8 +109,8 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <SEO 
-        title="ARIS STATIONARIES - Home of Affordable Stationaries | Nairobi, Kenya"
-        description="Shop quality stationery at affordable prices. ARIS STATIONARIES offers pens, notebooks, office supplies, and more. Fast delivery in Nairobi, Kenya."
+        title="ARIS STATIONERIES - Home of Affordable Stationeries | Nairobi, Kenya"
+        description="Shop quality stationery at affordable prices. ARIS STATIONERIES offers pens, notebooks, office supplies, and more. Fast delivery in Nairobi, Kenya."
         canonicalUrl="/"
       />
       <Header cartItemCount={getCartItemCount()} />
@@ -130,10 +130,10 @@ const Index = () => {
         <div className="container relative z-10">
           <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary animate-fade-in drop-shadow-sm">
-              ARIS STATIONARIES
+              ARIS STATIONERIES
             </h1>
             <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground animate-fade-in drop-shadow-sm">
-              HOME OF AFFORDABLE STATIONARIES
+              HOME OF AFFORDABLE STATIONERIES
             </p>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground animate-fade-in max-w-2xl mx-auto">
               Your trusted partner for all stationery needs

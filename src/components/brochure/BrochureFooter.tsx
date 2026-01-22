@@ -10,7 +10,7 @@ const BrochureFooter = () => {
             <div>
               <h3 className="font-semibold text-foreground text-sm print:text-xs">Visit Us</h3>
               <p className="text-xs text-muted-foreground print:text-[10px]">
-                ARIS STATIONARIES<br />
+                ARIS STATIONERIES<br />
                 Nairobi, Kenya
               </p>
             </div>
@@ -41,7 +41,7 @@ const BrochureFooter = () => {
 
         <div className="mt-4 pt-3 border-t border-border text-center print:mt-3 print:pt-2">
           <p className="text-xs text-muted-foreground print:text-[10px]">
-            © {new Date().getFullYear()} ARIS STATIONARIES. All rights reserved.
+            © {new Date().getFullYear()} ARIS STATIONERIES. All rights reserved.
           </p>
           <p className="text-[10px] text-muted-foreground mt-0.5 print:text-[9px]">
             Prices are subject to change. Free delivery on orders above Ksh 3,000 within Nairobi.

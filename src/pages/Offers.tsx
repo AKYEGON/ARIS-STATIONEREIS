@@ -43,7 +43,7 @@ const Offers = () => {
     <div className="min-h-screen flex flex-col">
       <SEO 
         title="Special Offers & Bundle Deals"
-        description="Save more with our specially curated bundle offers on stationery products. Quality stationery at discounted prices at ARIS STATIONARIES, Nairobi."
+        description="Save more with our specially curated bundle offers on stationery products. Quality stationery at discounted prices at ARIS STATIONERIES, Nairobi."
         canonicalUrl="/offers"
       />
       <Header cartItemCount={getCartItemCount()} />

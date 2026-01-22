@@ -8,13 +8,13 @@ const Footer = () => {
       <div className="container py-6 sm:py-8 px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           <div className="flex flex-col items-start gap-3">
-            <img src={logo} alt="ARIS STATIONARIES Logo" className="h-12 sm:h-14" />
+            <img src={logo} alt="ARIS STATIONERIES Logo" className="h-12 sm:h-14" />
             <div>
               <h3 className="font-bold text-base sm:text-lg mb-1 text-primary">
-                ARIS STATIONARIES
+                ARIS STATIONERIES
               </h3>
               <p className="text-xs sm:text-sm text-white/70">
-                Home of Affordable Stationaries
+                Home of Affordable Stationeries
               </p>
             </div>
           </div>
@@ -39,7 +39,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-white/20 text-center text-xs sm:text-sm text-white/60">
-          © {new Date().getFullYear()} ARIS STATIONARIES. All rights reserved.
+          © {new Date().getFullYear()} ARIS STATIONERIES. All rights reserved.
         </div>
       </div>
     </footer>

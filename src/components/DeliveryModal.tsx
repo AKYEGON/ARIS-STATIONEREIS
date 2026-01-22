@@ -16,7 +16,7 @@ export default function DeliveryModal({ open, onClose }: Props) {
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       <div className="relative z-10 max-w-lg w-full bg-white rounded-lg shadow-lg p-6">
-        <h3 className="text-lg font-semibold mb-3">Delivery information — ARIS STATIONARIES</h3>
+        <h3 className="text-lg font-semibold mb-3">Delivery information — ARIS STATIONERIES</h3>
 
         <div className="text-sm leading-relaxed text-gray-700 space-y-3">
           <p className="text-base font-semibold text-emerald-700">

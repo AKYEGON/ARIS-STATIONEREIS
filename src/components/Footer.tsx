@@ -24,16 +24,16 @@ const Footer = () => {
             {/* Brand Section - Full width on mobile */}
             <div className="col-span-2 sm:col-span-2 lg:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-4">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10 flex-shrink-0">
-                <img src={logo} alt="ARIS STATIONARIES Logo" className="h-10 sm:h-16" />
+                <img src={logo} alt="ARIS STATIONERIES Logo" className="h-10 sm:h-16" />
               </div>
               <div className="min-w-0">
                 <h3 className="font-bold text-sm sm:text-xl text-primary">
-                  ARIS STATIONARIES
+                  ARIS STATIONERIES
                 </h3>
                 <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
-                  Home of affordable stationaries. Your trusted partner for all stationery needs.
+                  Home of affordable stationeries. Your trusted partner for all stationery needs.
                 </p>
-                <p className="text-xs text-white/70 sm:hidden">Home of affordable stationaries</p>
+                <p className="text-xs text-white/70 sm:hidden">Home of affordable stationeries</p>
               </div>
             </div>
             
@@ -106,7 +106,7 @@ const Footer = () => {
           {/* Bottom bar - More compact on mobile */}
           <div className="mt-4 sm:mt-10 pt-3 sm:pt-6 border-t border-white/10">
             <div className="flex items-center justify-between text-xs sm:text-sm text-white/50">
-              <p>© {new Date().getFullYear()} ARIS STATIONARIES</p>
+              <p>© {new Date().getFullYear()} ARIS STATIONERIES</p>
               <p className="flex items-center gap-1">
                 <Heart className="h-3 w-3 text-red-400 fill-red-400" /> Kenya
               </p>

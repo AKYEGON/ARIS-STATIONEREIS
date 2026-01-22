@@ -20,7 +20,7 @@ const BrochureCover = () => {
         <div className="mb-4 sm:mb-8">
           <img 
             src={logo} 
-            alt="ARIS STATIONARIES Logo" 
+            alt="ARIS STATIONERIES Logo" 
             className="h-32 w-32 sm:h-48 sm:w-48 mx-auto print:h-40 print:w-40 drop-shadow-2xl"
           />
         </div>
@@ -28,11 +28,11 @@ const BrochureCover = () => {
         {/* Brand Name and Tagline */}
         <div className="space-y-4 sm:space-y-6">
           <h1 className="text-4xl sm:text-7xl font-bold text-primary-foreground print:text-6xl drop-shadow-lg px-4">
-            ARIS STATIONARIES
+            ARIS STATIONERIES
           </h1>
           <div className="h-1 w-24 sm:w-32 bg-primary-foreground/80 mx-auto rounded-full"></div>
           <p className="text-xl sm:text-3xl text-primary-foreground/95 print:text-2xl font-light px-4">
-            Home of Affordable Stationaries
+            Home of Affordable Stationeries
           </p>
         </div>
 

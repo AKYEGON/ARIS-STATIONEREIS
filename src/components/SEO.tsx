@@ -10,7 +10,7 @@ interface SEOProps {
   structuredData?: object;
 }
 
-const BASE_URL = "https://aris-stationaries.lovable.app"; // Update when you have a custom domain
+const BASE_URL = "https://arisstationaries.co.ke";
 
 const SEO = ({
   title,
@@ -21,7 +21,7 @@ const SEO = ({
   ogType = "website",
   structuredData,
 }: SEOProps) => {
-  const fullTitle = title.includes("ARIS") ? title : `${title} | ARIS STATIONARIES`;
+  const fullTitle = title.includes("ARIS") ? title : `${title} | ARIS STATIONERIES`;
   const fullUrl = canonicalUrl ? `${BASE_URL}${canonicalUrl}` : BASE_URL;
   const fullOgImage = ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`;
 
@@ -42,7 +42,7 @@ const SEO = ({
       <meta property="og:title" content={fullTitle} />
       <meta property="og:description" content={description} />
       <meta property="og:image" content={fullOgImage} />
-      <meta property="og:site_name" content="ARIS STATIONARIES" />
+      <meta property="og:site_name" content="ARIS STATIONERIES" />
       <meta property="og:locale" content="en_KE" />
       
       {/* Twitter */}

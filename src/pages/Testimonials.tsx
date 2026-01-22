@@ -67,7 +67,7 @@ const Testimonials = () => {
       <div className="min-h-screen">
         <SEO 
           title="Customer Reviews & Stories"
-          description="Read what our customers say about ARIS STATIONARIES. Real reviews from happy customers in Nairobi, Kenya."
+          description="Read what our customers say about ARIS STATIONERIES. Real reviews from happy customers in Nairobi, Kenya."
           canonicalUrl="/testimonials"
         />
         <Header cartItemCount={getCartItemCount()} />
@@ -83,7 +83,7 @@ const Testimonials = () => {
     <div className="min-h-screen">
       <SEO 
         title="Customer Reviews & Stories"
-        description="Read what our customers say about ARIS STATIONARIES. Real reviews from happy customers in Nairobi, Kenya."
+        description="Read what our customers say about ARIS STATIONERIES. Real reviews from happy customers in Nairobi, Kenya."
         canonicalUrl="/testimonials"
       />
       <Header cartItemCount={getCartItemCount()} />
@@ -116,7 +116,7 @@ const Testimonials = () => {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">Share Your Experience</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-            Had a great experience with ARIS STATIONARIES? We'd love to hear from you!
+            Had a great experience with ARIS STATIONERIES? We'd love to hear from you!
           </p>
           
           <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
