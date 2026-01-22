@@ -159,7 +159,7 @@ const Cart = () => {
       
       const orderDetails = [productDetails, bundleDetails].filter(Boolean).join("\n\n");
       
-      let message = `New Order from ARIS STATIONARIES\n\n`;
+      let message = `New Order from ARIS STATIONERIES\n\n`;
       message += `Order ID: ${orderId.slice(0, 8)}\n\n`;
       message += `Customer Details:\n`;
       message += `Name: ${data.name}\n`;
@@ -225,7 +225,7 @@ const Cart = () => {
     <div className="min-h-screen flex flex-col">
       <SEO 
         title="Shopping Cart"
-        description="Review your cart and checkout. Fast delivery available in Nairobi from ARIS STATIONARIES."
+        description="Review your cart and checkout. Fast delivery available in Nairobi from ARIS STATIONERIES."
         canonicalUrl="/cart"
       />
       <Header cartItemCount={getCartItemCount()} />

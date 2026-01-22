@@ -56,7 +56,7 @@ const Brochure = () => {
       // Use Web Share API for text/URL sharing
       if (navigator.share) {
         await navigator.share({
-          title: "ARIS Stationaries Catalog",
+          title: "ARIS Stationeries Catalog",
           text: "Check out our product catalog! Use Print > Save as PDF to download.",
           url: window.location.href,
         });
@@ -102,7 +102,7 @@ const Brochure = () => {
     <div className="min-h-screen bg-background">
       <SEO
         title="Product Catalog"
-        description="Browse our complete product catalog. Download or print our stationery brochure from ARIS STATIONARIES, Nairobi."
+        description="Browse our complete product catalog. Download or print our stationery brochure from ARIS STATIONERIES, Nairobi."
         canonicalUrl="/brochure"
       />
       {/* Print/Navigation controls - hidden when printing */}
@@ -154,7 +154,7 @@ const Brochure = () => {
                   className="h-6 w-6 print:h-5 print:w-5"
                 />
                 <span className="font-bold text-sm print:text-xs">
-                  ARIS STATIONARIES
+                  ARIS STATIONERIES
                 </span>
               </div>
               <span className="text-xs text-muted-foreground print:text-[8px]">

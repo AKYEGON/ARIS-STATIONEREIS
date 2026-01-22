@@ -8,15 +8,15 @@ const BrochureHeader = () => {
           <div className="flex items-center gap-3">
             <img 
               src={logo} 
-              alt="ARIS STATIONARIES Logo" 
+              alt="ARIS STATIONERIES Logo" 
               className="h-12 w-12 print:h-10 print:w-10"
             />
             <div>
               <h1 className="text-2xl font-bold text-foreground print:text-xl">
-                ARIS STATIONARIES
+                ARIS STATIONERIES
               </h1>
               <p className="text-sm text-muted-foreground print:text-xs">
-                Home of Affordable Stationaries
+                Home of Affordable Stationeries
               </p>
             </div>
           </div>

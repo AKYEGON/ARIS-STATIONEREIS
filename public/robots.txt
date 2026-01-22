@@ -1,5 +1,5 @@
-# ARIS STATIONARIES - Robots.txt
-# https://aris-stationaries.lovable.app
+# ARIS STATIONERIES - Robots.txt
+# https://arisstationaries.co.ke
 
 User-agent: Googlebot
 Allow: /
@@ -23,4 +23,4 @@ Disallow: /admin
 Disallow: /auth
 
 # Sitemap location
-Sitemap: https://aris-stationaries.lovable.app/sitemap.xml
+Sitemap: https://arisstationaries.co.ke/sitemap.xml
