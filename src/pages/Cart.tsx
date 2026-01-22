@@ -68,7 +68,6 @@ const Cart = () => {
 
   const onSubmit = async (data: z.infer<typeof checkoutFormSchema>) => {
     setIsSubmitting(true);
-    const total = getCartTotal();
 
     // Validate cart has items
     if (cartItems.length === 0 && bundleItems.length === 0) {
@@ -77,50 +76,35 @@ const Cart = () => {
       return;
     }
 
-    console.log("Starting order submission...", { total, itemCount: cartItems.length });
+    console.log("Starting order submission...", { itemCount: cartItems.length });
 
     try {
-      // Generate order ID client-side to avoid RLS SELECT issues
-      const orderId = crypto.randomUUID();
-      
-      // Create order in database
-      const { error: orderError } = await supabase
-        .from("orders")
-        .insert({
-          id: orderId,
-          customer_name: data.name,
-          customer_email: data.phone + "@temp.com", // Use phone as temp email since field is required
-          customer_phone: data.phone,
-          delivery_address: data.deliveryMethod === "delivery" 
-            ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
-            : `Pickup at ${data.university} - ${data.branch}`,
-          total: total,
-          subtotal: total,
-          status: "Pending"
+      // Prepare order items for server-side validation
+      const orderItems: Array<{
+        product_id?: string;
+        product_name: string;
+        product_image: string;
+        quantity: number;
+        price: number;
+      }> = [];
+
+      // Add regular products with their IDs for price verification
+      cartItems.forEach(item => {
+        orderItems.push({
+          product_id: item.id,
+          product_name: item.name,
+          product_image: item.image,
+          quantity: item.quantity,
+          price: item.price
         });
+      });
 
-      if (orderError) {
-        console.error("Order creation error:", orderError);
-        throw orderError;
-      }
-
-      console.log("Order created successfully:", orderId);
-
-      // Create order items for regular products
-      const orderItems = cartItems.map(item => ({
-        order_id: orderId,
-        product_name: item.name,
-        product_image: item.image,
-        quantity: item.quantity,
-        price: item.price
-      }));
-
-      // Create order items for bundles (expand to individual products)
+      // Add bundle items (expand to individual products)
       bundleItems.forEach(bundle => {
         bundle.items?.forEach(bundleItem => {
           if (bundleItem.product) {
             orderItems.push({
-              order_id: orderId,
+              product_id: bundleItem.product.id,
               product_name: `${bundle.name} - ${bundleItem.product.name}`,
               product_image: bundleItem.product.image,
               quantity: bundleItem.quantity * bundle.quantity,
@@ -130,18 +114,34 @@ const Cart = () => {
         });
       });
 
-      console.log("Inserting order items...", orderItems.length);
+      console.log("Submitting order via edge function...", orderItems.length);
 
-      const { error: itemsError } = await supabase
-        .from("order_items")
-        .insert(orderItems);
+      // Use server-side edge function for validated order creation
+      const { data: orderResult, error: orderError } = await supabase.functions.invoke("create-order", {
+        body: {
+          customer_name: data.name,
+          customer_email: data.phone + "@temp.com", // Use phone as temp email since field is required
+          customer_phone: data.phone,
+          delivery_address: data.deliveryMethod === "delivery" 
+            ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
+            : `Pickup at ${data.university} - ${data.branch}`,
+          items: orderItems
+        }
+      });
 
-      if (itemsError) {
-        console.error("Order items creation error:", itemsError);
-        throw itemsError;
+      if (orderError) {
+        console.error("Order creation error:", orderError);
+        throw new Error(orderError.message || "Failed to create order");
       }
 
-      console.log("Order items created successfully");
+      if (!orderResult?.success) {
+        console.error("Order validation failed:", orderResult?.error);
+        throw new Error(orderResult?.error || "Order validation failed");
+      }
+
+      const orderId = orderResult.orderId;
+      const serverTotal = orderResult.total;
+      console.log("Order created successfully:", orderId, "Total:", serverTotal);
 
       // Prepare WhatsApp message
       const productDetails = cartItems
@@ -167,7 +167,7 @@ const Cart = () => {
       message += `University: ${data.university}\n`;
       message += `Branch: ${data.branch}\n\n`;
       message += `Order Details:\n${orderDetails}\n\n`;
-      message += `Total Amount: KSh ${total.toFixed(2)}\n\n`;
+      message += `Total Amount: KSh ${serverTotal.toFixed(2)}\n\n`;
       message += `Delivery Method: ${data.deliveryMethod === "pickup" ? "Pickup in Person" : "Delivery"}\n`;
       
       if (data.deliveryMethod === "delivery" && data.deliveryAddress) {
