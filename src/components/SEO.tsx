@@ -10,7 +10,7 @@ interface SEOProps {
   structuredData?: object;
 }
 
-const BASE_URL = "https://aris-stationaries.lovable.app"; // Update when you have a custom domain
+const BASE_URL = "https://arisstationaries.co.ke";
 
 const SEO = ({
   title,
