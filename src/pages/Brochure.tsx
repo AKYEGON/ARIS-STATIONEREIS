@@ -5,17 +5,14 @@ import BrochureCover from "@/components/brochure/BrochureCover";
 import BrochureProduct from "@/components/brochure/BrochureProduct";
 import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
-import { Printer, ArrowLeft, Download, Loader2, Share2 } from "lucide-react";
+import { Printer, ArrowLeft, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
 import { toast } from "@/hooks/use-toast";
 import logo from "@/assets/logo.png";
 
 const Brochure = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDownloading, setIsDownloading] = useState(false);
   const brochureRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -54,166 +51,42 @@ const Brochure = () => {
     window.print();
   };
 
-  const generatePdfBlob = async (): Promise<Blob> => {
-    if (!brochureRef.current) throw new Error("Brochure ref not available");
-
-    const element = brochureRef.current;
-    const scale = window.innerWidth < 768 ? 1.5 : 2;
-
-    const canvas = await html2canvas(element, {
-      scale,
-      useCORS: true,
-      logging: false,
-      windowWidth: 1200,
-    });
-
-    const imgData = canvas.toDataURL("image/jpeg", 0.95);
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-      compress: true,
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 5; // mm
-
-    const imgWidth = pageWidth - margin * 2;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = margin;
-
-    // Add first page
-    pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-
-    // Add additional pages if needed
-    while (heightLeft >= 0) {
-      position = heightLeft - imgHeight + margin;
-      pdf.addPage();
-      pdf.addImage(imgData, "JPEG", margin, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-    }
-
-    return pdf.output("blob");
-  };
-
-  const handleDownload = async () => {
-    if (!brochureRef.current) return;
-
-    try {
-      setIsDownloading(true);
-
-      toast({
-        title: "Generating PDF...",
-        description: "Please wait while we create your brochure.",
-      });
-
-      const pdfBlob = await generatePdfBlob();
-      
-      // Create download link
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "ARIS-Stationaries-Catalog.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Download Complete!",
-        description: "Your brochure has been downloaded successfully.",
-      });
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-      toast({
-        title: "Download Failed",
-        description: "There was an error generating the PDF. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   const handleShare = async () => {
-    if (!brochureRef.current) return;
-
     try {
-      setIsDownloading(true);
-
-      toast({
-        title: "Preparing to share...",
-        description: "Generating your brochure.",
-      });
-
-      const pdfBlob = await generatePdfBlob();
-
-      // Check if Web Share API is available and supports files
+      // Use Web Share API for text/URL sharing
       if (navigator.share) {
-        const file = new File([pdfBlob], "ARIS-Stationaries-Catalog.pdf", {
-          type: "application/pdf",
+        await navigator.share({
+          title: "ARIS Stationaries Catalog",
+          text: "Check out our product catalog! Use Print > Save as PDF to download.",
+          url: window.location.href,
         });
-
-        // Check if the browser can share files
-        const canShareFiles =
-          navigator.canShare && navigator.canShare({ files: [file] });
-
-        if (canShareFiles) {
-          try {
-            await navigator.share({
-              files: [file],
-              title: "ARIS Stationaries Catalog",
-              text: "Check out our product catalog!",
-            });
-
-            toast({
-              title: "Shared Successfully!",
-              description: "Brochure has been shared.",
-            });
-            return;
-          } catch (shareError: any) {
-            // User cancelled or share failed
-            if (shareError.name === "AbortError") {
-              toast({
-                title: "Share Cancelled",
-                description: "You cancelled the share action.",
-              });
-              return;
-            }
-            console.error("Share error:", shareError);
-          }
-        }
+        
+        toast({
+          title: "Shared Successfully!",
+          description: "Link has been shared.",
+        });
+      } else {
+        // Fallback: Copy link to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: "Link Copied!",
+          description: "Catalog link copied to clipboard. Use Print > Save as PDF to download.",
+        });
       }
-
-      // Fallback: Download the PDF instead
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "ARIS-Stationaries-Catalog.pdf";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-      
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === "AbortError") {
+        toast({
+          title: "Share Cancelled",
+          description: "You cancelled the share action.",
+        });
+        return;
+      }
+      console.error("Share error:", error);
       toast({
-        title: "Downloaded Instead",
-        description:
-          "Sharing is not available on this device. The brochure has been downloaded.",
-      });
-    } catch (error) {
-      console.error("Error in share/download:", error);
-      toast({
-        title: "Action Failed",
-        description:
-          "Unable to share or download. Please try the Download PDF button.",
+        title: "Share Failed",
+        description: "Unable to share. Please use the Print button instead.",
         variant: "destructive",
       });
-    } finally {
-      setIsDownloading(false);
     }
   };
 
@@ -245,44 +118,20 @@ const Brochure = () => {
             <Button
               onClick={handleShare}
               size="sm"
-              variant="default"
-              className="flex-1 sm:flex-initial sm:hidden"
-              disabled={isDownloading}
+              variant="outline"
+              className="flex-1 sm:flex-initial"
             >
-              {isDownloading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <Share2 className="h-4 w-4 mr-2" />
-              )}
+              <Share2 className="h-4 w-4 mr-2" />
               Share
-            </Button>
-            <Button
-              onClick={handleDownload}
-              size="sm"
-              variant="default"
-              className="flex-1 sm:flex-initial hidden sm:flex"
-              disabled={isDownloading}
-            >
-              {isDownloading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </>
-              )}
             </Button>
             <Button
               onClick={handlePrint}
               size="sm"
-              variant="outline"
+              variant="default"
               className="flex-1 sm:flex-initial"
             >
               <Printer className="h-4 w-4 mr-2" />
-              Print
+              Print / Save PDF
             </Button>
           </div>
         </div>
