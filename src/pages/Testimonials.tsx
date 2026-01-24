@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { CustomerTestimonial } from "@/types/testimonial";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import SEO from "@/components/SEO";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import SEO from "@/components/common/SEO";
 import StoriesCarousel from "@/components/testimonials/StoriesCarousel";
 import StoryCircles from "@/components/testimonials/StoryCircles";
 import ReviewSubmissionForm from "@/components/testimonials/ReviewSubmissionForm";

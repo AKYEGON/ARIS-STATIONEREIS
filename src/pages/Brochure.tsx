@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import BrochureCover from "@/components/brochure/BrochureCover";
 import BrochureProduct from "@/components/brochure/BrochureProduct";
-import SEO from "@/components/SEO";
+import SEO from "@/components/common/SEO";
 import { Button } from "@/components/ui/button";
 import { Printer, ArrowLeft, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";

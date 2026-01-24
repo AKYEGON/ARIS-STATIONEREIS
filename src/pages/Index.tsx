@@ -1,17 +1,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import ProductCard from "@/components/ProductCard";
-import SEO from "@/components/SEO";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import ProductCard from "@/components/products/ProductCard";
+import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import heroBackground from "@/assets/hero-background.jpg";
-import OffersSection from "@/components/OffersSection";
+import OffersSection from "@/components/products/OffersSection";
 
 const PRODUCTS_PER_PAGE = 8;
 

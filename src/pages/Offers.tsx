@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useCart } from "@/contexts/CartContext";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import BundleCard from "@/components/BundleCard";
-import SEO from "@/components/SEO";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import BundleCard from "@/components/products/BundleCard";
+import SEO from "@/components/common/SEO";
 import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 
