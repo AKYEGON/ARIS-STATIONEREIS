@@ -14,8 +14,8 @@ import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
 
-import DeliveryBanner from "@/components/DeliveryBanner";
-import DeliveryModal from "@/components/DeliveryModal";
+import DeliveryBanner from "@/components/layout/DeliveryBanner";
+import DeliveryModal from "@/components/layout/DeliveryModal";
 import { useState } from "react";
 
 const queryClient = new QueryClient();
