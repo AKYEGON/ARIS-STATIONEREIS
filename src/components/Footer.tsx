@@ -31,9 +31,9 @@ const Footer = () => {
                   ARIS STATIONERIES
                 </h3>
                 <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
-                  Home of affordable stationeries. Your trusted partner for all stationery needs.
+                  THE HOME OF AFFORDABLE STATIONERIES. Your trusted partner for all stationery needs.
                 </p>
-                <p className="text-xs text-white/70 sm:hidden">Home of affordable stationeries</p>
+                <p className="text-xs text-white/70 sm:hidden">THE HOME OF AFFORDABLE STATIONERIES</p>
               </div>
             </div>
             

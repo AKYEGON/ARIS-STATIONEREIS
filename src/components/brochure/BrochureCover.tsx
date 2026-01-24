@@ -32,7 +32,7 @@ const BrochureCover = () => {
           </h1>
           <div className="h-1 w-24 sm:w-32 bg-primary-foreground/80 mx-auto rounded-full"></div>
           <p className="text-xl sm:text-3xl text-primary-foreground/95 print:text-2xl font-light px-4">
-            Home of Affordable Stationeries
+            THE HOME OF AFFORDABLE STATIONERIES
           </p>
         </div>
 
