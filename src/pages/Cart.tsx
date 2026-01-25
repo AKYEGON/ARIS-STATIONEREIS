@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCart } from "@/contexts/CartContext";
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -435,6 +435,20 @@ const Cart = () => {
                   >
                     Complete Your Order
                   </Button>
+                  <a 
+                    href="https://wa.me/254707222419?text=Hi%20ARIS%20STATIONERIES!%20I%20have%20a%20question%20about%20my%20order."
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block mt-2"
+                  >
+                    <Button 
+                      variant="outline" 
+                      className="w-full transition-all duration-200 active:scale-95 border-primary/50 text-primary hover:bg-primary/10"
+                    >
+                      <MessageCircle className="mr-2 h-4 w-4" />
+                      Chat on WhatsApp
+                    </Button>
+                  </a>
                   <Link to="/">
                     <Button className="w-full mt-2 transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90">
                       Continue Shopping
