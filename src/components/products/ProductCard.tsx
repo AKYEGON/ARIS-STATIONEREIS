@@ -45,29 +45,29 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </div>
           )}
         </div>
-        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1 flex flex-col justify-between">
-          <div>
-            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
-              {product.name}
-            </h3>
-            <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
-              {product.description}
-            </p>
-          </div>
-          {product.originalPrice && product.originalPrice > product.price ? (
-            <div className="flex flex-col gap-0 mt-auto">
-              <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
-                Was KSh {product.originalPrice.toFixed(0)}
-              </p>
+        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1 flex flex-col">
+          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
+            {product.name}
+          </h3>
+          <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
+            {product.description}
+          </p>
+          <div className="mt-auto">
+            {product.originalPrice && product.originalPrice > product.price ? (
+              <div className="flex flex-col gap-0">
+                <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
+                  Was KSh {product.originalPrice.toFixed(0)}
+                </p>
+                <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
+                  KSh {product.price.toFixed(0)}
+                </p>
+              </div>
+            ) : (
               <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                 KSh {product.price.toFixed(0)}
               </p>
-            </div>
-          ) : (
-            <p className="text-sm xs:text-base sm:text-lg font-bold text-primary mt-auto leading-tight">
-              KSh {product.price.toFixed(0)}
-            </p>
-          )}
+            )}
+          </div>
         </CardContent>
         <CardFooter className="p-2 xs:p-3 sm:p-4 pt-0">
           <Button 
