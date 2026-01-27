@@ -17,9 +17,45 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const hasMultipleMedia = product.media && product.media.length > 0;
   const totalMediaCount = 1 + (product.media?.length || 0);
 
+  // Generate product URL for SEO
+  const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
+  
+  // Product Schema for SEO
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.image.startsWith("http") ? product.image : `https://arisstationaries.co.ke${product.image}`,
+    "brand": {
+      "@type": "Brand",
+      "name": "ARIS STATIONERIES"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": productUrl,
+      "priceCurrency": "KES",
+      "price": product.price,
+      "availability": "https://schema.org/InStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "ARIS STATIONERIES"
+      }
+    },
+    ...(product.originalPrice && product.originalPrice > product.price ? {
+      "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    } : {})
+  };
+
   return (
     <>
-      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
+      {/* JSON-LD Product Schema for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col">
         <div 
           className="aspect-[4/3] xs:aspect-square overflow-hidden bg-muted relative cursor-pointer"
           onClick={() => hasMultipleMedia && setViewerOpen(true)}
@@ -29,7 +65,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
           )}
           <img
             src={product.image}
-            alt={product.name}
+            alt={`${product.name} - ${product.description} - Buy at ARIS STATIONERIES Nairobi Kenya`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
             className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-110 ${
@@ -45,14 +81,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </div>
           )}
         </div>
-        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1 flex flex-col">
+        <CardContent className="p-2 xs:p-3 sm:p-4">
           <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
             {product.name}
           </h3>
           <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
             {product.description}
           </p>
-          <div className="mt-auto">
+          <div>
             {product.originalPrice && product.originalPrice > product.price ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
