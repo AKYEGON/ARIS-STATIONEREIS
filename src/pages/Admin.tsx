@@ -2623,6 +2623,16 @@ const Admin = () => {
                       >
                         <MessageCircle className="h-3.5 w-3.5 text-blue-600" />
                       </a>
+                      <a
+                        href={`https://wa.me/${selectedOrder.customer_phone.replace(/^0/, '254').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${selectedOrder.customer_name}! This is ARIS STATIONERIES following up on your order #${selectedOrder.id.slice(0, 8)}. How can we help you?`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center h-7 px-2 rounded-md border border-input bg-background hover:bg-green-50 hover:border-green-500 transition-colors gap-1"
+                        title="WhatsApp customer"
+                      >
+                        <MessageCircle className="h-3.5 w-3.5 text-green-600" />
+                        <span className="text-xs text-green-600 font-medium">WhatsApp</span>
+                      </a>
                     </div>
                   </div>
                 </div>
