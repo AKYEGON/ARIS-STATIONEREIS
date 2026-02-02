@@ -26,6 +26,9 @@ import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
+import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
+import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
+import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 
 interface OrderItem {
   product_name: string;
@@ -72,6 +75,10 @@ const Admin = () => {
   const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [isQuickSaleOpen, setIsQuickSaleOpen] = useState(false);
   const [isRecalculating, setIsRecalculating] = useState(false);
+  
+  // Order status modal state
+  const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; newStatus: string } | null>(null);
   
   // Testimonials state
   const [testimonialsList, setTestimonialsList] = useState<CustomerTestimonial[]>([]);
@@ -1113,6 +1120,23 @@ const Admin = () => {
     }
   };
 
+  // Handler to trigger status change modal
+  const initiateStatusChange = (orderId: string, newStatus: string) => {
+    const order = ordersList.find(o => o.id === orderId);
+    if (!order) return;
+    
+    // If status is same as current, do nothing
+    if (order.status === newStatus) {
+      toast.info(`Order is already ${newStatus}`);
+      return;
+    }
+    
+    // Set pending status and open modal
+    setPendingStatusChange({ orderId, newStatus });
+    setIsStatusModalOpen(true);
+  };
+
+  // Actual status update function (called after modal confirmation)
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     try {
       // Get current order status first to check if already delivered
@@ -1903,20 +1927,16 @@ const Admin = () => {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
-                              <a
-                                href={`tel:${order.customer_phone}`}
-                                className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-input bg-background hover:bg-green-50 hover:border-green-300 transition-colors"
-                                title="Call customer"
-                              >
-                                <Phone className="h-4 w-4 text-green-600" />
-                              </a>
-                              <a
-                                href={`sms:${order.customer_phone}`}
-                                className="inline-flex items-center justify-center h-8 w-8 rounded-md border border-input bg-background hover:bg-blue-50 hover:border-blue-300 transition-colors"
-                                title="Text customer"
-                              >
-                                <MessageCircle className="h-4 w-4 text-blue-600" />
-                              </a>
+                              <OrderQuickActions 
+                                order={{
+                                  id: order.id,
+                                  customer_name: order.customer_name,
+                                  customer_phone: order.customer_phone,
+                                  total: order.total,
+                                  delivery_address: order.delivery_address,
+                                  status: order.status
+                                }}
+                              />
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -2645,18 +2665,24 @@ const Admin = () => {
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    {['pending', 'processing', 'shipped', 'delivered', 'cancelled'].map(status => (
+                    {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(status => (
                       <Button
                         key={status}
                         size="sm"
-                        variant={selectedOrder.status === status ? 'default' : 'outline'}
-                        onClick={() => updateOrderStatus(selectedOrder.id, status)}
-                        className={selectedOrder.status === status ? 'bg-primary hover:bg-primary/90' : ''}
+                        variant={selectedOrder.status.toLowerCase() === status.toLowerCase() ? 'default' : 'outline'}
+                        onClick={() => initiateStatusChange(selectedOrder.id, status)}
+                        className={selectedOrder.status.toLowerCase() === status.toLowerCase() ? 'bg-primary hover:bg-primary/90' : ''}
                       >
                         {status}
                       </Button>
                     ))}
                   </div>
+                </div>
+
+                {/* Communication History */}
+                <div>
+                  <Label className="text-muted-foreground mb-2 block">Communication History</Label>
+                  <OrderCommunicationHistory orderId={selectedOrder.id} />
                 </div>
 
                 <div>
@@ -2791,6 +2817,35 @@ const Admin = () => {
           fetchOrders();
         }}
       />
+
+      {/* Order Status Modal */}
+      {pendingStatusChange && (() => {
+        const orderForModal = ordersList.find(o => o.id === pendingStatusChange.orderId);
+        if (!orderForModal) return null;
+        return (
+          <OrderStatusModal
+            isOpen={isStatusModalOpen}
+            onClose={() => {
+              setIsStatusModalOpen(false);
+              setPendingStatusChange(null);
+            }}
+            order={{
+              id: orderForModal.id,
+              customer_name: orderForModal.customer_name,
+              customer_phone: orderForModal.customer_phone,
+              total: orderForModal.total,
+              delivery_address: orderForModal.delivery_address,
+              status: orderForModal.status
+            }}
+            newStatus={pendingStatusChange.newStatus}
+            onConfirm={async (sendMessage) => {
+              await updateOrderStatus(pendingStatusChange.orderId, pendingStatusChange.newStatus);
+              setIsStatusModalOpen(false);
+              setPendingStatusChange(null);
+            }}
+          />
+        );
+      })()}
     </div>
   );
 };
