@@ -152,6 +152,74 @@ export type Database = {
         }
         Relationships: []
       }
+      message_templates: {
+        Row: {
+          channel: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          template: string
+          trigger_status: string | null
+        }
+        Insert: {
+          channel?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          template: string
+          trigger_status?: string | null
+        }
+        Update: {
+          channel?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          template?: string
+          trigger_status?: string | null
+        }
+        Relationships: []
+      }
+      order_communications: {
+        Row: {
+          channel: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          message: string | null
+          order_id: string
+          status_at_time: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message?: string | null
+          order_id: string
+          status_at_time?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          message?: string | null
+          order_id?: string
+          status_at_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_communications_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           cost_price: number | null
@@ -206,8 +274,12 @@ export type Database = {
           delivery_address: string
           discount_amount: number | null
           discount_type: string | null
+          follow_up_at: string | null
           id: string
+          internal_notes: string | null
+          last_contacted_at: string | null
           original_total: number | null
+          priority: string | null
           profit: number | null
           status: string
           subtotal: number | null
@@ -224,8 +296,12 @@ export type Database = {
           delivery_address: string
           discount_amount?: number | null
           discount_type?: string | null
+          follow_up_at?: string | null
           id?: string
+          internal_notes?: string | null
+          last_contacted_at?: string | null
           original_total?: number | null
+          priority?: string | null
           profit?: number | null
           status?: string
           subtotal?: number | null
@@ -242,8 +318,12 @@ export type Database = {
           delivery_address?: string
           discount_amount?: number | null
           discount_type?: string | null
+          follow_up_at?: string | null
           id?: string
+          internal_notes?: string | null
+          last_contacted_at?: string | null
           original_total?: number | null
+          priority?: string | null
           profit?: number | null
           status?: string
           subtotal?: number | null
