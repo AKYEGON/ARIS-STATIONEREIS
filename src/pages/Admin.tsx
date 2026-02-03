@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
@@ -53,14 +53,24 @@ interface Order {
   original_total?: number;
 }
 
+const VALID_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles"];
+
 const Admin = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [productList, setProductList] = useState<Product[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [activeTab, setActiveTab] = useState("products");
+  
+  // Get active tab from URL, default to "products"
+  const urlTab = searchParams.get("tab");
+  const activeTab = VALID_TABS.includes(urlTab || "") ? urlTab! : "products";
+  
+  const setActiveTab = (tab: string) => {
+    setSearchParams({ tab });
+  };
   const [ordersList, setOrdersList] = useState<Order[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
