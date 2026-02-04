@@ -41,6 +41,7 @@ const App = () => {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/brochure" element={<Brochure />} />
                 <Route path="/testimonials" element={<Testimonials />} />
+                {/* /happy-customers redirects to /testimonials inside the component to avoid duplicate content */}
                 <Route path="/happy-customers" element={<Testimonials />} />
                 <Route path="/offers" element={<Offers />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
