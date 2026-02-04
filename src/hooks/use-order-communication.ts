@@ -68,19 +68,20 @@ export function useOrderCommunication() {
 
   const getMessageForStatus = (
     status: string,
-    order: { customer_name: string; id: string; total: number; delivery_address: string }
+    order: { customer_name: string; id: string; total: number; delivery_address: string; customer_phone?: string }
   ): string => {
-    const reviewLink = 'https://arisstationaries.co.ke/happy-customers';
+    const customerName = encodeURIComponent(order.customer_name);
+    const customerPhone = order.customer_phone ? encodeURIComponent(order.customer_phone) : '';
+    const reviewLink = `https://arisstationaries.co.ke/testimonials?review=true&name=${customerName}&phone=${customerPhone}`;
     
     const templates: Record<string, string> = {
       'Pending': `Hi ${order.customer_name}! Thank you for your order #${order.id.slice(0, 8).toUpperCase()} at ARIS STATIONERIES. We've received it and will process it shortly. Total: KSh ${order.total.toLocaleString()}`,
       'Processing': `Hi ${order.customer_name}! Great news - your order #${order.id.slice(0, 8).toUpperCase()} is now being prepared. We'll notify you once it's ready for delivery!`,
       'Shipped': `Hi ${order.customer_name}! Your order #${order.id.slice(0, 8).toUpperCase()} is on its way! Delivery address: ${order.delivery_address}. Questions? Reply here!`,
-      'Delivered': `Hi ${order.customer_name}! Your order #${order.id.slice(0, 8).toUpperCase()} has been delivered. Thank you for shopping with ARIS STATIONERIES!
+      'Delivered': `Hi ${order.customer_name}! Your order #${order.id.slice(0, 8).toUpperCase()} has been delivered. Thank you for shopping with ARIS STATIONERIES! 💙
 
-Share your experience with us: ${reviewLink}
-
-Your feedback means the world to us! 💙`,
+We'd love to hear about your experience! Share a quick review here:
+${reviewLink}`,
       'Cancelled': `Hi ${order.customer_name}, your order #${order.id.slice(0, 8).toUpperCase()} has been cancelled. If you have questions, please reach out. We hope to serve you again!`
     };
     
