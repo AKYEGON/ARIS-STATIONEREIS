@@ -70,7 +70,7 @@ export function useOrderCommunication() {
     status: string,
     order: { customer_name: string; id: string; total: number; delivery_address: string }
   ): string => {
-    const reviewLink = 'https://arisstationaries.co.ke/testimonials';
+    const reviewLink = 'https://arisstationaries.co.ke/happy-customers';
     
     const templates: Record<string, string> = {
       'Pending': `Hi ${order.customer_name}! Thank you for your order #${order.id.slice(0, 8).toUpperCase()} at ARIS STATIONERIES. We've received it and will process it shortly. Total: KSh ${order.total.toLocaleString()}`,
