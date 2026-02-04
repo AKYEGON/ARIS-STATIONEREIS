@@ -1913,24 +1913,39 @@ const Admin = () => {
                           <TableCell className="font-medium text-xs sm:text-sm">{order.id.slice(0, 8)}</TableCell>
                           <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{order.customer_name}</TableCell>
                           <TableCell className="hidden md:table-cell text-xs sm:text-sm">
-                            <Badge variant={
-                              order.status === 'delivered' ? 'default' :
-                              order.status === 'pending' ? 'secondary' : 'outline'
-                            }>
+                            <Badge 
+                              variant={
+                                order.status.toLowerCase() === 'delivered' ? 'default' :
+                                order.status.toLowerCase() === 'cancelled' ? 'destructive' :
+                                order.status.toLowerCase() === 'pending' ? 'secondary' : 'outline'
+                              }
+                              className={order.status.toLowerCase() === 'delivered' ? 'bg-green-500 hover:bg-green-600' : ''}
+                            >
                               {order.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-xs sm:text-sm font-semibold">KSh {order.total.toFixed(2)}</TableCell>
                           <TableCell className="hidden lg:table-cell">
-                            <div className="flex gap-1 flex-wrap">
-                              {(order.tags || []).slice(0, 2).map((tag, i) => (
-                                <Badge key={i} variant="secondary" className="text-xs">
+                            <div className="flex gap-1.5 flex-wrap">
+                              {(order.tags || []).slice(0, 3).map((tag, i) => (
+                                <Badge 
+                                  key={i} 
+                                  variant="outline" 
+                                  className={`text-xs px-2 py-0.5 ${
+                                    tag.toLowerCase() === 'walk-in' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                    tag.toLowerCase().includes('urgent') ? 'bg-red-50 text-red-700 border-red-200' :
+                                    tag.toLowerCase().includes('vip') ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                    tag.toLowerCase().includes('jumia') ? 'bg-orange-50 text-orange-700 border-orange-200' :
+                                    tag.toLowerCase().includes('reach') ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                                    'bg-gray-50 text-gray-700 border-gray-200'
+                                  }`}
+                                >
                                   {tag}
                                 </Badge>
                               ))}
-                              {(order.tags?.length || 0) > 2 && (
-                                <Badge variant="outline" className="text-xs">
-                                  +{(order.tags?.length || 0) - 2}
+                              {(order.tags?.length || 0) > 3 && (
+                                <Badge variant="outline" className="text-xs px-2 py-0.5">
+                                  +{(order.tags?.length || 0) - 3}
                                 </Badge>
                               )}
                             </div>
