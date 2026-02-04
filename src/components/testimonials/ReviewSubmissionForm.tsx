@@ -1,21 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Star, Upload, X, Loader2 } from "lucide-react";
+import { Star, Upload, X, Loader2, Camera, Video } from "lucide-react";
+import CameraCapture from "./CameraCapture";
 
 interface ReviewSubmissionFormProps {
   onSuccess: () => void;
+  prefillData?: {
+    customerName?: string;
+    phone?: string;
+    productName?: string;
+  };
 }
 
-const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
+const ReviewSubmissionForm = ({ onSuccess, prefillData }: ReviewSubmissionFormProps) => {
   const [formData, setFormData] = useState({
-    customer_name: "",
-    phone: "",
-    product_name: "",
+    customer_name: prefillData?.customerName || "",
+    phone: prefillData?.phone || "",
+    product_name: prefillData?.productName || "",
     review_text: "",
     rating: 5 as 1 | 2 | 3 | 4 | 5,
   });
@@ -24,6 +30,32 @@ const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const [videoPreview, setVideoPreview] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPhotoCamera, setShowPhotoCamera] = useState(false);
+  const [showVideoCamera, setShowVideoCamera] = useState(false);
+
+  // Update form when prefill data changes
+  useEffect(() => {
+    if (prefillData) {
+      setFormData(prev => ({
+        ...prev,
+        customer_name: prefillData.customerName || prev.customer_name,
+        phone: prefillData.phone || prev.phone,
+        product_name: prefillData.productName || prev.product_name,
+      }));
+    }
+  }, [prefillData]);
+
+  const handlePhotoCapture = (file: File) => {
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+    setShowPhotoCamera(false);
+  };
+
+  const handleVideoCapture = (file: File) => {
+    setVideoFile(file);
+    setVideoPreview(URL.createObjectURL(file));
+    setShowVideoCamera(false);
+  };
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -221,8 +253,8 @@ const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
 
       {/* Photo Upload (Optional) */}
       <div>
-        <Label htmlFor="photo">Your Photo (optional)</Label>
-        <div className="mt-2">
+        <Label>Your Photo (optional)</Label>
+        <div className="mt-2 flex flex-wrap gap-3">
           {photoPreview ? (
             <div className="relative inline-block">
               <img
@@ -242,19 +274,33 @@ const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
               </button>
             </div>
           ) : (
-            <label
-              htmlFor="photo"
-              className="flex items-center justify-center h-32 w-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent"
-            >
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <input
-                id="photo"
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoChange}
-                className="hidden"
-              />
-            </label>
+            <>
+              {/* Camera capture button */}
+              <button
+                type="button"
+                onClick={() => setShowPhotoCamera(true)}
+                className="flex flex-col items-center justify-center h-32 w-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent gap-2"
+              >
+                <Camera className="h-6 w-6 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Take Photo</span>
+              </button>
+              
+              {/* Upload button */}
+              <label
+                htmlFor="photo"
+                className="flex flex-col items-center justify-center h-32 w-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent gap-2"
+              >
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Upload</span>
+                <input
+                  id="photo"
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePhotoChange}
+                  className="hidden"
+                />
+              </label>
+            </>
           )}
         </div>
         <p className="text-xs text-muted-foreground mt-1">Max 5MB</p>
@@ -262,8 +308,8 @@ const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
 
       {/* Video Upload (Optional) */}
       <div>
-        <Label htmlFor="video">Video Testimonial (optional)</Label>
-        <div className="mt-2">
+        <Label>Video Testimonial (optional)</Label>
+        <div className="mt-2 flex flex-wrap gap-3">
           {videoPreview ? (
             <div className="relative inline-block">
               <video
@@ -283,19 +329,33 @@ const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
               </button>
             </div>
           ) : (
-            <label
-              htmlFor="video"
-              className="flex items-center justify-center h-32 w-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent"
-            >
-              <Upload className="h-8 w-8 text-muted-foreground" />
-              <input
-                id="video"
-                type="file"
-                accept="video/*"
-                onChange={handleVideoChange}
-                className="hidden"
-              />
-            </label>
+            <>
+              {/* Camera record button */}
+              <button
+                type="button"
+                onClick={() => setShowVideoCamera(true)}
+                className="flex flex-col items-center justify-center h-32 w-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent gap-2"
+              >
+                <Video className="h-6 w-6 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Record Video</span>
+              </button>
+              
+              {/* Upload button */}
+              <label
+                htmlFor="video"
+                className="flex flex-col items-center justify-center h-32 w-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent gap-2"
+              >
+                <Upload className="h-6 w-6 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Upload</span>
+                <input
+                  id="video"
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoChange}
+                  className="hidden"
+                />
+              </label>
+            </>
           )}
         </div>
         <p className="text-xs text-muted-foreground mt-1">Max 50MB</p>
@@ -314,6 +374,20 @@ const ReviewSubmissionForm = ({ onSuccess }: ReviewSubmissionFormProps) => {
           )}
         </Button>
       </div>
+
+      {/* Camera Capture Modals */}
+      <CameraCapture
+        type="photo"
+        isOpen={showPhotoCamera}
+        onCapture={handlePhotoCapture}
+        onClose={() => setShowPhotoCamera(false)}
+      />
+      <CameraCapture
+        type="video"
+        isOpen={showVideoCamera}
+        onCapture={handleVideoCapture}
+        onClose={() => setShowVideoCamera(false)}
+      />
     </form>
   );
 };

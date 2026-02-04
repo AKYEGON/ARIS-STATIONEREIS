@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useLocation, Navigate } from "react-router-dom";
+import { useEffect, useState, useMemo } from "react";
+import { useLocation, Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CustomerTestimonial } from "@/types/testimonial";
 import Header from "@/components/layout/Header";
@@ -15,12 +15,27 @@ import { useCart } from "@/contexts/CartContext";
 
 const Testimonials = () => {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [testimonials, setTestimonials] = useState<CustomerTestimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [showStories, setShowStories] = useState(false);
   const [storiesStartIndex, setStoriesStartIndex] = useState(0);
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+
+  // Extract prefill data from URL params
+  const prefillData = useMemo(() => ({
+    customerName: searchParams.get("name") || undefined,
+    phone: searchParams.get("phone") || undefined,
+    productName: searchParams.get("product") || undefined,
+  }), [searchParams]);
+
+  // Auto-open dialog if review=true in URL params
+  useEffect(() => {
+    if (searchParams.get("review") === "true") {
+      setIsSubmitDialogOpen(true);
+    }
+  }, [searchParams]);
 
   const fetchTestimonials = async () => {
     try {
@@ -140,7 +155,8 @@ const Testimonials = () => {
                 onSuccess={() => {
                   setIsSubmitDialogOpen(false);
                   fetchTestimonials();
-                }} 
+                }}
+                prefillData={prefillData}
               />
             </DialogContent>
           </Dialog>
