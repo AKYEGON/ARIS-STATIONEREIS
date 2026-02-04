@@ -16,7 +16,7 @@ interface QuickSaleSuccessDialogProps {
 }
 
 export function QuickSaleSuccessDialog({ open, onClose, saleData }: QuickSaleSuccessDialogProps) {
-  const reviewLink = 'https://arisstationaries.co.ke/happy-customers';
+  const reviewLink = 'https://arisstationaries.co.ke/testimonials';
   
   const reviewMessage = saleData.customerName && saleData.customerName !== 'Walk-in Customer'
     ? `Hi ${saleData.customerName}! Thank you for shopping at ARIS STATIONERIES today.
