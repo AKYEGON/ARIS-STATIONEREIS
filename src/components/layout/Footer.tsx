@@ -87,20 +87,6 @@ const Footer = () => {
               </div>
             </div>
             
-            {/* Admin Section - Hidden on mobile, shown on larger screens */}
-            <div className="hidden lg:block">
-              <h4 className="font-semibold mb-4 text-base text-white flex items-center gap-2">
-                <span className="w-8 h-0.5 bg-primary rounded-full" />
-                Admin Access
-              </h4>
-              <Link 
-                to="/auth" 
-                className="inline-flex items-center gap-2 text-sm bg-primary/10 border border-primary/30 text-primary px-4 py-2 rounded-lg hover:bg-primary/20 transition-all duration-200"
-              >
-                <Shield className="h-4 w-4" />
-                Admin Login
-              </Link>
-            </div>
           </div>
           
           {/* Bottom bar - More compact on mobile */}
