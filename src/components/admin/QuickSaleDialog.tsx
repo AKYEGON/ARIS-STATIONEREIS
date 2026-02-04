@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Product } from "@/types/product";
 import { Plus, Minus, Trash2, Search, ShoppingCart, Percent, DollarSign, Package } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { QuickSaleSuccessDialog } from "./QuickSaleSuccessDialog";
 
 interface QuickSaleItem {
   product: Product;
@@ -34,6 +35,13 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
   const [discountValue, setDiscountValue] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [completedSaleData, setCompletedSaleData] = useState<{
+    total: number;
+    itemCount: number;
+    customerName: string;
+    customerPhone: string;
+  } | null>(null);
 
   const filteredProducts = products.filter(p => 
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -99,6 +107,8 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
     setDeliveryAddress("");
     setDiscountValue("");
     setSearchQuery("");
+    setShowSuccessDialog(false);
+    setCompletedSaleData(null);
   };
 
   const completeSale = async () => {
@@ -188,16 +198,30 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
         .update({ profit: totalProfit })
         .eq("id", order.id);
 
+      // Store completed sale data for success dialog
+      const itemCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+      setCompletedSaleData({
+        total,
+        itemCount,
+        customerName: customerName || 'Walk-in Customer',
+        customerPhone: customerPhone || 'N/A'
+      });
+      
       toast.success(`Sale completed! Total: KSh ${total.toFixed(2)}`);
-      resetForm();
       onSaleCompleted();
-      onClose();
+      setShowSuccessDialog(true);
     } catch (error: any) {
       console.error("Error completing sale:", error);
       toast.error(error.message || "Failed to complete sale");
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleSuccessDialogClose = () => {
+    setShowSuccessDialog(false);
+    resetForm();
+    onClose();
   };
 
   return (
@@ -409,6 +433,15 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
           </div>
         </div>
       </DialogContent>
+
+      {/* Success Dialog with QR Code */}
+      {completedSaleData && (
+        <QuickSaleSuccessDialog
+          open={showSuccessDialog}
+          onClose={handleSuccessDialogClose}
+          saleData={completedSaleData}
+        />
+      )}
     </Dialog>
   );
 };
