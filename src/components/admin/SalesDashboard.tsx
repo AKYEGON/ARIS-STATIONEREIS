@@ -56,11 +56,11 @@ export const SalesDashboard = () => {
         startDate.setMonth(now.getMonth() - 1);
       }
 
-      // Fetch completed orders (including walk-in sales with status "delivered")
+      // Fetch completed orders (case-insensitive status check using ilike or multiple values)
       const { data: orders, error: ordersError } = await supabase
         .from("orders")
         .select("*")
-        .in("status", ["Fulfilled", "delivered"])
+        .or("status.ilike.delivered,status.ilike.fulfilled")
         .gte("completed_at", startDate.toISOString());
 
       if (ordersError) throw ordersError;
