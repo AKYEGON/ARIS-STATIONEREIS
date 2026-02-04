@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CustomerTestimonial } from "@/types/testimonial";
 import Header from "@/components/layout/Header";
@@ -13,16 +14,13 @@ import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 
 const Testimonials = () => {
+  const location = useLocation();
   const { getCartItemCount } = useCart();
   const [testimonials, setTestimonials] = useState<CustomerTestimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [showStories, setShowStories] = useState(false);
   const [storiesStartIndex, setStoriesStartIndex] = useState(0);
   const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
-
-  useEffect(() => {
-    fetchTestimonials();
-  }, []);
 
   const fetchTestimonials = async () => {
     try {
@@ -51,6 +49,10 @@ const Testimonials = () => {
     setShowStories(true);
   };
 
+  useEffect(() => {
+    fetchTestimonials();
+  }, []);
+
   // Auto-open stories if there are testimonials and user hasn't seen them yet
   useEffect(() => {
     if (testimonials.length > 0 && !showStories) {
@@ -60,7 +62,12 @@ const Testimonials = () => {
         sessionStorage.setItem('hasSeenStories', 'true');
       }
     }
-  }, [testimonials.length]);
+  }, [testimonials.length, showStories]);
+  
+  // Redirect /happy-customers to /testimonials for SEO (avoid duplicate content)
+  if (location.pathname === "/happy-customers") {
+    return <Navigate to="/testimonials" replace />;
+  }
 
   if (loading) {
     return (
