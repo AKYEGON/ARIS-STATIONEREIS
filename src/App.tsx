@@ -38,7 +38,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
+                <Route path="/aris-control" element={<Admin />} />
                 <Route path="/brochure" element={<Brochure />} />
                 <Route path="/testimonials" element={<Testimonials />} />
                 {/* /happy-customers redirects to /testimonials inside the component to avoid duplicate content */}
