@@ -69,15 +69,17 @@ const Testimonials = () => {
   }, []);
 
   // Auto-open stories if there are testimonials and user hasn't seen them yet
+  // BUT skip if user came specifically to submit a review (review=true in URL)
   useEffect(() => {
-    if (testimonials.length > 0 && !showStories) {
+    const isReviewMode = searchParams.get("review") === "true";
+    if (testimonials.length > 0 && !showStories && !isReviewMode) {
       const hasSeenStories = sessionStorage.getItem('hasSeenStories');
       if (!hasSeenStories) {
         setShowStories(true);
         sessionStorage.setItem('hasSeenStories', 'true');
       }
     }
-  }, [testimonials.length, showStories]);
+  }, [testimonials.length, showStories, searchParams]);
   
   // Redirect /happy-customers to /testimonials for SEO (avoid duplicate content)
   if (location.pathname === "/happy-customers") {
