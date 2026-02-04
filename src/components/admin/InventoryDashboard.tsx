@@ -30,7 +30,13 @@ interface StockMovement {
   created_at: string;
 }
 
-export const InventoryDashboard = () => {
+interface InventoryDashboardProps {
+  userRole?: "admin" | "manager" | "employee";
+}
+
+export const InventoryDashboard = ({ userRole = "admin" }: InventoryDashboardProps) => {
+  const canSeeCostData = userRole === "admin";
+  const canAdjustStock = userRole === "admin" || userRole === "manager";
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -161,17 +167,19 @@ export const InventoryDashboard = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Inv. Value</CardTitle>
-            <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-            <div className="text-lg sm:text-2xl font-bold">
-              KSh {getTotalInventoryValue().toFixed(0)}
-            </div>
-          </CardContent>
-        </Card>
+        {canSeeCostData && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Inv. Value</CardTitle>
+              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-lg sm:text-2xl font-bold">
+                KSh {getTotalInventoryValue().toFixed(0)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <Card>
@@ -197,10 +205,10 @@ export const InventoryDashboard = () => {
                 <TableRow>
                   <TableHead className="min-w-[120px]">Product</TableHead>
                   <TableHead className="w-[70px]">Stock</TableHead>
-                  <TableHead className="hidden sm:table-cell">Cost</TableHead>
+                  {canSeeCostData && <TableHead className="hidden sm:table-cell">Cost</TableHead>}
                   <TableHead className="hidden md:table-cell">Sell</TableHead>
-                  <TableHead className="hidden lg:table-cell">Profit</TableHead>
-                  <TableHead className="text-right w-[100px] sm:w-auto">Actions</TableHead>
+                  {canSeeCostData && <TableHead className="hidden lg:table-cell">Profit</TableHead>}
+                  {canAdjustStock && <TableHead className="text-right w-[100px] sm:w-auto">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -231,41 +239,47 @@ export const InventoryDashboard = () => {
                           )}
                         </div>
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm">KSh {product.cost_price.toFixed(0)}</TableCell>
+                      {canSeeCostData && (
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">KSh {product.cost_price.toFixed(0)}</TableCell>
+                      )}
                       <TableCell className="hidden md:table-cell text-xs sm:text-sm">KSh {product.price.toFixed(0)}</TableCell>
-                      <TableCell className="hidden lg:table-cell">
-                        <span className={`text-xs sm:text-sm ${profit > 0 ? "text-green-600 font-medium" : "text-red-600"}`}>
-                          KSh {profit.toFixed(0)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right p-2 sm:p-4">
-                        <div className="flex justify-end gap-1 sm:gap-2">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => openAdjustDialog(product, true)}
-                            className="h-7 w-7 sm:h-8 sm:w-8"
-                          >
-                            <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => openAdjustDialog(product, false)}
-                            className="h-7 w-7 sm:h-8 sm:w-8"
-                          >
-                            <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => openHistoryDialog(product)}
-                            className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 hidden xs:flex"
-                          >
-                            Hist
-                          </Button>
-                        </div>
-                      </TableCell>
+                      {canSeeCostData && (
+                        <TableCell className="hidden lg:table-cell">
+                          <span className={`text-xs sm:text-sm ${profit > 0 ? "text-green-600 font-medium" : "text-red-600"}`}>
+                            KSh {profit.toFixed(0)}
+                          </span>
+                        </TableCell>
+                      )}
+                      {canAdjustStock && (
+                        <TableCell className="text-right p-2 sm:p-4">
+                          <div className="flex justify-end gap-1 sm:gap-2">
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => openAdjustDialog(product, true)}
+                              className="h-7 w-7 sm:h-8 sm:w-8"
+                            >
+                              <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => openAdjustDialog(product, false)}
+                              className="h-7 w-7 sm:h-8 sm:w-8"
+                            >
+                              <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => openHistoryDialog(product)}
+                              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2 hidden xs:flex"
+                            >
+                              Hist
+                            </Button>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}

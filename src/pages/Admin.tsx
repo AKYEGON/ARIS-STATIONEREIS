@@ -25,6 +25,7 @@ import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
+import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
 import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
@@ -53,7 +54,9 @@ interface Order {
   original_total?: number;
 }
 
-const VALID_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles"];
+const VALID_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team"];
+
+type UserRole = "admin" | "manager" | "employee";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -64,9 +67,14 @@ const Admin = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
-  // Get active tab from URL, default to "products"
+  // Get active tab from URL, with role-based default
   const urlTab = searchParams.get("tab");
-  const activeTab = VALID_TABS.includes(urlTab || "") ? urlTab! : "products";
+  const getDefaultTab = () => {
+    if (userRole === "admin") return "products";
+    if (userRole === "manager") return "orders";
+    return "orders"; // employee
+  };
+  const activeTab = VALID_TABS.includes(urlTab || "") ? urlTab! : getDefaultTab();
   
   const setActiveTab = (tab: string) => {
     setSearchParams({ tab });
@@ -77,6 +85,7 @@ const Admin = () => {
   const [newTag, setNewTag] = useState("");
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole>("employee");
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
@@ -220,20 +229,24 @@ const Admin = () => {
         return;
       }
 
+      // Check for any valid role (admin, manager, or employee)
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", session.user.id)
-        .eq("role", "admin")
+        .in("role", ["admin", "manager", "employee"])
         .single();
 
       if (error || !data) {
-        toast.error("Access denied. Admin privileges required.");
+        toast.error("Access denied. You don't have staff privileges.");
         navigate("/");
         return;
       }
 
-      setIsAdmin(true);
+      // Set the user's role
+      const role = data.role as UserRole;
+      setUserRole(role);
+      setIsAdmin(true); // This now means "has access to admin panel"
     } catch (error) {
       console.error("Auth check error:", error);
       navigate("/auth");
@@ -1392,68 +1405,96 @@ const Admin = () => {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 mb-6">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-6 sm:w-full gap-1">
-              <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Products</span>
-                <span className="xs:hidden">Prod</span>
-              </TabsTrigger>
-              <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Bundles</span>
-                <span className="xs:hidden">Bndl</span>
-              </TabsTrigger>
-              <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Inventory</span>
-                <span className="xs:hidden">Inv</span>
-              </TabsTrigger>
-              <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Sales</span>
-                <span className="xs:hidden">Sale</span>
-              </TabsTrigger>
+            <TabsList className={`inline-flex w-auto min-w-full gap-1 ${
+              userRole === "admin" ? "sm:grid sm:grid-cols-7" : 
+              userRole === "manager" ? "sm:grid sm:grid-cols-3" : 
+              "sm:grid sm:grid-cols-1"
+            } sm:w-full`}>
+              {userRole === "admin" && (
+                <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Products</span>
+                  <span className="xs:hidden">Prod</span>
+                </TabsTrigger>
+              )}
+              {userRole === "admin" && (
+                <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Bundles</span>
+                  <span className="xs:hidden">Bndl</span>
+                </TabsTrigger>
+              )}
+              {(userRole === "admin" || userRole === "manager") && (
+                <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Inventory</span>
+                  <span className="xs:hidden">Inv</span>
+                </TabsTrigger>
+              )}
+              {(userRole === "admin" || userRole === "manager") && (
+                <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Sales</span>
+                  <span className="xs:hidden">Sale</span>
+                </TabsTrigger>
+              )}
               <TabsTrigger value="orders" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                 <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span className="hidden xs:inline">Orders</span>
                 <span className="xs:hidden">Ord</span>
               </TabsTrigger>
-              <TabsTrigger value="testimonials" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Reviews</span>
-                <span className="xs:hidden">Rev</span>
-              </TabsTrigger>
+              {userRole === "admin" && (
+                <TabsTrigger value="testimonials" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Reviews</span>
+                  <span className="xs:hidden">Rev</span>
+                </TabsTrigger>
+              )}
+              {userRole === "admin" && (
+                <TabsTrigger value="team" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Team</span>
+                  <span className="xs:hidden">Team</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
           {/* Inventory Tab */}
-          <TabsContent value="inventory" className="space-y-6">
-            <InventoryDashboard />
-          </TabsContent>
+          {(userRole === "admin" || userRole === "manager") && (
+            <TabsContent value="inventory" className="space-y-6">
+              <InventoryDashboard userRole={userRole} />
+            </TabsContent>
+          )}
 
           {/* Sales Dashboard Tab */}
-          <TabsContent value="sales" className="space-y-4 sm:space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-              <div>
-                <h3 className="text-base sm:text-lg font-semibold">Sales Analytics</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">View sales performance and profit data</p>
+          {(userRole === "admin" || userRole === "manager") && (
+            <TabsContent value="sales" className="space-y-4 sm:space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold">Sales Analytics</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">View sales performance {userRole === "admin" ? "and profit data" : ""}</p>
+                </div>
+                {userRole === "admin" && (
+                  <Button
+                    onClick={recalculateAllProfits}
+                    disabled={isRecalculating}
+                    variant="outline"
+                    className="gap-2 w-full sm:w-auto text-xs sm:text-sm"
+                    size="sm"
+                  >
+                    <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    {isRecalculating ? "Recalculating..." : "Fix Historical Profits"}
+                  </Button>
+                )}
               </div>
-              <Button
-                onClick={recalculateAllProfits}
-                disabled={isRecalculating}
-                variant="outline"
-                className="gap-2 w-full sm:w-auto text-xs sm:text-sm"
-                size="sm"
-              >
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                {isRecalculating ? "Recalculating..." : "Fix Historical Profits"}
-              </Button>
-            </div>
-            <SalesDashboard />
-          </TabsContent>
+              <SalesDashboard hideProfitData={userRole !== "admin"} />
+            </TabsContent>
+          )}
 
-          {/* Products Tab */}
-          <TabsContent value="products" className="space-y-6">
+          {/* Products Tab - Admin Only */}
+          {userRole === "admin" && (
+            <TabsContent value="products" className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">Manage your product catalog</p>
               
@@ -1787,10 +1828,12 @@ const Admin = () => {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+            </TabsContent>
+          )}
 
-          {/* Bundles Tab */}
-          <TabsContent value="bundles">
+          {/* Bundles Tab - Admin Only */}
+          {userRole === "admin" && (
+            <TabsContent value="bundles">
             <BundlesTab
               bundles={bundlesList}
               products={productList}
@@ -1832,9 +1875,10 @@ const Admin = () => {
               onEdit={openBundleEditDialog}
               onDelete={handleDeleteBundle}
             />
-          </TabsContent>
+            </TabsContent>
+          )}
 
-          {/* Orders Tab */}
+          {/* Orders Tab - All roles can see this */}
           <TabsContent value="orders" className="space-y-6">
             <PullToRefresh onRefresh={handleRefreshOrders} className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -1983,8 +2027,9 @@ const Admin = () => {
             </PullToRefresh>
           </TabsContent>
 
-          {/* Testimonials Tab */}
-          <TabsContent value="testimonials" className="space-y-4 sm:space-y-6">
+          {/* Testimonials Tab - Admin Only */}
+          {userRole === "admin" && (
+            <TabsContent value="testimonials" className="space-y-4 sm:space-y-6">
             {/* Status Filter Tabs */}
             <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
               <Button 
@@ -2355,7 +2400,15 @@ const Admin = () => {
                 <TestimonialAnalytics />
               </CardContent>
             </Card>
-          </TabsContent>
+            </TabsContent>
+          )}
+
+          {/* Team Tab - Admin Only */}
+          {userRole === "admin" && (
+            <TabsContent value="team" className="space-y-6">
+              <EmployeeManagement />
+            </TabsContent>
+          )}
         </Tabs>
 
         {/* Edit Product Dialog */}
