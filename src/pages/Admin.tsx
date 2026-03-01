@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 import { Product, ProductMedia } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, LogOut, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +29,7 @@ import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
 import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
+import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 
 interface OrderItem {
   product_name: string;
@@ -53,7 +54,22 @@ interface Order {
   original_total?: number;
 }
 
-const VALID_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles"];
+type UserRole = 'admin' | 'manager' | 'employee';
+
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team"];
+
+const getVisibleTabs = (role: UserRole) => {
+  switch (role) {
+    case 'admin':
+      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team"];
+    case 'manager':
+      return ["orders", "inventory", "sales"];
+    case 'employee':
+      return ["orders"];
+    default:
+      return ["orders"];
+  }
+};
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -63,10 +79,13 @@ const Admin = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [userRole, setUserRole] = useState<UserRole>('employee');
   
-  // Get active tab from URL, default to "products"
+  const visibleTabs = getVisibleTabs(userRole);
+  
+  // Get active tab from URL, default to first visible tab
   const urlTab = searchParams.get("tab");
-  const activeTab = VALID_TABS.includes(urlTab || "") ? urlTab! : "products";
+  const activeTab = visibleTabs.includes(urlTab || "") ? urlTab! : visibleTabs[0];
   
   const setActiveTab = (tab: string) => {
     setSearchParams({ tab });
@@ -223,16 +242,30 @@ const Admin = () => {
       const { data, error } = await supabase
         .from("user_roles")
         .select("role")
-        .eq("user_id", session.user.id)
-        .eq("role", "admin")
-        .single();
+        .eq("user_id", session.user.id);
 
-      if (error || !data) {
-        toast.error("Access denied. Admin privileges required.");
+      if (error || !data || data.length === 0) {
+        toast.error("Access denied. No staff privileges.");
         navigate("/");
         return;
       }
 
+      // Determine highest role: admin > manager > employee
+      const roles = data.map(r => r.role);
+      let detectedRole: UserRole = 'employee';
+      if (roles.includes('admin')) {
+        detectedRole = 'admin';
+      } else if (roles.includes('manager')) {
+        detectedRole = 'manager';
+      } else if (roles.includes('employee')) {
+        detectedRole = 'employee';
+      } else {
+        toast.error("Access denied. No staff privileges.");
+        navigate("/");
+        return;
+      }
+
+      setUserRole(detectedRole);
       setIsAdmin(true);
     } catch (error) {
       console.error("Auth check error:", error);
@@ -1392,43 +1425,62 @@ const Admin = () => {
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="overflow-x-auto -mx-4 px-4 mb-6">
-            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:grid-cols-6 sm:w-full gap-1">
-              <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Products</span>
-                <span className="xs:hidden">Prod</span>
-              </TabsTrigger>
-              <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Bundles</span>
-                <span className="xs:hidden">Bndl</span>
-              </TabsTrigger>
-              <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Inventory</span>
-                <span className="xs:hidden">Inv</span>
-              </TabsTrigger>
-              <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Sales</span>
-                <span className="xs:hidden">Sale</span>
-              </TabsTrigger>
-              <TabsTrigger value="orders" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Orders</span>
-                <span className="xs:hidden">Ord</span>
-              </TabsTrigger>
-              <TabsTrigger value="testimonials" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Reviews</span>
-                <span className="xs:hidden">Rev</span>
-              </TabsTrigger>
+            <TabsList className={`inline-flex w-auto min-w-full sm:grid sm:w-full gap-1`} style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}>
+              {visibleTabs.includes("products") && (
+                <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Products</span>
+                  <span className="xs:hidden">Prod</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("bundles") && (
+                <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Bundles</span>
+                  <span className="xs:hidden">Bndl</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("inventory") && (
+                <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Inventory</span>
+                  <span className="xs:hidden">Inv</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("sales") && (
+                <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Sales</span>
+                  <span className="xs:hidden">Sale</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("orders") && (
+                <TabsTrigger value="orders" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Orders</span>
+                  <span className="xs:hidden">Ord</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("testimonials") && (
+                <TabsTrigger value="testimonials" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Reviews</span>
+                  <span className="xs:hidden">Rev</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("team") && (
+                <TabsTrigger value="team" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <UsersRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Team</span>
+                  <span className="xs:hidden">Team</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
-            <InventoryDashboard />
+            <InventoryDashboard userRole={userRole} />
           </TabsContent>
 
           {/* Sales Dashboard Tab */}
@@ -1436,20 +1488,27 @@ const Admin = () => {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
               <div>
                 <h3 className="text-base sm:text-lg font-semibold">Sales Analytics</h3>
-                <p className="text-xs sm:text-sm text-muted-foreground">View sales performance and profit data</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">View sales performance{userRole === 'admin' ? ' and profit data' : ''}</p>
               </div>
-              <Button
-                onClick={recalculateAllProfits}
-                disabled={isRecalculating}
-                variant="outline"
-                className="gap-2 w-full sm:w-auto text-xs sm:text-sm"
-                size="sm"
-              >
-                <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                {isRecalculating ? "Recalculating..." : "Fix Historical Profits"}
-              </Button>
+              {userRole === 'admin' && (
+                <Button
+                  onClick={recalculateAllProfits}
+                  disabled={isRecalculating}
+                  variant="outline"
+                  className="gap-2 w-full sm:w-auto text-xs sm:text-sm"
+                  size="sm"
+                >
+                  <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  {isRecalculating ? "Recalculating..." : "Fix Historical Profits"}
+                </Button>
+              )}
             </div>
-            <SalesDashboard />
+            <SalesDashboard hideProfitData={userRole !== 'admin'} />
+          </TabsContent>
+
+          {/* Team Management Tab */}
+          <TabsContent value="team" className="space-y-6">
+            <EmployeeManagement />
           </TabsContent>
 
           {/* Products Tab */}
