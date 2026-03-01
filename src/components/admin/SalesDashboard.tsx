@@ -28,7 +28,11 @@ interface DailySales {
   order_count: number;
 }
 
-export const SalesDashboard = () => {
+interface SalesDashboardProps {
+  hideProfitData?: boolean;
+}
+
+export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) => {
   const [stats, setStats] = useState<SalesStats>({
     totalSales: 0,
     totalProfit: 0,
@@ -154,17 +158,19 @@ export const SalesDashboard = () => {
             <div className="text-sm xs:text-base sm:text-2xl font-bold">KSh {stats.totalSales.toFixed(0)}</div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
-            <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Profit</CardTitle>
-            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-2.5 pt-0 sm:p-6 sm:pt-0">
-            <div className="text-sm xs:text-base sm:text-2xl font-bold text-green-600">
-              KSh {stats.totalProfit.toFixed(0)}
-            </div>
-          </CardContent>
-        </Card>
+        {!hideProfitData && (
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
+              <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Profit</CardTitle>
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="p-2.5 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-sm xs:text-base sm:text-2xl font-bold text-green-600">
+                KSh {stats.totalProfit.toFixed(0)}
+              </div>
+            </CardContent>
+          </Card>
+        )}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 p-2.5 sm:p-6">
             <CardTitle className="text-[10px] xs:text-xs sm:text-sm font-medium">Orders</CardTitle>
@@ -200,7 +206,7 @@ export const SalesDashboard = () => {
                     <TableHead className="text-xs sm:text-sm">Product</TableHead>
                     <TableHead className="text-xs sm:text-sm w-[50px]">Qty</TableHead>
                     <TableHead className="text-xs sm:text-sm hidden xs:table-cell">Revenue</TableHead>
-                    <TableHead className="text-xs sm:text-sm">Profit</TableHead>
+                    {!hideProfitData && <TableHead className="text-xs sm:text-sm">Profit</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -209,9 +215,11 @@ export const SalesDashboard = () => {
                       <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-4 max-w-[120px] truncate">{product.product_name}</TableCell>
                       <TableCell className="text-xs sm:text-sm p-2 sm:p-4">{product.total_quantity}</TableCell>
                       <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden xs:table-cell">KSh {product.total_revenue.toFixed(0)}</TableCell>
-                      <TableCell className="text-green-600 font-medium text-xs sm:text-sm p-2 sm:p-4">
-                        KSh {product.total_profit.toFixed(0)}
-                      </TableCell>
+                      {!hideProfitData && (
+                        <TableCell className="text-green-600 font-medium text-xs sm:text-sm p-2 sm:p-4">
+                          KSh {product.total_profit.toFixed(0)}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -232,7 +240,7 @@ export const SalesDashboard = () => {
                     <TableHead className="text-xs sm:text-sm">Date</TableHead>
                     <TableHead className="text-xs sm:text-sm w-[40px]">Ord</TableHead>
                     <TableHead className="text-xs sm:text-sm hidden xs:table-cell">Sales</TableHead>
-                    <TableHead className="text-xs sm:text-sm">Profit</TableHead>
+                    {!hideProfitData && <TableHead className="text-xs sm:text-sm">Profit</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -241,9 +249,11 @@ export const SalesDashboard = () => {
                       <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-4">{day.date}</TableCell>
                       <TableCell className="text-xs sm:text-sm p-2 sm:p-4">{day.order_count}</TableCell>
                       <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden xs:table-cell">KSh {day.total_sales.toFixed(0)}</TableCell>
-                      <TableCell className="text-green-600 font-medium text-xs sm:text-sm p-2 sm:p-4">
-                        KSh {day.total_profit.toFixed(0)}
-                      </TableCell>
+                      {!hideProfitData && (
+                        <TableCell className="text-green-600 font-medium text-xs sm:text-sm p-2 sm:p-4">
+                          KSh {day.total_profit.toFixed(0)}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
