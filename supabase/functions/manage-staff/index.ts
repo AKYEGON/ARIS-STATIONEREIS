@@ -14,7 +14,6 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Verify the caller is an admin
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "No authorization header" }), {
@@ -25,7 +24,6 @@ Deno.serve(async (req) => {
 
     const supabaseClient = createClient(supabaseUrl, serviceRoleKey);
     
-    // Verify caller's token
     const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
     const { data: { user: caller }, error: authError } = await anonClient.auth.getUser(
       authHeader.replace("Bearer ", "")
@@ -56,61 +54,67 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { action } = body;
 
-    if (action === "add") {
-      const { email, name, phone, role } = body;
-
-      if (!email || !name || !role) {
-        return new Response(JSON.stringify({ error: "Email, name, and role are required" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Look up user by email using admin API with pagination
-      let targetUser = null;
+    // List all registered users with their roles
+    if (action === "list-users") {
+      const allUsers: any[] = [];
       let page = 1;
       const perPage = 100;
       
-      while (!targetUser) {
+      while (true) {
         const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers({
           page,
           perPage,
         });
         
         if (listError) {
-          return new Response(JSON.stringify({ error: "Failed to look up users" }), {
+          return new Response(JSON.stringify({ error: "Failed to list users" }), {
             status: 500,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
-        targetUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-        
+        allUsers.push(...users);
         if (users.length < perPage) break;
         page++;
       }
 
-      // If user not found, create account automatically with a temporary password
-      if (!targetUser) {
-        const tempPassword = crypto.randomUUID() + "Aa1!";
-        const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
-          email: email.toLowerCase(),
-          password: tempPassword,
-          email_confirm: true,
+      // Get all roles
+      const { data: roles } = await supabaseClient
+        .from("user_roles")
+        .select("*");
+
+      // Get all employee profiles
+      const { data: profiles } = await supabaseClient
+        .from("employee_profiles")
+        .select("*");
+
+      const usersWithRoles = allUsers
+        .filter(u => u.id !== caller.id) // Exclude the admin themselves
+        .map(user => {
+          const userRoles = (roles || []).filter(r => r.user_id === user.id);
+          const profile = (profiles || []).find(p => p.user_id === user.id);
+          return {
+            id: user.id,
+            email: user.email,
+            created_at: user.created_at,
+            email_confirmed_at: user.email_confirmed_at,
+            roles: userRoles.map(r => r.role),
+            profile: profile || null,
+          };
         });
 
-        if (createError) {
-          return new Response(JSON.stringify({ error: "Failed to create user account: " + createError.message }), {
-            status: 500,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
+      return new Response(JSON.stringify({ users: usersWithRoles }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-        targetUser = newUser.user;
-      }
-      if (!targetUser) {
-        return new Response(JSON.stringify({ error: "No user found with that email. They must sign up first." }), {
-          status: 404,
+    // Approve user - assign role and create employee profile
+    if (action === "approve") {
+      const { user_id, role, name, phone } = body;
+
+      if (!user_id || !role || !name) {
+        return new Response(JSON.stringify({ error: "user_id, role, and name are required" }), {
+          status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -119,7 +123,7 @@ Deno.serve(async (req) => {
       const { data: existingRole } = await supabaseClient
         .from("user_roles")
         .select("*")
-        .eq("user_id", targetUser.id)
+        .eq("user_id", user_id)
         .in("role", ["employee", "manager"])
         .maybeSingle();
 
@@ -133,7 +137,7 @@ Deno.serve(async (req) => {
       // Add role
       const { error: roleError } = await supabaseClient
         .from("user_roles")
-        .insert({ user_id: targetUser.id, role });
+        .insert({ user_id, role });
 
       if (roleError) {
         return new Response(JSON.stringify({ error: "Failed to assign role: " + roleError.message }), {
@@ -142,26 +146,25 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Create employee profile
+      // Create or update employee profile
       const { error: profileError } = await supabaseClient
         .from("employee_profiles")
-        .insert({
-          user_id: targetUser.id,
+        .upsert({
+          user_id,
           name,
           phone: phone || null,
           is_active: true,
-        });
+        }, { onConflict: "user_id" });
 
       if (profileError) {
-        // Rollback role if profile creation fails
-        await supabaseClient.from("user_roles").delete().eq("user_id", targetUser.id).eq("role", role);
+        await supabaseClient.from("user_roles").delete().eq("user_id", user_id).eq("role", role);
         return new Response(JSON.stringify({ error: "Failed to create profile: " + profileError.message }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      return new Response(JSON.stringify({ success: true, message: "Staff member added. They can log in using their email and set a password via 'Forgot Password'." }), {
+      return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -176,14 +179,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Delete existing employee/manager role
       await supabaseClient
         .from("user_roles")
         .delete()
         .eq("user_id", user_id)
         .in("role", ["employee", "manager"]);
 
-      // Insert new role
       const { error } = await supabaseClient
         .from("user_roles")
         .insert({ user_id, role });
@@ -210,14 +211,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Delete role
       await supabaseClient
         .from("user_roles")
         .delete()
         .eq("user_id", user_id)
         .in("role", ["employee", "manager"]);
 
-      // Delete employee profile
       await supabaseClient
         .from("employee_profiles")
         .delete()
