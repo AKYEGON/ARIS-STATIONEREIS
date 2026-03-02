@@ -17,6 +17,27 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast.error("Please enter your email address first");
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success("Password reset link sent! Check your email.");
+      setShowForgotPassword(false);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send reset link");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     // Check if user is already logged in
@@ -119,6 +140,13 @@ const Auth = () => {
                   <Button type="submit" className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11" disabled={loading}>
                     {loading ? "Signing in..." : "Sign In"}
                   </Button>
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotPassword(true)}
+                    className="w-full text-center text-sm text-primary hover:underline"
+                  >
+                    Forgot Password?
+                  </button>
                 </form>
               </TabsContent>
               
@@ -155,6 +183,45 @@ const Auth = () => {
                 </form>
               </TabsContent>
             </Tabs>
+
+            {/* Forgot Password Modal */}
+            {showForgotPassword && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                <Card className="w-full max-w-sm">
+                  <CardHeader className="p-4 sm:p-6">
+                    <CardTitle className="text-lg">Reset Password</CardTitle>
+                    <CardDescription className="text-xs sm:text-sm">
+                      Enter your email and we'll send you a reset link.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 sm:p-6 pt-0 space-y-3">
+                    <Input
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-10"
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setShowForgotPassword(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="flex-1"
+                        onClick={handleForgotPassword}
+                        disabled={loading}
+                      >
+                        {loading ? "Sending..." : "Send Link"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </CardContent>
         </Card>
       </main>
