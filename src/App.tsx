@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Brochure from "./pages/Brochure";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
@@ -38,6 +39,7 @@ const App = () => {
                 <Route path="/" element={<Index />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/brochure" element={<Brochure />} />
                 <Route path="/testimonials" element={<Testimonials />} />
