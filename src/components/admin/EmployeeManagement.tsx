@@ -8,185 +8,145 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Trash2, Users, Shield, UserCheck } from "lucide-react";
+import { Trash2, Users, Shield, UserCheck, UserPlus, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-interface StaffMember {
+interface RegisteredUser {
   id: string;
-  user_id: string;
-  name: string;
-  phone: string | null;
-  is_active: boolean;
+  email: string;
   created_at: string;
-  role: "employee" | "manager";
-  email?: string;
+  email_confirmed_at: string | null;
+  roles: string[];
+  profile: {
+    id: string;
+    name: string;
+    phone: string | null;
+    is_active: boolean;
+  } | null;
 }
 
 export const EmployeeManagement = () => {
-  const [staff, setStaff] = useState<StaffMember[]>([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<RegisteredUser[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [approveDialogUser, setApproveDialogUser] = useState<RegisteredUser | null>(null);
+  const [approveLoading, setApproveLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
     name: "",
     phone: "",
     role: "employee" as "employee" | "manager"
   });
 
   useEffect(() => {
-    fetchStaff();
+    fetchUsers();
   }, []);
 
-  const fetchStaff = async () => {
+  const fetchUsers = async () => {
+    setLoading(true);
     try {
-      // Fetch employee profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("employee_profiles")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (profilesError) throw profilesError;
-
-      // Fetch roles for these users
-      const userIds = (profiles || []).map(p => p.user_id);
-      
-      if (userIds.length === 0) {
-        setStaff([]);
-        return;
-      }
-
-      const { data: roles, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*")
-        .in("user_id", userIds)
-        .in("role", ["employee", "manager"]);
-
-      if (rolesError) throw rolesError;
-
-      const staffMembers: StaffMember[] = (profiles || []).map(profile => {
-        const userRole = roles?.find(r => r.user_id === profile.user_id);
-        return {
-          ...profile,
-          role: (userRole?.role as "employee" | "manager") || "employee"
-        };
+      const { data, error } = await supabase.functions.invoke('manage-staff', {
+        body: { action: 'list-users' }
       });
 
-      setStaff(staffMembers);
-    } catch (error) {
-      console.error("Error fetching staff:", error);
-      toast.error("Failed to load staff members");
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setUsers(data.users || []);
+    } catch (error: any) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleAddStaff = async () => {
-    if (!formData.email || !formData.name) {
-      toast.error("Please fill in email and name");
+  const pendingUsers = users.filter(u => !u.roles.some(r => ["employee", "manager", "admin"].includes(r)));
+  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager"].includes(r)));
+
+  const handleApprove = async () => {
+    if (!approveDialogUser || !formData.name) {
+      toast.error("Please enter the staff member's name");
       return;
     }
 
-    setLoading(true);
+    setApproveLoading(true);
     try {
-      // Look up user by email using edge function or direct auth lookup
-      // Since we can't query auth.users directly from client, we'll use a workaround
-      // The admin needs to provide the email of a user who has already signed up
-      
-      // Try to find if there's already an employee profile with this email
-      // We need to use a different approach - store the email lookup via an edge function
-      // For now, we'll use signInWithOtp to check if user exists, but better approach:
-      // Just create the profile and role, the user_id will need to be found
-      
-      // Alternative: Use supabase admin API through edge function
-      const { data: fnData, error: fnError } = await supabase.functions.invoke('manage-staff', {
+      const { data, error } = await supabase.functions.invoke('manage-staff', {
         body: {
-          action: 'add',
-          email: formData.email.trim().toLowerCase(),
+          action: 'approve',
+          user_id: approveDialogUser.id,
           name: formData.name,
           phone: formData.phone || null,
           role: formData.role
         }
       });
 
-      if (fnError) {
-        const errMsg = fnData?.error || fnError.message || "Failed to add staff member";
-        throw new Error(errMsg);
-      }
-      if (fnData?.error) throw new Error(fnData.error);
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      toast.success(`${formData.name} added as ${formData.role}!`);
-      setIsAddDialogOpen(false);
-      setFormData({ email: "", name: "", phone: "", role: "employee" });
-      fetchStaff();
+      toast.success(`${formData.name} approved as ${formData.role}!`);
+      setApproveDialogUser(null);
+      setFormData({ name: "", phone: "", role: "employee" });
+      fetchUsers();
     } catch (error: any) {
-      console.error("Error adding staff:", error);
-      toast.error(error.message || "Failed to add staff member");
+      toast.error(error.message || "Failed to approve user");
     } finally {
-      setLoading(false);
+      setApproveLoading(false);
     }
   };
 
-  const handleToggleActive = async (member: StaffMember) => {
+  const handleToggleActive = async (member: RegisteredUser) => {
+    if (!member.profile) return;
     try {
       const { error } = await supabase
         .from("employee_profiles")
-        .update({ is_active: !member.is_active })
-        .eq("id", member.id);
+        .update({ is_active: !member.profile.is_active })
+        .eq("user_id", member.id);
 
       if (error) throw error;
-
-      toast.success(`${member.name} ${member.is_active ? 'deactivated' : 'activated'}`);
-      fetchStaff();
+      toast.success(`${member.profile.name} ${member.profile.is_active ? 'deactivated' : 'activated'}`);
+      fetchUsers();
     } catch (error) {
-      console.error("Error toggling staff status:", error);
-      toast.error("Failed to update staff status");
+      toast.error("Failed to update status");
     }
   };
 
-  const handleUpdateRole = async (member: StaffMember, newRole: "employee" | "manager") => {
+  const handleUpdateRole = async (member: RegisteredUser, newRole: "employee" | "manager") => {
     try {
-      const { data: fnData, error: fnError } = await supabase.functions.invoke('manage-staff', {
-        body: {
-          action: 'update-role',
-          user_id: member.user_id,
-          role: newRole
-        }
+      const { data, error } = await supabase.functions.invoke('manage-staff', {
+        body: { action: 'update-role', user_id: member.id, role: newRole }
       });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      if (fnError) throw fnError;
-      if (fnData?.error) throw new Error(fnData.error);
-
-      toast.success(`${member.name}'s role updated to ${newRole}`);
-      fetchStaff();
+      toast.success(`Role updated to ${newRole}`);
+      fetchUsers();
     } catch (error: any) {
-      console.error("Error updating role:", error);
       toast.error(error.message || "Failed to update role");
     }
   };
 
-  const handleRemoveStaff = async (member: StaffMember) => {
-    if (!confirm(`Remove ${member.name} from staff? They will lose all access.`)) return;
+  const handleRemoveStaff = async (member: RegisteredUser) => {
+    const name = member.profile?.name || member.email;
+    if (!confirm(`Remove ${name} from staff? They will lose all access.`)) return;
 
     try {
-      const { data: fnData, error: fnError } = await supabase.functions.invoke('manage-staff', {
-        body: {
-          action: 'remove',
-          user_id: member.user_id
-        }
+      const { data, error } = await supabase.functions.invoke('manage-staff', {
+        body: { action: 'remove', user_id: member.id }
       });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-      if (fnError) throw fnError;
-      if (fnData?.error) throw new Error(fnData.error);
-
-      toast.success(`${member.name} removed from staff`);
-      fetchStaff();
+      toast.success(`${name} removed from staff`);
+      fetchUsers();
     } catch (error: any) {
-      console.error("Error removing staff:", error);
       toast.error(error.message || "Failed to remove staff member");
     }
   };
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Stats Cards */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
@@ -194,7 +154,16 @@ export const EmployeeManagement = () => {
             <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-            <div className="text-lg sm:text-2xl font-bold">{staff.length}</div>
+            <div className="text-lg sm:text-2xl font-bold">{staffMembers.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+            <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+            <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+            <div className="text-lg sm:text-2xl font-bold text-primary">{pendingUsers.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -204,32 +173,69 @@ export const EmployeeManagement = () => {
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-lg sm:text-2xl font-bold">
-              {staff.filter(s => s.role === "manager").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Active</CardTitle>
-            <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-            <div className="text-lg sm:text-2xl font-bold">
-              {staff.filter(s => s.is_active).length}
+              {staffMembers.filter(s => s.roles.includes("manager")).length}
             </div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Pending Approval Section */}
+      {pendingUsers.length > 0 && (
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-base sm:text-lg flex items-center gap-2">
+              <UserPlus className="h-4 w-4 text-primary" />
+              Pending Approval ({pendingUsers.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2 sm:p-6 pt-0">
+            <div className="overflow-x-auto -mx-2 sm:mx-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Email</TableHead>
+                    <TableHead className="hidden sm:table-cell">Signed Up</TableHead>
+                    <TableHead className="text-right w-[100px]">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pendingUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell className="p-2 sm:p-4">
+                        <div className="text-xs sm:text-sm font-medium">{user.email}</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground sm:hidden">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm text-muted-foreground">
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right p-2 sm:p-4">
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            setApproveDialogUser(user);
+                            setFormData({ name: "", phone: "", role: "employee" });
+                          }}
+                          className="h-7 sm:h-8 text-xs sm:text-sm gap-1"
+                        >
+                          <UserCheck className="h-3 w-3" />
+                          Approve
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Active Staff */}
       <Card>
         <CardHeader className="p-3 sm:p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <CardTitle className="text-base sm:text-lg">Staff Members</CardTitle>
-            <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2 w-full sm:w-auto" size="sm">
-              <Plus className="h-4 w-4" />
-              Add Staff
-            </Button>
-          </div>
+          <CardTitle className="text-base sm:text-lg">Staff Members</CardTitle>
         </CardHeader>
         <CardContent className="p-2 sm:p-6 pt-0">
           <div className="overflow-x-auto -mx-2 sm:mx-0">
@@ -237,70 +243,73 @@ export const EmployeeManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead className="min-w-[120px]">Name</TableHead>
-                  <TableHead className="hidden sm:table-cell">Phone</TableHead>
+                  <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Role</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {staff.length === 0 ? (
+                {staffMembers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                      No staff members yet. Add your first team member!
+                      {loading ? "Loading..." : "No staff members yet. Approve pending users above!"}
                     </TableCell>
                   </TableRow>
                 ) : (
-                  staff.map((member) => (
-                    <TableRow key={member.id}>
-                      <TableCell className="p-2 sm:p-4">
-                        <div>
-                          <div className="font-medium text-xs sm:text-sm">{member.name}</div>
-                          <div className="text-[10px] sm:text-xs text-muted-foreground sm:hidden">{member.phone || '-'}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{member.phone || '-'}</TableCell>
-                      <TableCell className="p-2 sm:p-4">
-                        <Select
-                          value={member.role}
-                          onValueChange={(value: "employee" | "manager") => handleUpdateRole(member, value)}
-                        >
-                          <SelectTrigger className="h-7 sm:h-8 text-[10px] sm:text-xs w-[90px] sm:w-[110px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="employee">Employee</SelectItem>
-                            <SelectItem value="manager">Manager</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell className="p-2 sm:p-4">
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            checked={member.is_active}
-                            onCheckedChange={() => handleToggleActive(member)}
-                            className="scale-75 sm:scale-100"
-                          />
-                          <Badge
-                            variant={member.is_active ? "default" : "secondary"}
-                            className="text-[10px] sm:text-xs hidden xs:inline-flex"
+                  staffMembers.map((member) => {
+                    const currentRole = member.roles.includes("manager") ? "manager" : "employee";
+                    return (
+                      <TableRow key={member.id}>
+                        <TableCell className="p-2 sm:p-4">
+                          <div>
+                            <div className="font-medium text-xs sm:text-sm">{member.profile?.name || "—"}</div>
+                            <div className="text-[10px] sm:text-xs text-muted-foreground sm:hidden">{member.email}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{member.email}</TableCell>
+                        <TableCell className="p-2 sm:p-4">
+                          <Select
+                            value={currentRole}
+                            onValueChange={(value: "employee" | "manager") => handleUpdateRole(member, value)}
                           >
-                            {member.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right p-2 sm:p-4">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => handleRemoveStaff(member)}
-                          className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
-                        >
-                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                            <SelectTrigger className="h-7 sm:h-8 text-[10px] sm:text-xs w-[90px] sm:w-[110px]">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="employee">Employee</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell className="p-2 sm:p-4">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={member.profile?.is_active ?? false}
+                              onCheckedChange={() => handleToggleActive(member)}
+                              className="scale-75 sm:scale-100"
+                            />
+                            <Badge
+                              variant={member.profile?.is_active ? "default" : "secondary"}
+                              className="text-[10px] sm:text-xs hidden xs:inline-flex"
+                            >
+                              {member.profile?.is_active ? "Active" : "Inactive"}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right p-2 sm:p-4">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => handleRemoveStaff(member)}
+                            className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 )}
               </TableBody>
             </Table>
@@ -308,31 +317,20 @@ export const EmployeeManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Add Staff Dialog */}
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+      {/* Approve Dialog */}
+      <Dialog open={!!approveDialogUser} onOpenChange={(open) => !open && setApproveDialogUser(null)}>
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-sm sm:text-base">Add Staff Member</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">Approve Staff Member</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 sm:space-y-4">
             <p className="text-xs sm:text-sm text-muted-foreground">
-              The staff member must have already signed up with this email address.
+              Approving <span className="font-medium text-foreground">{approveDialogUser?.email}</span> as staff.
             </p>
             <div>
-              <Label htmlFor="staff-email" className="text-xs sm:text-sm">Email Address *</Label>
+              <Label htmlFor="approve-name" className="text-xs sm:text-sm">Display Name *</Label>
               <Input
-                id="staff-email"
-                type="email"
-                placeholder="staff@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="h-9 sm:h-10 text-sm"
-              />
-            </div>
-            <div>
-              <Label htmlFor="staff-name" className="text-xs sm:text-sm">Full Name *</Label>
-              <Input
-                id="staff-name"
+                id="approve-name"
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -340,9 +338,9 @@ export const EmployeeManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="staff-phone" className="text-xs sm:text-sm">Phone (Optional)</Label>
+              <Label htmlFor="approve-phone" className="text-xs sm:text-sm">Phone (Optional)</Label>
               <Input
-                id="staff-phone"
+                id="approve-phone"
                 placeholder="+254..."
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -350,7 +348,7 @@ export const EmployeeManagement = () => {
               />
             </div>
             <div>
-              <Label htmlFor="staff-role" className="text-xs sm:text-sm">Role</Label>
+              <Label htmlFor="approve-role" className="text-xs sm:text-sm">Role</Label>
               <Select
                 value={formData.role}
                 onValueChange={(value: "employee" | "manager") => setFormData({ ...formData, role: value })}
@@ -364,8 +362,8 @@ export const EmployeeManagement = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleAddStaff} className="w-full h-9 sm:h-10 text-sm" disabled={loading}>
-              {loading ? "Adding..." : "Add Staff Member"}
+            <Button onClick={handleApprove} className="w-full h-9 sm:h-10 text-sm" disabled={approveLoading}>
+              {approveLoading ? "Approving..." : "Approve & Set Role"}
             </Button>
           </div>
         </DialogContent>

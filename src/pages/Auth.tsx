@@ -63,7 +63,7 @@ const Auth = () => {
 
       if (error) throw error;
 
-      toast.success("Account created! Please log in.");
+      toast.success("Account created! Please wait for admin approval, then log in.");
       setEmail("");
       setPassword("");
     } catch (error: any) {
