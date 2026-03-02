@@ -66,17 +66,29 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Look up user by email using admin API
-      const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers();
+      // Look up user by email using admin API with pagination
+      let targetUser = null;
+      let page = 1;
+      const perPage = 100;
       
-      if (listError) {
-        return new Response(JSON.stringify({ error: "Failed to look up users" }), {
-          status: 500,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+      while (!targetUser) {
+        const { data: { users }, error: listError } = await supabaseClient.auth.admin.listUsers({
+          page,
+          perPage,
         });
-      }
+        
+        if (listError) {
+          return new Response(JSON.stringify({ error: "Failed to look up users" }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
 
-      const targetUser = users.find(u => u.email === email);
+        targetUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+        
+        if (users.length < perPage) break; // No more pages
+        page++;
+      }
       if (!targetUser) {
         return new Response(JSON.stringify({ error: "No user found with that email. They must sign up first." }), {
           status: 404,
