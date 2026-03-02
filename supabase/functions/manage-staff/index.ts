@@ -86,8 +86,27 @@ Deno.serve(async (req) => {
 
         targetUser = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
         
-        if (users.length < perPage) break; // No more pages
+        if (users.length < perPage) break;
         page++;
+      }
+
+      // If user not found, create account automatically with a temporary password
+      if (!targetUser) {
+        const tempPassword = crypto.randomUUID() + "Aa1!";
+        const { data: newUser, error: createError } = await supabaseClient.auth.admin.createUser({
+          email: email.toLowerCase(),
+          password: tempPassword,
+          email_confirm: true,
+        });
+
+        if (createError) {
+          return new Response(JSON.stringify({ error: "Failed to create user account: " + createError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
+        targetUser = newUser.user;
       }
       if (!targetUser) {
         return new Response(JSON.stringify({ error: "No user found with that email. They must sign up first." }), {
@@ -106,7 +125,7 @@ Deno.serve(async (req) => {
 
       if (existingRole) {
         return new Response(JSON.stringify({ error: "This user already has a staff role" }), {
-          status: 400,
+          status: 409,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -142,7 +161,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      return new Response(JSON.stringify({ success: true }), {
+      return new Response(JSON.stringify({ success: true, message: "Staff member added. They can log in using their email and set a password via 'Forgot Password'." }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
