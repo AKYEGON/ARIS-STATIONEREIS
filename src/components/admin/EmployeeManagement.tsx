@@ -100,14 +100,17 @@ export const EmployeeManagement = () => {
       const { data: fnData, error: fnError } = await supabase.functions.invoke('manage-staff', {
         body: {
           action: 'add',
-          email: formData.email,
+          email: formData.email.trim().toLowerCase(),
           name: formData.name,
           phone: formData.phone || null,
           role: formData.role
         }
       });
 
-      if (fnError) throw fnError;
+      if (fnError) {
+        const errMsg = fnData?.error || fnError.message || "Failed to add staff member";
+        throw new Error(errMsg);
+      }
       if (fnData?.error) throw new Error(fnData.error);
 
       toast.success(`${formData.name} added as ${formData.role}!`);
