@@ -1,13 +1,11 @@
-import { ShoppingCart, FileText, Users, Menu, Tag, LogOut, LogIn } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { ShoppingCart, FileText, Users, Menu, Tag } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useFooterVisibility } from "@/hooks/use-footer-visibility";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -16,24 +14,6 @@ interface HeaderProps {
 const Header = ({ cartItemCount }: HeaderProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isFooterVisible = useFooterVisibility();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session);
-    });
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    toast.success("Signed out successfully");
-    setMobileMenuOpen(false);
-    navigate("/");
-  };
 
   return (
     <>
@@ -97,24 +77,6 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                     <ShoppingCart className="h-5 w-5" />
                     Cart {cartItemCount > 0 && `(${cartItemCount})`}
                   </Link>
-                  {isLoggedIn ? (
-                    <button 
-                      onClick={handleSignOut}
-                      className="flex items-center gap-3 text-lg font-medium hover:text-destructive transition-colors"
-                    >
-                      <LogOut className="h-5 w-5" />
-                      Sign Out
-                    </button>
-                  ) : (
-                    <Link 
-                      to="/auth" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
-                    >
-                      <LogIn className="h-5 w-5" />
-                      Sign In
-                    </Link>
-                  )}
                 </nav>
               </SheetContent>
             </Sheet>
@@ -154,19 +116,6 @@ const Header = ({ cartItemCount }: HeaderProps) => {
               </Button>
             </Link>
             
-            {isLoggedIn ? (
-              <Button variant="outline" size="sm" onClick={handleSignOut} className="hidden md:flex gap-1.5">
-                <LogOut className="h-4 w-4" />
-                <span className="hidden lg:inline">Sign Out</span>
-              </Button>
-            ) : (
-              <Link to="/auth" className="hidden md:block">
-                <Button variant="outline" size="sm">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  <span className="hidden lg:inline">Sign In</span>
-                </Button>
-              </Link>
-            )}
           </div>
         </div>
       </header>

@@ -92,6 +92,41 @@ export type Database = {
         }
         Relationships: []
       }
+      campus_branches: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          university_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          university_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          university_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campus_branches_university_id_fkey"
+            columns: ["university_id"]
+            isOneToOne: false
+            referencedRelation: "universities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_testimonials: {
         Row: {
           average_view_duration: number | null
@@ -363,6 +398,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pickup_outlets: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          location: string | null
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          location?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
       product_media: {
         Row: {
           created_at: string | null
@@ -516,6 +578,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      universities: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 import { Product, ProductMedia } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,7 @@ import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
 import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
+import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
 
 interface OrderItem {
   product_name: string;
@@ -56,14 +57,14 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team"];
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
     case 'manager':
-      return ["orders", "inventory", "sales"];
+      return ["orders", "inventory", "sales", "settings"];
     case 'employee':
       return ["orders"];
     default:
@@ -1411,6 +1412,10 @@ const Admin = () => {
               <span className="hidden xs:inline">Quick Sale</span>
               <span className="xs:hidden">Sale</span>
             </Button>
+            <Button variant="outline" onClick={async () => { await supabase.auth.signOut(); toast.success("Signed out successfully"); navigate("/auth"); }} className="gap-1.5 sm:gap-2 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
           </div>
         </div>
         
@@ -1466,6 +1471,13 @@ const Admin = () => {
                   <span className="xs:hidden">Team</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("settings") && (
+                <TabsTrigger value="settings" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Settings</span>
+                  <span className="xs:hidden">Set</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -1500,6 +1512,15 @@ const Admin = () => {
           {/* Team Management Tab */}
           <TabsContent value="team" className="space-y-6">
             <EmployeeManagement />
+          </TabsContent>
+
+          {/* Settings Tab - Checkout Options */}
+          <TabsContent value="settings" className="space-y-6">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold">Checkout Options</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">Manage universities, campus branches, and pickup outlets shown in checkout</p>
+            </div>
+            <CheckoutOptionsManager />
           </TabsContent>
 
           {/* Products Tab */}
