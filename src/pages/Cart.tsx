@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const checkoutFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -43,6 +43,26 @@ const Cart = () => {
   const navigate = useNavigate();
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Dynamic checkout options from database
+  const [universities, setUniversities] = useState<{id: string; name: string}[]>([]);
+  const [branches, setBranches] = useState<{id: string; university_id: string; name: string}[]>([]);
+  const [outlets, setOutlets] = useState<{id: string; name: string; location: string | null}[]>([]);
+  const [selectedPickupOutlet, setSelectedPickupOutlet] = useState("");
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      const [uniRes, branchRes, outletRes] = await Promise.all([
+        supabase.from("universities").select("id, name").eq("is_active", true).order("display_order"),
+        supabase.from("campus_branches").select("id, university_id, name").eq("is_active", true).order("display_order"),
+        supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
+      ]);
+      if (uniRes.data) setUniversities(uniRes.data);
+      if (branchRes.data) setBranches(branchRes.data);
+      if (outletRes.data) setOutlets(outletRes.data);
+    };
+    fetchOptions();
+  }, []);
 
   const form = useForm<z.infer<typeof checkoutFormSchema>>({
     resolver: zodResolver(checkoutFormSchema),
@@ -124,7 +144,7 @@ const Cart = () => {
           customer_phone: data.phone,
           delivery_address: data.deliveryMethod === "delivery" 
             ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
-            : `Pickup at ${data.university} - ${data.branch}`,
+            : `Pickup at ${selectedPickupOutlet || 'outlet'} (${data.university} - ${data.branch})`,
           items: orderItems
         }
       });
@@ -491,14 +511,16 @@ const Cart = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>University</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={(val) => { field.onChange(val); form.setValue("branch", ""); }} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select university" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="University of Nairobi">University of Nairobi</SelectItem>
+                        {universities.map(u => (
+                          <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -509,27 +531,30 @@ const Cart = () => {
               <FormField
                 control={form.control}
                 name="branch"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Campus Branch</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select branch" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Chiromo">Chiromo</SelectItem>
-                        <SelectItem value="Main Campus">Main Campus</SelectItem>
-                        <SelectItem value="Kikuyu">Kikuyu</SelectItem>
-                        <SelectItem value="Lower Kabete">Lower Kabete</SelectItem>
-                        <SelectItem value="A.D.D">A.D.D</SelectItem>
-                        <SelectItem value="Parklands">Parklands</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const selectedUni = universities.find(u => u.name === form.watch("university"));
+                  const filteredBranches = selectedUni 
+                    ? branches.filter(b => b.university_id === selectedUni.id)
+                    : [];
+                  return (
+                    <FormItem>
+                      <FormLabel>Campus Branch</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select branch" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {filteredBranches.map(b => (
+                            <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField
@@ -558,6 +583,24 @@ const Cart = () => {
                   </FormItem>
                 )}
               />
+
+              {deliveryMethod === "pickup" && outlets.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Select Pickup Outlet</Label>
+                  <Select onValueChange={setSelectedPickupOutlet} value={selectedPickupOutlet}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select outlet" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {outlets.map(o => (
+                        <SelectItem key={o.id} value={o.name}>
+                          {o.name}{o.location ? ` — ${o.location}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               {deliveryMethod === "delivery" && (
                 <FormField
