@@ -15,20 +15,16 @@ import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
 
-import DeliveryBanner from "@/components/layout/DeliveryBanner";
-import DeliveryModal from "@/components/layout/DeliveryModal";
-import { useState } from "react";
+
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [deliveryOpen, setDeliveryOpen] = useState(false);
 
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-        <DeliveryBanner onOpenDetails={() => setDeliveryOpen(true)} />
-        <DeliveryModal open={deliveryOpen} onClose={() => setDeliveryOpen(false)} />
+
 
         <TooltipProvider>
           <CartProvider>
