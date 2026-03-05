@@ -8,21 +8,17 @@ const Footer = () => {
       {/* Decorative top wave/curve */}
       <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background to-transparent -translate-y-full" />
       
-      {/* Main footer with gradient background */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 relative">
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-5" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-        }} />
+      {/* Main footer with black background */}
+      <div className="bg-black relative">
         
         {/* Green accent line at top */}
         <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
         
-        <div className="container py-6 sm:py-12 px-4 relative z-10">
+        <div className="container py-4 sm:py-6 px-4 relative z-10">
           {/* Mobile: Compact 2-column layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
             {/* Brand Section - Full width on mobile */}
-            <div className="col-span-2 sm:col-span-2 lg:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-4">
+            <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10 flex-shrink-0">
                 <img src={logo} alt="ARIS STATIONERIES Logo" className="h-10 sm:h-16" />
               </div>
@@ -90,7 +86,7 @@ const Footer = () => {
           </div>
           
           {/* Bottom bar - More compact on mobile */}
-          <div className="mt-4 sm:mt-10 pt-3 sm:pt-6 border-t border-white/10">
+          <div className="mt-3 sm:mt-4 pt-3 border-t border-white/10">
             <div className="flex items-center justify-between text-xs sm:text-sm text-white/50">
               <p>© {new Date().getFullYear()} ARIS STATIONERIES</p>
               <p className="flex items-center gap-1">
