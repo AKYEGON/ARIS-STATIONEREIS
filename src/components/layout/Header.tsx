@@ -1,108 +1,64 @@
-import { ShoppingCart, FileText, Users, Menu, Tag } from "lucide-react";
-import { Link } from "react-router-dom";
+import { ShoppingCart, FileText, Users, Tag, Store } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/logo.png";
-import { useState } from "react";
 import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
 interface HeaderProps {
   cartItemCount: number;
 }
 
+const bottomTabs = [
+  { to: "/", label: "Shop", icon: Store },
+  { to: "/offers", label: "Offers", icon: Tag },
+  { to: "/testimonials", label: "Customers", icon: Users },
+  { to: "/brochure", label: "Brochure", icon: FileText },
+  { to: "/cart", label: "Cart", icon: ShoppingCart },
+] as const;
+
 const Header = ({ cartItemCount }: HeaderProps) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isFooterVisible = useFooterVisibility();
+  const location = useLocation();
+
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300">
         <div className="container flex h-14 sm:h-16 items-center justify-between px-4">
-        <Link to="/" className="flex items-center space-x-2 sm:space-x-3 transition-transform duration-200 hover:scale-105">
+          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 transition-transform duration-200 hover:scale-105">
             <img src={logo} alt="ARIS STATIONERIES Logo" className="h-8 sm:h-10 md:h-12" />
-            <span className="hidden sm:inline-block text-lg sm:text-xl md:text-2xl font-bold text-primary">ARIS STATIONERIES</span>
+            <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">ARIS STATIONERIES</span>
           </Link>
           
-          <div className="flex items-center gap-2 sm:gap-4">
-            {/* Mobile Menu Button */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="icon" className="md:hidden">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right">
-                <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
-                </SheetHeader>
-                <nav className="flex flex-col gap-4 mt-6">
-                  <Link 
-                    to="/" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                    Shop
-                  </Link>
-                  <Link 
-                    to="/offers" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
-                  >
-                    <Tag className="h-5 w-5" />
-                    Offers
-                  </Link>
-                  <Link 
-                    to="/testimonials" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
-                  >
-                    <Users className="h-5 w-5" />
-                    Happy Customers
-                  </Link>
-                  <Link 
-                    to="/brochure" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
-                  >
-                    <FileText className="h-5 w-5" />
-                    Brochure
-                  </Link>
-                  <Link 
-                    to="/cart" 
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 text-lg font-medium hover:text-primary transition-colors"
-                  >
-                    <ShoppingCart className="h-5 w-5" />
-                    Cart {cartItemCount > 0 && `(${cartItemCount})`}
-                  </Link>
-                </nav>
-              </SheetContent>
-            </Sheet>
-            
-            <Link to="/offers" className="hidden md:block">
+          {/* Desktop nav links */}
+          <div className="hidden md:flex items-center gap-2 sm:gap-4">
+            <Link to="/offers">
               <Button variant="outline" size="sm">
                 <Tag className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Offers</span>
               </Button>
             </Link>
             
-            <Link to="/testimonials" className="hidden md:block">
+            <Link to="/testimonials">
               <Button variant="outline" size="sm">
                 <Users className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Happy Customers</span>
               </Button>
             </Link>
             
-            <Link to="/brochure" className="hidden md:block">
+            <Link to="/brochure">
               <Button variant="outline" size="sm">
                 <FileText className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Brochure</span>
               </Button>
             </Link>
             
-            <Link to="/cart" className="hidden md:block">
+            <Link to="/cart">
               <Button variant="outline" size="icon" className="relative transition-all duration-200 hover:scale-110 active:scale-95">
                 <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
                 {cartItemCount > 0 && (
@@ -115,34 +71,47 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                 )}
               </Button>
             </Link>
-            
           </div>
         </div>
       </header>
       
-      {/* Floating Cart Button for Mobile - Centered at bottom, hides when footer is visible */}
-      <Link 
-        to="/cart" 
-        className={`md:hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 active:scale-95 ${
-          cartItemCount > 0 
-            ? 'bg-primary text-primary-foreground animate-bounce-subtle' 
-            : 'bg-background border-2 border-primary text-primary'
-        } ${
-          isFooterVisible 
-            ? 'opacity-0 pointer-events-none translate-y-4' 
-            : 'opacity-100 translate-y-0'
+      {/* Mobile Bottom Tab Bar */}
+      <nav
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.08)] transition-all duration-300 ${
+          isFooterVisible
+            ? "opacity-0 pointer-events-none translate-y-4"
+            : "opacity-100 translate-y-0"
         }`}
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       >
-        <ShoppingCart className="h-6 w-6" />
-        {cartItemCount > 0 && (
-          <Badge 
-            className="absolute -top-2 -right-2 h-6 w-6 flex items-center justify-center p-0 bg-secondary text-secondary-foreground text-xs font-bold"
-            variant="default"
-          >
-            {cartItemCount}
-          </Badge>
-        )}
-      </Link>
+        <div className="flex items-center justify-around h-14">
+          {bottomTabs.map(({ to, label, icon: Icon }) => {
+            const active = isActive(to);
+            return (
+              <Link
+                key={to}
+                to={to}
+                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors ${
+                  active ? "text-primary" : "text-muted-foreground"
+                }`}
+              >
+                <span className="relative">
+                  <Icon className="h-5 w-5" />
+                  {to === "/cart" && cartItemCount > 0 && (
+                    <Badge
+                      className="absolute -top-2 -right-3 h-4 min-w-4 flex items-center justify-center p-0 text-[9px] bg-primary"
+                      variant="default"
+                    >
+                      {cartItemCount}
+                    </Badge>
+                  )}
+                </span>
+                <span className="text-[10px] font-medium leading-none">{label}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 };
