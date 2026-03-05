@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
-import heroBackground from "@/assets/hero-background.jpg";
+
 import OffersSection from "@/components/products/OffersSection";
 
 const PRODUCTS_PER_PAGE = 8;
@@ -115,34 +115,7 @@ const Index = () => {
       />
       <Header cartItemCount={getCartItemCount()} />
       
-      {/* Hero Section */}
-      <section className="relative py-16 sm:py-20 md:py-24 lg:py-32 px-4 overflow-hidden">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${heroBackground})` }}
-        />
-        
-        {/* Overlay for better text readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-white/95 via-white/90 to-white/85 dark:from-black/90 dark:via-black/85 dark:to-black/80" />
-        
-        {/* Content */}
-        <div className="container relative z-10">
-          <div className="max-w-3xl mx-auto text-center space-y-4 sm:space-y-6">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-primary animate-fade-in drop-shadow-sm">
-              ARIS STATIONERIES
-            </h1>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground animate-fade-in drop-shadow-sm">
-              THE HOME OF AFFORDABLE STATIONERIES
-            </p>
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground animate-fade-in max-w-2xl mx-auto">
-              Your trusted partner for all stationery needs
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Offers Section */}
+      {/* Offers Section - moved to top */}
       <OffersSection />
 
       {/* Search Section */}
