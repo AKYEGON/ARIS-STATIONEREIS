@@ -51,14 +51,14 @@ const OffersSection = () => {
   if (isLoading || bundles.length === 0) return null;
 
   return (
-    <section className="py-3 sm:py-4 px-4 bg-muted/30">
-      <div className="container">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-lg sm:text-xl font-bold text-primary">
+    <section className="py-2 sm:py-3 px-4 bg-muted/30">
+      <div className="container max-w-4xl">
+        <div className="flex items-center justify-between mb-1.5">
+          <h2 className="text-sm sm:text-base font-bold text-primary">
             Special Offers
           </h2>
           <Link to="/offers">
-            <Button variant="outline" size="sm" className="text-xs h-7">View All</Button>
+            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs h-6 px-2">View All</Button>
           </Link>
         </div>
 
@@ -66,7 +66,7 @@ const OffersSection = () => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-8 w-8"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-7 w-7"
             onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-3 w-3" />
@@ -74,13 +74,13 @@ const OffersSection = () => {
 
           <div
             id="bundles-container"
-            className="flex gap-2 sm:gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-2"
+            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {bundles.map((bundle, index) => (
               <div
                 key={bundle.id}
-                className="min-w-[200px] sm:min-w-[240px] snap-start animate-fade-in"
+                className="min-w-[160px] max-w-[180px] snap-start animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <BundleCard bundle={bundle} onAddToCart={addBundleToCart} />
@@ -91,7 +91,7 @@ const OffersSection = () => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-8 w-8"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-7 w-7"
             onClick={() => scroll("right")}
           >
             <ChevronRight className="h-3 w-3" />
