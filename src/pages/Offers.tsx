@@ -40,7 +40,7 @@ const Offers = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO 
         title="Special Offers & Bundle Deals"
         description="Save more with our specially curated bundle offers on stationery products. Quality stationery at discounted prices at ARIS STATIONERIES, Nairobi."

@@ -242,7 +242,7 @@ const Cart = () => {
   const subtotal = getCartTotal();
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO 
         title="Shopping Cart"
         description="Review your cart and checkout. Fast delivery available in Nairobi from ARIS STATIONERIES."
