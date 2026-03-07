@@ -107,7 +107,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO 
         title="ARIS STATIONERIES - Home of Affordable Stationeries | Nairobi, Kenya"
         description="Shop quality stationery at affordable prices. ARIS STATIONERIES offers pens, notebooks, office supplies, and more. Fast delivery in Nairobi, Kenya."
