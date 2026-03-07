@@ -2,15 +2,53 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bundle } from "@/types/bundle";
+import { ShoppingCart } from "lucide-react";
 
 interface BundleCardProps {
   bundle: Bundle;
   onAddToCart: (bundle: Bundle) => void;
+  compact?: boolean;
 }
 
-const BundleCard = ({ bundle, onAddToCart }: BundleCardProps) => {
+const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) => {
   const savings = bundle.original_total_price - bundle.bundle_price;
   const savingsPercentage = Math.round((savings / bundle.original_total_price) * 100);
+
+  if (compact) {
+    return (
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
+        <div className="relative overflow-hidden aspect-[4/3]">
+          <Badge className="absolute top-1 right-1 z-10 bg-primary text-[9px] px-1.5 py-0">
+            -{savingsPercentage}%
+          </Badge>
+          <img
+            src={bundle.image}
+            alt={bundle.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </div>
+        <CardContent className="p-2 flex flex-col flex-1">
+          <h3 className="font-semibold text-[11px] sm:text-xs mb-0.5 line-clamp-1">{bundle.name}</h3>
+          <div className="flex items-baseline gap-1 mb-1 mt-auto">
+            <span className="text-[9px] text-muted-foreground line-through">
+              KSh {bundle.original_total_price.toFixed(0)}
+            </span>
+            <span className="text-xs sm:text-sm font-bold text-primary">
+              KSh {bundle.bundle_price.toFixed(0)}
+            </span>
+          </div>
+          <Button
+            onClick={() => onAddToCart(bundle)}
+            size="sm"
+            className="w-full h-6 text-[10px] gap-1"
+          >
+            <ShoppingCart className="h-3 w-3" />
+            Add
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
@@ -51,8 +89,9 @@ const BundleCard = ({ bundle, onAddToCart }: BundleCardProps) => {
         </div>
         <Button
           onClick={() => onAddToCart(bundle)}
-          className="w-full h-8 xs:h-9 sm:h-10 text-xs xs:text-sm transition-all duration-200 active:scale-95"
+          className="w-full h-8 xs:h-9 sm:h-10 text-xs xs:text-sm transition-all duration-200 active:scale-95 gap-1.5"
         >
+          <ShoppingCart className="h-3.5 w-3.5 xs:h-4 xs:w-4" />
           <span className="hidden xs:inline">Add Bundle to Cart</span>
           <span className="xs:hidden">Add to Cart</span>
         </Button>

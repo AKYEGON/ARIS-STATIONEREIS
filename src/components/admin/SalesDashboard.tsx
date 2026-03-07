@@ -64,8 +64,8 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
       const { data: orders, error: ordersError } = await supabase
         .from("orders")
         .select("*")
-        .or("status.ilike.delivered,status.ilike.fulfilled")
-        .gte("completed_at", startDate.toISOString());
+        .or("status.ilike.delivered,status.ilike.fulfilled,status.ilike.completed")
+        .gte("created_at", startDate.toISOString());
 
       if (ordersError) throw ordersError;
 
