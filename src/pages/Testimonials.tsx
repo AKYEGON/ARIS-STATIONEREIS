@@ -88,7 +88,7 @@ const Testimonials = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen pb-16 md:pb-0">
         <SEO 
           title="Customer Reviews & Stories"
           description="Read what our customers say about ARIS STATIONERIES. Real reviews from happy customers in Nairobi, Kenya."
@@ -104,7 +104,7 @@ const Testimonials = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen pb-16 md:pb-0">
       <SEO 
         title="Customer Reviews & Stories"
         description="Read what our customers say about ARIS STATIONERIES. Real reviews from happy customers in Nairobi, Kenya."
