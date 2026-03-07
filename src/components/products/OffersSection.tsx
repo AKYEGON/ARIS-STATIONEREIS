@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import BundleCard from "./BundleCard";
@@ -7,10 +7,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+const AUTO_SCROLL_INTERVAL = 3000;
+
 const OffersSection = () => {
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addBundleToCart } = useCart();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     fetchBundles();
@@ -40,18 +45,40 @@ const OffersSection = () => {
     }
   };
 
-  const scroll = (direction: "left" | "right") => {
-    const container = document.getElementById("bundles-container");
-    if (container) {
-      const scrollAmount = direction === "left" ? -250 : 250;
+  const scroll = useCallback((direction: "left" | "right") => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const cardWidth = container.querySelector("div")?.offsetWidth || 160;
+    const gap = 8;
+    const scrollAmount = direction === "left" ? -(cardWidth + gap) : (cardWidth + gap);
+    
+    // If at the end, loop back to start
+    if (direction === "right" && 
+        container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+      container.scrollTo({ left: 0, behavior: "smooth" });
+    } else {
       container.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
-  };
+  }, []);
+
+  // Auto-scroll
+  useEffect(() => {
+    if (bundles.length <= 1 || isPaused) return;
+
+    autoScrollRef.current = setInterval(() => {
+      scroll("right");
+    }, AUTO_SCROLL_INTERVAL);
+
+    return () => {
+      if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+    };
+  }, [bundles.length, isPaused, scroll]);
 
   if (isLoading || bundles.length === 0) return null;
 
   return (
-    <section className="py-2 sm:py-3 px-4 bg-muted/30">
+    <section className="py-2 sm:py-3 px-3 sm:px-4 bg-muted/30">
       <div className="container max-w-4xl">
         <div className="flex items-center justify-between mb-1.5">
           <h2 className="text-sm sm:text-base font-bold text-primary">
@@ -62,28 +89,34 @@ const OffersSection = () => {
           </Link>
         </div>
 
-        <div className="relative">
+        <div 
+          className="relative"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setTimeout(() => setIsPaused(false), 5000)}
+        >
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-7 w-7"
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-6 w-6 bg-background/80 backdrop-blur-sm"
             onClick={() => scroll("left")}
           >
             <ChevronLeft className="h-3 w-3" />
           </Button>
 
           <div
-            id="bundles-container"
-            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1"
+            ref={containerRef}
+            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1 md:px-8"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {bundles.map((bundle, index) => (
               <div
                 key={bundle.id}
-                className="min-w-[160px] max-w-[180px] snap-start animate-fade-in"
+                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start animate-fade-in flex-shrink-0"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} />
+                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
               </div>
             ))}
           </div>
@@ -91,7 +124,7 @@ const OffersSection = () => {
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-7 w-7"
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-6 w-6 bg-background/80 backdrop-blur-sm"
             onClick={() => scroll("right")}
           >
             <ChevronRight className="h-3 w-3" />
