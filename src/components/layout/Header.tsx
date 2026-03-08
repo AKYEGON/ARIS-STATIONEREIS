@@ -77,22 +77,18 @@ const Header = ({ cartItemCount }: HeaderProps) => {
       
       {/* Mobile Bottom Tab Bar */}
       <nav
-        className={`md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.08)] transition-all duration-300 ${
-          isFooterVisible
-            ? "opacity-0 pointer-events-none translate-y-4"
-            : "opacity-100 translate-y-0"
-        }`}
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+        className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.08)]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}
       >
-        <div className="flex items-center justify-around h-14">
+        <div className="flex items-center justify-around h-16">
           {bottomTabs.map(({ to, label, icon: Icon }) => {
             const active = isActive(to);
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors ${
-                  active ? "text-primary" : "text-muted-foreground"
+                className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
+                  active ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
                 <span className="relative">
