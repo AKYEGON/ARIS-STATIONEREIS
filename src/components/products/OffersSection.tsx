@@ -5,7 +5,7 @@ import BundleCard from "./BundleCard";
 import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+
 
 const AUTO_SCROLL_INTERVAL = 3000;
 
