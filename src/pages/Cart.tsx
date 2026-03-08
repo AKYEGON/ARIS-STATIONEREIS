@@ -182,7 +182,7 @@ const Cart = () => {
             `   • ${bi.product?.name || 'Product'} ${bi.quantity > 1 ? `(×${bi.quantity})` : ''}`
           ).join('\n') || '';
           const num = cartItems.length + index + 1;
-          return `${num}. 📦 ${bundle.name} (Bundle) × ${bundle.quantity} — KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
+          return `${num}. ${bundle.name} (Bundle) × ${bundle.quantity} — KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
         })
         .join("\n\n");
       
