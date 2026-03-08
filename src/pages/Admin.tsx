@@ -1463,7 +1463,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Header cartItemCount={getCartItemCount()} />
       
       <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
