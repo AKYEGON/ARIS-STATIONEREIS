@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import logo from "@/assets/logo.png";
-import { useFooterVisibility } from "@/hooks/use-footer-visibility";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -18,7 +17,6 @@ const bottomTabs = [
 ] as const;
 
 const Header = ({ cartItemCount }: HeaderProps) => {
-  const isFooterVisible = useFooterVisibility();
   const location = useLocation();
 
   const isActive = (path: string) => {
