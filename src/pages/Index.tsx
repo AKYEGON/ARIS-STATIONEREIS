@@ -57,9 +57,14 @@ const Index = () => {
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
         category: p.category,
         image: p.image,
-        media: (p.media || []).map(m => ({
+        media: ((p as any).media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
+        })),
+        variants: ((p as any).variants || []).filter((v: any) => v.is_active).map((v: any) => ({
+          ...v,
+          price: Number(v.price),
+          cost_price: Number(v.cost_price),
         }))
       }));
       
