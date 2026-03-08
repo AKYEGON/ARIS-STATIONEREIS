@@ -830,6 +830,23 @@ const Admin = () => {
             display_order: displayOrder
           });
         }
+
+        // Save variants
+        if (productVariants.length > 0) {
+          const variantsToInsert = productVariants.map((v, i) => ({
+            product_id: productId,
+            variant_type: v.variant_type,
+            variant_value: v.variant_value,
+            price: v.price,
+            cost_price: v.cost_price,
+            stock: v.stock,
+            sku: v.sku || null,
+            is_active: v.is_active,
+            display_order: i,
+          }));
+          const { error: varError } = await supabase.from("product_variants").insert(variantsToInsert);
+          if (varError) console.error("Error saving variants:", varError);
+        }
       }
 
       console.log("Product inserted successfully, fetching products...");
