@@ -50,19 +50,31 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(BUNDLE_STORAGE_KEY, JSON.stringify(bundleItems));
   }, [bundleItems]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, selectedVariant?: ProductVariant) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
+      // Unique key: product id + variant id (if any)
+      const cartKey = selectedVariant ? `${product.id}_${selectedVariant.id}` : product.id;
+      const existingItem = prevItems.find((item) => {
+        const itemKey = item.selectedVariant ? `${item.id}_${item.selectedVariant.id}` : item.id;
+        return itemKey === cartKey;
+      });
+      
+      const effectivePrice = selectedVariant ? selectedVariant.price : product.price;
+      
       if (existingItem) {
         toast.success("Quantity updated in cart");
-        return prevItems.map((item) =>
-          item.id === product.id
+        return prevItems.map((item) => {
+          const itemKey = item.selectedVariant ? `${item.id}_${item.selectedVariant.id}` : item.id;
+          return itemKey === cartKey
             ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+            : item;
+        });
       }
-      toast.success("Added to cart");
-      return [...prevItems, { ...product, quantity: 1 }];
+      toast.success(selectedVariant 
+        ? `Added ${selectedVariant.variant_value} to cart` 
+        : "Added to cart"
+      );
+      return [...prevItems, { ...product, price: effectivePrice, quantity: 1, selectedVariant }];
     });
   };
 
