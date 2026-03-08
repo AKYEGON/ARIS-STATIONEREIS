@@ -50,8 +50,9 @@ const BrochureCover = () => {
         {/* Contact Information */}
         <div className="mt-16 sm:mt-28 pt-6 sm:pt-8 border-t border-primary-foreground/30 space-y-2 sm:space-y-3 text-primary-foreground/95 print:text-sm px-4">
           <p className="text-base sm:text-lg font-medium">📍 Nairobi, Kenya</p>
-          <p className="text-base sm:text-lg font-medium">📞 0707222419</p>
-          <p className="text-base sm:text-lg font-medium">✉️ scaler.com@gmail.com</p>
+          <p className="text-base sm:text-lg font-medium">📞 +254119774470</p>
+          <p className="text-base sm:text-lg font-medium">✉️ arisstationeries@gmail.com</p>
+          <p className="text-base sm:text-lg font-medium">🌐 arisstationaries.co.ke</p>
         </div>
       </div>
     </div>
