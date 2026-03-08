@@ -101,6 +101,7 @@ const Admin = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>("all");
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
   const [discountValue, setDiscountValue] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
