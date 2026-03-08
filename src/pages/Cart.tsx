@@ -182,7 +182,7 @@ const Cart = () => {
             `   • ${bi.product?.name || 'Product'} ${bi.quantity > 1 ? `(×${bi.quantity})` : ''}`
           ).join('\n') || '';
           const num = cartItems.length + index + 1;
-          return `${num}. 📦 ${bundle.name} (Bundle) × ${bundle.quantity} — KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
+          return `${num}. ${bundle.name} (Bundle) × ${bundle.quantity} — KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
         })
         .join("\n\n");
       
@@ -195,24 +195,24 @@ const Cart = () => {
         ? outlets.find(o => o.id === selectedPickupOutlet || o.name === selectedPickupOutlet)?.name || selectedPickupOutlet
         : 'N/A';
 
-      let message = `🛒 *NEW ORDER — ARIS STATIONERIES*\n`;
+      let message = `*NEW ORDER — ARIS STATIONERIES*\n`;
       message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
-      message += `📋 *Order ID:* #${orderId.slice(0, 8)}\n`;
-      message += `📅 *Date:* ${new Date().toLocaleDateString('en-KE', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
+      message += `*Order ID:* #${orderId.slice(0, 8)}\n`;
+      message += `*Date:* ${new Date().toLocaleDateString('en-KE', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
       
-      message += `👤 *CUSTOMER DETAILS*\n`;
+      message += `*CUSTOMER DETAILS*\n`;
       message += `• Name: ${data.name}\n`;
       message += `• Phone: ${data.phone}\n`;
       message += `• University: ${data.university}\n`;
       message += `• Campus/Branch: ${data.branch}\n\n`;
       
-      message += `📦 *ORDER ITEMS* (${totalItems} item${totalItems !== 1 ? 's' : ''})\n`;
+      message += `*ORDER ITEMS* (${totalItems} item${totalItems !== 1 ? 's' : ''})\n`;
       message += `────────────────────\n`;
       message += `${orderDetails}\n`;
       message += `────────────────────\n`;
-      message += `💰 *TOTAL: KSh ${serverTotal.toFixed(2)}*\n\n`;
+      message += `*TOTAL: KSh ${serverTotal.toFixed(2)}*\n\n`;
       
-      message += `🚚 *DELIVERY METHOD*\n`;
+      message += `*DELIVERY METHOD*\n`;
       if (data.deliveryMethod === "pickup") {
         message += `• Pickup in Person\n`;
         message += `• Outlet: ${pickupOutletName}\n`;
