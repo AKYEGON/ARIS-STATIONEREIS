@@ -15,17 +15,12 @@ import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
 
-
-
 const queryClient = new QueryClient();
 
 const App = () => {
-
   return (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
-
-
         <TooltipProvider>
           <CartProvider>
             <Toaster />
@@ -39,10 +34,8 @@ const App = () => {
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/brochure" element={<Brochure />} />
                 <Route path="/testimonials" element={<Testimonials />} />
-                {/* /happy-customers redirects to /testimonials inside the component to avoid duplicate content */}
                 <Route path="/happy-customers" element={<Testimonials />} />
                 <Route path="/offers" element={<Offers />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
