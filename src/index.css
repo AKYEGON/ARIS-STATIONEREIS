@@ -197,6 +197,6 @@ All colors MUST be HSL.
 }
 
 /* Hide bottom nav when stories carousel is open */
-body.stories-open nav[class*="fixed bottom-0"] {
+body.stories-open [data-bottom-nav] {
   display: none !important;
 }
