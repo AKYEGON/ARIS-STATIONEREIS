@@ -975,7 +975,7 @@ const Admin = () => {
     }
   };
 
-  const openEditDialog = (product: Product) => {
+  const openEditDialog = async (product: Product) => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
@@ -996,6 +996,30 @@ const Admin = () => {
     setVideoFile(null);
     setVideoPreview("");
     setMediaToDelete([]);
+    
+    // Load existing variants
+    try {
+      const { data: varData } = await supabase
+        .from("product_variants")
+        .select("*")
+        .eq("product_id", product.id)
+        .order("display_order");
+      setProductVariants((varData || []).map(v => ({
+        id: v.id,
+        variant_type: v.variant_type,
+        variant_value: v.variant_value,
+        price: Number(v.price),
+        cost_price: Number(v.cost_price),
+        stock: v.stock || 0,
+        sku: v.sku || "",
+        is_active: v.is_active,
+        display_order: v.display_order,
+      })));
+    } catch (e) {
+      console.error("Error loading variants:", e);
+      setProductVariants([]);
+    }
+    
     setIsEditDialogOpen(true);
   };
 
