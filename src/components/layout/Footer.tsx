@@ -60,7 +60,7 @@ const Footer = () => {
               </h4>
               <div className="space-y-1.5 sm:space-y-3">
                 <a 
-                  href="https://wa.me/254707222419" 
+                  href="https://wa.me/254119774470" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70 hover:text-primary transition-all"
