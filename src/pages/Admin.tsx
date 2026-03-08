@@ -737,6 +737,7 @@ const Admin = () => {
     setVideoPreview("");
     setExistingMedia([]);
     setMediaToDelete([]);
+    setProductVariants([]);
   };
 
   const handleImageUpload = async (file: File): Promise<string> => {
