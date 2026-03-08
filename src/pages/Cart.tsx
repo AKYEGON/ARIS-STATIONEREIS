@@ -381,7 +381,7 @@ const Cart = () => {
               )}
               {cartItems.map((item, index) => (
                 <Card 
-                  key={item.id} 
+                  key={`${item.id}_${item.selectedVariant?.id || 'base'}`} 
                   className="transition-all duration-300 hover:shadow-md animate-fade-in"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
@@ -394,6 +394,11 @@ const Cart = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate">{item.name}</h3>
+                        {item.selectedVariant && (
+                          <p className="text-xs text-primary font-medium">
+                            {item.selectedVariant.variant_type}: {item.selectedVariant.variant_value}
+                          </p>
+                        )}
                         <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2">{item.description}</p>
                         <p className="text-base sm:text-lg font-bold text-primary mt-1 sm:mt-2">
                           KSh {item.price.toFixed(2)}
@@ -404,7 +409,7 @@ const Cart = () => {
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 sm:h-9 sm:w-9 transition-all duration-200 hover:scale-110 active:scale-95"
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(item.id, item.selectedVariant?.id)}
                         >
                           <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
@@ -413,7 +418,7 @@ const Cart = () => {
                             variant="outline"
                             size="icon"
                             className="h-7 w-7 sm:h-9 sm:w-9 transition-all duration-200 active:scale-90"
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity - 1, item.selectedVariant?.id)}
                           >
                             <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
@@ -422,7 +427,7 @@ const Cart = () => {
                             variant="outline"
                             size="icon"
                             className="h-7 w-7 sm:h-9 sm:w-9 transition-all duration-200 active:scale-90"
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.id, item.quantity + 1, item.selectedVariant?.id)}
                           >
                             <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
