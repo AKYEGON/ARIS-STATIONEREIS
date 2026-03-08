@@ -1819,6 +1819,13 @@ const Admin = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Product Variants */}
+                    <ProductVariantManager
+                      variants={productVariants}
+                      onChange={setProductVariants}
+                    />
+                    
                     <Button 
                       onClick={handleAddProduct} 
                       className="w-full transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90"
