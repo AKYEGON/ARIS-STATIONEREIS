@@ -1,73 +1,148 @@
-# Welcome to your Lovable project
+# ARIS STATIONERIES
 
-## Project info
+**THE HOME OF AFFORDABLE STATIONERIES**
 
-**URL**: https://lovable.dev/projects/12394eb5-8610-4e17-a269-6b5fd93160c9
+E-commerce website for Aris Stationeries — an online stationery shop serving university students across Kenya. Customers browse products, build bundles, and place orders via WhatsApp checkout.
 
-## How can I edit this code?
+**Live site:** [arisstationaries.co.ke](https://arisstationaries.co.ke)
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## Quick Start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/12394eb5-8610-4e17-a269-6b5fd93160c9) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+```bash
+# 1. Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 2. Install dependencies
+npm install
 
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 3. Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The app runs at `http://localhost:8080`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+---
 
-**Use GitHub Codespaces**
+## Project Structure
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```
+src/
+├── pages/                  # Route-level page components
+│   ├── Index.tsx           # Homepage — product listing & search
+│   ├── Cart.tsx            # Shopping cart & WhatsApp checkout
+│   ├── Offers.tsx          # Bundle deals page
+│   ├── Testimonials.tsx    # Customer reviews & stories
+│   ├── Brochure.tsx        # Printable product catalog
+│   ├── Auth.tsx            # Login & signup
+│   ├── ResetPassword.tsx   # Password reset
+│   ├── Admin.tsx           # Admin dashboard (protected)
+│   └── NotFound.tsx        # 404 page
+│
+├── components/
+│   ├── layout/             # Header, Footer, NavLink
+│   ├── products/           # ProductCard, BundleCard, OffersSection, MediaViewer
+│   ├── cart/               # ProductImageGallery
+│   ├── admin/              # Inventory, Sales, Orders, Employee management
+│   ├── testimonials/       # Reviews, Stories, Camera capture
+│   ├── brochure/           # Printable catalog components
+│   ├── common/             # SEO, PullToRefresh
+│   └── ui/                 # shadcn/ui primitives (auto-managed)
+│
+├── contexts/
+│   └── CartContext.tsx      # Shopping cart state (localStorage)
+│
+├── hooks/                   # Custom React hooks
+│   ├── use-mobile.tsx       # Mobile viewport detection
+│   ├── use-toast.ts         # Toast notifications
+│   ├── use-footer-visibility.tsx
+│   ├── use-pull-to-refresh.tsx
+│   └── use-order-communication.ts
+│
+├── types/                   # TypeScript interfaces
+│   ├── product.ts           # Product, CartItem, ProductVariant
+│   ├── bundle.ts            # Bundle, BundleItem
+│   ├── testimonial.ts       # CustomerTestimonial
+│   └── communication.ts     # Order messaging types & helpers
+│
+├── data/
+│   └── products.ts          # Fallback product data
+│
+├── integrations/supabase/   # Auto-generated — DO NOT EDIT
+│   ├── client.ts
+│   └── types.ts
+│
+├── assets/                  # Images (logo, backgrounds)
+├── lib/utils.ts             # Utility functions (cn)
+├── index.css                # Global styles & design tokens
+└── main.tsx                 # App entry point
 
-## What technologies are used for this project?
+supabase/
+├── functions/               # Backend functions (auto-deployed)
+│   ├── create-order/        # Order processing & stock updates
+│   ├── manage-staff/        # Employee management
+│   ├── recalculate-profits/ # Profit recalculation
+│   └── track-story-view/    # Testimonial view analytics
+└── config.toml              # Backend configuration
+```
 
-This project is built with:
+---
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Routes
 
-## How can I deploy this project?
+| Path | Page | Description |
+|------|------|-------------|
+| `/` | Homepage | Product catalog with search & categories |
+| `/cart` | Cart | Shopping cart with WhatsApp checkout |
+| `/offers` | Offers | Bundle deals and promotions |
+| `/testimonials` | Reviews | Customer stories and reviews |
+| `/happy-customers` | Reviews | Alias for `/testimonials` |
+| `/brochure` | Catalog | Printable product brochure |
+| `/auth` | Auth | Login and signup |
+| `/reset-password` | Reset | Password recovery |
+| `/admin` | Dashboard | Admin panel (requires admin role) |
 
-Simply open [Lovable](https://lovable.dev/projects/12394eb5-8610-4e17-a269-6b5fd93160c9) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
+## Key Features
 
-Yes, you can!
+- **Product Catalog** — Browse by category, search, view product media
+- **Shopping Cart** — Add/remove items, quantity controls, localStorage persistence
+- **Bundle Deals** — Discounted product bundles
+- **WhatsApp Checkout** — Orders sent directly via WhatsApp with full details
+- **Customer Reviews** — Instagram-style story format + written reviews
+- **Admin Dashboard** — Inventory, sales analytics, order management, employee management
+- **Printable Brochure** — Generate a catalog PDF for offline sharing
+- **University Selection** — Delivery to specific campuses and pickup outlets
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+---
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| React 18 + TypeScript | Frontend framework |
+| Vite | Build tool & dev server |
+| Tailwind CSS | Styling |
+| shadcn/ui | UI component library |
+| Lovable Cloud | Backend (database, auth, storage, functions) |
+| TanStack Query | Server state & caching |
+| React Router v6 | Client-side routing |
+| React Hook Form + Zod | Form validation |
+
+---
+
+## Development Notes
+
+- **Do not edit** files in `src/integrations/supabase/` — they are auto-generated
+- **Do not edit** `.env` or `supabase/config.toml` — managed automatically
+- Each component folder has an `index.ts` barrel export for clean imports
+- Design tokens are defined in `src/index.css` and `tailwind.config.ts`
+- The admin page requires the `admin` role in the `user_roles` table
+
+---
+
+## Deployment
+
+Built and deployed via [Lovable](https://lovable.dev). Push changes to the repo or edit through the Lovable editor — both sync automatically.
