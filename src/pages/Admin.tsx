@@ -31,6 +31,7 @@ import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
+import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 
 interface OrderItem {
   product_name: string;
@@ -169,6 +170,7 @@ const Admin = () => {
   const [videoPreview, setVideoPreview] = useState<string>("");
   const [existingMedia, setExistingMedia] = useState<ProductMedia[]>([]);
   const [mediaToDelete, setMediaToDelete] = useState<string[]>([]);
+  const [productVariants, setProductVariants] = useState<ProductVariant[]>([]);
 
   useEffect(() => {
     checkAdminAccess();
@@ -735,6 +737,7 @@ const Admin = () => {
     setVideoPreview("");
     setExistingMedia([]);
     setMediaToDelete([]);
+    setProductVariants([]);
   };
 
   const handleImageUpload = async (file: File): Promise<string> => {
@@ -827,6 +830,23 @@ const Admin = () => {
             display_order: displayOrder
           });
         }
+
+        // Save variants
+        if (productVariants.length > 0) {
+          const variantsToInsert = productVariants.map((v, i) => ({
+            product_id: productId,
+            variant_type: v.variant_type,
+            variant_value: v.variant_value,
+            price: v.price,
+            cost_price: v.cost_price,
+            stock: v.stock,
+            sku: v.sku || null,
+            is_active: v.is_active,
+            display_order: i,
+          }));
+          const { error: varError } = await supabase.from("product_variants").insert(variantsToInsert);
+          if (varError) console.error("Error saving variants:", varError);
+        }
       }
 
       console.log("Product inserted successfully, fetching products...");
@@ -907,6 +927,24 @@ const Admin = () => {
         });
       }
 
+      // Handle variants: delete existing, re-insert all
+      await supabase.from("product_variants").delete().eq("product_id", editingProduct.id);
+      if (productVariants.length > 0) {
+        const variantsToInsert = productVariants.map((v, i) => ({
+          product_id: editingProduct.id,
+          variant_type: v.variant_type,
+          variant_value: v.variant_value,
+          price: v.price,
+          cost_price: v.cost_price,
+          stock: v.stock,
+          sku: v.sku || null,
+          is_active: v.is_active,
+          display_order: i,
+        }));
+        const { error: varError } = await supabase.from("product_variants").insert(variantsToInsert);
+        if (varError) console.error("Error saving variants:", varError);
+      }
+
       await fetchProducts();
       toast.success("Product updated successfully");
       setIsEditDialogOpen(false);
@@ -937,7 +975,7 @@ const Admin = () => {
     }
   };
 
-  const openEditDialog = (product: Product) => {
+  const openEditDialog = async (product: Product) => {
     setEditingProduct(product);
     setFormData({
       name: product.name,
@@ -958,6 +996,30 @@ const Admin = () => {
     setVideoFile(null);
     setVideoPreview("");
     setMediaToDelete([]);
+    
+    // Load existing variants
+    try {
+      const { data: varData } = await supabase
+        .from("product_variants")
+        .select("*")
+        .eq("product_id", product.id)
+        .order("display_order");
+      setProductVariants((varData || []).map(v => ({
+        id: v.id,
+        variant_type: v.variant_type,
+        variant_value: v.variant_value,
+        price: Number(v.price),
+        cost_price: Number(v.cost_price),
+        stock: v.stock || 0,
+        sku: v.sku || "",
+        is_active: v.is_active,
+        display_order: v.display_order,
+      })));
+    } catch (e) {
+      console.error("Error loading variants:", e);
+      setProductVariants([]);
+    }
+    
     setIsEditDialogOpen(true);
   };
 
@@ -1757,6 +1819,13 @@ const Admin = () => {
                         </div>
                       )}
                     </div>
+                    
+                    {/* Product Variants */}
+                    <ProductVariantManager
+                      variants={productVariants}
+                      onChange={setProductVariants}
+                    />
+                    
                     <Button 
                       onClick={handleAddProduct} 
                       className="w-full transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90"
@@ -2689,6 +2758,13 @@ const Admin = () => {
                     </div>
                   )}
                 </div>
+                
+                {/* Product Variants */}
+                <ProductVariantManager
+                  variants={productVariants}
+                  onChange={setProductVariants}
+                />
+                
               <Button 
                 onClick={handleEditProduct} 
                 className="w-full transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90"

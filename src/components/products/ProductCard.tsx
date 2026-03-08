@@ -2,20 +2,33 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
-import { Product } from "@/types/product";
+import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
 
 interface ProductCardProps {
   product: Product;
-  onAddToCart: (product: Product) => void;
+  onAddToCart: (product: Product, selectedVariant?: ProductVariant) => void;
 }
 
 const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
 
   const hasMultipleMedia = product.media && product.media.length > 0;
   const totalMediaCount = 1 + (product.media?.length || 0);
+  const hasVariants = product.variants && product.variants.length > 0;
+
+  // Group variants by type
+  const variantGroups = hasVariants
+    ? product.variants!.reduce<Record<string, ProductVariant[]>>((acc, v) => {
+        if (!acc[v.variant_type]) acc[v.variant_type] = [];
+        acc[v.variant_type].push(v);
+        return acc;
+      }, {})
+    : {};
+
+  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
 
   // Generate product URL for SEO
   const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
@@ -35,7 +48,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       "@type": "Offer",
       "url": productUrl,
       "priceCurrency": "KES",
-      "price": product.price,
+      "price": displayPrice,
       "availability": "https://schema.org/InStock",
       "seller": {
         "@type": "Organization",
@@ -81,26 +94,51 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </div>
           )}
         </div>
-        <CardContent className="p-2 xs:p-3 sm:p-4">
+        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
           <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
             {product.name}
           </h3>
           <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
             {product.description}
           </p>
+
+          {/* Variant Selection */}
+          {hasVariants && Object.entries(variantGroups).map(([type, variants]) => (
+            <div key={type} className="mb-1.5">
+              <p className="text-[9px] xs:text-[10px] text-muted-foreground font-medium mb-0.5">{type}</p>
+              <div className="flex flex-wrap gap-1">
+                {variants.map((v) => (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => setSelectedVariant(selectedVariant?.id === v.id ? undefined : v)}
+                    className={`text-[9px] xs:text-[10px] px-1.5 py-0.5 rounded border transition-all ${
+                      selectedVariant?.id === v.id
+                        ? 'border-primary bg-primary/10 text-primary font-semibold'
+                        : 'border-border text-muted-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    {v.variant_value}
+                    <span className="ml-0.5 opacity-70">KSh {v.price.toFixed(0)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
           <div>
-            {product.originalPrice && product.originalPrice > product.price ? (
+            {!selectedVariant && product.originalPrice && product.originalPrice > product.price ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
                   Was KSh {product.originalPrice.toFixed(0)}
                 </p>
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
-                  KSh {product.price.toFixed(0)}
+                  KSh {displayPrice.toFixed(0)}
                 </p>
               </div>
             ) : (
               <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
-                KSh {product.price.toFixed(0)}
+                KSh {displayPrice.toFixed(0)}
               </p>
             )}
           </div>
@@ -108,7 +146,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         <CardFooter className="p-2 xs:p-3 sm:p-4 pt-0">
           <Button 
             className="w-full h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90 touch-manipulation"
-            onClick={() => onAddToCart(product)}
+            onClick={() => onAddToCart(product, selectedVariant)}
           >
             <ShoppingCart className="mr-1.5 h-3.5 w-3.5 xs:h-4 xs:w-4" />
             <span className="hidden xs:inline">Add to Cart</span>

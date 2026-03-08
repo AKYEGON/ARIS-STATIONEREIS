@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Product, CartItem } from "@/types/product";
+import { Product, CartItem, ProductVariant } from "@/types/product";
 import { Bundle, CartBundle } from "@/types/bundle";
 import { toast } from "sonner";
 
@@ -19,11 +19,11 @@ const getStoredItems = <T,>(key: string, fallback: T): T => {
 interface CartContextType {
   cartItems: CartItem[];
   bundleItems: CartBundle[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, selectedVariant?: ProductVariant) => void;
   addBundleToCart: (bundle: Bundle) => void;
-  removeFromCart: (productId: string) => void;
+  removeFromCart: (productId: string, variantId?: string) => void;
   removeBundleFromCart: (bundleId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   updateBundleQuantity: (bundleId: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
@@ -50,36 +50,58 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem(BUNDLE_STORAGE_KEY, JSON.stringify(bundleItems));
   }, [bundleItems]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, selectedVariant?: ProductVariant) => {
     setCartItems((prevItems) => {
-      const existingItem = prevItems.find((item) => item.id === product.id);
+      // Unique key: product id + variant id (if any)
+      const cartKey = selectedVariant ? `${product.id}_${selectedVariant.id}` : product.id;
+      const existingItem = prevItems.find((item) => {
+        const itemKey = item.selectedVariant ? `${item.id}_${item.selectedVariant.id}` : item.id;
+        return itemKey === cartKey;
+      });
+      
+      const effectivePrice = selectedVariant ? selectedVariant.price : product.price;
+      
       if (existingItem) {
         toast.success("Quantity updated in cart");
-        return prevItems.map((item) =>
-          item.id === product.id
+        return prevItems.map((item) => {
+          const itemKey = item.selectedVariant ? `${item.id}_${item.selectedVariant.id}` : item.id;
+          return itemKey === cartKey
             ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
+            : item;
+        });
       }
-      toast.success("Added to cart");
-      return [...prevItems, { ...product, quantity: 1 }];
+      toast.success(selectedVariant 
+        ? `Added ${selectedVariant.variant_value} to cart` 
+        : "Added to cart"
+      );
+      return [...prevItems, { ...product, price: effectivePrice, quantity: 1, selectedVariant }];
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== productId));
+  const removeFromCart = (productId: string, variantId?: string) => {
+    setCartItems((prevItems) => prevItems.filter((item) => {
+      if (variantId) {
+        return !(item.id === productId && item.selectedVariant?.id === variantId);
+      }
+      return !(item.id === productId && !item.selectedVariant);
+    }));
     toast.success("Removed from cart");
   };
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number, variantId?: string) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, variantId);
       return;
     }
     setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity } : item
-      )
+      prevItems.map((item) => {
+        if (variantId) {
+          return (item.id === productId && item.selectedVariant?.id === variantId)
+            ? { ...item, quantity } : item;
+        }
+        return (item.id === productId && !item.selectedVariant)
+          ? { ...item, quantity } : item;
+      })
     );
   };
 
