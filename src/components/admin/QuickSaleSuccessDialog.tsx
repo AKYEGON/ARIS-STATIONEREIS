@@ -8,6 +8,7 @@ interface QuickSaleSuccessDialogProps {
   open: boolean;
   onClose: () => void;
   saleData: {
+    orderId: string;
     total: number;
     itemCount: number;
     customerName: string;
@@ -16,19 +17,21 @@ interface QuickSaleSuccessDialogProps {
 }
 
 export function QuickSaleSuccessDialog({ open, onClose, saleData }: QuickSaleSuccessDialogProps) {
-  const reviewLink = 'https://arisstationaries.co.ke/happy-customers';
+  const orderRef = saleData.orderId ? saleData.orderId.slice(0, 8).toUpperCase() : '';
+  const customerNameEncoded = encodeURIComponent(saleData.customerName);
+  const customerPhoneEncoded = saleData.customerPhone !== 'N/A' ? encodeURIComponent(saleData.customerPhone) : '';
+  const reviewLink = `https://arisstationaries.co.ke/testimonials?review=true&name=${customerNameEncoded}&phone=${customerPhoneEncoded}`;
   
+  // Match the exact same message format as the "Delivered" status template
   const reviewMessage = saleData.customerName && saleData.customerName !== 'Walk-in Customer'
-    ? `Hi ${saleData.customerName}! Thank you for shopping at ARIS STATIONERIES today.
+    ? `Hi ${saleData.customerName}! Your order #${orderRef} has been delivered. Thank you for shopping with ARIS STATIONERIES! 💙
 
-We'd love to hear about your experience! Leave a quick review: ${reviewLink}
+We'd love to hear about your experience! Share a quick review here:
+${reviewLink}`
+    : `Hi! Your order #${orderRef} has been delivered. Thank you for shopping at ARIS STATIONERIES! 💙
 
-See you again soon! 🛍️`
-    : `Hi! Thank you for shopping at ARIS STATIONERIES today.
-
-We'd love to hear about your experience! Leave a quick review: ${reviewLink}
-
-See you again soon! 🛍️`;
+We'd love to hear about your experience! Share a quick review here:
+${reviewLink}`;
 
   const handleSendWhatsApp = () => {
     const formattedPhone = formatPhoneForWhatsApp(saleData.customerPhone);
@@ -55,6 +58,7 @@ See you again soon! 🛍️`;
             <p className="text-3xl font-bold text-primary">KSh {saleData.total.toFixed(2)}</p>
             <p className="text-xs text-muted-foreground mt-1">
               {saleData.itemCount} item{saleData.itemCount !== 1 ? 's' : ''} sold
+              {orderRef && ` • Order #${orderRef}`}
             </p>
           </div>
 
