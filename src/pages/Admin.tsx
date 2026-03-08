@@ -101,6 +101,7 @@ const Admin = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState("");
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>("all");
   const [discountType, setDiscountType] = useState<"percentage" | "fixed">("percentage");
   const [discountValue, setDiscountValue] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
@@ -1986,26 +1987,52 @@ const Admin = () => {
                 <CardTitle className="text-lg sm:text-xl">Orders Management</CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                  <Input
-                    placeholder="Search orders by ID, customer name, email, or phone..."
-                    value={orderSearchQuery}
-                    onChange={(e) => setOrderSearchQuery(e.target.value)}
-                    className="max-w-md"
-                  />
-                  <Button
-                    onClick={exportOrdersToCSV}
-                    variant="outline"
-                    className="gap-2 w-full sm:w-auto"
-                  >
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </Button>
+                <div className="mb-4 flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <Input
+                      placeholder="Search orders by ID, customer name, email, or phone..."
+                      value={orderSearchQuery}
+                      onChange={(e) => setOrderSearchQuery(e.target.value)}
+                      className="max-w-md"
+                    />
+                    <Button
+                      onClick={exportOrdersToCSV}
+                      variant="outline"
+                      className="gap-2 w-full sm:w-auto"
+                    >
+                      <Download className="h-4 w-4" />
+                      Export CSV
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {["all", "pending", "confirmed", "processing", "dispatched", "delivered", "fulfilled", "completed", "cancelled"].map((status) => (
+                      <Button
+                        key={status}
+                        variant={orderStatusFilter === status ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setOrderStatusFilter(status)}
+                        className="capitalize text-xs"
+                      >
+                        {status === "all" ? "All" : status}
+                        {status !== "all" && (
+                          <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 flex items-center justify-center p-0 text-[10px]">
+                            {ordersList.filter(o => o.status.toLowerCase() === status).length}
+                          </Badge>
+                        )}
+                        {status === "all" && (
+                          <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 flex items-center justify-center p-0 text-[10px]">
+                            {ordersList.length}
+                          </Badge>
+                        )}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                 {isLoadingOrders ? (
                   <div className="text-center py-8">Loading orders...</div>
                 ) : ordersList.filter(order => {
+                  if (orderStatusFilter !== "all" && order.status.toLowerCase() !== orderStatusFilter) return false;
                   if (!orderSearchQuery) return true;
                   const query = orderSearchQuery.toLowerCase();
                   return (
@@ -2034,6 +2061,7 @@ const Admin = () => {
                     <TableBody>
                       {ordersList
                         .filter(order => {
+                          if (orderStatusFilter !== "all" && order.status.toLowerCase() !== orderStatusFilter) return false;
                           if (!orderSearchQuery) return true;
                           const query = orderSearchQuery.toLowerCase();
                           return (
