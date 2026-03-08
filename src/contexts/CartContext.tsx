@@ -19,7 +19,7 @@ const getStoredItems = <T,>(key: string, fallback: T): T => {
 interface CartContextType {
   cartItems: CartItem[];
   bundleItems: CartBundle[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, selectedVariant?: ProductVariant) => void;
   addBundleToCart: (bundle: Bundle) => void;
   removeFromCart: (productId: string) => void;
   removeBundleFromCart: (bundleId: string) => void;
