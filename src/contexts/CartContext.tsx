@@ -21,9 +21,9 @@ interface CartContextType {
   bundleItems: CartBundle[];
   addToCart: (product: Product, selectedVariant?: ProductVariant) => void;
   addBundleToCart: (bundle: Bundle) => void;
-  removeFromCart: (productId: string) => void;
+  removeFromCart: (productId: string, variantId?: string) => void;
   removeBundleFromCart: (bundleId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (productId: string, quantity: number, variantId?: string) => void;
   updateBundleQuantity: (bundleId: string, quantity: number) => void;
   clearCart: () => void;
   getCartTotal: () => number;
