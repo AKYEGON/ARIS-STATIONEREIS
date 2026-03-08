@@ -37,6 +37,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [completedSaleData, setCompletedSaleData] = useState<{
+    orderId: string;
     total: number;
     itemCount: number;
     customerName: string;
@@ -201,6 +202,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
       // Store completed sale data for success dialog
       const itemCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
       setCompletedSaleData({
+        orderId: order.id,
         total,
         itemCount,
         customerName: customerName || 'Walk-in Customer',
