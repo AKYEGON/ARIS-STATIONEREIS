@@ -170,6 +170,7 @@ const Admin = () => {
   const [videoPreview, setVideoPreview] = useState<string>("");
   const [existingMedia, setExistingMedia] = useState<ProductMedia[]>([]);
   const [mediaToDelete, setMediaToDelete] = useState<string[]>([]);
+  const [productVariants, setProductVariants] = useState<ProductVariant[]>([]);
 
   useEffect(() => {
     checkAdminAccess();
