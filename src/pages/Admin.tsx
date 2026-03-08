@@ -1987,21 +1987,46 @@ const Admin = () => {
                 <CardTitle className="text-lg sm:text-xl">Orders Management</CardTitle>
               </CardHeader>
               <CardContent className="p-4 sm:p-6">
-                <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                  <Input
-                    placeholder="Search orders by ID, customer name, email, or phone..."
-                    value={orderSearchQuery}
-                    onChange={(e) => setOrderSearchQuery(e.target.value)}
-                    className="max-w-md"
-                  />
-                  <Button
-                    onClick={exportOrdersToCSV}
-                    variant="outline"
-                    className="gap-2 w-full sm:w-auto"
-                  >
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </Button>
+                <div className="mb-4 flex flex-col gap-3">
+                  <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                    <Input
+                      placeholder="Search orders by ID, customer name, email, or phone..."
+                      value={orderSearchQuery}
+                      onChange={(e) => setOrderSearchQuery(e.target.value)}
+                      className="max-w-md"
+                    />
+                    <Button
+                      onClick={exportOrdersToCSV}
+                      variant="outline"
+                      className="gap-2 w-full sm:w-auto"
+                    >
+                      <Download className="h-4 w-4" />
+                      Export CSV
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {["all", "pending", "confirmed", "processing", "dispatched", "delivered", "fulfilled", "completed", "cancelled"].map((status) => (
+                      <Button
+                        key={status}
+                        variant={orderStatusFilter === status ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setOrderStatusFilter(status)}
+                        className="capitalize text-xs"
+                      >
+                        {status === "all" ? "All" : status}
+                        {status !== "all" && (
+                          <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 flex items-center justify-center p-0 text-[10px]">
+                            {ordersList.filter(o => o.status.toLowerCase() === status).length}
+                          </Badge>
+                        )}
+                        {status === "all" && (
+                          <Badge variant="secondary" className="ml-1.5 h-5 min-w-5 flex items-center justify-center p-0 text-[10px]">
+                            {ordersList.length}
+                          </Badge>
+                        )}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                 {isLoadingOrders ? (
