@@ -202,6 +202,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
       // Store completed sale data for success dialog
       const itemCount = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
       setCompletedSaleData({
+        orderId: order.id,
         total,
         itemCount,
         customerName: customerName || 'Walk-in Customer',
