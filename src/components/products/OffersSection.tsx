@@ -78,36 +78,39 @@ const OffersSection = () => {
   if (isLoading || bundles.length === 0) return null;
 
   return (
-    <section className="py-2 sm:py-3 px-3 sm:px-4 bg-muted/30">
-      <div className="container max-w-4xl">
-        <div className="flex items-center justify-between mb-1.5">
-          <h2 className="text-sm sm:text-base font-bold text-primary">
+    <section className="py-2 sm:py-3 md:py-6 px-3 sm:px-4 bg-muted/30">
+      <div className="container max-w-4xl md:max-w-6xl">
+        <div className="flex items-center justify-between mb-1.5 md:mb-4">
+          <h2 className="text-sm sm:text-base md:text-lg font-bold text-primary">
             Special Offers
           </h2>
           <Link to="/offers">
-            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs h-6 px-2">View All</Button>
+            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs md:text-sm h-6 md:h-8 px-2 md:px-3">View All</Button>
           </Link>
         </div>
 
+        {/* Desktop: Grid layout */}
+        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {bundles.map((bundle, index) => (
+            <div
+              key={bundle.id}
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
+            </div>
+          ))}
+        </div>
+
+        {/* Mobile: Horizontal scroll */}
         <div 
-          className="relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
+          className="relative md:hidden"
           onTouchStart={() => setIsPaused(true)}
           onTouchEnd={() => setTimeout(() => setIsPaused(false), 5000)}
         >
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-6 w-6 bg-background/80 backdrop-blur-sm"
-            onClick={() => scroll("left")}
-          >
-            <ChevronLeft className="h-3 w-3" />
-          </Button>
-
           <div
             ref={containerRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1 md:px-8"
+            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {bundles.map((bundle, index) => (
@@ -120,15 +123,6 @@ const OffersSection = () => {
               </div>
             ))}
           </div>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 hidden md:flex h-6 w-6 bg-background/80 backdrop-blur-sm"
-            onClick={() => scroll("right")}
-          >
-            <ChevronRight className="h-3 w-3" />
-          </Button>
         </div>
       </div>
     </section>
