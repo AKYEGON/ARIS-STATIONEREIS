@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useLocation, Navigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { CustomerTestimonial } from "@/types/testimonial";
@@ -143,7 +143,14 @@ const Testimonials = () => {
             Had a great experience with ARIS STATIONERIES? We'd love to hear from you!
           </p>
           
-          <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
+          <Dialog open={isSubmitDialogOpen} onOpenChange={(open) => {
+              setIsSubmitDialogOpen(open);
+              if (open) {
+                document.body.classList.add('stories-open');
+              } else {
+                document.body.classList.remove('stories-open');
+              }
+            }}>
             <DialogTrigger asChild>
               <Button size="lg" className="gap-2 h-10 sm:h-11 text-sm sm:text-base px-4 sm:px-6">
                 📝 Submit Your Review
