@@ -68,7 +68,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
       
-      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col">
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
         <div 
           className="aspect-square overflow-hidden bg-white relative cursor-pointer flex items-center justify-center"
           onClick={() => hasMultipleMedia && setViewerOpen(true)}
