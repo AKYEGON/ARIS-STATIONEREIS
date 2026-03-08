@@ -143,7 +143,7 @@ const Brochure = () => {
         <BrochureCover />
 
         {/* Products Page */}
-        <div className="min-h-screen bg-background print:min-h-0">
+        <div className="min-h-screen bg-background print:min-h-0 print:break-before-page">
           {/* Compact Header for products page */}
           <header className="bg-primary/5 border-b border-border py-2 print:py-1">
             <div className="container mx-auto px-2 flex items-center justify-between">
@@ -151,52 +151,31 @@ const Brochure = () => {
                 <img
                   src={logo}
                   alt="Logo"
-                  className="h-6 w-6 print:h-5 print:w-5"
+                  className="h-6 w-6 print:h-4 print:w-4"
                 />
-                <span className="font-bold text-sm print:text-xs">
+                <span className="font-bold text-sm print:text-[9px]">
                   ARIS STATIONERIES
                 </span>
               </div>
-              <span className="text-xs text-muted-foreground print:text-[8px]">
+              <span className="text-xs text-muted-foreground print:text-[7px]">
                 Product Catalog
               </span>
             </div>
           </header>
 
-          <main className="container mx-auto px-2 py-2 print:py-1">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 print:grid-cols-6 print:gap-2">
-              {products
-                .reduce((acc, product, index) => {
-                  const rowIndex = Math.floor(index / 6);
-                  if (!acc[rowIndex]) acc[rowIndex] = [];
-                  acc[rowIndex].push(product);
-                  return acc;
-                }, [] as Product[][])
-                .map((row, rowIndex) => (
-                  <div
-                    key={`row-${rowIndex}`}
-                    className="contents print:block print:break-inside-avoid print:mb-2"
-                  >
-                    {row.map((product) => (
-                      <BrochureProduct key={product.id} product={product} />
-                    ))}
-                  </div>
-                ))}
+          <main className="container mx-auto px-2 py-2 print:py-1 print:px-1">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3 print:grid-cols-6 print:gap-1.5">
+              {products.map((product) => (
+                <BrochureProduct key={product.id} product={product} />
+              ))}
             </div>
           </main>
 
           {/* Compact Footer */}
-          <footer className="border-t border-border py-2 mt-4 print:py-1 print:mt-2">
-            <div className="container mx-auto px-2 text-center text-[10px] text-muted-foreground print:text-[8px]">
-              <p className="hidden sm:inline">
+          <footer className="border-t border-border py-2 mt-4 print:py-1 print:mt-1">
+            <div className="container mx-auto px-2 text-center text-[10px] text-muted-foreground print:text-[7px]">
+              <p>
                 📞 0707222419 | ✉️ scaler.com@gmail.com | 📍 Nairobi, Kenya
-              </p>
-              <p className="sm:hidden text-xs">
-                📞 0707222419
-                <br />
-                ✉️ scaler.com@gmail.com
-                <br />
-                📍 Nairobi, Kenya
               </p>
             </div>
           </footer>

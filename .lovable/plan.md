@@ -1,29 +1,42 @@
 
 
-## Improve Brochure Print Layout
+## Navigation Redesign: Public Storefront
 
-### Goal
-Optimize the brochure for cleaner PDF/print output: better page breaks, more products per page, and tighter spacing.
+The goal is to replace the current hamburger menu + floating cart button on mobile with a fixed **bottom tab bar**, while keeping the desktop header clean with inline links. The tablet view will get a hybrid approach.
 
-### Changes
+### Current State
+- **Mobile**: Sticky header with hamburger menu (Sheet) + floating cart FAB
+- **Desktop**: Sticky header with inline button links (Offers, Happy Customers, Brochure, Cart)
+- Admin panel navigation is untouched (stays as-is)
 
-**1. `src/index.css` — Print styles overhaul**
-- Reduce `@page` margins from 0.8cm to 0.5cm for more usable space
-- Remove the `contents` display override that forces grid on row wrappers (causes layout issues)
-- Add column-based flow layout rules so products fill pages naturally without awkward gaps
+### Plan
 
-**2. `src/components/brochure/BrochureProduct.tsx` — Compact print card**
-- Reduce padding and image size for print via `print:` utilities
-- Shrink font sizes further so more cards fit per page
-- Use a fixed small height for the image area in print mode instead of aspect-square
+#### 1. Mobile Bottom Tab Bar (replaces hamburger + floating cart)
+- Fixed bottom bar with 5 tabs: **Shop**, **Offers**, **Customers**, **Brochure**, **Cart** (with badge)
+- Active tab highlighted with primary color (icon + label)
+- Compact icons with small labels beneath
+- Hides when footer is visible (reuse existing `useFooterVisibility` hook)
+- Remove: hamburger menu button, Sheet component, floating cart FAB
 
-**3. `src/pages/Brochure.tsx` — Simplify grid layout**
-- Remove the manual row-chunking logic (grouping by 6) which causes incomplete rows and print break issues
-- Use a flat grid instead — let CSS handle natural flow and page breaks
-- Tighten container padding and gaps for print
-- Add `print:page-break-before` on the products section so it always starts on page 2 after the cover
+#### 2. Desktop Header (minor cleanup)
+- Keep current sticky header with inline nav links
+- No structural changes needed, just remove mobile-only elements cleanly
 
-### Technical details
+#### 3. Tablet View (md breakpoint, 768px-1024px)
+- Use the **desktop header** layout (inline links) since there are only 4-5 nav items and they fit comfortably
+- No bottom bar on tablet
 
-The current row-chunking approach (`reduce` into groups of 6 with `contents` class) creates print layout problems because `contents` display is overridden to `grid` in print CSS, causing each row wrapper to act as its own grid container. Replacing this with a flat product grid lets the browser's native page-break logic work properly, fitting as many cards as possible per page before breaking.
+### Files to Change
+
+| File | Change |
+|------|--------|
+| `src/components/layout/Header.tsx` | Remove hamburger Sheet, floating cart FAB. Add bottom tab bar for mobile (`md:hidden`). Keep desktop nav as-is. |
+| `src/components/layout/index.ts` | No change needed |
+
+### Bottom Bar Design
+- White/background fill, top border, subtle shadow
+- 5 evenly spaced items, each with icon (20px) + label (10px text)
+- Cart tab shows badge count
+- Uses `NavLink` or `useLocation` to highlight active route
+- Safe area padding for notched phones (`pb-safe` / env(safe-area-inset-bottom))
 
