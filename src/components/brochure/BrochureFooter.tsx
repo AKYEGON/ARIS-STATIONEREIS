@@ -21,7 +21,7 @@ const BrochureFooter = () => {
             <div>
               <h3 className="font-semibold text-foreground text-sm print:text-xs">Call Us</h3>
               <p className="text-xs text-muted-foreground print:text-[10px]">
-                +254 XXX XXX XXX<br />
+                +254 119 774470<br />
                 Mon-Sat: 8AM - 6PM
               </p>
             </div>

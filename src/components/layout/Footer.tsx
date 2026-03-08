@@ -66,7 +66,7 @@ const Footer = () => {
                   className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70 hover:text-primary transition-all"
                 >
                   <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">+254 707 222419</span>
+                  <span className="hidden sm:inline">+254 119 774470</span>
                   <span className="sm:hidden">WhatsApp</span>
                 </a>
                 <div className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70">

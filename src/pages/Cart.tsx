@@ -202,7 +202,7 @@ const Cart = () => {
         message += `Delivery Address: ${data.deliveryAddress}\n`;
       }
       
-      const whatsappUrl = `https://wa.me/254707222419?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/254119774470?text=${encodeURIComponent(message)}`;
       
       // Show success and cleanup state BEFORE redirect
       toast.success(`Order #${orderId.slice(0, 8)} placed! Redirecting to WhatsApp...`);
