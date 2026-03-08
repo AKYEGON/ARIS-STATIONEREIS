@@ -31,6 +31,7 @@ import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
+import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 
 interface OrderItem {
   product_name: string;
