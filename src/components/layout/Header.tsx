@@ -76,31 +76,31 @@ const Header = ({ cartItemCount }: HeaderProps) => {
       {/* Mobile Bottom Tab Bar */}
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.08)]"
-        style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}
+        style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)" }}
       >
-        <div className="flex items-center justify-around h-16">
+        <div className="flex items-center justify-around" style={{ height: "clamp(52px, 8vh, 64px)" }}>
           {bottomTabs.map(({ to, label, icon: Icon }) => {
             const active = isActive(to);
             return (
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center justify-center flex-1 h-full gap-1 transition-colors ${
+                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors ${
                   active ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
                 <span className="relative">
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-[clamp(18px,2.5vh,22px)] w-[clamp(18px,2.5vh,22px)]" />
                   {to === "/cart" && cartItemCount > 0 && (
                     <Badge
-                      className="absolute -top-2 -right-3 h-4 min-w-4 flex items-center justify-center p-0 text-[9px] bg-primary"
+                      className="absolute -top-1.5 -right-2.5 h-4 min-w-4 flex items-center justify-center p-0 text-[9px] bg-primary"
                       variant="default"
                     >
                       {cartItemCount}
                     </Badge>
                   )}
                 </span>
-                <span className="text-[10px] font-medium leading-none">{label}</span>
+                <span className="text-[clamp(9px,1.2vh,11px)] font-medium leading-none">{label}</span>
               </Link>
             );
           })}
