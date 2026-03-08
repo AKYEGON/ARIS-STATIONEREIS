@@ -175,7 +175,7 @@ const Brochure = () => {
           <footer className="border-t border-border py-2 mt-4 print:py-1 print:mt-1">
             <div className="container mx-auto px-2 text-center text-[10px] text-muted-foreground print:text-[7px]">
               <p>
-                📞 0707222419 | ✉️ scaler.com@gmail.com | 📍 Nairobi, Kenya
+                📞 +254119774470 | ✉️ arisstationeries@gmail.com | 🌐 arisstationaries.co.ke | 📍 Nairobi, Kenya
               </p>
             </div>
           </footer>
