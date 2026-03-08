@@ -110,9 +110,12 @@ const Cart = () => {
 
       // Add regular products with their IDs for price verification
       cartItems.forEach(item => {
+        const variantLabel = item.selectedVariant 
+          ? ` (${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value})`
+          : '';
         orderItems.push({
           product_id: item.id,
-          product_name: item.name,
+          product_name: item.name + variantLabel,
           product_image: item.image,
           quantity: item.quantity,
           price: item.price
