@@ -57,7 +57,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       
       <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col">
         <div 
-          className="aspect-[4/3] xs:aspect-square overflow-hidden bg-muted relative cursor-pointer"
+          className="aspect-square overflow-hidden bg-white relative cursor-pointer flex items-center justify-center"
           onClick={() => hasMultipleMedia && setViewerOpen(true)}
         >
           {!imageLoaded && (
@@ -68,7 +68,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             alt={`${product.name} - ${product.description} - Buy at ARIS STATIONERIES Nairobi Kenya`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
-            className={`h-full w-full object-cover transition-all duration-500 group-hover:scale-110 ${
+            className={`max-h-full max-w-full object-contain p-2 transition-all duration-500 group-hover:scale-110 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
