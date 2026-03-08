@@ -195,3 +195,8 @@ All colors MUST be HSL.
     widows: 3;
   }
 }
+
+/* Hide bottom nav when stories carousel is open */
+body.stories-open [data-bottom-nav] {
+  display: none !important;
+}

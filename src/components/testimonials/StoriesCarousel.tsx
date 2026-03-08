@@ -48,6 +48,11 @@ const expandTestimonials = (testimonials: CustomerTestimonial[]) => {
 const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCarouselProps) => {
   const expandedTestimonials = expandTestimonials(testimonials);
   
+  // Hide bottom nav when stories are open
+  useEffect(() => {
+    document.body.classList.add('stories-open');
+    return () => document.body.classList.remove('stories-open');
+  }, []);
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     loop: false,
     startIndex: initialIndex,
