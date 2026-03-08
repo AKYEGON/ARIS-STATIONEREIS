@@ -38,7 +38,13 @@ const ProductMediaViewer = ({ product, open, onClose }: ProductMediaViewerProps)
   useEffect(() => {
     if (open) {
       window.addEventListener("keydown", handleKeyDown);
-      return () => window.removeEventListener("keydown", handleKeyDown);
+      // Hide mobile bottom nav
+      const bottomNav = document.querySelector('[data-bottom-nav]') as HTMLElement;
+      if (bottomNav) bottomNav.style.display = 'none';
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        if (bottomNav) bottomNav.style.display = '';
+      };
     }
   }, [open, currentIndex]);
 
