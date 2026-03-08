@@ -42,7 +42,8 @@ const Index = () => {
         .from("products")
         .select(`
           *,
-          media:product_media(*)
+          media:product_media(*),
+          variants:product_variants(*)
         `)
         .order("created_at", { ascending: false });
 
