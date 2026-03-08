@@ -2061,6 +2061,7 @@ const Admin = () => {
                     <TableBody>
                       {ordersList
                         .filter(order => {
+                          if (orderStatusFilter !== "all" && order.status.toLowerCase() !== orderStatusFilter) return false;
                           if (!orderSearchQuery) return true;
                           const query = orderSearchQuery.toLowerCase();
                           return (
