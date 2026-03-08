@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { Product, CartItem } from "@/types/product";
+import { Product, CartItem, ProductVariant } from "@/types/product";
 import { Bundle, CartBundle } from "@/types/bundle";
 import { toast } from "sonner";
 
