@@ -168,7 +168,12 @@ const Cart = () => {
 
       // Prepare WhatsApp message
       const productDetails = cartItems
-        .map((item) => `${item.name} x${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`)
+        .map((item) => {
+          const variantLabel = item.selectedVariant 
+            ? ` (${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value})`
+            : '';
+          return `${item.name}${variantLabel} x${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`;
+        })
         .join("\n");
       
       const bundleDetails = bundleItems
