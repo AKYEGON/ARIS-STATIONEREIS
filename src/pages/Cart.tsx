@@ -168,39 +168,61 @@ const Cart = () => {
 
       // Prepare WhatsApp message
       const productDetails = cartItems
-        .map((item) => {
+        .map((item, index) => {
           const variantLabel = item.selectedVariant 
             ? ` (${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value})`
             : '';
-          return `${item.name}${variantLabel} x${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`;
+          return `${index + 1}. ${item.name}${variantLabel} × ${item.quantity} — KSh ${(item.price * item.quantity).toFixed(2)}`;
         })
         .join("\n");
       
       const bundleDetails = bundleItems
-        .map((bundle) => {
+        .map((bundle, index) => {
           const itemsList = bundle.items?.map(bi => 
-            `  • ${bi.product?.name || 'Product'} ${bi.quantity > 1 ? `(×${bi.quantity})` : ''}`
+            `   • ${bi.product?.name || 'Product'} ${bi.quantity > 1 ? `(×${bi.quantity})` : ''}`
           ).join('\n') || '';
-          return `${bundle.name} (Bundle) x${bundle.quantity} - KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
+          const num = cartItems.length + index + 1;
+          return `${num}. 📦 ${bundle.name} (Bundle) × ${bundle.quantity} — KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
         })
         .join("\n\n");
       
-      const orderDetails = [productDetails, bundleDetails].filter(Boolean).join("\n\n");
+      const orderDetails = [productDetails, bundleDetails].filter(Boolean).join("\n");
       
-      let message = `New Order from ARIS STATIONERIES\n\n`;
-      message += `Order ID: ${orderId.slice(0, 8)}\n\n`;
-      message += `Customer Details:\n`;
-      message += `Name: ${data.name}\n`;
-      message += `Phone: ${data.phone}\n`;
-      message += `University: ${data.university}\n`;
-      message += `Branch: ${data.branch}\n\n`;
-      message += `Order Details:\n${orderDetails}\n\n`;
-      message += `Total Amount: KSh ${serverTotal.toFixed(2)}\n\n`;
-      message += `Delivery Method: ${data.deliveryMethod === "pickup" ? "Pickup in Person" : "Delivery"}\n`;
+      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0) + 
+        bundleItems.reduce((sum, b) => sum + b.quantity, 0);
+
+      const pickupOutletName = selectedPickupOutlet 
+        ? outlets.find(o => o.id === selectedPickupOutlet || o.name === selectedPickupOutlet)?.name || selectedPickupOutlet
+        : 'N/A';
+
+      let message = `🛒 *NEW ORDER — ARIS STATIONERIES*\n`;
+      message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+      message += `📋 *Order ID:* #${orderId.slice(0, 8)}\n`;
+      message += `📅 *Date:* ${new Date().toLocaleDateString('en-KE', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
       
-      if (data.deliveryMethod === "delivery" && data.deliveryAddress) {
-        message += `Delivery Address: ${data.deliveryAddress}\n`;
+      message += `👤 *CUSTOMER DETAILS*\n`;
+      message += `• Name: ${data.name}\n`;
+      message += `• Phone: ${data.phone}\n`;
+      message += `• University: ${data.university}\n`;
+      message += `• Campus/Branch: ${data.branch}\n\n`;
+      
+      message += `📦 *ORDER ITEMS* (${totalItems} item${totalItems !== 1 ? 's' : ''})\n`;
+      message += `────────────────────\n`;
+      message += `${orderDetails}\n`;
+      message += `────────────────────\n`;
+      message += `💰 *TOTAL: KSh ${serverTotal.toFixed(2)}*\n\n`;
+      
+      message += `🚚 *DELIVERY METHOD*\n`;
+      if (data.deliveryMethod === "pickup") {
+        message += `• Pickup in Person\n`;
+        message += `• Outlet: ${pickupOutletName}\n`;
+      } else {
+        message += `• Delivery\n`;
+        message += `• Address: ${data.deliveryAddress}\n`;
       }
+      
+      message += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
+      message += `_Sent via arisstationaries.co.ke_`;
       
       const whatsappUrl = `https://wa.me/254119774470?text=${encodeURIComponent(message)}`;
       
