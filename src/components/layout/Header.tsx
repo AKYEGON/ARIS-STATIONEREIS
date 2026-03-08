@@ -75,6 +75,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
       
       {/* Mobile Bottom Tab Bar */}
       <nav
+        data-bottom-nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-2px_10px_rgba(0,0,0,0.08)]"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)" }}
       >
