@@ -97,7 +97,7 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
       let query = supabase
         .from("orders")
         .select("*")
-        .or("status.ilike.delivered,status.ilike.fulfilled,status.ilike.completed");
+        .in("status", ["delivered", "fulfilled", "completed", "Delivered", "Fulfilled", "Completed"]);
 
       if (startDate) {
         query = query.gte("created_at", startDate.toISOString());
