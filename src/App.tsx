@@ -14,6 +14,7 @@ import Brochure from "./pages/Brochure";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
+import ScrollToTop from "./components/common/ScrollToTop";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <BrowserRouter>
+              <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/cart" element={<Cart />} />

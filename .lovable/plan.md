@@ -1,30 +1,42 @@
 
 
-# Improve Footer & Fix Build Error
+## Navigation Redesign: Public Storefront
 
-## Issues Identified
+The goal is to replace the current hamburger menu + floating cart button on mobile with a fixed **bottom tab bar**, while keeping the desktop header clean with inline links. The tablet view will get a hybrid approach.
 
-1. **Build error**: `NodeJS.Timeout` type in `OffersSection.tsx` line 17 — needs to use `ReturnType<typeof setInterval>` instead.
+### Current State
+- **Mobile**: Sticky header with hamburger menu (Sheet) + floating cart FAB
+- **Desktop**: Sticky header with inline button links (Offers, Happy Customers, Brochure, Cart)
+- Admin panel navigation is untouched (stays as-is)
 
-2. **Footer page transition issue**: When navigating between pages, the scroll position isn't reset, so users land mid-page or at the footer instead of the top. There's no scroll-to-top on route change.
+### Plan
 
-3. **Footer overlap on mobile**: The footer can get partially hidden behind the bottom navigation bar on some pages.
+#### 1. Mobile Bottom Tab Bar (replaces hamburger + floating cart)
+- Fixed bottom bar with 5 tabs: **Shop**, **Offers**, **Customers**, **Brochure**, **Cart** (with badge)
+- Active tab highlighted with primary color (icon + label)
+- Compact icons with small labels beneath
+- Hides when footer is visible (reuse existing `useFooterVisibility` hook)
+- Remove: hamburger menu button, Sheet component, floating cart FAB
 
-## Plan
+#### 2. Desktop Header (minor cleanup)
+- Keep current sticky header with inline nav links
+- No structural changes needed, just remove mobile-only elements cleanly
 
-### 1. Fix build error in OffersSection.tsx
-- Change `NodeJS.Timeout` to `ReturnType<typeof setInterval>` on line 17.
+#### 3. Tablet View (md breakpoint, 768px-1024px)
+- Use the **desktop header** layout (inline links) since there are only 4-5 nav items and they fit comfortably
+- No bottom bar on tablet
 
-### 2. Add scroll-to-top on route change
-- Create a `ScrollToTop` component in `src/components/common/` that uses `useLocation` from react-router and scrolls to top on pathname change.
-- Add it inside `BrowserRouter` in `App.tsx`.
+### Files to Change
 
-### 3. Ensure footer isn't hidden behind mobile nav
-- Verify all pages have `pb-16 md:pb-0` on their wrapper div (some already do — will check and fix any missing ones like Brochure, Testimonials, Cart).
+| File | Change |
+|------|--------|
+| `src/components/layout/Header.tsx` | Remove hamburger Sheet, floating cart FAB. Add bottom tab bar for mobile (`md:hidden`). Keep desktop nav as-is. |
+| `src/components/layout/index.ts` | No change needed |
 
-### Files to modify
-- `src/components/products/OffersSection.tsx` — fix TypeScript error
-- `src/components/common/ScrollToTop.tsx` — new component
-- `src/App.tsx` — add ScrollToTop
-- Any pages missing bottom padding for mobile nav
+### Bottom Bar Design
+- White/background fill, top border, subtle shadow
+- 5 evenly spaced items, each with icon (20px) + label (10px text)
+- Cart tab shows badge count
+- Uses `NavLink` or `useLocation` to highlight active route
+- Safe area padding for notched phones (`pb-safe` / env(safe-area-inset-bottom))
 

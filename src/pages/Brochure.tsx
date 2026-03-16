@@ -99,7 +99,7 @@ const Brochure = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-16 md:pb-0">
       <SEO
         title="Product Catalog"
         description="Browse our complete product catalog. Download or print our stationery brochure from ARIS STATIONERIES, Nairobi."
