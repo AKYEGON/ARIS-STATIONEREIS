@@ -14,7 +14,7 @@ const OffersSection = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { addBundleToCart } = useCart();
   const containerRef = useRef<HTMLDivElement>(null);
-  const autoScrollRef = useRef<NodeJS.Timeout | null>(null);
+  const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
