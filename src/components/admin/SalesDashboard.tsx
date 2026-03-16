@@ -146,7 +146,7 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
           };
           existing.total_quantity += item.quantity;
           existing.total_revenue += Number(item.price) * item.quantity;
-          existing.total_profit += Number(item.profit || 0) * item.quantity;
+          existing.total_profit += Number(item.profit || 0);
           productMap.set(item.product_name, existing);
         });
 
