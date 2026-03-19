@@ -134,7 +134,7 @@ const Index = () => {
               placeholder="Search products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 pr-9 transition-all duration-200 focus:ring-2 focus:ring-primary"
+              className="pl-9 sm:pl-10 pr-9 bg-secondary border-primary/30 transition-all duration-200 focus:ring-2 focus:ring-primary"
             />
             {searchQuery && (
               <button
