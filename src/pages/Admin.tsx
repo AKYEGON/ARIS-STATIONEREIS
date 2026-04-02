@@ -159,8 +159,11 @@ const Admin = () => {
     costPrice: "",
     stock: "",
     category: "",
-    image: "/placeholder.svg"
+    image: "/placeholder.svg",
+    is_featured: false,
+    display_order: "0"
   });
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imageInputMode, setImageInputMode] = useState<"file" | "url">("file");
