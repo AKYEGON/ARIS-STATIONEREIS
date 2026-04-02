@@ -1693,11 +1693,38 @@ const Admin = () => {
                     </div>
                     <div>
                       <Label htmlFor="category">Category</Label>
-                      <Input
-                        id="category"
+                      <Select
                         value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        placeholder="e.g., Notebooks, Pens"
+                        onValueChange={(value) => setFormData({...formData, category: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {productCategories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              {cat.icon} {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="is_featured">Show on Homepage</Label>
+                      <Switch
+                        id="is_featured"
+                        checked={formData.is_featured}
+                        onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="display_order">Display Order</Label>
+                      <Input
+                        id="display_order"
+                        type="number"
+                        value={formData.display_order}
+                        onChange={(e) => setFormData({...formData, display_order: e.target.value})}
+                        placeholder="0"
                       />
                     </div>
                     <div>
