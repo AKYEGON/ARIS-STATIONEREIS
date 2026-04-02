@@ -917,7 +917,9 @@ const Admin = () => {
           cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
           stock: formData.stock ? parseInt(formData.stock) : 0,
           category: formData.category,
-          image: imageUrl
+          image: imageUrl,
+          is_featured: formData.is_featured,
+          display_order: parseInt(formData.display_order) || 0
         })
         .eq("id", editingProduct.id);
 
