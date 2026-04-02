@@ -13,11 +13,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { products } from "@/data/products";
-import { Product, ProductMedia } from "@/types/product";
+import { Product, ProductMedia, ProductCategory } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
@@ -157,8 +159,11 @@ const Admin = () => {
     costPrice: "",
     stock: "",
     category: "",
-    image: "/placeholder.svg"
+    image: "/placeholder.svg",
+    is_featured: false,
+    display_order: "0"
   });
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imageInputMode, setImageInputMode] = useState<"file" | "url">("file");
@@ -180,6 +185,7 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchProducts();
+      fetchProductCategories();
       if (activeTab === "orders") {
         fetchOrders();
       }
@@ -191,6 +197,20 @@ const Admin = () => {
       }
     }
   }, [activeTab, isAdmin]);
+
+  const fetchProductCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("product_categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      setProductCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -221,6 +241,8 @@ const Admin = () => {
         stock: p.stock || 0,
         category: p.category,
         image: p.image,
+        is_featured: p.is_featured,
+        display_order: p.display_order,
         media: (p.product_media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
@@ -727,7 +749,9 @@ const Admin = () => {
       costPrice: "",
       stock: "",
       category: "",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      is_featured: false,
+      display_order: "0"
     });
     setSelectedImageFile(null);
     setImageUrl("");
@@ -789,7 +813,9 @@ const Admin = () => {
         cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
         stock: formData.stock ? parseInt(formData.stock) : 0,
         category: formData.category,
-        image: imageUrl
+        image: imageUrl,
+        is_featured: formData.is_featured,
+        display_order: parseInt(formData.display_order) || 0
       };
 
       console.log("Inserting product data:", productData);
@@ -891,7 +917,9 @@ const Admin = () => {
           cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
           stock: formData.stock ? parseInt(formData.stock) : 0,
           category: formData.category,
-          image: imageUrl
+          image: imageUrl,
+          is_featured: formData.is_featured,
+          display_order: parseInt(formData.display_order) || 0
         })
         .eq("id", editingProduct.id);
 
@@ -986,7 +1014,9 @@ const Admin = () => {
       costPrice: product.costPrice?.toString() || "0",
       stock: product.stock?.toString() || "0",
       category: product.category,
-      image: product.image
+      image: product.image,
+      is_featured: product.is_featured || false,
+      display_order: (product.display_order || 0).toString()
     });
     setSelectedImageFile(null);
     setImageUrl(product.image);
@@ -1663,11 +1693,38 @@ const Admin = () => {
                     </div>
                     <div>
                       <Label htmlFor="category">Category</Label>
-                      <Input
-                        id="category"
+                      <Select
                         value={formData.category}
-                        onChange={(e) => setFormData({...formData, category: e.target.value})}
-                        placeholder="e.g., Notebooks, Pens"
+                        onValueChange={(value) => setFormData({...formData, category: value})}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {productCategories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              {cat.icon} {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="is_featured">Show on Homepage</Label>
+                      <Switch
+                        id="is_featured"
+                        checked={formData.is_featured}
+                        onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="display_order">Display Order</Label>
+                      <Input
+                        id="display_order"
+                        type="number"
+                        value={formData.display_order}
+                        onChange={(e) => setFormData({...formData, display_order: e.target.value})}
+                        placeholder="0"
                       />
                     </div>
                     <div>
@@ -1888,7 +1945,12 @@ const Admin = () => {
                           className="animate-fade-in"
                           style={{ animationDelay: `${index * 0.03}s` }}
                         >
-                          <TableCell className="font-medium text-xs sm:text-sm">{product.name}</TableCell>
+                          <TableCell className="font-medium text-xs sm:text-sm">
+                            <div className="flex items-center gap-1">
+                              {product.is_featured && <Star className="h-3 w-3 text-primary fill-primary" />}
+                              {product.name}
+                            </div>
+                          </TableCell>
                           <TableCell className="hidden md:table-cell max-w-xs truncate text-xs sm:text-sm">{product.description}</TableCell>
                           <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{product.category}</TableCell>
                           <TableCell className="text-xs sm:text-sm">
@@ -2593,11 +2655,38 @@ const Admin = () => {
               </div>
               <div>
                 <Label htmlFor="edit-category">Category</Label>
-                <Input
-                  id="edit-category"
+                <Select
                   value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  placeholder="e.g., Notebooks, Pens"
+                  onValueChange={(value) => setFormData({...formData, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        {cat.icon} {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="edit-is_featured">Show on Homepage</Label>
+                <Switch
+                  id="edit-is_featured"
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-display_order">Display Order</Label>
+                <Input
+                  id="edit-display_order"
+                  type="number"
+                  value={formData.display_order}
+                  onChange={(e) => setFormData({...formData, display_order: e.target.value})}
+                  placeholder="0"
                 />
               </div>
               <div>

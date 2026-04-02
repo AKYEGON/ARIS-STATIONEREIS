@@ -7,9 +7,10 @@ import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Product } from "@/types/product";
+import { Product, ProductCategory } from "@/types/product";
 
 import OffersSection from "@/components/products/OffersSection";
 
@@ -28,6 +29,8 @@ const Index = () => {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
 
   // Persist search query to sessionStorage
@@ -45,6 +48,8 @@ const Index = () => {
           media:product_media(*),
           variants:product_variants(*)
         `)
+        .order("is_featured", { ascending: false })
+        .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -57,6 +62,8 @@ const Index = () => {
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
         category: p.category,
         image: p.image,
+        is_featured: p.is_featured,
+        display_order: p.display_order,
         media: ((p as any).media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
@@ -76,17 +83,35 @@ const Index = () => {
     }
   }, []);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("product_categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
 
-  const filteredProducts = products.filter(
-    (product) =>
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch =
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      product.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
@@ -96,7 +121,7 @@ const Index = () => {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, selectedCategory]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -157,6 +182,37 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Category Filter */}
+      {categories.length > 0 && (
+        <section className="container px-4 pb-4">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex gap-2 pb-2">
+              <Button
+                variant={selectedCategory === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory("all")}
+                className="shrink-0 rounded-full"
+              >
+                All
+              </Button>
+              {categories.map((cat) => (
+                <Button
+                  key={cat.id}
+                  variant={selectedCategory === cat.name ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className="shrink-0 rounded-full"
+                >
+                  {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                  {cat.name}
+                </Button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </section>
+      )}
 
       {/* Products Section */}
       <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
