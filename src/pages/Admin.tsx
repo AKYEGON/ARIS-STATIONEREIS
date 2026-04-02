@@ -2650,11 +2650,38 @@ const Admin = () => {
               </div>
               <div>
                 <Label htmlFor="edit-category">Category</Label>
-                <Input
-                  id="edit-category"
+                <Select
                   value={formData.category}
-                  onChange={(e) => setFormData({...formData, category: e.target.value})}
-                  placeholder="e.g., Notebooks, Pens"
+                  onValueChange={(value) => setFormData({...formData, category: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {productCategories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.name}>
+                        {cat.icon} {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="edit-is_featured">Show on Homepage</Label>
+                <Switch
+                  id="edit-is_featured"
+                  checked={formData.is_featured}
+                  onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-display_order">Display Order</Label>
+                <Input
+                  id="edit-display_order"
+                  type="number"
+                  value={formData.display_order}
+                  onChange={(e) => setFormData({...formData, display_order: e.target.value})}
+                  placeholder="0"
                 />
               </div>
               <div>
