@@ -121,7 +121,7 @@ const Index = () => {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, selectedCategory]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
