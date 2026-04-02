@@ -993,7 +993,9 @@ const Admin = () => {
       costPrice: product.costPrice?.toString() || "0",
       stock: product.stock?.toString() || "0",
       category: product.category,
-      image: product.image
+      image: product.image,
+      is_featured: product.is_featured || false,
+      display_order: (product.display_order || 0).toString()
     });
     setSelectedImageFile(null);
     setImageUrl(product.image);
