@@ -183,6 +183,37 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Category Filter */}
+      {categories.length > 0 && (
+        <section className="container px-4 pb-4">
+          <ScrollArea className="w-full whitespace-nowrap">
+            <div className="flex gap-2 pb-2">
+              <Button
+                variant={selectedCategory === "all" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedCategory("all")}
+                className="shrink-0 rounded-full"
+              >
+                All
+              </Button>
+              {categories.map((cat) => (
+                <Button
+                  key={cat.id}
+                  variant={selectedCategory === cat.name ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedCategory(cat.name)}
+                  className="shrink-0 rounded-full"
+                >
+                  {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                  {cat.name}
+                </Button>
+              ))}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </section>
+      )}
+
       {/* Products Section */}
       <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
         {isLoading ? (
