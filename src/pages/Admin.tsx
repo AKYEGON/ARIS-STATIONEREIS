@@ -1945,7 +1945,12 @@ const Admin = () => {
                           className="animate-fade-in"
                           style={{ animationDelay: `${index * 0.03}s` }}
                         >
-                          <TableCell className="font-medium text-xs sm:text-sm">{product.name}</TableCell>
+                          <TableCell className="font-medium text-xs sm:text-sm">
+                            <div className="flex items-center gap-1">
+                              {product.is_featured && <Star className="h-3 w-3 text-primary fill-primary" />}
+                              {product.name}
+                            </div>
+                          </TableCell>
                           <TableCell className="hidden md:table-cell max-w-xs truncate text-xs sm:text-sm">{product.description}</TableCell>
                           <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{product.category}</TableCell>
                           <TableCell className="text-xs sm:text-sm">
