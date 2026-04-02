@@ -48,6 +48,8 @@ const Index = () => {
           media:product_media(*),
           variants:product_variants(*)
         `)
+        .order("is_featured", { ascending: false })
+        .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -60,6 +62,8 @@ const Index = () => {
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
         category: p.category,
         image: p.image,
+        is_featured: p.is_featured,
+        display_order: p.display_order,
         media: ((p as any).media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
@@ -76,6 +80,21 @@ const Index = () => {
       console.error("Error fetching products:", error);
     } finally {
       setIsLoading(false);
+    }
+  }, []);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from("product_categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   }, []);
 
