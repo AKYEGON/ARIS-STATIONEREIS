@@ -732,7 +732,9 @@ const Admin = () => {
       costPrice: "",
       stock: "",
       category: "",
-      image: "/placeholder.svg"
+      image: "/placeholder.svg",
+      is_featured: false,
+      display_order: "0"
     });
     setSelectedImageFile(null);
     setImageUrl("");
