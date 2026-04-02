@@ -100,7 +100,8 @@ const Index = () => {
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
 
 
   const filteredProducts = products.filter(
