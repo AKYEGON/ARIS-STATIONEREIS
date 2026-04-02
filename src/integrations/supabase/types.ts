@@ -425,6 +425,36 @@ export type Database = {
         }
         Relationships: []
       }
+      product_categories: {
+        Row: {
+          created_at: string
+          display_order: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       product_media: {
         Row: {
           created_at: string | null
@@ -519,8 +549,10 @@ export type Database = {
           cost_price: number | null
           created_at: string
           description: string | null
+          display_order: number
           id: string
           image: string
+          is_featured: boolean
           name: string
           original_price: number | null
           price: number
@@ -532,8 +564,10 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          display_order?: number
           id?: string
           image: string
+          is_featured?: boolean
           name: string
           original_price?: number | null
           price: number
@@ -545,8 +579,10 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           description?: string | null
+          display_order?: number
           id?: string
           image?: string
+          is_featured?: boolean
           name?: string
           original_price?: number | null
           price?: number
