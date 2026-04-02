@@ -30,8 +30,19 @@ export interface Product {
   stock?: number;
   image: string;
   category: string;
+  is_featured?: boolean;
+  display_order?: number;
   media?: ProductMedia[];
   variants?: ProductVariant[];
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  display_order: number;
+  is_active: boolean;
 }
 
 export interface CartItem extends Product {
