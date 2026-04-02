@@ -185,6 +185,7 @@ const Admin = () => {
   useEffect(() => {
     if (isAdmin) {
       fetchProducts();
+      fetchProductCategories();
       if (activeTab === "orders") {
         fetchOrders();
       }
@@ -196,6 +197,20 @@ const Admin = () => {
       }
     }
   }, [activeTab, isAdmin]);
+
+  const fetchProductCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("product_categories")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true });
+      if (error) throw error;
+      setProductCategories(data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
