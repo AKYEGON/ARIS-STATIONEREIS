@@ -226,6 +226,8 @@ const Admin = () => {
         stock: p.stock || 0,
         category: p.category,
         image: p.image,
+        is_featured: p.is_featured,
+        display_order: p.display_order,
         media: (p.product_media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
