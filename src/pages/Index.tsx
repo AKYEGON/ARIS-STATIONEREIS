@@ -8,7 +8,7 @@ import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users, X, Ruler, Calculator, PenTool, BookOpen, FolderOpen, Palette, Paperclip, ClipboardCheck, Gift, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 
@@ -17,6 +17,19 @@ import OffersSection from "@/components/products/OffersSection";
 const PRODUCTS_PER_PAGE = 8;
 
 const SEARCH_STORAGE_KEY = "aris-search-query";
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  "Engineering & Drawing": <Ruler className="h-3.5 w-3.5" />,
+  "Scientific Calculators": <Calculator className="h-3.5 w-3.5" />,
+  "Writing Instruments": <PenTool className="h-3.5 w-3.5" />,
+  "Notebooks & Papers": <BookOpen className="h-3.5 w-3.5" />,
+  "Filing & Organization": <FolderOpen className="h-3.5 w-3.5" />,
+  "Art & Craft Supplies": <Palette className="h-3.5 w-3.5" />,
+  "Office Supplies": <Paperclip className="h-3.5 w-3.5" />,
+  "Exam Essentials": <ClipboardCheck className="h-3.5 w-3.5" />,
+  "Gifts & Accessories": <Gift className="h-3.5 w-3.5" />,
+  "General Stationery": <Package className="h-3.5 w-3.5" />,
+};
 
 const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
@@ -204,7 +217,7 @@ const Index = () => {
                   onClick={() => setSelectedCategory(cat.name)}
                   className="shrink-0 rounded-full"
                 >
-                  {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                  {CATEGORY_ICONS[cat.name] && <span className="mr-1.5">{CATEGORY_ICONS[cat.name]}</span>}
                   {cat.name}
                 </Button>
               ))}
