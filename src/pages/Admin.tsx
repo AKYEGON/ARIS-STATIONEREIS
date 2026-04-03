@@ -33,6 +33,7 @@ import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
+import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 
 interface OrderItem {
@@ -1614,6 +1615,7 @@ const Admin = () => {
               <p className="text-xs sm:text-sm text-muted-foreground mb-4">Manage universities, campus branches, and pickup outlets shown in checkout</p>
             </div>
             <CheckoutOptionsManager />
+            <CategoryManager />
           </TabsContent>
 
           {/* Products Tab */}
