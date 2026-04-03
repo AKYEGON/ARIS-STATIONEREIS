@@ -217,7 +217,7 @@ const Index = () => {
                   onClick={() => setSelectedCategory(cat.name)}
                   className="shrink-0 rounded-full"
                 >
-                  {cat.icon && <span className="mr-1">{cat.icon}</span>}
+                  {CATEGORY_ICONS[cat.name] && <span className="mr-1.5">{CATEGORY_ICONS[cat.name]}</span>}
                   {cat.name}
                 </Button>
               ))}
