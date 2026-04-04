@@ -30,6 +30,7 @@ export interface Product {
   stock?: number;
   image: string;
   category: string;
+  categories?: string[];
   is_featured?: boolean;
   display_order?: number;
   media?: ProductMedia[];
