@@ -755,6 +755,7 @@ const Admin = () => {
       is_featured: false,
       display_order: "0"
     });
+    setSelectedCategoryIds([]);
     setSelectedImageFile(null);
     setImageUrl("");
     setImageInputMode("file");
