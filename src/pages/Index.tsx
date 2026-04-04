@@ -45,6 +45,7 @@ const Index = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [categoryProductMap, setCategoryProductMap] = useState<Record<string, string[]>>({});
 
   // Persist search query to sessionStorage
   useEffect(() => {
@@ -98,14 +99,32 @@ const Index = () => {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const { data, error } = await supabase
-        .from("product_categories")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+      const [catRes, assignRes] = await Promise.all([
+        supabase
+          .from("product_categories")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("product_category_assignments")
+          .select("product_id, category_id")
+      ]);
 
-      if (error) throw error;
-      setCategories(data || []);
+      if (catRes.error) throw catRes.error;
+      setCategories(catRes.data || []);
+
+      // Build a map: category_name -> product_id[]
+      const catMap: Record<string, string[]> = {};
+      const catIdToName: Record<string, string> = {};
+      (catRes.data || []).forEach(c => { catIdToName[c.id] = c.name; });
+      (assignRes.data || []).forEach(a => {
+        const name = catIdToName[a.category_id];
+        if (name) {
+          if (!catMap[name]) catMap[name] = [];
+          catMap[name].push(a.product_id);
+        }
+      });
+      setCategoryProductMap(catMap);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -122,7 +141,8 @@ const Index = () => {
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || 
+      (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
     return matchesSearch && matchesCategory;
   });
 

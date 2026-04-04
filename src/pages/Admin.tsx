@@ -20,6 +20,7 @@ import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, D
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
@@ -165,6 +166,7 @@ const Admin = () => {
     display_order: "0"
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imageInputMode, setImageInputMode] = useState<"file" | "url">("file");
@@ -754,6 +756,7 @@ const Admin = () => {
       is_featured: false,
       display_order: "0"
     });
+    setSelectedCategoryIds([]);
     setSelectedImageFile(null);
     setImageUrl("");
     setImageInputMode("file");
@@ -806,6 +809,11 @@ const Admin = () => {
         console.log("Using image URL:", imageUrl);
       }
 
+      // Use first selected category name for the legacy category column
+      const primaryCatName = selectedCategoryIds.length > 0
+        ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
+        : "";
+
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -813,7 +821,7 @@ const Admin = () => {
         original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
         cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
         stock: formData.stock ? parseInt(formData.stock) : 0,
-        category: formData.category,
+        category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
         display_order: parseInt(formData.display_order) || 0
@@ -875,6 +883,16 @@ const Admin = () => {
           const { error: varError } = await supabase.from("product_variants").insert(variantsToInsert);
           if (varError) console.error("Error saving variants:", varError);
         }
+
+        // Save category assignments
+        if (selectedCategoryIds.length > 0) {
+          const assignments = selectedCategoryIds.map(catId => ({
+            product_id: productId,
+            category_id: catId,
+          }));
+          const { error: catError } = await supabase.from("product_category_assignments").insert(assignments);
+          if (catError) console.error("Error saving category assignments:", catError);
+        }
       }
 
       console.log("Product inserted successfully, fetching products...");
@@ -917,7 +935,9 @@ const Admin = () => {
           original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
           stock: formData.stock ? parseInt(formData.stock) : 0,
-          category: formData.category,
+          category: selectedCategoryIds.length > 0
+            ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
+            : "",
           image: imageUrl,
           is_featured: formData.is_featured,
           display_order: parseInt(formData.display_order) || 0
@@ -975,6 +995,17 @@ const Admin = () => {
         if (varError) console.error("Error saving variants:", varError);
       }
 
+      // Handle category assignments: delete existing, re-insert all
+      await supabase.from("product_category_assignments").delete().eq("product_id", editingProduct.id);
+      if (selectedCategoryIds.length > 0) {
+        const assignments = selectedCategoryIds.map(catId => ({
+          product_id: editingProduct.id,
+          category_id: catId,
+        }));
+        const { error: catError } = await supabase.from("product_category_assignments").insert(assignments);
+        if (catError) console.error("Error saving category assignments:", catError);
+      }
+
       await fetchProducts();
       toast.success("Product updated successfully");
       setIsEditDialogOpen(false);
@@ -1028,6 +1059,18 @@ const Admin = () => {
     setVideoFile(null);
     setVideoPreview("");
     setMediaToDelete([]);
+
+    // Load existing category assignments
+    try {
+      const { data: catData } = await supabase
+        .from("product_category_assignments")
+        .select("category_id")
+        .eq("product_id", product.id);
+      setSelectedCategoryIds((catData || []).map(c => c.category_id));
+    } catch (e) {
+      console.error("Error loading category assignments:", e);
+      setSelectedCategoryIds([]);
+    }
     
     // Load existing variants
     try {
@@ -1694,22 +1737,30 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Select
-                        value={formData.category}
-                        onValueChange={(value) => setFormData({...formData, category: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {productCategories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
+                      <Label>Categories</Label>
+                      <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 mt-1">
+                        {productCategories.map((cat) => (
+                          <div key={cat.id} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`cat-add-${cat.id}`}
+                              checked={selectedCategoryIds.includes(cat.id)}
+                              onCheckedChange={(checked) => {
+                                setSelectedCategoryIds(prev =>
+                                  checked
+                                    ? [...prev, cat.id]
+                                    : prev.filter(id => id !== cat.id)
+                                );
+                              }}
+                            />
+                            <label htmlFor={`cat-add-${cat.id}`} className="text-sm cursor-pointer">
                               {cat.icon} {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                            </label>
+                          </div>
+                        ))}
+                        {productCategories.length === 0 && (
+                          <p className="text-xs text-muted-foreground">No categories yet. Add them in Settings.</p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="is_featured">Show on Homepage</Label>
@@ -2656,22 +2707,30 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-category">Category</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({...formData, category: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {productCategories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.name}>
+                <Label>Categories</Label>
+                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 mt-1">
+                  {productCategories.map((cat) => (
+                    <div key={cat.id} className="flex items-center gap-2">
+                      <Checkbox
+                        id={`cat-edit-${cat.id}`}
+                        checked={selectedCategoryIds.includes(cat.id)}
+                        onCheckedChange={(checked) => {
+                          setSelectedCategoryIds(prev =>
+                            checked
+                              ? [...prev, cat.id]
+                              : prev.filter(id => id !== cat.id)
+                          );
+                        }}
+                      />
+                      <label htmlFor={`cat-edit-${cat.id}`} className="text-sm cursor-pointer">
                         {cat.icon} {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                      </label>
+                    </div>
+                  ))}
+                  {productCategories.length === 0 && (
+                    <p className="text-xs text-muted-foreground">No categories yet. Add them in Settings.</p>
+                  )}
+                </div>
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="edit-is_featured">Show on Homepage</Label>
