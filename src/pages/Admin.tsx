@@ -882,6 +882,16 @@ const Admin = () => {
           const { error: varError } = await supabase.from("product_variants").insert(variantsToInsert);
           if (varError) console.error("Error saving variants:", varError);
         }
+
+        // Save category assignments
+        if (selectedCategoryIds.length > 0) {
+          const assignments = selectedCategoryIds.map(catId => ({
+            product_id: productId,
+            category_id: catId,
+          }));
+          const { error: catError } = await supabase.from("product_category_assignments").insert(assignments);
+          if (catError) console.error("Error saving category assignments:", catError);
+        }
       }
 
       console.log("Product inserted successfully, fetching products...");
