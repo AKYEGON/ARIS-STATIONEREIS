@@ -141,7 +141,8 @@ const Index = () => {
       product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory;
+    const matchesCategory = selectedCategory === "all" || 
+      (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
     return matchesSearch && matchesCategory;
   });
 
