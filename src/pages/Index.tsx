@@ -45,6 +45,7 @@ const Index = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [categoryProductMap, setCategoryProductMap] = useState<Record<string, string[]>>({});
 
   // Persist search query to sessionStorage
   useEffect(() => {
