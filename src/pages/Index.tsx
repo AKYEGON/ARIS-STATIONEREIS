@@ -7,7 +7,7 @@ import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, ChevronLeft, ChevronRight, Users, X, Ruler, Calculator, PenTool, BookOpen, FolderOpen, Palette, Paperclip, ClipboardCheck, Gift, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
@@ -216,34 +216,27 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Category Filter */}
+      {/* Category Filter Dropdown */}
       {categories.length > 0 && (
         <section className="container px-4 pb-4">
-          <ScrollArea className="w-full whitespace-nowrap">
-            <div className="flex gap-2 pb-2">
-              <Button
-                variant={selectedCategory === "all" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedCategory("all")}
-                className="shrink-0 rounded-full"
-              >
-                All
-              </Button>
-              {categories.map((cat) => (
-                <Button
-                  key={cat.id}
-                  variant={selectedCategory === cat.name ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(cat.name)}
-                  className="shrink-0 rounded-full"
-                >
-                  {CATEGORY_ICONS[cat.name] && <span className="mr-1.5">{CATEGORY_ICONS[cat.name]}</span>}
-                  {cat.name}
-                </Button>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
+          <div className="max-w-xl mx-auto">
+            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <SelectTrigger className="w-full bg-secondary border-primary/30">
+                <SelectValue placeholder="Browse by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.name}>
+                    <span className="flex items-center gap-2">
+                      {CATEGORY_ICONS[cat.name] && <span>{CATEGORY_ICONS[cat.name]}</span>}
+                      {cat.name}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </section>
       )}
 
