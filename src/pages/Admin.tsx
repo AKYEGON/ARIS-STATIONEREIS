@@ -1737,22 +1737,30 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="category">Category</Label>
-                      <Select
-                        value={formData.category}
-                        onValueChange={(value) => setFormData({...formData, category: value})}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {productCategories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
+                      <Label>Categories</Label>
+                      <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 mt-1">
+                        {productCategories.map((cat) => (
+                          <div key={cat.id} className="flex items-center gap-2">
+                            <Checkbox
+                              id={`cat-add-${cat.id}`}
+                              checked={selectedCategoryIds.includes(cat.id)}
+                              onCheckedChange={(checked) => {
+                                setSelectedCategoryIds(prev =>
+                                  checked
+                                    ? [...prev, cat.id]
+                                    : prev.filter(id => id !== cat.id)
+                                );
+                              }}
+                            />
+                            <label htmlFor={`cat-add-${cat.id}`} className="text-sm cursor-pointer">
                               {cat.icon} {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                            </label>
+                          </div>
+                        ))}
+                        {productCategories.length === 0 && (
+                          <p className="text-xs text-muted-foreground">No categories yet. Add them in Settings.</p>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="is_featured">Show on Homepage</Label>
