@@ -165,6 +165,7 @@ const Admin = () => {
     display_order: "0"
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [imageInputMode, setImageInputMode] = useState<"file" | "url">("file");
