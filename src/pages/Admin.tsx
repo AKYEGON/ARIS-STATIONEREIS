@@ -808,6 +808,11 @@ const Admin = () => {
         console.log("Using image URL:", imageUrl);
       }
 
+      // Use first selected category name for the legacy category column
+      const primaryCatName = selectedCategoryIds.length > 0
+        ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
+        : "";
+
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -815,7 +820,7 @@ const Admin = () => {
         original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
         cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
         stock: formData.stock ? parseInt(formData.stock) : 0,
-        category: formData.category,
+        category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
         display_order: parseInt(formData.display_order) || 0
