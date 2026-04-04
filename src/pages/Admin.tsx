@@ -1058,6 +1058,18 @@ const Admin = () => {
     setVideoFile(null);
     setVideoPreview("");
     setMediaToDelete([]);
+
+    // Load existing category assignments
+    try {
+      const { data: catData } = await supabase
+        .from("product_category_assignments")
+        .select("category_id")
+        .eq("product_id", product.id);
+      setSelectedCategoryIds((catData || []).map(c => c.category_id));
+    } catch (e) {
+      console.error("Error loading category assignments:", e);
+      setSelectedCategoryIds([]);
+    }
     
     // Load existing variants
     try {
