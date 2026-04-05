@@ -203,29 +203,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Category Filter Dropdown */}
-      {categories.length > 0 && (
-        <section className="container px-4 pb-4">
-          <div className="max-w-xl mx-auto">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full bg-secondary border-primary/30">
-                <SelectValue placeholder="Browse by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.name}>
-                    <span className="flex items-center gap-2">
-                      {CATEGORY_ICONS[cat.name] && <span>{CATEGORY_ICONS[cat.name]}</span>}
-                      {cat.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </section>
-      )}
+      {/* Category Rotator */}
+      <CategoryRotator
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
       {/* Products Section */}
       <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
