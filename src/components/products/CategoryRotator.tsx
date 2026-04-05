@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
 import { ProductCategory } from "@/types/product";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Ruler, Calculator, PenTool, BookOpen, FolderOpen,
   Palette, Paperclip, ClipboardCheck, Gift, Package
@@ -26,63 +26,47 @@ interface CategoryRotatorProps {
 }
 
 const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: CategoryRotatorProps) => {
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
+  const [rotatingIndex, setRotatingIndex] = useState(0);
 
-  // Auto-rotate highlighted category every 2.5 seconds (only when no category is actively selected)
+  // Auto-rotate the placeholder text when no category is selected
   useEffect(() => {
     if (categories.length === 0 || selectedCategory !== "all") return;
     const interval = setInterval(() => {
-      setHighlightedIndex((prev) => (prev + 1) % categories.length);
+      setRotatingIndex((prev) => (prev + 1) % categories.length);
     }, 2500);
     return () => clearInterval(interval);
   }, [categories.length, selectedCategory]);
 
   if (categories.length === 0) return null;
 
+  const rotatingName = categories[rotatingIndex]?.name || "Browse by category";
+
   return (
     <section className="container px-4 pb-4">
-      <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Browse Categories</span>
-          {selectedCategory !== "all" && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs h-6 px-2 text-muted-foreground hover:text-foreground"
-              onClick={() => onSelectCategory("all")}
-            >
-              Clear filter ×
-            </Button>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-1.5 sm:gap-2">
-          {categories.map((cat, index) => {
-            const isActive = selectedCategory === cat.name;
-            const isHighlighted = selectedCategory === "all" && index === highlightedIndex;
-
-            return (
-              <Button
-                key={cat.id}
-                variant={isActive ? "default" : "outline"}
-                size="sm"
-                onClick={() => onSelectCategory(isActive ? "all" : cat.name)}
-                className={`
-                  h-8 text-xs sm:text-sm transition-all duration-500 ease-in-out
-                  ${isHighlighted && !isActive
-                    ? "border-primary/60 bg-primary/10 text-primary scale-105 shadow-sm"
-                    : ""
-                  }
-                  ${isActive ? "scale-105 shadow-md" : ""}
-                `}
-              >
-                <span className="flex items-center gap-1.5">
+      <div className="max-w-xl mx-auto">
+        <Select value={selectedCategory} onValueChange={onSelectCategory}>
+          <SelectTrigger className="w-full bg-secondary border-primary/30">
+            {selectedCategory === "all" ? (
+              <span className="flex items-center gap-2 text-muted-foreground animate-fade-in" key={rotatingIndex}>
+                {CATEGORY_ICONS[rotatingName]}
+                {rotatingName}
+              </span>
+            ) : (
+              <SelectValue />
+            )}
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name}>
+                <span className="flex items-center gap-2">
                   {CATEGORY_ICONS[cat.name]}
                   {cat.name}
                 </span>
-              </Button>
-            );
-          })}
-        </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </section>
   );
