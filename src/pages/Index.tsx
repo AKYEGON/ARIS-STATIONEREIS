@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
-
 import OffersSection from "@/components/products/OffersSection";
+import CategoryRotator from "@/components/products/CategoryRotator";
 
 const PRODUCTS_PER_PAGE = 8;
 
