@@ -7,8 +7,7 @@ import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, ChevronRight, Users, X, Ruler, Calculator, PenTool, BookOpen, FolderOpen, Palette, Paperclip, ClipboardCheck, Gift, Package } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 
