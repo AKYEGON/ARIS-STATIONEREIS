@@ -7,29 +7,16 @@ import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, ChevronLeft, ChevronRight, Users, X, Ruler, Calculator, PenTool, BookOpen, FolderOpen, Palette, Paperclip, ClipboardCheck, Gift, Package } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
-
 import OffersSection from "@/components/products/OffersSection";
+import CategoryRotator from "@/components/products/CategoryRotator";
 
 const PRODUCTS_PER_PAGE = 8;
 
 const SEARCH_STORAGE_KEY = "aris-search-query";
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  "Engineering & Drawing": <Ruler className="h-3.5 w-3.5" />,
-  "Scientific Calculators": <Calculator className="h-3.5 w-3.5" />,
-  "Writing Instruments": <PenTool className="h-3.5 w-3.5" />,
-  "Notebooks & Papers": <BookOpen className="h-3.5 w-3.5" />,
-  "Filing & Organization": <FolderOpen className="h-3.5 w-3.5" />,
-  "Art & Craft Supplies": <Palette className="h-3.5 w-3.5" />,
-  "Office Supplies": <Paperclip className="h-3.5 w-3.5" />,
-  "Exam Essentials": <ClipboardCheck className="h-3.5 w-3.5" />,
-  "Gifts & Accessories": <Gift className="h-3.5 w-3.5" />,
-  "General Stationery": <Package className="h-3.5 w-3.5" />,
-};
 
 const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
@@ -216,29 +203,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Category Filter Dropdown */}
-      {categories.length > 0 && (
-        <section className="container px-4 pb-4">
-          <div className="max-w-xl mx-auto">
-            <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-              <SelectTrigger className="w-full bg-secondary border-primary/30">
-                <SelectValue placeholder="Browse by category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.name}>
-                    <span className="flex items-center gap-2">
-                      {CATEGORY_ICONS[cat.name] && <span>{CATEGORY_ICONS[cat.name]}</span>}
-                      {cat.name}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </section>
-      )}
+      {/* Category Rotator */}
+      <CategoryRotator
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
 
       {/* Products Section */}
       <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
