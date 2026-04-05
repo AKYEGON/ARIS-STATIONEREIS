@@ -1771,14 +1771,18 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="display_order">Display Order</Label>
+                      <Label htmlFor="display_order">Display Order (Position out of {products.length} products)</Label>
                       <Input
                         id="display_order"
                         type="number"
+                        min="0"
                         value={formData.display_order}
                         onChange={(e) => setFormData({...formData, display_order: e.target.value})}
-                        placeholder="0"
+                        placeholder="0 = auto"
                       />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Set 1 to show first, 2 for second, etc. Leave 0 for automatic ordering.
+                      </p>
                     </div>
                     <div>
                       <Label>Product Image</Label>

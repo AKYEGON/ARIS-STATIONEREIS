@@ -75,7 +75,21 @@ const Index = () => {
           cost_price: Number(v.cost_price),
         }))
       }));
-      
+
+      // Sort: featured first, then by display_order (>0 first in ascending order, 0 = unset goes last)
+      formattedProducts.sort((a, b) => {
+        // Featured products first
+        if (a.is_featured && !b.is_featured) return -1;
+        if (!a.is_featured && b.is_featured) return 1;
+        // Within same featured group: products with display_order > 0 come first
+        const aOrder = a.display_order || 0;
+        const bOrder = b.display_order || 0;
+        if (aOrder > 0 && bOrder === 0) return -1;
+        if (aOrder === 0 && bOrder > 0) return 1;
+        if (aOrder > 0 && bOrder > 0) return aOrder - bOrder;
+        return 0; // both 0, keep original order
+      });
+
       setProducts(formattedProducts);
     } catch (error) {
       console.error("Error fetching products:", error);
