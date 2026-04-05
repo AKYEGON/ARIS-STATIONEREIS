@@ -17,18 +17,6 @@ const PRODUCTS_PER_PAGE = 8;
 
 const SEARCH_STORAGE_KEY = "aris-search-query";
 
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  "Engineering & Drawing": <Ruler className="h-3.5 w-3.5" />,
-  "Scientific Calculators": <Calculator className="h-3.5 w-3.5" />,
-  "Writing Instruments": <PenTool className="h-3.5 w-3.5" />,
-  "Notebooks & Papers": <BookOpen className="h-3.5 w-3.5" />,
-  "Filing & Organization": <FolderOpen className="h-3.5 w-3.5" />,
-  "Art & Craft Supplies": <Palette className="h-3.5 w-3.5" />,
-  "Office Supplies": <Paperclip className="h-3.5 w-3.5" />,
-  "Exam Essentials": <ClipboardCheck className="h-3.5 w-3.5" />,
-  "Gifts & Accessories": <Gift className="h-3.5 w-3.5" />,
-  "General Stationery": <Package className="h-3.5 w-3.5" />,
-};
 
 const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
