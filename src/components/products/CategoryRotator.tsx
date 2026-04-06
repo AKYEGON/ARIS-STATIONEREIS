@@ -51,7 +51,10 @@ const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: Cat
             {selectedCategory === "all" ? (
               <span className="flex items-center gap-2 text-muted-foreground animate-fade-in" key={rotatingIndex}>
                 {getLucideIcon(rotatingCat?.icon)}
-                <span className="truncate">{rotatingCat?.name || "Browse by category"}</span>
+                <span className="truncate">
+                  <span className="font-medium text-foreground/70">Categories:</span>{" "}
+                  {rotatingCat?.name || "Browse by category"}
+                </span>
               </span>
             ) : (
               <SelectValue />
