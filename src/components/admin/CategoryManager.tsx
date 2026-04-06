@@ -257,8 +257,10 @@ export const CategoryManager = () => {
               <TableRow key={cat.id}>
                 <TableCell className="text-muted-foreground text-xs">{cat.display_order}</TableCell>
                 <TableCell className="font-medium">
-                  {cat.icon && <span className="mr-1.5">{cat.icon}</span>}
-                  {cat.name}
+                  <span className="flex items-center gap-1.5">
+                    {renderIcon(cat.icon, "h-4 w-4 shrink-0")}
+                    {cat.name}
+                  </span>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell text-xs text-muted-foreground font-mono">
                   {cat.slug}
