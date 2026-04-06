@@ -47,7 +47,7 @@ const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: Cat
     <section className="container px-4 pb-4">
       <div className="max-w-xl mx-auto">
         <Select value={selectedCategory} onValueChange={onSelectCategory}>
-          <SelectTrigger className="w-full bg-secondary border-primary/30">
+          <SelectTrigger className="w-full bg-secondary border-primary/30 [&>span:first-child]:flex [&>span:first-child]:items-center [&>span:first-child]:gap-2">
             {selectedCategory === "all" ? (
               <span className="flex items-center gap-2 text-muted-foreground animate-fade-in" key={rotatingIndex}>
                 {getLucideIcon(rotatingCat?.icon)}
