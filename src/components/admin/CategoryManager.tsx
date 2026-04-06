@@ -5,12 +5,27 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, GripVertical, Tag } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, Package, icons } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProductCategory } from "@/types/product";
+
+const SUGGESTED_ICONS = [
+  "Ruler", "Calculator", "PenTool", "BookOpen", "FolderOpen",
+  "Palette", "Paperclip", "ClipboardCheck", "Gift", "Package",
+  "Pencil", "Compass", "FlaskConical", "GraduationCap", "Scissors",
+  "Printer", "Monitor", "Laptop", "Briefcase", "Archive",
+];
+
+const renderIcon = (iconName: string | null, className = "h-4 w-4") => {
+  if (!iconName) return <Package className={className} />;
+  if (/[^\x00-\x7F]/.test(iconName)) return <span className="text-sm">{iconName}</span>;
+  const IconComp = (icons as Record<string, any>)[iconName];
+  return IconComp ? <IconComp className={className} /> : <Package className={className} />;
+};
 
 export const CategoryManager = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
