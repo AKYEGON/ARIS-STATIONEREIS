@@ -165,12 +165,32 @@ export const CategoryManager = () => {
         />
       </div>
       <div>
-        <Label>Icon (optional emoji or text)</Label>
-        <Input
-          value={formData.icon}
-          onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-          placeholder="e.g. 📐"
-        />
+        <Label>Icon (Lucide icon name)</Label>
+        <Select
+          value={formData.icon || ""}
+          onValueChange={(val) => setFormData({ ...formData, icon: val })}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select an icon">
+              {formData.icon && (
+                <span className="flex items-center gap-2">
+                  {renderIcon(formData.icon)}
+                  <span>{formData.icon}</span>
+                </span>
+              )}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            {SUGGESTED_ICONS.map((name) => (
+              <SelectItem key={name} value={name}>
+                <span className="flex items-center gap-2">
+                  {renderIcon(name)}
+                  <span>{name}</span>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div>
         <Label>Display Order</Label>
