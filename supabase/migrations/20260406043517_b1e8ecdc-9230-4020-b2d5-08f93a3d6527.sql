@@ -1,0 +1,11 @@
+UPDATE product_categories SET icon = 'Ruler' WHERE id = '9ea5bebb-3ba4-433b-ab53-667d8989e222';
+UPDATE product_categories SET icon = 'Calculator' WHERE id = '4d2f1365-7977-4ee7-86b9-8c5724b5b349';
+UPDATE product_categories SET icon = 'Compass' WHERE id = '8786dbc7-14e1-4e7a-9656-1ad284318ec2';
+UPDATE product_categories SET icon = 'PenTool' WHERE id = '325bc18e-3909-40dd-9ce2-70b7cfe85e7c';
+UPDATE product_categories SET icon = 'BookOpen' WHERE id = '8eeaa882-ff57-4872-bc08-cd388d48e13a';
+UPDATE product_categories SET icon = 'FolderOpen' WHERE id = 'e07f188c-17c2-4e82-b811-6b7e88c36552';
+UPDATE product_categories SET icon = 'Palette' WHERE id = '32da39d5-48b6-4d22-9efd-029d4fda1abe';
+UPDATE product_categories SET icon = 'Paperclip' WHERE id = '7f941d75-eeca-4ba0-aabc-0ae136450938';
+UPDATE product_categories SET icon = 'ClipboardCheck' WHERE id = '4bafd46f-1d41-41f7-8d0f-5e0990cf433b';
+UPDATE product_categories SET icon = 'Gift' WHERE id = '8ba53812-f27d-426f-b919-37576269cf46';
+UPDATE product_categories SET icon = 'Package' WHERE id = 'eeab2f0c-4a0e-442d-9d2e-e761ed797a65';
