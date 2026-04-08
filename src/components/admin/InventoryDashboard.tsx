@@ -31,7 +31,7 @@ interface StockMovement {
 }
 
 interface InventoryDashboardProps {
-  userRole?: 'admin' | 'manager' | 'employee';
+  userRole?: 'admin' | 'manager' | 'employee' | 'agent';
 }
 
 export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardProps) => {
