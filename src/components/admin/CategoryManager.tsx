@@ -143,14 +143,14 @@ export const CategoryManager = () => {
     setIsEditOpen(true);
   };
 
-  const CategoryForm = ({ onSubmit, submitLabel }: { onSubmit: () => void; submitLabel: string }) => (
+  const renderCategoryForm = (onSubmit: () => void, submitLabel: string) => (
     <div className="space-y-4">
       <div>
         <Label>Category Name *</Label>
         <Input
           value={formData.name}
           onChange={(e) =>
-            setFormData({ ...formData, name: e.target.value, slug: generateSlug(e.target.value) })
+            setFormData((prev) => ({ ...prev, name: e.target.value, slug: generateSlug(e.target.value) }))
           }
           placeholder="e.g. Engineering & Drawing"
         />
@@ -159,7 +159,7 @@ export const CategoryManager = () => {
         <Label>Slug</Label>
         <Input
           value={formData.slug}
-          onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+          onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
           placeholder="auto-generated"
           className="text-muted-foreground"
         />
@@ -168,7 +168,7 @@ export const CategoryManager = () => {
         <Label>Icon (Lucide icon name)</Label>
         <Select
           value={formData.icon || ""}
-          onValueChange={(val) => setFormData({ ...formData, icon: val })}
+          onValueChange={(val) => setFormData((prev) => ({ ...prev, icon: val }))}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an icon">
@@ -197,14 +197,14 @@ export const CategoryManager = () => {
         <Input
           type="number"
           value={formData.display_order}
-          onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+          onChange={(e) => setFormData((prev) => ({ ...prev, display_order: parseInt(e.target.value) || 0 }))}
         />
       </div>
       <div className="flex items-center justify-between">
         <Label>Active</Label>
         <Switch
           checked={formData.is_active}
-          onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+          onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
         />
       </div>
       <Button onClick={onSubmit} className="w-full bg-primary hover:bg-primary/90">
