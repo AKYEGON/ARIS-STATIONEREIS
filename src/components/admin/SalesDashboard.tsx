@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, TrendingUp, Package, ShoppingCart, Store, Globe } from "lucide-react";
+import { DollarSign, TrendingUp, Package, ShoppingCart, Store, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,6 +32,14 @@ interface DailySales {
   order_count: number;
 }
 
+interface AgentZoneStats {
+  zone_id: string;
+  zone_name: string;
+  order_count: number;
+  total_revenue: number;
+  delivered_count: number;
+}
+
 type TimeRange = "today" | "week" | "month" | "3months" | "6months" | "year" | "all";
 
 interface SalesDashboardProps {
@@ -51,6 +59,7 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
   });
   const [topProducts, setTopProducts] = useState<ProductSales[]>([]);
   const [dailySales, setDailySales] = useState<DailySales[]>([]);
+  const [agentZoneStats, setAgentZoneStats] = useState<AgentZoneStats[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>("month");
   const [isLoading, setIsLoading] = useState(false);
 
