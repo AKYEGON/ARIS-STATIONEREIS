@@ -59,6 +59,7 @@ interface Order {
   discount_amount?: number;
   discount_type?: string;
   original_total?: number;
+  agent_zone_id?: string | null;
 }
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';

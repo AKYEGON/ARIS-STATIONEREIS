@@ -225,6 +225,10 @@ const Cart = () => {
         message += `• Delivery\n`;
         message += `• Address: ${data.deliveryAddress}\n`;
       }
+      if (selectedAgentZoneId) {
+        const zoneName = agentZones.find(z => z.id === selectedAgentZoneId)?.name || 'N/A';
+        message += `• Agent Zone: ${zoneName}\n`;
+      }
       
       message += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
       message += `_Sent via arisstationaries.co.ke_`;
