@@ -189,6 +189,60 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       );
 
+      // Fetch agent zone analytics
+      try {
+        const { data: zones } = await supabase
+          .from("agent_zones")
+          .select("id, name");
+
+        if (zones && zones.length > 0) {
+          // Get all orders (not just completed) that have an agent_zone_id
+          let zoneQuery = supabase
+            .from("orders")
+            .select("id, total, status, agent_zone_id")
+            .not("agent_zone_id", "is", null);
+
+          if (startDate) {
+            zoneQuery = zoneQuery.gte("created_at", startDate.toISOString());
+          }
+
+          const { data: zoneOrders } = await zoneQuery;
+
+          const zoneMap = new Map<string, AgentZoneStats>();
+          zones.forEach(z => {
+            zoneMap.set(z.id, {
+              zone_id: z.id,
+              zone_name: z.name,
+              order_count: 0,
+              total_revenue: 0,
+              delivered_count: 0,
+            });
+          });
+
+          (zoneOrders || []).forEach(order => {
+            const stat = zoneMap.get(order.agent_zone_id);
+            if (stat) {
+              stat.order_count += 1;
+              stat.total_revenue += Number(order.total);
+              const s = (order.status || "").toLowerCase();
+              if (["delivered", "fulfilled", "completed"].includes(s)) {
+                stat.delivered_count += 1;
+              }
+            }
+          });
+
+          setAgentZoneStats(
+            Array.from(zoneMap.values())
+              .filter(s => s.order_count > 0)
+              .sort((a, b) => b.total_revenue - a.total_revenue)
+          );
+        } else {
+          setAgentZoneStats([]);
+        }
+      } catch (err) {
+        console.error("Error fetching agent zone stats:", err);
+      }
+
     } catch (error) {
       console.error("Error fetching sales data:", error);
       toast.error("Failed to load sales data");
