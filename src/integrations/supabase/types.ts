@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_zone_assignments: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+          zone_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id: string
+          zone_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+          zone_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_zone_assignments_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "agent_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_zones: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+        }
+        Relationships: []
+      }
       bundle_items: {
         Row: {
           bundle_id: string
@@ -331,6 +384,7 @@ export type Database = {
       }
       orders: {
         Row: {
+          agent_zone_id: string | null
           completed_at: string | null
           created_at: string
           customer_email: string
@@ -353,6 +407,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          agent_zone_id?: string | null
           completed_at?: string | null
           created_at?: string
           customer_email: string
@@ -375,6 +430,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          agent_zone_id?: string | null
           completed_at?: string | null
           created_at?: string
           customer_email?: string
@@ -396,7 +452,15 @@ export type Database = {
           total?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "orders_agent_zone_id_fkey"
+            columns: ["agent_zone_id"]
+            isOneToOne: false
+            referencedRelation: "agent_zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pickup_outlets: {
         Row: {
