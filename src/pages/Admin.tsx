@@ -36,6 +36,7 @@ import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
 import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
+import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 
 interface OrderItem {
   product_name: string;
@@ -60,7 +61,7 @@ interface Order {
   original_total?: number;
 }
 
-type UserRole = 'admin' | 'manager' | 'employee';
+type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
 const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
 
@@ -71,6 +72,8 @@ const getVisibleTabs = (role: UserRole) => {
     case 'manager':
       return ["orders", "inventory", "sales", "settings"];
     case 'employee':
+      return ["orders"];
+    case 'agent':
       return ["orders"];
     default:
       return ["orders"];
@@ -279,13 +282,15 @@ const Admin = () => {
         return;
       }
 
-      // Determine highest role: admin > manager > employee
+      // Determine highest role: admin > manager > agent > employee
       const roles = data.map(r => r.role);
       let detectedRole: UserRole = 'employee';
       if (roles.includes('admin')) {
         detectedRole = 'admin';
       } else if (roles.includes('manager')) {
         detectedRole = 'manager';
+      } else if (roles.includes('agent')) {
+        detectedRole = 'agent';
       } else if (roles.includes('employee')) {
         detectedRole = 'employee';
       } else {
