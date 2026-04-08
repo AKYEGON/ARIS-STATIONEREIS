@@ -19,6 +19,7 @@ interface OrderRequest {
   customer_phone: string;
   delivery_address: string;
   items: OrderItem[];
+  agent_zone_id?: string | null;
 }
 
 Deno.serve(async (req) => {
@@ -146,18 +147,25 @@ Deno.serve(async (req) => {
 
     // Create order with server-calculated total
     const orderId = crypto.randomUUID();
+    const orderInsert: any = {
+      id: orderId,
+      customer_name: body.customer_name.trim(),
+      customer_email: body.customer_email.trim(),
+      customer_phone: body.customer_phone.trim(),
+      delivery_address: body.delivery_address.trim(),
+      total: calculatedTotal,
+      subtotal: calculatedTotal,
+      status: "Pending"
+    };
+
+    // Add agent zone if provided
+    if (body.agent_zone_id) {
+      orderInsert.agent_zone_id = body.agent_zone_id;
+    }
+
     const { error: orderError } = await supabase
       .from("orders")
-      .insert({
-        id: orderId,
-        customer_name: body.customer_name.trim(),
-        customer_email: body.customer_email.trim(),
-        customer_phone: body.customer_phone.trim(),
-        delivery_address: body.delivery_address.trim(),
-        total: calculatedTotal,
-        subtotal: calculatedTotal,
-        status: "Pending"
-      });
+      .insert(orderInsert);
 
     if (orderError) {
       console.error("Error creating order:", orderError);

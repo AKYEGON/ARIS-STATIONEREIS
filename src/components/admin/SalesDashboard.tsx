@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DollarSign, TrendingUp, Package, ShoppingCart, Store, Globe } from "lucide-react";
+import { DollarSign, TrendingUp, Package, ShoppingCart, Store, Globe, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -32,6 +32,14 @@ interface DailySales {
   order_count: number;
 }
 
+interface AgentZoneStats {
+  zone_id: string;
+  zone_name: string;
+  order_count: number;
+  total_revenue: number;
+  delivered_count: number;
+}
+
 type TimeRange = "today" | "week" | "month" | "3months" | "6months" | "year" | "all";
 
 interface SalesDashboardProps {
@@ -51,6 +59,7 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
   });
   const [topProducts, setTopProducts] = useState<ProductSales[]>([]);
   const [dailySales, setDailySales] = useState<DailySales[]>([]);
+  const [agentZoneStats, setAgentZoneStats] = useState<AgentZoneStats[]>([]);
   const [timeRange, setTimeRange] = useState<TimeRange>("month");
   const [isLoading, setIsLoading] = useState(false);
 
@@ -179,6 +188,60 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
         Array.from(dailyMap.values())
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       );
+
+      // Fetch agent zone analytics
+      try {
+        const { data: zones } = await supabase
+          .from("agent_zones")
+          .select("id, name");
+
+        if (zones && zones.length > 0) {
+          // Get all orders (not just completed) that have an agent_zone_id
+          let zoneQuery = supabase
+            .from("orders")
+            .select("id, total, status, agent_zone_id")
+            .not("agent_zone_id", "is", null);
+
+          if (startDate) {
+            zoneQuery = zoneQuery.gte("created_at", startDate.toISOString());
+          }
+
+          const { data: zoneOrders } = await zoneQuery;
+
+          const zoneMap = new Map<string, AgentZoneStats>();
+          zones.forEach(z => {
+            zoneMap.set(z.id, {
+              zone_id: z.id,
+              zone_name: z.name,
+              order_count: 0,
+              total_revenue: 0,
+              delivered_count: 0,
+            });
+          });
+
+          (zoneOrders || []).forEach(order => {
+            const stat = zoneMap.get(order.agent_zone_id);
+            if (stat) {
+              stat.order_count += 1;
+              stat.total_revenue += Number(order.total);
+              const s = (order.status || "").toLowerCase();
+              if (["delivered", "fulfilled", "completed"].includes(s)) {
+                stat.delivered_count += 1;
+              }
+            }
+          });
+
+          setAgentZoneStats(
+            Array.from(zoneMap.values())
+              .filter(s => s.order_count > 0)
+              .sort((a, b) => b.total_revenue - a.total_revenue)
+          );
+        } else {
+          setAgentZoneStats([]);
+        }
+      } catch (err) {
+        console.error("Error fetching agent zone stats:", err);
+      }
 
     } catch (error) {
       console.error("Error fetching sales data:", error);
@@ -369,6 +432,48 @@ export const SalesDashboard = ({ hideProfitData = false }: SalesDashboardProps) 
           </CardContent>
         </Card>
       </div>
+
+      {/* Agent Zone Performance */}
+      {agentZoneStats.length > 0 && (
+        <Card>
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Agent Zone Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2 sm:p-6 pt-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-xs sm:text-sm">Zone</TableHead>
+                    <TableHead className="text-xs sm:text-sm w-[60px]">Orders</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Revenue</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Delivered</TableHead>
+                    <TableHead className="text-xs sm:text-sm">Rate</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {agentZoneStats.map((zone) => (
+                    <TableRow key={zone.zone_id}>
+                      <TableCell className="font-medium text-xs sm:text-sm p-2 sm:p-4">{zone.zone_name}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4">{zone.order_count}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4">KSh {zone.total_revenue.toFixed(0)}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4">{zone.delivered_count}</TableCell>
+                      <TableCell className="text-xs sm:text-sm p-2 sm:p-4">
+                        <Badge variant={zone.delivered_count / zone.order_count >= 0.7 ? "default" : "secondary"} className="text-[10px]">
+                          {zone.order_count > 0 ? Math.round((zone.delivered_count / zone.order_count) * 100) : 0}%
+                        </Badge>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

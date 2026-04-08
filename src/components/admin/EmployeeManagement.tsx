@@ -34,12 +34,24 @@ export const EmployeeManagement = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    role: "employee" as "employee" | "manager"
+    role: "employee" as "employee" | "manager" | "agent"
   });
+  const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState("");
 
   useEffect(() => {
     fetchUsers();
+    fetchAgentZones();
   }, []);
+
+  const fetchAgentZones = async () => {
+    const { data } = await supabase
+      .from("agent_zones")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("display_order");
+    if (data) setAgentZones(data);
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -60,12 +72,17 @@ export const EmployeeManagement = () => {
     }
   };
 
-  const pendingUsers = users.filter(u => !u.roles.some(r => ["employee", "manager", "admin"].includes(r)));
-  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager"].includes(r)));
+  const pendingUsers = users.filter(u => !u.roles.some(r => ["employee", "manager", "admin", "agent"].includes(r)));
+  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager", "agent"].includes(r)));
 
   const handleApprove = async () => {
     if (!approveDialogUser || !formData.name) {
       toast.error("Please enter the staff member's name");
+      return;
+    }
+
+    if (formData.role === "agent" && !selectedZoneId) {
+      toast.error("Please select a zone for the agent");
       return;
     }
 
@@ -77,7 +94,8 @@ export const EmployeeManagement = () => {
           user_id: approveDialogUser.id,
           name: formData.name,
           phone: formData.phone || null,
-          role: formData.role
+          role: formData.role,
+          zone_id: formData.role === "agent" ? selectedZoneId : undefined,
         }
       });
 
@@ -87,6 +105,7 @@ export const EmployeeManagement = () => {
       toast.success(`${formData.name} approved as ${formData.role}!`);
       setApproveDialogUser(null);
       setFormData({ name: "", phone: "", role: "employee" });
+      setSelectedZoneId("");
       fetchUsers();
     } catch (error: any) {
       toast.error(error.message || "Failed to approve user");
@@ -111,7 +130,7 @@ export const EmployeeManagement = () => {
     }
   };
 
-  const handleUpdateRole = async (member: RegisteredUser, newRole: "employee" | "manager") => {
+  const handleUpdateRole = async (member: RegisteredUser, newRole: "employee" | "manager" | "agent") => {
     try {
       const { data, error } = await supabase.functions.invoke('manage-staff', {
         body: { action: 'update-role', user_id: member.id, role: newRole }
@@ -258,7 +277,7 @@ export const EmployeeManagement = () => {
                   </TableRow>
                 ) : (
                   staffMembers.map((member) => {
-                    const currentRole = member.roles.includes("manager") ? "manager" : "employee";
+                    const currentRole = member.roles.includes("manager") ? "manager" : member.roles.includes("agent") ? "agent" : "employee";
                     return (
                       <TableRow key={member.id}>
                         <TableCell className="p-2 sm:p-4">
@@ -271,7 +290,7 @@ export const EmployeeManagement = () => {
                         <TableCell className="p-2 sm:p-4">
                           <Select
                             value={currentRole}
-                            onValueChange={(value: "employee" | "manager") => handleUpdateRole(member, value)}
+                            onValueChange={(value: "employee" | "manager" | "agent") => handleUpdateRole(member, value)}
                           >
                             <SelectTrigger className="h-7 sm:h-8 text-[10px] sm:text-xs w-[90px] sm:w-[110px]">
                               <SelectValue />
@@ -279,6 +298,7 @@ export const EmployeeManagement = () => {
                             <SelectContent>
                               <SelectItem value="employee">Employee</SelectItem>
                               <SelectItem value="manager">Manager</SelectItem>
+                              <SelectItem value="agent">Agent</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
@@ -351,7 +371,10 @@ export const EmployeeManagement = () => {
               <Label htmlFor="approve-role" className="text-xs sm:text-sm">Role</Label>
               <Select
                 value={formData.role}
-                onValueChange={(value: "employee" | "manager") => setFormData({ ...formData, role: value })}
+                onValueChange={(value: "employee" | "manager" | "agent") => {
+                  setFormData({ ...formData, role: value });
+                  if (value !== "agent") setSelectedZoneId("");
+                }}
               >
                 <SelectTrigger className="h-9 sm:h-10 text-sm">
                   <SelectValue />
@@ -359,9 +382,25 @@ export const EmployeeManagement = () => {
                 <SelectContent>
                   <SelectItem value="employee">Employee - Quick Sale & Orders only</SelectItem>
                   <SelectItem value="manager">Manager - Inventory & Sales access</SelectItem>
+                  <SelectItem value="agent">Agent - Zone-based order access</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            {formData.role === "agent" && (
+              <div>
+                <Label className="text-xs sm:text-sm">Assign Zone *</Label>
+                <Select value={selectedZoneId} onValueChange={setSelectedZoneId}>
+                  <SelectTrigger className="h-9 sm:h-10 text-sm">
+                    <SelectValue placeholder="Select agent zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agentZones.map(z => (
+                      <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <Button onClick={handleApprove} className="w-full h-9 sm:h-10 text-sm" disabled={approveLoading}>
               {approveLoading ? "Approving..." : "Approve & Set Role"}
             </Button>

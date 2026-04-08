@@ -48,18 +48,22 @@ const Cart = () => {
   const [universities, setUniversities] = useState<{id: string; name: string}[]>([]);
   const [branches, setBranches] = useState<{id: string; university_id: string; name: string}[]>([]);
   const [outlets, setOutlets] = useState<{id: string; name: string; location: string | null}[]>([]);
+  const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
   const [selectedPickupOutlet, setSelectedPickupOutlet] = useState("");
+  const [selectedAgentZoneId, setSelectedAgentZoneId] = useState("");
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const [uniRes, branchRes, outletRes] = await Promise.all([
+      const [uniRes, branchRes, outletRes, zoneRes] = await Promise.all([
         supabase.from("universities").select("id, name").eq("is_active", true).order("display_order"),
         supabase.from("campus_branches").select("id, university_id, name").eq("is_active", true).order("display_order"),
         supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
+        supabase.from("agent_zones").select("id, name").eq("is_active", true).order("display_order"),
       ]);
       if (uniRes.data) setUniversities(uniRes.data);
       if (branchRes.data) setBranches(branchRes.data);
       if (outletRes.data) setOutlets(outletRes.data);
+      if (zoneRes.data) setAgentZones(zoneRes.data);
     };
     fetchOptions();
   }, []);
@@ -143,12 +147,13 @@ const Cart = () => {
       const { data: orderResult, error: orderError } = await supabase.functions.invoke("create-order", {
         body: {
           customer_name: data.name,
-          customer_email: data.phone + "@temp.com", // Use phone as temp email since field is required
+          customer_email: data.phone + "@temp.com",
           customer_phone: data.phone,
           delivery_address: data.deliveryMethod === "delivery" 
             ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
             : `Pickup at ${selectedPickupOutlet || 'outlet'} (${data.university} - ${data.branch})`,
-          items: orderItems
+          items: orderItems,
+          agent_zone_id: selectedAgentZoneId || null,
         }
       });
 
@@ -219,6 +224,10 @@ const Cart = () => {
       } else {
         message += `• Delivery\n`;
         message += `• Address: ${data.deliveryAddress}\n`;
+      }
+      if (selectedAgentZoneId) {
+        const zoneName = agentZones.find(z => z.id === selectedAgentZoneId)?.name || 'N/A';
+        message += `• Agent Zone: ${zoneName}\n`;
       }
       
       message += `\n━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -655,6 +664,22 @@ const Cart = () => {
                     </FormItem>
                   )}
                 />
+              )}
+
+              {agentZones.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Your Area / Agent Zone <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Select onValueChange={setSelectedAgentZoneId} value={selectedAgentZoneId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agentZones.map(z => (
+                        <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               )}
 
               <div className="border-t pt-4">

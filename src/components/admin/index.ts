@@ -1,4 +1,5 @@
 // Admin dashboard components
+export { AgentZoneManager } from './AgentZoneManager';
 export { CategoryManager } from './CategoryManager';
 export { CheckoutOptionsManager } from './CheckoutOptionsManager';
 export { EmployeeManagement } from './EmployeeManagement';
