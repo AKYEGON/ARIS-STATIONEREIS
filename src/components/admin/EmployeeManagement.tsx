@@ -277,7 +277,7 @@ export const EmployeeManagement = () => {
                   </TableRow>
                 ) : (
                   staffMembers.map((member) => {
-                    const currentRole = member.roles.includes("manager") ? "manager" : "employee";
+                    const currentRole = member.roles.includes("manager") ? "manager" : member.roles.includes("agent") ? "agent" : "employee";
                     return (
                       <TableRow key={member.id}>
                         <TableCell className="p-2 sm:p-4">
@@ -290,7 +290,7 @@ export const EmployeeManagement = () => {
                         <TableCell className="p-2 sm:p-4">
                           <Select
                             value={currentRole}
-                            onValueChange={(value: "employee" | "manager") => handleUpdateRole(member, value)}
+                            onValueChange={(value: "employee" | "manager" | "agent") => handleUpdateRole(member, value)}
                           >
                             <SelectTrigger className="h-7 sm:h-8 text-[10px] sm:text-xs w-[90px] sm:w-[110px]">
                               <SelectValue />
@@ -298,6 +298,7 @@ export const EmployeeManagement = () => {
                             <SelectContent>
                               <SelectItem value="employee">Employee</SelectItem>
                               <SelectItem value="manager">Manager</SelectItem>
+                              <SelectItem value="agent">Agent</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
