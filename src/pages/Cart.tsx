@@ -661,6 +661,22 @@ const Cart = () => {
                 />
               )}
 
+              {agentZones.length > 0 && (
+                <div className="space-y-2">
+                  <Label>Your Area / Agent Zone <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Select onValueChange={setSelectedAgentZoneId} value={selectedAgentZoneId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select your area" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agentZones.map(z => (
+                        <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
               <div className="border-t pt-4">
                 <div className="flex justify-between text-lg font-bold mb-4">
                   <span>Total Amount:</span>
