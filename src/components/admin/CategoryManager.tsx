@@ -237,7 +237,7 @@ export const CategoryManager = () => {
             <DialogHeader>
               <DialogTitle>Add Category</DialogTitle>
             </DialogHeader>
-            <CategoryForm onSubmit={handleAdd} submitLabel="Add Category" />
+            {renderCategoryForm(handleAdd, "Add Category")}
           </DialogContent>
         </Dialog>
       </CardHeader>
