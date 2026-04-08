@@ -147,12 +147,13 @@ const Cart = () => {
       const { data: orderResult, error: orderError } = await supabase.functions.invoke("create-order", {
         body: {
           customer_name: data.name,
-          customer_email: data.phone + "@temp.com", // Use phone as temp email since field is required
+          customer_email: data.phone + "@temp.com",
           customer_phone: data.phone,
           delivery_address: data.deliveryMethod === "delivery" 
             ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
             : `Pickup at ${selectedPickupOutlet || 'outlet'} (${data.university} - ${data.branch})`,
-          items: orderItems
+          items: orderItems,
+          agent_zone_id: selectedAgentZoneId || null,
         }
       });
 
