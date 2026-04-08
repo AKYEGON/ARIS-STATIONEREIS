@@ -110,10 +110,17 @@ Deno.serve(async (req) => {
 
     // Approve user - assign role and create employee profile
     if (action === "approve") {
-      const { user_id, role, name, phone } = body;
+      const { user_id, role, name, phone, zone_id } = body;
 
       if (!user_id || !role || !name) {
         return new Response(JSON.stringify({ error: "user_id, role, and name are required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (role === "agent" && !zone_id) {
+        return new Response(JSON.stringify({ error: "zone_id is required for agent role" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -124,7 +131,7 @@ Deno.serve(async (req) => {
         .from("user_roles")
         .select("*")
         .eq("user_id", user_id)
-        .in("role", ["employee", "manager"])
+        .in("role", ["employee", "manager", "agent"])
         .maybeSingle();
 
       if (existingRole) {
@@ -164,6 +171,23 @@ Deno.serve(async (req) => {
         });
       }
 
+      // If agent, assign zone
+      if (role === "agent" && zone_id) {
+        const { error: zoneError } = await supabaseClient
+          .from("agent_zone_assignments")
+          .insert({ user_id, zone_id });
+
+        if (zoneError) {
+          // Rollback
+          await supabaseClient.from("user_roles").delete().eq("user_id", user_id).eq("role", role);
+          await supabaseClient.from("employee_profiles").delete().eq("user_id", user_id);
+          return new Response(JSON.stringify({ error: "Failed to assign zone: " + zoneError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
       return new Response(JSON.stringify({ success: true }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -183,7 +207,7 @@ Deno.serve(async (req) => {
         .from("user_roles")
         .delete()
         .eq("user_id", user_id)
-        .in("role", ["employee", "manager"]);
+        .in("role", ["employee", "manager", "agent"]);
 
       const { error } = await supabaseClient
         .from("user_roles")
@@ -215,7 +239,13 @@ Deno.serve(async (req) => {
         .from("user_roles")
         .delete()
         .eq("user_id", user_id)
-        .in("role", ["employee", "manager"]);
+        .in("role", ["employee", "manager", "agent"]);
+
+      // Also remove agent zone assignments
+      await supabaseClient
+        .from("agent_zone_assignments")
+        .delete()
+        .eq("user_id", user_id);
 
       await supabaseClient
         .from("employee_profiles")
