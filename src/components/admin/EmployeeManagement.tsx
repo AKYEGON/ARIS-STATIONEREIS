@@ -34,12 +34,24 @@ export const EmployeeManagement = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    role: "employee" as "employee" | "manager"
+    role: "employee" as "employee" | "manager" | "agent"
   });
+  const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
+  const [selectedZoneId, setSelectedZoneId] = useState("");
 
   useEffect(() => {
     fetchUsers();
+    fetchAgentZones();
   }, []);
+
+  const fetchAgentZones = async () => {
+    const { data } = await supabase
+      .from("agent_zones")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("display_order");
+    if (data) setAgentZones(data);
+  };
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -60,12 +72,17 @@ export const EmployeeManagement = () => {
     }
   };
 
-  const pendingUsers = users.filter(u => !u.roles.some(r => ["employee", "manager", "admin"].includes(r)));
-  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager"].includes(r)));
+  const pendingUsers = users.filter(u => !u.roles.some(r => ["employee", "manager", "admin", "agent"].includes(r)));
+  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager", "agent"].includes(r)));
 
   const handleApprove = async () => {
     if (!approveDialogUser || !formData.name) {
       toast.error("Please enter the staff member's name");
+      return;
+    }
+
+    if (formData.role === "agent" && !selectedZoneId) {
+      toast.error("Please select a zone for the agent");
       return;
     }
 
@@ -77,7 +94,8 @@ export const EmployeeManagement = () => {
           user_id: approveDialogUser.id,
           name: formData.name,
           phone: formData.phone || null,
-          role: formData.role
+          role: formData.role,
+          zone_id: formData.role === "agent" ? selectedZoneId : undefined,
         }
       });
 
@@ -87,6 +105,7 @@ export const EmployeeManagement = () => {
       toast.success(`${formData.name} approved as ${formData.role}!`);
       setApproveDialogUser(null);
       setFormData({ name: "", phone: "", role: "employee" });
+      setSelectedZoneId("");
       fetchUsers();
     } catch (error: any) {
       toast.error(error.message || "Failed to approve user");
@@ -111,7 +130,7 @@ export const EmployeeManagement = () => {
     }
   };
 
-  const handleUpdateRole = async (member: RegisteredUser, newRole: "employee" | "manager") => {
+  const handleUpdateRole = async (member: RegisteredUser, newRole: "employee" | "manager" | "agent") => {
     try {
       const { data, error } = await supabase.functions.invoke('manage-staff', {
         body: { action: 'update-role', user_id: member.id, role: newRole }
