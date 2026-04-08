@@ -48,18 +48,22 @@ const Cart = () => {
   const [universities, setUniversities] = useState<{id: string; name: string}[]>([]);
   const [branches, setBranches] = useState<{id: string; university_id: string; name: string}[]>([]);
   const [outlets, setOutlets] = useState<{id: string; name: string; location: string | null}[]>([]);
+  const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
   const [selectedPickupOutlet, setSelectedPickupOutlet] = useState("");
+  const [selectedAgentZoneId, setSelectedAgentZoneId] = useState("");
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const [uniRes, branchRes, outletRes] = await Promise.all([
+      const [uniRes, branchRes, outletRes, zoneRes] = await Promise.all([
         supabase.from("universities").select("id, name").eq("is_active", true).order("display_order"),
         supabase.from("campus_branches").select("id, university_id, name").eq("is_active", true).order("display_order"),
         supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
+        supabase.from("agent_zones").select("id, name").eq("is_active", true).order("display_order"),
       ]);
       if (uniRes.data) setUniversities(uniRes.data);
       if (branchRes.data) setBranches(branchRes.data);
       if (outletRes.data) setOutlets(outletRes.data);
+      if (zoneRes.data) setAgentZones(zoneRes.data);
     };
     fetchOptions();
   }, []);

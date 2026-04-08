@@ -1663,6 +1663,7 @@ const Admin = () => {
               <p className="text-xs sm:text-sm text-muted-foreground mb-4">Manage universities, campus branches, and pickup outlets shown in checkout</p>
             </div>
             <CheckoutOptionsManager />
+            <AgentZoneManager />
             <CategoryManager />
           </TabsContent>
 
