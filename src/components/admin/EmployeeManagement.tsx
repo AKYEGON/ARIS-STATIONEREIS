@@ -371,7 +371,10 @@ export const EmployeeManagement = () => {
               <Label htmlFor="approve-role" className="text-xs sm:text-sm">Role</Label>
               <Select
                 value={formData.role}
-                onValueChange={(value: "employee" | "manager") => setFormData({ ...formData, role: value })}
+                onValueChange={(value: "employee" | "manager" | "agent") => {
+                  setFormData({ ...formData, role: value });
+                  if (value !== "agent") setSelectedZoneId("");
+                }}
               >
                 <SelectTrigger className="h-9 sm:h-10 text-sm">
                   <SelectValue />
@@ -379,9 +382,25 @@ export const EmployeeManagement = () => {
                 <SelectContent>
                   <SelectItem value="employee">Employee - Quick Sale & Orders only</SelectItem>
                   <SelectItem value="manager">Manager - Inventory & Sales access</SelectItem>
+                  <SelectItem value="agent">Agent - Zone-based order access</SelectItem>
                 </SelectContent>
               </Select>
             </div>
+            {formData.role === "agent" && (
+              <div>
+                <Label className="text-xs sm:text-sm">Assign Zone *</Label>
+                <Select value={selectedZoneId} onValueChange={setSelectedZoneId}>
+                  <SelectTrigger className="h-9 sm:h-10 text-sm">
+                    <SelectValue placeholder="Select agent zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agentZones.map(z => (
+                      <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <Button onClick={handleApprove} className="w-full h-9 sm:h-10 text-sm" disabled={approveLoading}>
               {approveLoading ? "Approving..." : "Approve & Set Role"}
             </Button>
