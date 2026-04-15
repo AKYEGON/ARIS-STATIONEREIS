@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { X, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ const expandTestimonials = (testimonials: CustomerTestimonial[]) => {
 };
 
 const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCarouselProps) => {
-  const expandedTestimonials = expandTestimonials(testimonials);
+  const expandedTestimonials = useMemo(() => expandTestimonials(testimonials), [testimonials]);
   
   // Hide bottom nav when stories are open
   useEffect(() => {
