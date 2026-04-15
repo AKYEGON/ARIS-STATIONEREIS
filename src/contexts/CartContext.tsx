@@ -28,6 +28,12 @@ interface CartContextType {
   clearCart: () => void;
   getCartTotal: () => number;
   getCartItemCount: () => number;
+  getDetailedItemCount: () => {
+    cartItems: number;
+    bundleItems: number;
+    total: number;
+    bundleCount: number;
+  };
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -152,9 +158,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const getCartItemCount = () => {
+    // Count number of unique items in cart (not total quantity)
+    const uniqueProducts = cartItems.length;
+    const uniqueBundles = bundleItems.length;
+    
+    // Total unique items = products + bundles
+    return uniqueProducts + uniqueBundles;
+  };
+  
+  // Helper to get detailed item count for display purposes
+  const getDetailedItemCount = () => {
     const productsCount = cartItems.reduce((count, item) => count + item.quantity, 0);
-    const bundlesCount = bundleItems.reduce((count, item) => count + item.quantity, 0);
-    return productsCount + bundlesCount;
+    
+    // Count actual product items within bundles
+    const bundleItemsCount = bundleItems.reduce((count, bundle) => {
+      const itemsPerBundle = bundle.items?.length || 1;
+      return count + (itemsPerBundle * bundle.quantity);
+    }, 0);
+    
+    return {
+      cartItems: productsCount,
+      bundleItems: bundleItemsCount,
+      total: productsCount + bundleItemsCount,
+      bundleCount: bundleItems.reduce((count, bundle) => count + bundle.quantity, 0)
+    };
   };
 
   return (
@@ -171,6 +198,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         clearCart,
         getCartTotal,
         getCartItemCount,
+        getDetailedItemCount,
       }}
     >
       {children}

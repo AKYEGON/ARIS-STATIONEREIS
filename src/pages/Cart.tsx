@@ -39,7 +39,7 @@ const checkoutFormSchema = z.object({
 });
 
 const Cart = () => {
-  const { cartItems, bundleItems, updateQuantity, updateBundleQuantity, removeFromCart, removeBundleFromCart, getCartTotal, clearCart, getCartItemCount } = useCart();
+  const { cartItems, bundleItems, updateQuantity, updateBundleQuantity, removeFromCart, removeBundleFromCart, getCartTotal, clearCart, getCartItemCount, getDetailedItemCount } = useCart();
   const navigate = useNavigate();
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,8 +193,9 @@ const Cart = () => {
       
       const orderDetails = [productDetails, bundleDetails].filter(Boolean).join("\n");
       
-      const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0) + 
-        bundleItems.reduce((sum, b) => sum + b.quantity, 0);
+      const itemCounts = getDetailedItemCount();
+      const totalUniqueItems = getCartItemCount(); // For cart badge
+      const totalItems = itemCounts.total; // For order summary
 
       const pickupOutletName = selectedPickupOutlet 
         ? outlets.find(o => o.id === selectedPickupOutlet || o.name === selectedPickupOutlet)?.name || selectedPickupOutlet
@@ -289,60 +290,60 @@ const Cart = () => {
       />
       <Header cartItemCount={getCartItemCount()} />
       
-      <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 md:mb-8 text-primary">Shopping Cart</h1>
+      <main className="flex-1 container py-3 sm:py-4 md:py-6 lg:py-8 px-3 sm:px-4">
+        <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-3 sm:mb-4 md:mb-6 lg:mb-8 text-primary">Shopping Cart</h1>
         
         {cartItems.length === 0 && bundleItems.length === 0 ? (
-          <Card className="text-center py-12 sm:py-16 transition-all duration-300">
-            <CardContent className="flex flex-col items-center gap-4">
-              <ShoppingBag className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground" />
-              <p className="text-lg sm:text-xl text-muted-foreground">Your cart is empty</p>
+          <Card className="text-center py-8 sm:py-12 md:py-16 transition-all duration-300">
+            <CardContent className="flex flex-col items-center gap-3 sm:gap-4">
+              <ShoppingBag className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 text-muted-foreground" />
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Your cart is empty</p>
               <Link to="/">
-                <Button className="transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90">Continue Shopping</Button>
+                <Button className="transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90 text-sm sm:text-base">Continue Shopping</Button>
               </Link>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
-            <div className="lg:col-span-2 space-y-3 sm:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
+            <div className="md:col-span-2 lg:col-span-2 space-y-2 sm:space-y-3 md:space-y-4">
               {/* Bundle Items */}
               {bundleItems.length > 0 && (
                 <>
-                  <h2 className="text-xl font-bold text-primary mb-2">Bundle Offers</h2>
+                  <h2 className="text-lg sm:text-xl font-bold text-primary mb-1.5 sm:mb-2">Bundle Offers</h2>
                   {bundleItems.map((bundle, index) => (
                     <Card 
                       key={bundle.id} 
                       className="transition-all duration-300 hover:shadow-md animate-fade-in border-2 border-primary/20 overflow-hidden"
                       style={{ animationDelay: `${index * 0.05}s` }}
                     >
-                      <CardContent className="p-3 sm:p-4">
-                        <div className="flex gap-2 sm:gap-4">
-                          <div className="relative w-16 h-16 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-md">
+                      <CardContent className="p-2.5 sm:p-3 md:p-4">
+                        <div className="flex gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
+                          <div className="relative w-12 h-12 xs:w-14 xs:h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 flex-shrink-0 overflow-hidden rounded-md">
                             <img
                               src={bundle.image}
                               alt={bundle.name}
                               className="w-full h-full object-cover"
                             />
-                            <div className="absolute top-0.5 right-0.5 sm:top-1 sm:right-1">
-                              <span className="bg-primary text-primary-foreground text-[10px] sm:text-xs px-1 sm:px-2 py-0.5 rounded">
+                            <div className="absolute top-0.5 right-0.5 xs:top-1 xs:right-1 sm:top-1 sm:right-1">
+                              <span className="bg-primary text-primary-foreground text-[8px] xs:text-[9px] sm:text-[10px] px-0.5 xs:px-1 sm:px-1.5 py-0.5 rounded">
                                 Bundle
                               </span>
                             </div>
                           </div>
                           <div className="flex-1 min-w-0 overflow-hidden">
-                            <h3 className="font-semibold text-xs sm:text-base md:text-lg line-clamp-2 sm:truncate">{bundle.name}</h3>
+                            <h3 className="font-semibold text-[10px] xs:text-[11px] sm:text-sm md:text-base lg:text-lg line-clamp-2 sm:truncate">{bundle.name}</h3>
                             {bundle.items && bundle.items.length > 0 && (
-                              <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-2">
+                              <p className="text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs text-muted-foreground line-clamp-1 sm:line-clamp-2">
                                 Includes: {bundle.items.map(item => 
                                   `${item.product?.name || 'Product'} ${item.quantity > 1 ? `(×${item.quantity})` : ''}`
                                 ).join(', ')}
                               </p>
                             )}
-                            <div className="flex items-baseline gap-1 sm:gap-2 mt-1">
-                              <span className="text-[10px] sm:text-xs text-muted-foreground line-through">
+                            <div className="flex items-baseline gap-0.5 sm:gap-1 md:gap-2 mt-0.5 sm:mt-1">
+                              <span className="text-[8px] xs:text-[9px] sm:text-[10px] md:text-xs text-muted-foreground line-through">
                                 KSh {bundle.original_total_price.toFixed(2)}
                               </span>
-                              <span className="text-sm sm:text-lg font-bold text-primary">
+                              <span className="text-[10px] xs:text-xs sm:text-sm md:text-lg lg:text-lg font-bold text-primary">
                                 KSh {bundle.bundle_price.toFixed(2)}
                               </span>
                             </div>
@@ -416,7 +417,7 @@ const Cart = () => {
 
               {/* Individual Products */}
               {cartItems.length > 0 && bundleItems.length > 0 && (
-                <h2 className="text-xl font-bold text-primary mt-6 mb-2">Individual Products</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-primary mt-4 sm:mt-6 mb-1.5 sm:mb-2">Individual Products</h2>
               )}
               {cartItems.map((item, index) => (
                 <Card 
@@ -424,26 +425,26 @@ const Cart = () => {
                   className="transition-all duration-300 hover:shadow-md animate-fade-in"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex gap-3 sm:gap-4">
+                  <CardContent className="p-2 sm:p-2.5 md:p-3 lg:p-4">
+                    <div className="flex gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
                       <ProductImageGallery
                         primaryImage={item.image}
                         productName={item.name}
                         media={item.media}
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-sm sm:text-base md:text-lg truncate">{item.name}</h3>
+                        <h3 className="font-semibold text-[10px] xs:text-[11px] sm:text-sm md:text-base lg:text-lg truncate">{item.name}</h3>
                         {item.selectedVariant && (
-                          <p className="text-xs text-primary font-medium">
+                          <p className="text-[9px] xs:text-[10px] sm:text-xs text-primary font-medium">
                             {item.selectedVariant.variant_type}: {item.selectedVariant.variant_value}
                           </p>
                         )}
-                        <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2">{item.description}</p>
-                        <p className="text-base sm:text-lg font-bold text-primary mt-1 sm:mt-2">
+                        <p className="text-[9px] xs:text-[10px] sm:text-xs md:text-sm text-muted-foreground line-clamp-1 sm:line-clamp-2">{item.description}</p>
+                        <p className="text-xs xs:text-sm sm:text-base md:text-lg lg:text-lg font-bold text-primary mt-0.5 sm:mt-1 md:mt-2">
                           KSh {item.price.toFixed(2)}
                         </p>
                       </div>
-                      <div className="flex flex-col items-end gap-2 sm:gap-3">
+                      <div className="flex flex-col items-end gap-1 sm:gap-1.5 md:gap-2 lg:gap-3">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -461,7 +462,7 @@ const Cart = () => {
                           >
                             <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
-                          <span className="w-6 sm:w-8 text-center font-semibold text-sm sm:text-base">{item.quantity}</span>
+                          <span className="w-4 xs:w-5 sm:w-6 md:w-8 text-center font-semibold text-[10px] xs:text-xs sm:text-sm md:text-base">{item.quantity}</span>
                           <Button
                             variant="outline"
                             size="icon"
@@ -479,28 +480,28 @@ const Cart = () => {
             </div>
             
             <div>
-              <Card className="sticky top-20 sm:top-24 transition-all duration-300">
-                <CardContent className="p-4 sm:p-6">
-                  <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-primary">Order Summary</h2>
-                  <div className="space-y-2 mb-3 sm:mb-4">
-                    <div className="flex justify-between text-sm sm:text-base">
+              <Card className="sticky top-16 sm:top-20 md:top-24 transition-all duration-300">
+                <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6">
+                  <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-2 sm:mb-2.5 md:mb-3 lg:mb-4 text-primary">Order Summary</h2>
+                  <div className="space-y-1 sm:space-y-1.5 md:space-y-2 mb-2 sm:mb-2.5 md:mb-3 lg:mb-4">
+                    <div className="flex justify-between text-xs sm:text-sm md:text-base">
                       <span className="text-muted-foreground">Subtotal</span>
                       <span className="font-semibold">KSh {subtotal.toFixed(2)}</span>
                     </div>
-                    <div className="flex justify-between text-base sm:text-lg font-bold pt-2 border-t">
+                    <div className="flex justify-between text-sm xs:text-base sm:text-lg font-bold pt-1 sm:pt-1.5 md:pt-2 border-t">
                       <span>Total</span>
                       <span className="text-primary">KSh {subtotal.toFixed(2)}</span>
                     </div>
                   </div>
                   <Button 
-                    className="w-full transition-all duration-200 active:scale-95" 
+                    className="w-full transition-all duration-200 active:scale-95 text-xs sm:text-sm md:text-base" 
                     size="lg"
                     onClick={handleCheckout}
                   >
                   Complete Your Order
                   </Button>
                   <Link to="/">
-                    <Button className="w-full mt-2 transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90">
+                    <Button className="w-full mt-2 transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90 text-xs sm:text-sm md:text-base">
                       Continue Shopping
                     </Button>
                   </Link>
@@ -514,23 +515,23 @@ const Cart = () => {
       <Footer />
 
       <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
           <DialogHeader>
-            <DialogTitle className="text-xl sm:text-2xl font-bold text-primary">Checkout</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold text-primary">Checkout</DialogTitle>
           </DialogHeader>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-3 md:space-y-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm">Full Name</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} className="h-10 sm:h-11" />
+                      <Input placeholder="Enter your full name" {...field} className="h-9 sm:h-10 md:h-11" />
                     </FormControl>
-                    <FormMessage className="text-xs" />
+                    <FormMessage className="text-[10px] xs:text-xs" />
                   </FormItem>
                 )}
               />
@@ -540,11 +541,11 @@ const Cart = () => {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="0712345678" {...field} />
+                      <Input placeholder="0712345678" {...field} className="h-9 sm:h-10 md:h-11" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[10px] xs:text-xs" />
                   </FormItem>
                 )}
               />
@@ -554,7 +555,7 @@ const Cart = () => {
                 name="university"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>University</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">University</FormLabel>
                     <Select onValueChange={(val) => { field.onChange(val); form.setValue("branch", ""); }} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
@@ -582,7 +583,7 @@ const Cart = () => {
                     : [];
                   return (
                     <FormItem>
-                      <FormLabel>Campus Branch</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">Campus Branch</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -595,7 +596,7 @@ const Cart = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-[10px] xs:text-xs" />
                     </FormItem>
                   );
                 }}
@@ -606,7 +607,7 @@ const Cart = () => {
                 name="deliveryMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Delivery Method</FormLabel>
+                    <FormLabel className="text-xs sm:text-sm">Delivery Method</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
@@ -630,7 +631,7 @@ const Cart = () => {
 
               {deliveryMethod === "pickup" && outlets.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Select Pickup Outlet</Label>
+                  <Label className="text-xs sm:text-sm">Select Pickup Outlet</Label>
                   <Select onValueChange={setSelectedPickupOutlet} value={selectedPickupOutlet}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select outlet" />
@@ -652,7 +653,7 @@ const Cart = () => {
                   name="deliveryAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Delivery Address</FormLabel>
+                      <FormLabel className="text-xs sm:text-sm">Delivery Address</FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="Enter your delivery address including building name, room number, or any landmarks"
@@ -668,7 +669,7 @@ const Cart = () => {
 
               {agentZones.length > 0 && (
                 <div className="space-y-2">
-                  <Label>Your Area / Agent Zone <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Label className="text-xs sm:text-sm">Your Area / Agent Zone <span className="text-muted-foreground text-[10px] xs:text-xs">(optional)</span></Label>
                   <Select onValueChange={setSelectedAgentZoneId} value={selectedAgentZoneId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select your area" />
@@ -683,11 +684,11 @@ const Cart = () => {
               )}
 
               <div className="border-t pt-4">
-                <div className="flex justify-between text-lg font-bold mb-4">
+                <div className="flex justify-between text-base xs:text-lg sm:text-xl font-bold mb-3 sm:mb-4">
                   <span>Total Amount:</span>
                   <span className="text-primary">KSh {subtotal.toFixed(2)}</span>
                 </div>
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" size="lg" disabled={isSubmitting}>
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-sm sm:text-base" size="lg" disabled={isSubmitting}>
                   {isSubmitting ? "Placing Order..." : "Complete Order via WhatsApp"}
                 </Button>
               </div>

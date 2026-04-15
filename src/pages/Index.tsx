@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/layout/Header";
@@ -152,6 +152,49 @@ const Index = () => {
   const endIndex = startIndex + PRODUCTS_PER_PAGE;
   const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
+  // Track screen size for responsive pagination
+  const [screenSize, setScreenSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth;
+    }
+    return 640; // Default
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenSize(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fixed pagination logic - show different number of pages by screen size
+  const visiblePages = useMemo(() => {
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    
+    // Determine max pages to show based on screen size
+    const maxPages = screenSize < 640 ? 5 : 8; // Mobile: 5, Tablet/Desktop: 8
+    const pages: number[] = [];
+    
+    // Calculate start and end pages to show
+    let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+    let endPage = startPage + maxPages - 1;
+    
+    // Adjust if we go beyond total pages
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxPages + 1);
+    }
+    
+    // Generate the page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
+  }, [totalPages, currentPage, screenSize]);
+
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
@@ -253,51 +296,56 @@ const Index = () => {
             
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 sm:gap-3 md:gap-4 mt-8 sm:mt-12">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                  className="h-10 w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                
-                <div className="flex items-center gap-1.5 sm:gap-2">
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <Button
-                      key={page}
-                      variant={currentPage === page ? "default" : "outline"}
-                      size="icon"
-                      onClick={() => {
-                        setCurrentPage(page);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className={`h-10 w-10 text-sm sm:text-base transition-all duration-200 touch-manipulation ${
-                        currentPage === page ? 'scale-110' : ''
-                      }`}
-                    >
-                      {page}
-                    </Button>
-                  ))}
+              <>
+              <div className="flex flex-col items-center gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-12">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap max-w-full overflow-x-auto px-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className="h-9 w-9 xs:h-10 xs:w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation flex-shrink-0"
+                  >
+                    <ChevronLeft className="h-4 w-4 xs:h-5 xs:w-5" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 flex-wrap justify-center">
+                    {visiblePages.map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="icon"
+                        onClick={() => {
+                          setCurrentPage(page);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 text-xs xs:text-sm sm:text-base transition-all duration-200 touch-manipulation flex-shrink-0 ${
+                          currentPage === page ? 'scale-105 xs:scale-110' : ''
+                        }`}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="h-9 w-9 xs:h-10 xs:w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation flex-shrink-0"
+                  >
+                    <ChevronRight className="h-4 w-4 xs:h-5 xs:w-5" />
+                  </Button>
                 </div>
                 
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                  className="h-10 w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
+                <div className="text-center text-xs xs:text-sm text-muted-foreground px-4">
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+                </div>
               </div>
+              </>
             )}
             
-            <div className="text-center mt-4 text-sm text-muted-foreground">
-              Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
-            </div>
           </>
         )}
       </main>
