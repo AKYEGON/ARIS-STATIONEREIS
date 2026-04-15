@@ -39,6 +39,7 @@ const App = () => {
                 <Route path="/happy-customers" element={<Testimonials />} />
                 <Route path="/offers" element={<Offers />} />
                 <Route path="*" element={<NotFound />} />
+                {/*Comment  */}
               </Routes>
             </BrowserRouter>
           </CartProvider>
