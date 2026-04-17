@@ -525,23 +525,23 @@ const Cart = () => {
       <Footer />
 
       <Dialog open={showCheckoutDialog} onOpenChange={setShowCheckoutDialog}>
-        <DialogContent className="max-w-[95vw] sm:max-w-lg max-h-[90vh] overflow-y-auto p-3 sm:p-4 md:p-6">
-          <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl md:text-2xl font-bold text-primary">Checkout</DialogTitle>
+        <DialogContent className="max-w-[98vw] xs:max-w-[95vw] sm:max-w-lg md:max-w-2xl max-h-[85vh] xs:max-h-[88vh] sm:max-h-[90vh] overflow-y-auto p-2 xs:p-2.5 sm:p-4 md:p-6">
+          <DialogHeader className="pb-2 xs:pb-3 sm:pb-4">
+            <DialogTitle className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-primary pr-8 xs:pr-10 sm:pr-12">Checkout</DialogTitle>
           </DialogHeader>
           
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2.5 sm:space-y-3 md:space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2 xs:space-y-2.5 sm:space-y-3 md:space-y-4">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Full Name</FormLabel>
+                    <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter your full name" {...field} className="h-9 sm:h-10 md:h-11" />
+                      <Input placeholder="Enter your full name" {...field} className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base" />
                     </FormControl>
-                    <FormMessage className="text-[10px] xs:text-xs" />
+                    <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                   </FormItem>
                 )}
               />
@@ -551,11 +551,11 @@ const Cart = () => {
                 name="phone"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Phone Number</FormLabel>
+                    <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">Phone Number</FormLabel>
                     <FormControl>
-                      <Input placeholder="0712345678" {...field} className="h-9 sm:h-10 md:h-11" />
+                      <Input placeholder="0712345678" {...field} className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base" />
                     </FormControl>
-                    <FormMessage className="text-[10px] xs:text-xs" />
+                    <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                   </FormItem>
                 )}
               />
@@ -565,20 +565,20 @@ const Cart = () => {
                 name="university"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">University</FormLabel>
+                    <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">University</FormLabel>
                     <Select onValueChange={(val) => { field.onChange(val); form.setValue("branch", ""); }} defaultValue={field.value}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base">
                           <SelectValue placeholder="Select university" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
                         {universities.map(u => (
-                          <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>
+                          <SelectItem key={u.id} value={u.name} className="text-xs xs:text-sm sm:text-base">{u.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                   </FormItem>
                 )}
               />
@@ -593,20 +593,20 @@ const Cart = () => {
                     : [];
                   return (
                     <FormItem>
-                      <FormLabel className="text-xs sm:text-sm">Campus Branch</FormLabel>
+                      <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">Campus Branch</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base">
                             <SelectValue placeholder="Select branch" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {filteredBranches.map(b => (
-                            <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
+                            <SelectItem key={b.id} value={b.name} className="text-xs xs:text-sm sm:text-base">{b.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage className="text-[10px] xs:text-xs" />
+                      <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                     </FormItem>
                   );
                 }}
@@ -617,38 +617,38 @@ const Cart = () => {
                 name="deliveryMethod"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs sm:text-sm">Delivery Method</FormLabel>
+                    <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">Delivery Method</FormLabel>
                     <FormControl>
                       <RadioGroup
                         onValueChange={field.onChange}
                         defaultValue={field.value}
-                        className="flex flex-col space-y-2"
+                        className="flex flex-col space-y-1.5 xs:space-y-2 sm:space-y-3"
                       >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="pickup" id="pickup" />
-                          <Label htmlFor="pickup" className="cursor-pointer">Pickup in Person from Our Outlets</Label>
+                        <div className="flex items-center space-x-1.5 xs:space-x-2 sm:space-x-3">
+                          <RadioGroupItem value="pickup" id="pickup" className="h-4 w-4 xs:h-5 xs:w-5" />
+                          <Label htmlFor="pickup" className="cursor-pointer text-[10px] xs:text-xs sm:text-sm md:text-base">Pickup in Person from Our Outlets</Label>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="delivery" id="delivery" />
-                          <Label htmlFor="delivery" className="cursor-pointer">Delivery to My Location</Label>
+                        <div className="flex items-center space-x-1.5 xs:space-x-2 sm:space-x-3">
+                          <RadioGroupItem value="delivery" id="delivery" className="h-4 w-4 xs:h-5 xs:w-5" />
+                          <Label htmlFor="delivery" className="cursor-pointer text-[10px] xs:text-xs sm:text-sm md:text-base">Delivery to My Location</Label>
                         </div>
                       </RadioGroup>
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                   </FormItem>
                 )}
               />
 
               {deliveryMethod === "pickup" && outlets.length > 0 && (
                 <div className="space-y-2">
-                  <Label className="text-xs sm:text-sm">Select Pickup Outlet</Label>
+                  <Label className="text-[10px] xs:text-xs sm:text-sm md:text-base">Select Pickup Outlet</Label>
                   <Select onValueChange={setSelectedPickupOutlet} value={selectedPickupOutlet}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base">
                       <SelectValue placeholder="Select outlet" />
                     </SelectTrigger>
                     <SelectContent>
                       {outlets.map(o => (
-                        <SelectItem key={o.id} value={o.name}>
+                        <SelectItem key={o.id} value={o.name} className="text-xs xs:text-sm sm:text-base">
                           {o.name}{o.location ? ` — ${o.location}` : ""}
                         </SelectItem>
                       ))}
@@ -663,15 +663,15 @@ const Cart = () => {
                   name="deliveryAddress"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs sm:text-sm">Delivery Address</FormLabel>
+                      <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">Delivery Address</FormLabel>
                       <FormControl>
                         <Textarea 
                           placeholder="Enter your delivery address including building name, room number, or any landmarks"
-                          className="min-h-[100px]"
+                          className="min-h-[80px] xs:min-h-[90px] sm:min-h-[100px] text-xs xs:text-sm sm:text-base"
                           {...field}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                     </FormItem>
                   )}
                 />
@@ -683,31 +683,31 @@ const Cart = () => {
                   name="agentZone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs sm:text-sm">Your Area / Agent Zone *</FormLabel>
+                      <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">Your Area / Agent Zone *</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base">
                             <SelectValue placeholder="Select your area" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           {agentZones.map(z => (
-                            <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                            <SelectItem key={z.id} value={z.id} className="text-xs xs:text-sm sm:text-base">{z.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
-                      <FormMessage />
+                      <FormMessage className="text-[9px] xs:text-[10px] sm:text-xs" />
                     </FormItem>
                   )}
                 />
               )}
 
-              <div className="border-t pt-4">
-                <div className="flex justify-between text-base xs:text-lg sm:text-xl font-bold mb-3 sm:mb-4">
+              <div className="border-t pt-3 xs:pt-4">
+                <div className="flex justify-between text-sm xs:text-base sm:text-lg md:text-xl font-bold mb-2.5 xs:mb-3 sm:mb-4">
                   <span>Total Amount:</span>
                   <span className="text-primary">KSh {subtotal.toFixed(2)}</span>
                 </div>
-                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-sm sm:text-base" size="lg" disabled={isSubmitting}>
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-xs xs:text-sm sm:text-base md:text-lg" size="lg" disabled={isSubmitting}>
                   {isSubmitting ? "Placing Order..." : "Complete Order via WhatsApp"}
                 </Button>
               </div>
