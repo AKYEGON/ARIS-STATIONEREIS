@@ -24,10 +24,19 @@ import { useState, useEffect } from "react";
 const checkoutFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().min(10, "Please enter a valid phone number"),
-  university: z.string().min(1, "Please select a university"),
-  branch: z.string().min(1, "Please select a branch"),
+  university: z.string().optional(),
+  branch: z.string().optional(),
   deliveryMethod: z.enum(["pickup", "delivery"]),
   deliveryAddress: z.string().optional(),
+  agentZone: z.string().optional(),
+}).refine((data) => {
+  if (data.deliveryMethod === "delivery") {
+    return !!data.university && !!data.branch && !!data.deliveryAddress && !!data.agentZone;
+  }
+  return true;
+}, {
+  message: "University, branch, delivery address, and agent zone are required for delivery",
+  path: ["deliveryMethod"],
 }).refine((data) => {
   if (data.deliveryMethod === "delivery" && !data.deliveryAddress) {
     return false;
@@ -77,6 +86,7 @@ const Cart = () => {
       branch: "",
       deliveryMethod: "pickup",
       deliveryAddress: "",
+      agentZone: "",
     },
   });
 
@@ -667,20 +677,29 @@ const Cart = () => {
                 />
               )}
 
-              {agentZones.length > 0 && (
-                <div className="space-y-2">
-                  <Label className="text-xs sm:text-sm">Your Area / Agent Zone <span className="text-muted-foreground text-[10px] xs:text-xs">(optional)</span></Label>
-                  <Select onValueChange={setSelectedAgentZoneId} value={selectedAgentZoneId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your area" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {agentZones.map(z => (
-                        <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {deliveryMethod === "delivery" && agentZones.length > 0 && (
+                <FormField
+                  control={form.control}
+                  name="agentZone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs sm:text-sm">Your Area / Agent Zone *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your area" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {agentZones.map(z => (
+                            <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
 
               <div className="border-t pt-4">
