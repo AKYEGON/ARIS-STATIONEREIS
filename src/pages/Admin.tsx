@@ -60,6 +60,7 @@ interface Order {
   discount_type?: string;
   original_total?: number;
   agent_zone_id?: string | null;
+  agent_zone?: { name: string } | null;
 }
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
@@ -323,6 +324,9 @@ const Admin = () => {
             product_image,
             quantity,
             price
+          ),
+          agent_zone:agent_zones (
+            name
           )
         `)
         .order("created_at", { ascending: false });
@@ -3022,6 +3026,16 @@ const Admin = () => {
                   <Label className="text-muted-foreground">Delivery Address</Label>
                   <p className="text-sm">{selectedOrder.delivery_address}</p>
                 </div>
+
+                {selectedOrder.agent_zone?.name && (
+                  <div>
+                    <Label className="text-muted-foreground">Agent Zone</Label>
+                    <p className="text-sm font-medium flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 text-primary" />
+                      {selectedOrder.agent_zone.name}
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <Label className="text-muted-foreground">Status</Label>
