@@ -139,15 +139,21 @@ const Index = () => {
   }, [fetchProducts, fetchCategories]);
 
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || 
-      (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProducts = useMemo(() => {
+    const list = products.filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" ||
+        (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
+      return matchesSearch && matchesCategory;
+    });
+    if (sortBy === "price-asc") return [...list].sort((a, b) => a.price - b.price);
+    if (sortBy === "price-desc") return [...list].sort((a, b) => b.price - a.price);
+    if (sortBy === "name-asc") return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [products, searchQuery, selectedCategory, categoryProductMap, sortBy]);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
