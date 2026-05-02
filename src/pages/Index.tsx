@@ -34,6 +34,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProductMap, setCategoryProductMap] = useState<Record<string, string[]>>({});
+  const [sortBy, setSortBy] = useState<string>("price-asc");
 
   // Persist search query to sessionStorage
   useEffect(() => {
