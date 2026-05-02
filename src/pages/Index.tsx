@@ -8,6 +8,7 @@ import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
@@ -33,6 +34,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProductMap, setCategoryProductMap] = useState<Record<string, string[]>>({});
+  const [sortBy, setSortBy] = useState<string>("price-asc");
 
   // Persist search query to sessionStorage
   useEffect(() => {
@@ -137,15 +139,21 @@ const Index = () => {
   }, [fetchProducts, fetchCategories]);
 
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.category.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === "all" || 
-      (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
-    return matchesSearch && matchesCategory;
-  });
+  const filteredProducts = useMemo(() => {
+    const list = products.filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" ||
+        (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
+      return matchesSearch && matchesCategory;
+    });
+    if (sortBy === "price-asc") return [...list].sort((a, b) => a.price - b.price);
+    if (sortBy === "price-desc") return [...list].sort((a, b) => b.price - a.price);
+    if (sortBy === "name-asc") return [...list].sort((a, b) => a.name.localeCompare(b.name));
+    return list;
+  }, [products, searchQuery, selectedCategory, categoryProductMap, sortBy]);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
@@ -198,7 +206,7 @@ const Index = () => {
   // Reset to page 1 when search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory, sortBy]);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -247,6 +255,21 @@ const Index = () => {
                 <X className="h-4 w-4" />
               </button>
             )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">Sort by:</span>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-9 bg-secondary border-primary/30">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="name-asc">Name: A to Z</SelectItem>
+                <SelectItem value="featured">Featured</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="flex justify-center md:hidden">
