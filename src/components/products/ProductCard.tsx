@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
@@ -30,8 +31,9 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
 
-  // Generate product URL for SEO
-  const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
+  // Generate product URL for SEO (slug preferred, fallback to id)
+  const productPath = product.slug ? `/product/${product.slug}` : `/product/${product.id}`;
+  const productUrl = `https://arisstationaries.co.ke${productPath}`;
   
   // Product Schema for SEO
   const productSchema = {
