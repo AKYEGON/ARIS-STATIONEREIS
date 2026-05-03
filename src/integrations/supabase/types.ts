@@ -656,6 +656,7 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          slug: string
           stock: number | null
           updated_at: string
         }
@@ -671,6 +672,7 @@ export type Database = {
           name: string
           original_price?: number | null
           price: number
+          slug: string
           stock?: number | null
           updated_at?: string
         }
@@ -686,6 +688,7 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          slug?: string
           stock?: number | null
           updated_at?: string
         }
@@ -880,6 +883,7 @@ export type Database = {
         Args: { is_completed?: boolean; testimonial_id: string }
         Returns: undefined
       }
+      slugify: { Args: { input: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user" | "employee" | "manager" | "agent"
