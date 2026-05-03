@@ -1,4 +1,4 @@
-# ARIS STATIONERIES - Robots.txt
+# Aris Stationeries - Robots.txt
 # https://arisstationaries.co.ke
 
 User-agent: Googlebot
@@ -18,9 +18,12 @@ Allow: /
 User-agent: *
 Allow: /
 
-# Disallow admin and auth pages from indexing
+# Disallow private/non-indexable pages
 Disallow: /admin
 Disallow: /auth
+Disallow: /reset-password
+Disallow: /cart
+Disallow: /checkout
 
-# Sitemap location
+# Sitemap
 Sitemap: https://arisstationaries.co.ke/sitemap.xml
