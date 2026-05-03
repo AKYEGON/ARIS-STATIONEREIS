@@ -105,10 +105,11 @@ const Testimonials = () => {
 
   return (
     <div className="min-h-screen pb-16 md:pb-0">
-      <SEO 
-        title="Customer Reviews & Stories"
-        description="Read what our customers say about ARIS STATIONERIES. Real reviews from happy customers in Nairobi, Kenya."
+      <SEO
+        title="Customer Reviews | Aris Stationeries Kenya"
+        description="Read verified reviews from Aris Stationeries customers across Kenya. See why students at UoN, KU, Strathmore and USIU trust us for affordable stationery."
         canonicalUrl="/testimonials"
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Reviews", url: "/testimonials" }]}
       />
       <Header cartItemCount={getCartItemCount()} />
       

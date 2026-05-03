@@ -101,9 +101,10 @@ const Brochure = () => {
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0">
       <SEO
-        title="Product Catalog"
-        description="Browse our complete product catalog. Download or print our stationery brochure from ARIS STATIONERIES, Nairobi."
+        title="Stationery Catalog Kenya | Aris Stationeries Brochure"
+        description="Browse and download the full Aris Stationeries product catalog. Pens, notebooks, calculators, drawing sets — all at affordable prices in Kenya."
         canonicalUrl="/brochure"
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Catalog", url: "/brochure" }]}
       />
       {/* Print/Navigation controls - hidden when printing */}
       <div className="print:hidden sticky top-0 z-50 bg-background border-b border-border shadow-sm">

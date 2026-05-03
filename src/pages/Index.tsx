@@ -224,10 +224,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <SEO 
-        title="ARIS STATIONERIES - Home of Affordable Stationeries | Nairobi, Kenya"
-        description="Shop quality stationery at affordable prices. ARIS STATIONERIES offers pens, notebooks, office supplies, and more. Fast delivery in Nairobi, Kenya."
+      <SEO
+        title="Aris Stationeries | Affordable Stationery in Kenya — Order Online"
+        description="Buy affordable stationery in Kenya. Pens, notebooks, calculators, drawing sets — delivered to UoN, KU, Strathmore, USIU and nationwide. Best prices guaranteed."
         canonicalUrl="/"
+        breadcrumbs={[{ name: "Home", url: "/" }]}
       />
       <Header cartItemCount={getCartItemCount()} />
       

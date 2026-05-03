@@ -1,55 +1,59 @@
+# Aris Stationeries — Full SEO Build Plan
 
-# Agent Role & Zone-Based Order System
+## ✅ Phase 0 — Quick Wins (DONE)
+- Fixed NAP: `+254119774470` / `arisstationeries@gmail.com` in `index.html`
+- Installed GA4 (`G-B7XY6KM6N0`) directly in `<head>` (no GTM, no GSC meta — DNS verified)
+- Upgraded `index.html` with: LocalBusiness + WebSite + Sitelinks SearchAction + FAQPage JSON-LD, hreflang `en-ke`, `max-image-preview:large`, OG image dimensions
+- Upgraded `SEO.tsx`: supports `breadcrumbs`, `noindex`, `ogType="product"`, multi-schema arrays, auto BreadcrumbList JSON-LD
+- Per-page titles/descriptions rewritten to match the prompt's keyword patterns (Index, Offers, Testimonials, Cart [noindex], Brochure)
+- `robots.txt` now disallows `/cart`, `/checkout`, `/auth`, `/reset-password`, `/admin`
+- Sitemap `lastmod` refreshed
+- ProductCard already emits Product JSON-LD per card
 
-## Overview
-Add an "agent" role where agents are assigned to geographic zones. Customers select an agent zone during checkout, and agents only see orders from their assigned zone. Admins get agent performance analytics.
+## 🚧 Phase 1 — Individual Product Pages (HIGH IMPACT)
+- Add route `/product/:slug` (slug = derived from product name, e.g. `casio-fx-991es-scientific-calculator-kenya`)
+- New page `src/pages/ProductDetail.tsx`:
+  - Dynamic H1: `Buy [Name] in Kenya — KSh [Price] | Aris Stationeries`
+  - 200-word SEO description block with university keywords (UoN, KU, Strathmore, USIU)
+  - H2 sections: Why buy from us / Price in Kenya / Delivery info
+  - Breadcrumbs: Home → Category → Product
+  - Full Product + Offer + BreadcrumbList JSON-LD via `<SEO>`
+  - "You may also like" 4 related products
+- Add DB column `slug` on `products` (or compute from name; redirect old IDs)
+- Update `ProductCard` to link → `/product/[slug]`
+- Sitemap: server-render or build-time generate from products table
 
-## Step 1: Database Migration
-- Add `agent` to the `app_role` enum
-- Create `agent_zones` table (id, name, display_order, is_active, created_at)
-- Create `agent_zone_assignments` table (id, user_id, zone_id) — links agents to their zone
-- Add `agent_zone_id` column to `orders` table (nullable UUID, references agent_zones)
-- RLS policies:
-  - `agent_zones`: public read, admin write
-  - `agent_zone_assignments`: admin write, agents can read their own
-  - Orders: agents can SELECT/UPDATE orders where `agent_zone_id` matches their assigned zone
+## 🚧 Phase 2 — Category Landing Pages
+- Route `/category/:slug`
+- Page lists products in category + 150-word intro paragraph + breadcrumbs
+- Title pattern: `[Category] in Kenya | Affordable [Category] — Aris Stationeries`
 
-## Step 2: Admin Settings — Agent Zone Manager
-- Add a "Agent Zones" management section in the Settings tab (similar to Universities/Outlets)
-- CRUD for zones (name, display order, active toggle)
+## 🚧 Phase 3 — University Landing Pages
+- Routes: `/university/uon`, `/kenyatta-university`, `/strathmore`, `/usiu`
+- One file `src/pages/UniversityLanding.tsx` driven by config object (campus list, common products, WhatsApp CTA)
 
-## Step 3: Agent Onboarding in Team Tab
-- Update the approve/manage staff flow to support the "agent" role
-- When approving as agent, show a zone assignment dropdown
-- Update the `manage-staff` edge function to handle agent role + zone assignment
+## 🚧 Phase 4 — Blog
+- Route `/blog` + `/blog/:slug`
+- Markdown-based or DB-backed posts
+- Seed 5 articles per prompt (UoN guide, calculator comparison, etc.)
 
-## Step 4: Checkout Flow Update
-- Add an "Agent Zone" dropdown in the checkout form (optional, shown alongside delivery address)
-- Fetch active zones from `agent_zones` table
-- Save selected `agent_zone_id` on the order
+## 🚧 Phase 5 — Comparison/Content Pages
+- `/guides/best-scientific-calculators-kenya-2025`
+- `/guides/cheapest-stationery-near-uon`
+- Internal linking to product/category pages
 
-## Step 5: Agent Dashboard
-- When a user with `agent` role logs into Admin, show a simplified view:
-  - Only their zone's orders (filtered by `agent_zone_id`)
-  - Order details view (customer info, items, status)
-  - No access to Products, Inventory, Sales, Team, Settings, Testimonials, Bundles tabs
-- Agent can view order details but NOT modify them (view-only based on user's answer)
+## 🚧 Phase 6 — Local SEO
+- `/delivery` page with embedded Google Map + full areas list
+- Google Business Profile setup (manual, outside code)
 
-## Step 6: Admin Agent Analytics
-- Add an "Agent Performance" section in the Sales Dashboard
-- Show per-agent/zone metrics: order count, total revenue, delivery rate
-- Filter by time range (reuse existing range selector)
+## 🚧 Phase 7 — Dynamic Sitemap
+- Edge Function or build script that emits sitemap.xml from `products`, `bundles`, `categories` tables
+- Replace static `public/sitemap.xml`
 
-## Step 7: Update Edge Functions
-- Update `create-order` to accept and validate `agent_zone_id`
-- Update `manage-staff` to handle agent role + zone assignment
+## 🚧 Phase 8 — GA4 Event Tracking
+- Wire `add_to_cart`, `begin_checkout`, `purchase`, `search`, `view_item` events to `gtag()` calls in CartContext / Cart.tsx / ProductDetail.tsx
 
-## Files to Create/Modify
-- **New migration**: enum update, new tables, RLS policies, orders column
-- `src/pages/Admin.tsx` — conditional tab rendering for agents
-- `src/pages/Cart.tsx` — agent zone dropdown in checkout
-- `src/components/admin/AgentZoneManager.tsx` — new CRUD component
-- `src/components/admin/EmployeeManagement.tsx` — agent role + zone picker
-- `src/components/admin/SalesDashboard.tsx` — agent analytics section
-- `supabase/functions/manage-staff/index.ts` — agent support
-- `supabase/functions/create-order/index.ts` — agent_zone_id field
+## Notes
+- No GSC verification meta tag (DNS verified per user)
+- No GTM — direct gtag.js only
+- All structured data must validate at https://search.google.com/test/rich-results
