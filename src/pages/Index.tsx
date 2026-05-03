@@ -59,6 +59,7 @@ const Index = () => {
       
       const formattedProducts = (data || []).map(p => ({
         id: p.id,
+        slug: (p as any).slug,
         name: p.name,
         description: p.description || "",
         price: Number(p.price),

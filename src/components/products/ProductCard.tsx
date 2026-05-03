@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
@@ -30,8 +31,9 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
 
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
 
-  // Generate product URL for SEO
-  const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
+  // Generate product URL for SEO (slug preferred, fallback to id)
+  const productPath = product.slug ? `/product/${product.slug}` : `/product/${product.id}`;
+  const productUrl = `https://arisstationaries.co.ke${productPath}`;
   
   // Product Schema for SEO
   const productSchema = {
@@ -69,35 +71,43 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       />
       
       <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
-        <div 
+        <Link
+          to={productPath}
           className="aspect-square overflow-hidden bg-white relative cursor-pointer flex items-center justify-center"
-          onClick={() => hasMultipleMedia && setViewerOpen(true)}
+          aria-label={`View ${product.name}`}
         >
           {!imageLoaded && (
             <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
           <img
             src={product.image}
-            alt={`${product.name} - ${product.description} - Buy at ARIS STATIONERIES Nairobi Kenya`}
+            alt={`${product.name} — Buy Affordable ${product.category} in Kenya | Aris Stationeries`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
             className={`max-h-full max-w-full object-contain p-2 transition-all duration-500 group-hover:scale-110 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
-          
-          {/* Gallery indicator badge */}
+
+          {/* Gallery indicator badge — clicking opens viewer instead of navigating */}
           {hasMultipleMedia && (
-            <div className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 bg-black/70 text-white px-1.5 py-0.5 xs:px-2 xs:py-1 rounded-full flex items-center gap-0.5 xs:gap-1 text-[10px] xs:text-xs font-medium backdrop-blur-sm">
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setViewerOpen(true); }}
+              className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 bg-black/70 text-white px-1.5 py-0.5 xs:px-2 xs:py-1 rounded-full flex items-center gap-0.5 xs:gap-1 text-[10px] xs:text-xs font-medium backdrop-blur-sm hover:bg-black/85"
+              aria-label="Open gallery"
+            >
               <Images className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
               <span>{totalMediaCount}</span>
-            </div>
+            </button>
           )}
-        </div>
+        </Link>
         <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
-          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
-            {product.name}
-          </h3>
+          <Link to={productPath} className="block">
+            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2 hover:text-primary transition-colors">
+              {product.name}
+            </h3>
+          </Link>
           <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
             {product.description}
           </p>
