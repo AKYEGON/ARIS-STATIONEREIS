@@ -186,7 +186,6 @@ const ProductDetail = () => {
           structuredData={seoData.schema}
           breadcrumbs={[
             { name: "Home", url: "/" },
-            { name: product.category, url: `/?category=${encodeURIComponent(product.category)}` },
             { name: product.name, url: seoData.url },
           ]}
         />
