@@ -841,7 +841,7 @@ const Admin = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .insert(productData)
+        .insert(productData as any)
         .select();
 
       console.log("Insert result:", { data, error });
