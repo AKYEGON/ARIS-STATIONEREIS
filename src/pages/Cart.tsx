@@ -293,10 +293,11 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
-      <SEO 
-        title="Shopping Cart"
-        description="Review your cart and checkout. Fast delivery available in Nairobi from ARIS STATIONERIES."
+      <SEO
+        title="Shopping Cart | Aris Stationeries"
+        description="Review your cart and checkout securely at Aris Stationeries. Affordable stationery delivered to your university or doorstep in Kenya."
         canonicalUrl="/cart"
+        noindex
       />
       <Header cartItemCount={getCartItemCount()} />
       
