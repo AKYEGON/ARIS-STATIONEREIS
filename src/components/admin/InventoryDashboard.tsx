@@ -150,6 +150,14 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
     return products.reduce((sum, p) => sum + (p.cost_price * p.stock), 0);
   };
 
+  const getProjectedRevenue = () => {
+    return products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+  };
+
+  const getProjectedProfit = () => {
+    return products.reduce((sum, p) => sum + ((p.price - (p.cost_price || 0)) * p.stock), 0);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-3">
