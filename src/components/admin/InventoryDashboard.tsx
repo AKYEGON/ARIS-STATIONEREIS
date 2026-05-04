@@ -55,6 +55,14 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
 
   useEffect(() => {
     fetchProducts();
+    // Realtime sync with the Products tab so any add/edit/delete reflects here instantly
+    const channel = supabase
+      .channel('inventory-products')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchProducts();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const fetchProducts = async () => {
@@ -142,9 +150,17 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
     return products.reduce((sum, p) => sum + (p.cost_price * p.stock), 0);
   };
 
+  const getProjectedRevenue = () => {
+    return products.reduce((sum, p) => sum + (p.price * p.stock), 0);
+  };
+
+  const getProjectedProfit = () => {
+    return products.reduce((sum, p) => sum + ((p.price - (p.cost_price || 0)) * p.stock), 0);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-3">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
             <CardTitle className="text-xs sm:text-sm font-medium">Total Products</CardTitle>
@@ -175,6 +191,22 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
               <div className="text-lg sm:text-2xl font-bold">
                 KSh {getTotalInventoryValue().toFixed(0)}
               </div>
+            </CardContent>
+          </Card>
+        )}
+        {userRole === 'admin' && (
+          <Card className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/30 col-span-2 lg:col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6">
+              <CardTitle className="text-xs sm:text-sm font-medium">Projected Revenue (Sell-out)</CardTitle>
+              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
+            </CardHeader>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-lg sm:text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                KSh {getProjectedRevenue().toFixed(0)}
+              </div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">
+                If all stock sold • Profit: KSh {getProjectedProfit().toFixed(0)}
+              </p>
             </CardContent>
           </Card>
         )}

@@ -106,6 +106,7 @@ const Admin = () => {
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [zonesList, setZonesList] = useState<Array<{ id: string; name: string }>>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState("");
@@ -194,6 +195,7 @@ const Admin = () => {
     if (isAdmin) {
       fetchProducts();
       fetchProductCategories();
+      fetchAgentZones();
       if (activeTab === "orders") {
         fetchOrders();
       }
@@ -205,6 +207,32 @@ const Admin = () => {
       }
     }
   }, [activeTab, isAdmin]);
+
+  const fetchAgentZones = async () => {
+    const { data } = await supabase
+      .from("agent_zones")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
+    setZonesList(data || []);
+  };
+
+  const handleAssignZone = async (orderId: string, zoneId: string | null) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ agent_zone_id: zoneId })
+      .eq("id", orderId);
+    if (error) { toast.error("Failed to assign zone"); return; }
+    toast.success(zoneId ? "Order assigned to agent zone" : "Agent zone cleared");
+    // Update local state + selectedOrder
+    const zone = zonesList.find(z => z.id === zoneId);
+    setOrdersList(prev => prev.map(o => o.id === orderId
+      ? { ...o, agent_zone_id: zoneId, agent_zone: zone ? { name: zone.name } : null }
+      : o));
+    setSelectedOrder(prev => prev && prev.id === orderId
+      ? { ...prev, agent_zone_id: zoneId, agent_zone: zone ? { name: zone.name } : null }
+      : prev);
+  };
 
   const fetchProductCategories = async () => {
     try {
@@ -841,7 +869,7 @@ const Admin = () => {
 
       const { data, error } = await supabase
         .from("products")
-        .insert(productData)
+        .insert(productData as any)
         .select();
 
       console.log("Insert result:", { data, error });
@@ -3027,7 +3055,31 @@ const Admin = () => {
                   <p className="text-sm">{selectedOrder.delivery_address}</p>
                 </div>
 
-                {selectedOrder.agent_zone?.name && (
+                {(userRole === 'admin' || userRole === 'manager') ? (
+                  <div>
+                    <Label className="text-muted-foreground flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 text-primary" />
+                      Assign to Agent Zone
+                    </Label>
+                    <Select
+                      value={selectedOrder.agent_zone_id ?? "none"}
+                      onValueChange={(val) => handleAssignZone(selectedOrder.id, val === "none" ? null : val)}
+                    >
+                      <SelectTrigger className="mt-1.5 h-9">
+                        <SelectValue placeholder="Unassigned" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Unassigned (no agent)</SelectItem>
+                        {zonesList.map(z => (
+                          <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Agents only see orders in their assigned zones.
+                    </p>
+                  </div>
+                ) : selectedOrder.agent_zone?.name && (
                   <div>
                     <Label className="text-muted-foreground">Agent Zone</Label>
                     <p className="text-sm font-medium flex items-center gap-1.5">
