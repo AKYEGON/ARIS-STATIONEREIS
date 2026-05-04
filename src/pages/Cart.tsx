@@ -566,11 +566,11 @@ const Cart = () => {
                 name="university"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">University</FormLabel>
+                    <FormLabel className="text-[10px] xs:text-xs sm:text-sm md:text-base">University/Location</FormLabel>
                     <Select onValueChange={(val) => { field.onChange(val); form.setValue("branch", ""); }} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger className="h-8 xs:h-9 sm:h-10 md:h-11 lg:h-12 text-xs xs:text-sm sm:text-base">
-                          <SelectValue placeholder="Select university" />
+                          <SelectValue placeholder="Select university/location" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
