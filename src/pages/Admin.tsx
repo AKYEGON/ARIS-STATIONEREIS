@@ -106,6 +106,7 @@ const Admin = () => {
   const [isOrderDialogOpen, setIsOrderDialogOpen] = useState(false);
   const [newTag, setNewTag] = useState("");
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [zonesList, setZonesList] = useState<Array<{ id: string; name: string }>>([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [productSearchQuery, setProductSearchQuery] = useState("");
