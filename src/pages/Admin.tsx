@@ -195,6 +195,7 @@ const Admin = () => {
     if (isAdmin) {
       fetchProducts();
       fetchProductCategories();
+      fetchAgentZones();
       if (activeTab === "orders") {
         fetchOrders();
       }
@@ -206,6 +207,32 @@ const Admin = () => {
       }
     }
   }, [activeTab, isAdmin]);
+
+  const fetchAgentZones = async () => {
+    const { data } = await supabase
+      .from("agent_zones")
+      .select("id, name")
+      .eq("is_active", true)
+      .order("display_order", { ascending: true });
+    setZonesList(data || []);
+  };
+
+  const handleAssignZone = async (orderId: string, zoneId: string | null) => {
+    const { error } = await supabase
+      .from("orders")
+      .update({ agent_zone_id: zoneId })
+      .eq("id", orderId);
+    if (error) { toast.error("Failed to assign zone"); return; }
+    toast.success(zoneId ? "Order assigned to agent zone" : "Agent zone cleared");
+    // Update local state + selectedOrder
+    const zone = zonesList.find(z => z.id === zoneId);
+    setOrdersList(prev => prev.map(o => o.id === orderId
+      ? { ...o, agent_zone_id: zoneId, agent_zone: zone ? { name: zone.name } : null }
+      : o));
+    setSelectedOrder(prev => prev && prev.id === orderId
+      ? { ...prev, agent_zone_id: zoneId, agent_zone: zone ? { name: zone.name } : null }
+      : prev);
+  };
 
   const fetchProductCategories = async () => {
     try {
