@@ -55,6 +55,14 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
 
   useEffect(() => {
     fetchProducts();
+    // Realtime sync with the Products tab so any add/edit/delete reflects here instantly
+    const channel = supabase
+      .channel('inventory-products')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, () => {
+        fetchProducts();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
   const fetchProducts = async () => {
