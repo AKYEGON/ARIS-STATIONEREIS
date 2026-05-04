@@ -219,7 +219,7 @@ const Cart = () => {
       message += `*CUSTOMER DETAILS*\n`;
       message += `• Name: ${data.name}\n`;
       message += `• Phone: ${data.phone}\n`;
-      message += `• University: ${data.university}\n`;
+      message += `• University/Location: ${data.university}\n`;
       message += `• Campus/Branch: ${data.branch}\n\n`;
       
       message += `*ORDER ITEMS* (${totalItems} item${totalItems !== 1 ? 's' : ''})\n`;
