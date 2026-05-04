@@ -3055,7 +3055,31 @@ const Admin = () => {
                   <p className="text-sm">{selectedOrder.delivery_address}</p>
                 </div>
 
-                {selectedOrder.agent_zone?.name && (
+                {(userRole === 'admin' || userRole === 'manager') ? (
+                  <div>
+                    <Label className="text-muted-foreground flex items-center gap-1.5">
+                      <Tag className="h-3.5 w-3.5 text-primary" />
+                      Assign to Agent Zone
+                    </Label>
+                    <Select
+                      value={selectedOrder.agent_zone_id ?? "none"}
+                      onValueChange={(val) => handleAssignZone(selectedOrder.id, val === "none" ? null : val)}
+                    >
+                      <SelectTrigger className="mt-1.5 h-9">
+                        <SelectValue placeholder="Unassigned" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Unassigned (no agent)</SelectItem>
+                        {zonesList.map(z => (
+                          <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Agents only see orders in their assigned zones.
+                    </p>
+                  </div>
+                ) : selectedOrder.agent_zone?.name && (
                   <div>
                     <Label className="text-muted-foreground">Agent Zone</Label>
                     <p className="text-sm font-medium flex items-center gap-1.5">
