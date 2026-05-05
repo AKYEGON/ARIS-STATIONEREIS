@@ -1699,6 +1699,7 @@ const Admin = () => {
             <CheckoutOptionsManager />
             <AgentZoneManager />
             <CategoryManager />
+            <FacultyManager />
           </TabsContent>
 
           {/* Products Tab */}
