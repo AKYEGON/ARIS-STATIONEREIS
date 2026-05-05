@@ -10,7 +10,7 @@ import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import Brochure from "./pages/Brochure";
+import Students from "./pages/Students";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
@@ -34,7 +34,8 @@ const App = () => {
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/brochure" element={<Brochure />} />
+                <Route path="/students" element={<Students />} />
+                <Route path="/brochure" element={<Students />} />
                 <Route path="/testimonials" element={<Testimonials />} />
                 <Route path="/happy-customers" element={<Testimonials />} />
                 <Route path="/offers" element={<Offers />} />
