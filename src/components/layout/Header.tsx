@@ -1,4 +1,4 @@
-import { ShoppingCart, FileText, Users, Tag, Store } from "lucide-react";
+import { ShoppingCart, GraduationCap, Users, Tag, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,7 +12,7 @@ const bottomTabs = [
   { to: "/", label: "Shop", icon: Store },
   { to: "/offers", label: "Offers", icon: Tag },
   { to: "/testimonials", label: "Customers", icon: Users },
-  { to: "/brochure", label: "Brochure", icon: FileText },
+  { to: "/students", label: "Courses", icon: GraduationCap },
   { to: "/cart", label: "Cart", icon: ShoppingCart },
 ] as const;
 
@@ -49,10 +49,10 @@ const Header = ({ cartItemCount }: HeaderProps) => {
               </Button>
             </Link>
             
-            <Link to="/brochure">
+            <Link to="/students">
               <Button variant="outline" size="sm">
-                <FileText className="h-4 w-4 mr-2" />
-                <span className="hidden lg:inline">Brochure</span>
+                <GraduationCap className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Shop by Course</span>
               </Button>
             </Link>
             

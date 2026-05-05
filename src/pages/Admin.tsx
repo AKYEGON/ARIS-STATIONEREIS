@@ -37,6 +37,7 @@ import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManage
 import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
+import { FacultyManager } from "@/components/admin/FacultyManager";
 
 interface OrderItem {
   product_name: string;
@@ -1698,6 +1699,7 @@ const Admin = () => {
             <CheckoutOptionsManager />
             <AgentZoneManager />
             <CategoryManager />
+            <FacultyManager />
           </TabsContent>
 
           {/* Products Tab */}
