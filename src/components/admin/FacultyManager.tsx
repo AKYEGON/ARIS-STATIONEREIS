@@ -301,6 +301,14 @@ export const FacultyManager = () => {
                   </div>
                 </button>
                 <div className="flex gap-1 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-2 text-[10px]"
+                    onClick={() => { setActiveFaculty(f); setView("courses"); fetchCourses(f.id); }}
+                  >
+                    <BookOpen className="h-3 w-3 mr-1" /> Courses
+                  </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditFaculty(f)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
@@ -313,6 +321,11 @@ export const FacultyManager = () => {
             {faculties.length === 0 && (
               <p className="col-span-full text-center text-sm text-muted-foreground py-6">
                 No faculties yet. Add one to begin.
+              </p>
+            )}
+            {faculties.length > 0 && (
+              <p className="col-span-full text-[11px] text-muted-foreground italic mt-1">
+                💡 Tip: Click a faculty (or its "Courses" button) to add courses and allocate products.
               </p>
             )}
           </div>
