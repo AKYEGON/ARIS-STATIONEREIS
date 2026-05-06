@@ -13,6 +13,8 @@ import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "l
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 
+type ProductWithSlug = Product & { slug?: string };
+
 const formatProduct = (p: any): Product => ({
   id: p.id,
   name: p.name,
