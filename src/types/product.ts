@@ -33,6 +33,7 @@ export interface Product {
   categories?: string[];
   is_featured?: boolean;
   display_order?: number;
+  slug?: string;
   media?: ProductMedia[];
   variants?: ProductVariant[];
 }
