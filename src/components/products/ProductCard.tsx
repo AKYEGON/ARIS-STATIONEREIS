@@ -4,6 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
 import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: Product;
