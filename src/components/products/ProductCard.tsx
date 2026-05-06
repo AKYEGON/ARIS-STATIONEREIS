@@ -147,11 +147,21 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         <CardFooter className="p-2 xs:p-3 sm:p-4 pt-0">
           <Button 
             className="w-full h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90 touch-manipulation"
-            onClick={() => onAddToCart(product, selectedVariant)}
+            onClick={() => {
+              if (hasVariants && !selectedVariant) {
+                toast.error("Please select an option first");
+                return;
+              }
+              onAddToCart(product, selectedVariant);
+            }}
           >
             <ShoppingCart className="mr-1.5 h-3.5 w-3.5 xs:h-4 xs:w-4" />
-            <span className="hidden xs:inline">Add to Cart</span>
-            <span className="xs:hidden">Add</span>
+            <span className="hidden xs:inline">
+              {hasVariants && !selectedVariant ? "Select Option" : "Add to Cart"}
+            </span>
+            <span className="xs:hidden">
+              {hasVariants && !selectedVariant ? "Select" : "Add"}
+            </span>
           </Button>
         </CardFooter>
       </Card>
