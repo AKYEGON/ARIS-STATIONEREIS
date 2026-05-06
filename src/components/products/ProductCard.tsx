@@ -71,9 +71,10 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
       />
       
       <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
-        <div 
-          className="aspect-square overflow-hidden bg-white relative cursor-pointer flex items-center justify-center"
-          onClick={() => hasMultipleMedia && setViewerOpen(true)}
+        <Link
+          to={`/product/${(product as any).slug || product.id}`}
+          className="aspect-square overflow-hidden bg-white relative cursor-pointer flex items-center justify-center group/img"
+          aria-label={`View ${product.name} details`}
         >
           {!imageLoaded && (
             <div className="absolute inset-0 bg-muted animate-pulse" />
@@ -87,19 +88,26 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
-          
+
           {/* Gallery indicator badge */}
           {hasMultipleMedia && (
-            <div className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 bg-black/70 text-white px-1.5 py-0.5 xs:px-2 xs:py-1 rounded-full flex items-center gap-0.5 xs:gap-1 text-[10px] xs:text-xs font-medium backdrop-blur-sm">
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setViewerOpen(true); }}
+              className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 bg-black/70 text-white px-1.5 py-0.5 xs:px-2 xs:py-1 rounded-full flex items-center gap-0.5 xs:gap-1 text-[10px] xs:text-xs font-medium backdrop-blur-sm hover:bg-black/90"
+              aria-label="View gallery"
+            >
               <Images className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
               <span>{totalMediaCount}</span>
-            </div>
+            </button>
           )}
-        </div>
+        </Link>
         <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
-          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
-            {product.name}
-          </h3>
+          <Link to={`/product/${(product as any).slug || product.id}`} className="block hover:text-primary transition-colors">
+            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
+              {product.name}
+            </h3>
+          </Link>
           <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
             {product.description}
           </p>
