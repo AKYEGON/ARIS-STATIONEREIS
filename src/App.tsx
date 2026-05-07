@@ -14,6 +14,7 @@ import Students from "./pages/Students";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import NotFound from "./pages/NotFound";
+import ProductDetail from "./pages/ProductDetail";
 import ScrollToTop from "./components/common/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => {
                 <Route path="/testimonials" element={<Testimonials />} />
                 <Route path="/happy-customers" element={<Testimonials />} />
                 <Route path="/offers" element={<Offers />} />
+                <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>

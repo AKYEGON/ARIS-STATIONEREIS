@@ -67,6 +67,7 @@ const Index = () => {
         image: p.image,
         is_featured: p.is_featured,
         display_order: p.display_order,
+        slug: (p as any).slug,
         media: ((p as any).media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
