@@ -49,12 +49,35 @@ const Offers = () => {
       />
       <Header cartItemCount={getCartItemCount()} />
 
-      <main className="flex-1 container py-6 sm:py-8 md:py-12 px-3 sm:px-4">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 text-primary">
-            Special Offers
-          </h1>
-          <p className="text-sm sm:text-base md:text-lg text-muted-foreground mb-6 sm:mb-8">
+      <main className="flex-1 py-6 sm:py-8 md:py-12" style={{ background: "#EFF6F0" }}>
+        <div className="max-w-screen-xl mx-auto px-4 md:px-8">
+          {/* ── Section header ── */}
+          <div className="mb-6 md:mb-8 flex items-center gap-3">
+            {/* Accent pip */}
+            <span
+              className="hidden sm:block w-1 h-6 rounded-full"
+              style={{ background: "linear-gradient(180deg,#5C7A5F,#A8C5AB)" }}
+            />
+            <div>
+              <p
+                className="text-[10px] tracking-[0.15em] uppercase font-semibold mb-0.5"
+                style={{ color: "#7A9E7E" }}
+              >
+                Curated Deals
+              </p>
+              <h1
+                className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight"
+                style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
+              >
+                Special Offers
+              </h1>
+            </div>
+          </div>
+          
+          <p
+            className="text-[13px] sm:text-[14px] mb-6 md:mb-8 max-w-2xl"
+            style={{ color: "#7A8C80" }}
+          >
             Save more with our specially curated bundle offers
           </p>
 
@@ -69,7 +92,7 @@ const Offers = () => {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {bundles.map((bundle, index) => (
                 <div
                   key={bundle.id}

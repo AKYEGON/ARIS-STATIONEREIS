@@ -148,89 +148,110 @@ const Students = () => {
       />
       <Header cartItemCount={getCartItemCount()} />
 
-      <main className="flex-1 container py-6 sm:py-8 px-3 sm:px-4">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 py-6 sm:py-8 md:py-12" style={{ background: "#EFF6F0" }}>
+        <div className="max-w-screen-xl mx-auto px-4 md:px-8">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 mb-4 text-xs sm:text-sm text-muted-foreground flex-wrap uppercase tracking-wide">
-            <button onClick={goHome} className="hover:text-primary transition-colors font-semibold">
-              FACULTIES
+          <div className="flex items-center gap-2 mb-6 text-[11px] sm:text-[12px] font-medium flex-wrap uppercase tracking-wide" style={{ color: "#7A8C80" }}>
+            <button onClick={goHome} className="transition-colors" style={{ color: "#5C7A5F" }}>
+              Faculties
             </button>
             {activeFaculty && (
               <>
                 <ChevronRight className="h-3 w-3" />
                 <button
                   onClick={() => goFaculty(activeFaculty.id)}
-                  className="hover:text-primary transition-colors font-semibold"
+                  className="transition-colors"
+                  style={{ color: "#5C7A5F" }}
                 >
-                  {activeFaculty.name.toUpperCase()}
+                  {activeFaculty.name}
                 </button>
               </>
             )}
             {activeCourse && (
               <>
                 <ChevronRight className="h-3 w-3" />
-                <span className="text-foreground font-bold">{activeCourse.name.toUpperCase()}</span>
+                <span style={{ color: "#2C3E35", fontWeight: 600 }}>{activeCourse.name}</span>
               </>
             )}
           </div>
 
           {/* Hero header */}
-          <div className="border-b border-border pb-5 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="bg-primary/10 text-primary p-2 rounded-lg">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <Badge variant="outline" className="text-[10px] uppercase tracking-widest">
-                For Students
-              </Badge>
+          <div className="mb-6 md:mb-8 flex items-center gap-3 pb-0">
+            {/* Accent pip */}
+            <span
+              className="hidden sm:block w-1 h-6 rounded-full"
+              style={{ background: "linear-gradient(180deg,#5C7A5F,#A8C5AB)" }}
+            />
+            <div>
+              <p
+                className="text-[10px] tracking-[0.15em] uppercase font-semibold mb-0.5"
+                style={{ color: "#7A9E7E" }}
+              >
+                {activeCourse ? "Course Essentials" : "Shop by Course"}
+              </p>
+              <h1
+                className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight"
+                style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
+              >
+                {activeCourse
+                  ? activeCourse.name
+                  : activeFaculty
+                  ? activeFaculty.name
+                  : "Shop by Course"}
+              </h1>
             </div>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-primary uppercase tracking-tight">
-              {activeCourse
-                ? activeCourse.name
-                : activeFaculty
-                ? activeFaculty.name
-                : "SHOP BY COURSE"}
-            </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              {activeCourse
-                ? `Stationery curated for ${activeCourse.name} students.`
-                : activeFaculty
-                ? `Choose your course in ${activeFaculty.name}.`
-                : "Find the right stationery for your course — pick a faculty to begin."}
-            </p>
           </div>
 
+          <p
+            className="text-[13px] sm:text-[14px] mb-6 md:mb-8 max-w-2xl"
+            style={{ color: "#7A8C80" }}
+          >
+            {activeCourse
+              ? `Stationery curated specifically for ${activeCourse.name} students.`
+              : activeFaculty
+              ? `Browse all courses in ${activeFaculty.name} and find the right supplies.`
+              : "Find the right stationery for your course — pick a faculty to begin."}
+          </p>
+
           {(activeFaculty || activeCourse) && (
-            <Button
-              variant="outline"
-              size="sm"
+            <button
               onClick={() => {
                 setSearch("");
                 activeCourse ? goFaculty(facultyId!) : goHome();
               }}
-              className="mb-6 uppercase tracking-wide"
+              className="mb-6 flex items-center gap-2 text-[12.5px] font-medium rounded-lg px-3.5 py-2 transition-colors"
+              style={{ color: "#5C7A5F", background: "#fff", border: "1px solid #C8DCCA" }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "#5C7A5F";
+                (e.currentTarget as HTMLElement).style.color = "#fff";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.background = "#fff";
+                (e.currentTarget as HTMLElement).style.color = "#5C7A5F";
+              }}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               {activeCourse ? "Back to Courses" : "Back to Faculties"}
-            </Button>
+            </button>
           )}
 
           {/* Search bar — visible on faculty + course pickers */}
           {!activeCourse && (
-            <div className="relative mb-5 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <div className="relative mb-6 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4" style={{ color: "#7A8C80" }} />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={activeFaculty ? "Search courses..." : "Search faculties or courses..."}
-                className="pl-9 bg-secondary border-primary/30 focus-visible:ring-primary"
+                className="pl-9 rounded-lg border"
+                style={{ borderColor: "#DDE8DF", background: "#fff" }}
               />
             </div>
           )}
 
           {loading ? (
             <div className="flex justify-center py-20">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2" style={{ borderColor: "#5C7A5F" }}></div>
             </div>
           ) : !activeFaculty ? (
             // Faculty grid (with search across faculties + courses)
@@ -240,40 +261,59 @@ const Students = () => {
                 ? faculties.filter((f) => f.name.toLowerCase().includes(q))
                 : faculties;
               return (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                   {filtered.map((f) => (
                     <button
                       key={f.id}
                       onClick={() => { setSearch(""); goFaculty(f.id); }}
                       className="group text-left"
                     >
-                      <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 border-2">
-                        <CardContent className="p-4 sm:p-6 flex flex-col items-start gap-3">
-                          <div className="bg-primary/10 text-primary p-3 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                            {renderIcon(f.icon)}
-                          </div>
-                          <div className="space-y-1">
-                            <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight leading-tight">
-                              {f.name}
-                            </h3>
-                            {f.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {f.description}
-                              </p>
-                            )}
-                          </div>
-                          <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-                            <BookOpen className="h-3 w-3 mr-1" />
-                            {counts[f.id] || 0} Courses
-                          </Badge>
-                        </CardContent>
-                      </Card>
+                      <div
+                        className="h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col p-4 sm:p-5"
+                        style={{
+                          background: "#FFFFFF",
+                          border: "1px solid #DDE8DF",
+                          boxShadow: "0 1px 4px rgba(92,122,95,0.06)",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.boxShadow =
+                            "0 10px 32px rgba(92,122,95,0.14)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.boxShadow =
+                            "0 1px 4px rgba(92,122,95,0.06)";
+                        }}
+                      >
+                        <div
+                          className="p-3 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform"
+                          style={{ background: "#EFF6F0" }}
+                        >
+                          {renderIcon(f.icon, "h-5 w-5")}
+                        </div>
+                        <h3
+                          className="font-semibold text-sm sm:text-base leading-snug mb-1"
+                          style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
+                        >
+                          {f.name}
+                        </h3>
+                        {f.description && (
+                          <p className="text-xs line-clamp-2 mb-2" style={{ color: "#7A8C80" }}>
+                            {f.description}
+                          </p>
+                        )}
+                        <p
+                          className="text-[10px] font-medium mt-auto"
+                          style={{ color: "#7A9E7E" }}
+                        >
+                          {counts[f.id] || 0} Courses
+                        </p>
+                      </div>
                     </button>
                   ))}
                   {filtered.length === 0 && (
-                    <div className="col-span-full text-center py-16 text-muted-foreground">
+                    <div className="col-span-full text-center py-16" style={{ color: "#7A8C80" }}>
                       <GraduationCap className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                      <p>No faculties match your search.</p>
+                      <p className="text-[13px] sm:text-[14px]">No faculties match your search.</p>
                     </div>
                   )}
                 </div>
@@ -290,34 +330,53 @@ const Students = () => {
                   )
                 : courses;
               return (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                   {filtered.map((c) => (
                     <button
                       key={c.id}
                       onClick={() => setSearchParams({ faculty: facultyId!, course: c.id })}
                       className="group text-left"
                     >
-                      <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 border-2">
-                        <CardContent className="p-4 sm:p-5 flex flex-col gap-2">
-                          <div className="bg-primary/10 text-primary p-2.5 rounded-lg w-fit group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                            <BookOpen className="h-5 w-5" />
-                          </div>
-                          <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight leading-tight">
-                            {c.name}
-                          </h3>
-                          {c.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {c.description}
-                            </p>
-                          )}
-                        </CardContent>
-                      </Card>
+                      <div
+                        className="h-full rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col p-4 sm:p-5"
+                        style={{
+                          background: "#FFFFFF",
+                          border: "1px solid #DDE8DF",
+                          boxShadow: "0 1px 4px rgba(92,122,95,0.06)",
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.boxShadow =
+                            "0 10px 32px rgba(92,122,95,0.14)";
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.boxShadow =
+                            "0 1px 4px rgba(92,122,95,0.06)";
+                        }}
+                      >
+                        <div
+                          className="p-2.5 rounded-lg w-fit mb-3 group-hover:scale-110 transition-transform"
+                          style={{ background: "#EFF6F0" }}
+                        >
+                          <BookOpen className="h-5 w-5" style={{ color: "#5C7A5F" }} />
+                        </div>
+                        <h3
+                          className="font-semibold text-sm sm:text-base leading-snug"
+                          style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
+                        >
+                          {c.name}
+                        </h3>
+                        {c.description && (
+                          <p className="text-xs line-clamp-2 mt-1" style={{ color: "#7A8C80" }}>
+                            {c.description}
+                          </p>
+                        )}
+                      </div>
                     </button>
                   ))}
                   {filtered.length === 0 && (
-                    <div className="col-span-full text-center py-16 text-muted-foreground">
+                    <div className="col-span-full text-center py-16" style={{ color: "#7A8C80" }}>
                       <BookOpen className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                      <p>{courses.length === 0 ? "No courses in this faculty yet." : "No courses match your search."}</p>
+                      <p className="text-[13px] sm:text-[14px]">{courses.length === 0 ? "No courses in this faculty yet." : "No courses match your search."}</p>
                     </div>
                   )}
                 </div>
@@ -327,12 +386,12 @@ const Students = () => {
             // Products for selected course
             <>
               {products.length === 0 ? (
-                <div className="text-center py-16 text-muted-foreground">
+                <div className="text-center py-16" style={{ color: "#7A8C80" }}>
                   <Package className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                  <p>No stationery has been allocated to this course yet.</p>
+                  <p className="text-[13px] sm:text-[14px]">No stationery has been allocated to this course yet.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                   {products.map((p) => (
                     <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
                   ))}

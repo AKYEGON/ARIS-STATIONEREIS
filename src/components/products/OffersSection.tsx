@@ -1,21 +1,22 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import BundleCard from "./BundleCard";
 import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 
-
-const AUTO_SCROLL_INTERVAL = 3000;
+const AUTO_SCROLL_INTERVAL = 4000;
 
 const OffersSection = () => {
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addBundleToCart } = useCart();
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
+  const [isInteracting, setIsInteracting] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
 
   useEffect(() => {
     fetchBundles();
@@ -25,17 +26,10 @@ const OffersSection = () => {
     try {
       const { data, error } = await supabase
         .from("bundles")
-        .select(`
-          *,
-          items:bundle_items(
-            *,
-            product:products(*)
-          )
-        `)
+        .select(`*, items:bundle_items(*, product:products(*))`)
         .eq("is_active", true)
         .order("display_order", { ascending: false })
-        .limit(6);
-
+        .limit(8);
       if (error) throw error;
       setBundles(data || []);
     } catch (error) {
@@ -45,85 +39,152 @@ const OffersSection = () => {
     }
   };
 
+  // Calculate scroll progress for the sleek indicator bar
+  const handleScroll = useCallback(() => {
+    if (!containerRef.current) return;
+    const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+    const maxScroll = scrollWidth - clientWidth;
+    if (maxScroll <= 0) return setScrollProgress(0);
+    const progress = (scrollLeft / maxScroll) * 100;
+    setScrollProgress(progress);
+  }, []);
+
   const scroll = useCallback((direction: "left" | "right") => {
     const container = containerRef.current;
     if (!container) return;
-
-    const cardWidth = container.querySelector("div")?.offsetWidth || 160;
-    const gap = 8;
-    const scrollAmount = direction === "left" ? -(cardWidth + gap) : (cardWidth + gap);
     
-    // If at the end, loop back to start
-    if (direction === "right" && 
-        container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
+    // Dynamically grab the width of the first card + gap
+    const cardElement = container.firstElementChild as HTMLElement;
+    if (!cardElement) return;
+    
+    const scrollAmount = cardElement.offsetWidth + 24; // 24px is the gap-6
+    
+    if (
+      direction === "right" &&
+      container.scrollLeft + container.clientWidth >= container.scrollWidth - 10
+    ) {
+      // Loop back to start smoothly
       container.scrollTo({ left: 0, behavior: "smooth" });
     } else {
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
+      container.scrollBy({ 
+        left: direction === "left" ? -scrollAmount : scrollAmount, 
+        behavior: "smooth" 
+      });
     }
   }, []);
 
-  // Auto-scroll
+  // Auto-scroll logic (pauses on hover/touch)
   useEffect(() => {
-    if (bundles.length <= 1 || isPaused) return;
-
-    autoScrollRef.current = setInterval(() => {
-      scroll("right");
-    }, AUTO_SCROLL_INTERVAL);
-
-    return () => {
+    if (bundles.length <= 1 || isInteracting) {
       if (autoScrollRef.current) clearInterval(autoScrollRef.current);
+      return;
+    }
+    
+    autoScrollRef.current = setInterval(() => scroll("right"), AUTO_SCROLL_INTERVAL);
+    return () => { 
+      if (autoScrollRef.current) clearInterval(autoScrollRef.current); 
     };
-  }, [bundles.length, isPaused, scroll]);
+  }, [bundles.length, isInteracting, scroll]);
+
+  // Attach scroll listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      handleScroll(); // Init
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, [handleScroll, bundles.length]);
 
   if (isLoading || bundles.length === 0) return null;
 
   return (
-    <section className="py-2 sm:py-3 md:py-6 px-3 sm:px-4 bg-muted/30">
-      <div className="container max-w-4xl md:max-w-6xl">
-        <div className="flex items-center justify-between mb-1.5 md:mb-4">
-          <h2 className="text-sm sm:text-base md:text-lg font-bold text-primary">
-            Special Offers
-          </h2>
-          <Link to="/offers">
-            <Button variant="outline" size="sm" className="text-[10px] sm:text-xs md:text-sm h-6 md:h-8 px-2 md:px-3">View All</Button>
-          </Link>
-        </div>
+    <section className="relative py-12 md:py-20 bg-[#F8FAF9] border-b border-[#E5EBE6] overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 xl:px-12">
+        
+        {/* ── Editorial Header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-6">
+          <div className="max-w-2xl">
+            <span className="inline-flex items-center gap-2 text-xs font-bold tracking-[0.2em] uppercase text-[#5C7A5F] mb-3">
+              <span className="w-8 h-[2px] bg-[#5C7A5F]" />
+              Curated Deals
+            </span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium tracking-tight text-[#2C3E35] font-serif">
+              Exclusive Bundles
+            </h2>
+          </div>
 
-        {/* Desktop: Grid layout */}
-        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {bundles.map((bundle, index) => (
-            <div
-              key={bundle.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+          <div className="flex items-center gap-4">
+            <Link
+              to="/offers"
+              className="group flex items-center gap-2 text-sm font-semibold text-[#2C3E35] pb-1 border-b border-[#2C3E35]/30 hover:border-[#2C3E35] transition-colors"
             >
-              <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
+              Explore All Offers
+              <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
+            </Link>
+
+            {/* Premium Navigation Arrows */}
+            <div className="hidden md:flex items-center gap-2 ml-4">
+              <button
+                onClick={() => scroll("left")}
+                className="w-11 h-11 flex items-center justify-center rounded-full border border-[#DDE8DF] bg-white text-[#4A5C50] transition-all hover:bg-[#2C3E35] hover:text-white hover:border-[#2C3E35] hover:scale-105 active:scale-95"
+                aria-label="Previous items"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => scroll("right")}
+                className="w-11 h-11 flex items-center justify-center rounded-full border border-[#DDE8DF] bg-white text-[#4A5C50] transition-all hover:bg-[#2C3E35] hover:text-white hover:border-[#2C3E35] hover:scale-105 active:scale-95"
+                aria-label="Next items"
+              >
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Mobile: Horizontal scroll */}
+        {/* ── Fluid Carousel Track ── */}
         <div 
-          className="relative md:hidden"
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setTimeout(() => setIsPaused(false), 5000)}
+          className="-mx-4 px-4 md:-mx-8 md:px-8 xl:-mx-12 xl:px-12"
+          onMouseEnter={() => setIsInteracting(true)}
+          onMouseLeave={() => setIsInteracting(false)}
+          onTouchStart={() => setIsInteracting(true)}
+          onTouchEnd={() => setIsInteracting(false)}
         >
           <div
             ref={containerRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-8 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
-            {bundles.map((bundle, index) => (
+            {bundles.map((bundle, i) => (
               <div
                 key={bundle.id}
-                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start animate-fade-in flex-shrink-0"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="snap-start flex-shrink-0 w-[260px] sm:w-[300px] md:w-[340px] animate-fade-in group"
+                style={{ animationDelay: `${i * 0.1}s` }}
               >
-                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
+                {/* Assumes BundleCard will fill its container. 
+                  The subtle hover scale here adds a tactile feel. 
+                */}
+                <div className="h-full transition-transform duration-500 ease-out group-hover:-translate-y-1">
+                  <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact={false} />
+                </div>
               </div>
             ))}
+            
+            {/* Spacer to allow the last item to scroll fully into view with proper right padding */}
+            <div className="flex-shrink-0 w-1 md:w-4" />
           </div>
         </div>
+
+        {/* ── Smart Progress Indicator ── */}
+        {bundles.length > 2 && (
+          <div className="max-w-[200px] mx-auto mt-2 h-1 bg-[#DDE8DF] rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-[#5C7A5F] rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${Math.max(10, scrollProgress)}%` }}
+            />
+          </div>
+        )}
+
       </div>
     </section>
   );
