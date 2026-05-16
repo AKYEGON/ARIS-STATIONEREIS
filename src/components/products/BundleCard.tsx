@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, X, ShoppingBag, Check, HelpCircle } from "lucide-react";
+import { createPortal } from "react-dom"; // CRITICAL: Escapes the carousel transform trap
+import { Plus, X, ShoppingBag, Check } from "lucide-react";
 import { Bundle } from "@/types/bundle";
 
 interface BundleCardProps {
@@ -11,8 +12,13 @@ interface BundleCardProps {
 const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAdded, setIsAdded] = useState(false);
+  const [mounted, setMounted] = useState(false); // Ensures SSR safety for Next.js environments
 
-  // Fallback calculations matching your previous structure safely
+  // Handle client-side mounting for the Portal system safely
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const bPrice = bundle.bundle_price;
   const oPrice = bundle.original_total_price;
   const savings = oPrice - bPrice;
@@ -29,7 +35,7 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
   }, [isModalOpen]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Avoid triggering open modal if fired from underlying surfaces
+    e.stopPropagation(); 
     onAddToCart(bundle);
     setIsAdded(true);
     setTimeout(() => setIsAdded(false), 2000);
@@ -37,10 +43,10 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
 
   return (
     <>
-      {/* ── 1. The Luxury Display Card ── */}
+      {/* ── 1. The Luxury Display Card (Remains inside the Slider track safely) ── */}
       <div 
         onClick={() => setIsModalOpen(true)}
-        className="group relative flex flex-col h-full bg-white border border-[#DDE8DF]/60 rounded-sm overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-[0_12px_30px_-6px_rgba(92,122,95,0.08)]"
+        className="group relative flex flex-col h-full w-full min-w-[240px] bg-white border border-[#DDE8DF]/60 rounded-sm overflow-hidden cursor-pointer transition-all duration-500 hover:shadow-[0_12px_30px_-6px_rgba(92,122,95,0.08)]"
       >
         {/* Media Window - Elegant 3:4 Aspect Portrait Ratio */}
         <div className="relative aspect-[3/4] w-full bg-[#F4F7F5] overflow-hidden">
@@ -99,22 +105,22 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
         </div>
       </div>
 
-      {/* ── 2. The Editorial Quick-Add Modal Overlay ── */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-10 animate-fade-in">
+      {/* ── 2. The Editorial Quick-Add Modal Overlay (Teleported directly to document body) ── */}
+      {isModalOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 md:p-10 isolation-auto">
           {/* Blur Darkened Backdrop Matrix */}
           <div 
             onClick={() => setIsModalOpen(false)}
-            className="absolute inset-0 bg-[#1e2b25]/50 backdrop-blur-md"
+            className="fixed inset-0 bg-[#1e2b25]/50 backdrop-blur-md transition-opacity duration-300"
           />
 
           {/* Main Structural Display Frame */}
-          <div className="relative w-full max-w-4xl max-h-[85vh] md:max-h-[640px] bg-white rounded-none shadow-2xl overflow-hidden flex flex-col md:flex-row z-10 animate-slide-up">
+          <div className="relative w-full max-w-4xl max-h-[85vh] md:max-h-[640px] bg-white rounded-none shadow-2xl overflow-hidden flex flex-col md:flex-row z-50 animate-slide-up">
             
             {/* Native Window Close Button Anchor */}
             <button 
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-4 right-4 z-20 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full text-[#2C3E35] border border-[#DDE8DF]/40 hover:bg-[#2C3E35] hover:text-white transition-colors"
+              className="absolute top-4 right-4 z-50 w-9 h-9 flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full text-[#2C3E35] border border-[#DDE8DF]/40 hover:bg-[#2C3E35] hover:text-white transition-colors"
               aria-label="Close panel"
             >
               <X className="w-4 h-4" />
@@ -204,7 +210,8 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body // Teleports rendering out of the slider node cleanly into root document space
       )}
     </>
   );
