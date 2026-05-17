@@ -97,29 +97,6 @@ const OffersSection = () => {
             ))}
           </div>
         </div>
-
-        {/* Mobile: Horizontal scroll */}
-        <div 
-          className="relative md:hidden"
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setTimeout(() => setIsPaused(false), 5000)}
-        >
-          <div
-            ref={containerRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {bundles.map((bundle, index) => (
-              <div
-                key={bundle.id}
-                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start animate-fade-in flex-shrink-0"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
