@@ -180,6 +180,96 @@ export type Database = {
           },
         ]
       }
+      course_bundle_items: {
+        Row: {
+          course_bundle_id: string
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+        }
+        Insert: {
+          course_bundle_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+        }
+        Update: {
+          course_bundle_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+        }
+        Relationships: []
+      }
+      course_bundles: {
+        Row: {
+          bundle_price: number
+          course_id: string
+          course_year_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image: string
+          is_active: boolean
+          name: string
+          original_total_price: number
+          updated_at: string
+        }
+        Insert: {
+          bundle_price: number
+          course_id: string
+          course_year_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image: string
+          is_active?: boolean
+          name: string
+          original_total_price: number
+          updated_at?: string
+        }
+        Update: {
+          bundle_price?: number
+          course_id?: string
+          course_year_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image?: string
+          is_active?: boolean
+          name?: string
+          original_total_price?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      course_product_years: {
+        Row: {
+          course_product_id: string
+          course_year_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          course_product_id: string
+          course_year_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          course_product_id?: string
+          course_year_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
       course_products: {
         Row: {
           course_id: string
@@ -218,6 +308,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      course_years: {
+        Row: {
+          course_id: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          label: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          label?: string
+        }
+        Relationships: []
       }
       courses: {
         Row: {

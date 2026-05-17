@@ -11,10 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Plus, Pencil, Trash2, GraduationCap, BookOpen, Package, ChevronRight, ArrowLeft, icons,
+  Plus, Pencil, Trash2, GraduationCap, BookOpen, Package, ChevronRight, ArrowLeft, Layers, icons,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CourseYearsDialog } from "./CourseYearsDialog";
+import { CourseBundlesDialog } from "./CourseBundlesDialog";
 
 const SUGGESTED_ICONS = [
   "GraduationCap", "Wrench", "FlaskConical", "Stethoscope", "Scale",
@@ -61,8 +63,17 @@ export const FacultyManager = () => {
   const [activeCourse, setActiveCourse] = useState<Course | null>(null);
   const [allProducts, setAllProducts] = useState<ProductLite[]>([]);
   const [assignedProductIds, setAssignedProductIds] = useState<Set<string>>(new Set());
+  // courseProductId per productId for the active course
+  const [cpIdByProduct, setCpIdByProduct] = useState<Record<string, string>>({});
+  // courseYears for active course
+  const [courseYears, setCourseYears] = useState<{ id: string; label: string }[]>([]);
+  // For each productId: Set of course_year_ids it is tagged to (empty = all years)
+  const [productYearTags, setProductYearTags] = useState<Record<string, Set<string>>>({});
   const [productSearch, setProductSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const [yearsDialogCourse, setYearsDialogCourse] = useState<Course | null>(null);
+  const [bundlesDialogCourse, setBundlesDialogCourse] = useState<Course | null>(null);
 
   // Faculty form
   const [facDialogOpen, setFacDialogOpen] = useState(false);
@@ -95,17 +106,39 @@ export const FacultyManager = () => {
   };
 
   const fetchProductsForCourse = async (courseId: string) => {
-    const { data: prods } = await supabase
-      .from("products")
-      .select("id, name, image, price")
-      .order("name", { ascending: true });
+    const [{ data: prods }, { data: assigned }, { data: yrs }] = await Promise.all([
+      supabase.from("products").select("id, name, image, price").order("name", { ascending: true }),
+      supabase.from("course_products").select("id, product_id").eq("course_id", courseId),
+      supabase.from("course_years").select("id, label").eq("course_id", courseId).eq("is_active", true).order("display_order"),
+    ]);
     setAllProducts((prods as ProductLite[]) || []);
+    setCourseYears((yrs as { id: string; label: string }[]) || []);
 
-    const { data: assigned } = await supabase
-      .from("course_products")
-      .select("product_id")
-      .eq("course_id", courseId);
-    setAssignedProductIds(new Set((assigned || []).map((r: any) => r.product_id)));
+    const cpMap: Record<string, string> = {};
+    const assignedIds = new Set<string>();
+    (assigned || []).forEach((r: any) => {
+      cpMap[r.product_id] = r.id;
+      assignedIds.add(r.product_id);
+    });
+    setCpIdByProduct(cpMap);
+    setAssignedProductIds(assignedIds);
+
+    const cpIds = Object.values(cpMap);
+    const tagMap: Record<string, Set<string>> = {};
+    if (cpIds.length > 0) {
+      const { data: tagRows } = await supabase
+        .from("course_product_years")
+        .select("course_product_id, course_year_id")
+        .in("course_product_id", cpIds);
+      const productByCpId: Record<string, string> = {};
+      Object.entries(cpMap).forEach(([pid, cpid]) => { productByCpId[cpid] = pid; });
+      (tagRows || []).forEach((r: any) => {
+        const pid = productByCpId[r.course_product_id];
+        if (!pid) return;
+        (tagMap[pid] ||= new Set()).add(r.course_year_id);
+      });
+    }
+    setProductYearTags(tagMap);
   };
 
   useEffect(() => {
@@ -189,11 +222,14 @@ export const FacultyManager = () => {
   const toggleProduct = async (productId: string, checked: boolean) => {
     if (!activeCourse) return;
     if (checked) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("course_products")
-        .insert({ course_id: activeCourse.id, product_id: productId });
-      if (error) return toast.error("Failed to assign");
+        .insert({ course_id: activeCourse.id, product_id: productId })
+        .select("id")
+        .single();
+      if (error || !data) return toast.error("Failed to assign");
       setAssignedProductIds((prev) => new Set(prev).add(productId));
+      setCpIdByProduct((prev) => ({ ...prev, [productId]: data.id }));
     } else {
       const { error } = await supabase
         .from("course_products")
@@ -204,6 +240,48 @@ export const FacultyManager = () => {
       setAssignedProductIds((prev) => {
         const next = new Set(prev);
         next.delete(productId);
+        return next;
+      });
+      setCpIdByProduct((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
+      setProductYearTags((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
+    }
+  };
+
+  const toggleProductYear = async (productId: string, yearId: string, checked: boolean) => {
+    const cpId = cpIdByProduct[productId];
+    if (!cpId) return;
+    if (checked) {
+      const { error } = await supabase
+        .from("course_product_years")
+        .insert({ course_product_id: cpId, course_year_id: yearId });
+      if (error) return toast.error("Failed to tag year");
+      setProductYearTags((prev) => {
+        const next = { ...prev };
+        const set = new Set(next[productId] || []);
+        set.add(yearId);
+        next[productId] = set;
+        return next;
+      });
+    } else {
+      const { error } = await supabase
+        .from("course_product_years")
+        .delete()
+        .eq("course_product_id", cpId)
+        .eq("course_year_id", yearId);
+      if (error) return toast.error("Failed to untag year");
+      setProductYearTags((prev) => {
+        const next = { ...prev };
+        const set = new Set(next[productId] || []);
+        set.delete(yearId);
+        next[productId] = set;
         return next;
       });
     }
@@ -353,10 +431,16 @@ export const FacultyManager = () => {
                     )}
                   </div>
                 </button>
-                <Badge variant="outline" className="text-[10px] shrink-0">
-                  <Package className="h-3 w-3 mr-1" /> Allocate
-                </Badge>
-                <div className="flex gap-1 shrink-0">
+                <div className="flex gap-1 shrink-0 flex-wrap justify-end">
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setYearsDialogCourse(c)}>
+                    <Layers className="h-3 w-3 mr-1" /> Years
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setBundlesDialogCourse(c)}>
+                    <Package className="h-3 w-3 mr-1" /> Bundles
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => { setActiveCourse(c); setView("products"); fetchProductsForCourse(c.id); }}>
+                    <Package className="h-3 w-3 mr-1" /> Allocate
+                  </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditCourse(c)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
@@ -389,21 +473,47 @@ export const FacultyManager = () => {
               <div className="space-y-1">
                 {filteredProducts.map((p) => {
                   const checked = assignedProductIds.has(p.id);
+                  const tags = productYearTags[p.id] || new Set<string>();
                   return (
-                    <label
-                      key={p.id}
-                      className="flex items-center gap-3 p-2 rounded hover:bg-muted cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(v) => toggleProduct(p.id, !!v)}
-                      />
-                      <img src={p.image} alt={p.name} className="h-10 w-10 object-contain rounded bg-muted" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">Ksh {p.price.toFixed(0)}</p>
-                      </div>
-                    </label>
+                    <div key={p.id} className="rounded hover:bg-muted p-2">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <Checkbox checked={checked} onCheckedChange={(v) => toggleProduct(p.id, !!v)} />
+                        <img src={p.image} alt={p.name} className="h-10 w-10 object-contain rounded bg-muted" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{p.name}</p>
+                          <p className="text-xs text-muted-foreground">Ksh {p.price.toFixed(0)}</p>
+                        </div>
+                      </label>
+                      {checked && courseYears.length > 0 && (
+                        <div className="pl-8 pt-2 flex flex-wrap gap-1.5">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground self-center mr-1">
+                            Years:
+                          </span>
+                          {courseYears.map((y) => {
+                            const on = tags.has(y.id);
+                            return (
+                              <button
+                                key={y.id}
+                                type="button"
+                                onClick={() => toggleProductYear(p.id, y.id, !on)}
+                                className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide border transition-colors ${
+                                  on
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : "bg-background border-border hover:border-primary/50"
+                                }`}
+                              >
+                                {y.label}
+                              </button>
+                            );
+                          })}
+                          {tags.size === 0 && (
+                            <span className="text-[10px] text-muted-foreground italic self-center">
+                              (visible in all years)
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
                 {filteredProducts.length === 0 && (
@@ -411,6 +521,11 @@ export const FacultyManager = () => {
                 )}
               </div>
             </ScrollArea>
+            {activeCourse && courseYears.length === 0 && (
+              <p className="text-[11px] text-amber-600 italic">
+                💡 Add years on this course (Years button) to tag products to specific academic years.
+              </p>
+            )}
           </div>
         )}
       </CardContent>
@@ -491,6 +606,28 @@ export const FacultyManager = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {yearsDialogCourse && (
+        <CourseYearsDialog
+          open={!!yearsDialogCourse}
+          onOpenChange={(o) => {
+            if (!o) {
+              setYearsDialogCourse(null);
+              if (activeCourse?.id === yearsDialogCourse.id) fetchProductsForCourse(activeCourse.id);
+            }
+          }}
+          courseId={yearsDialogCourse.id}
+          courseName={yearsDialogCourse.name}
+        />
+      )}
+      {bundlesDialogCourse && (
+        <CourseBundlesDialog
+          open={!!bundlesDialogCourse}
+          onOpenChange={(o) => { if (!o) setBundlesDialogCourse(null); }}
+          courseId={bundlesDialogCourse.id}
+          courseName={bundlesDialogCourse.name}
+        />
+      )}
     </Card>
   );
 };
