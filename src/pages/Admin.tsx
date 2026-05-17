@@ -3261,6 +3261,13 @@ const Admin = () => {
         }}
       />
 
+      <ProductCoursesDialog
+        open={!!coursesDialogProduct}
+        onOpenChange={(v) => { if (!v) setCoursesDialogProduct(null); }}
+        productId={coursesDialogProduct?.id ?? null}
+        productName={coursesDialogProduct?.name}
+      />
+
       {/* Order Status Modal */}
       {pendingStatusChange && (() => {
         const orderForModal = ordersList.find(o => o.id === pendingStatusChange.orderId);
