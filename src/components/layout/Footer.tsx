@@ -67,7 +67,26 @@ const Footer = () => {
                 </Link>
               </div>
             </div>
-            
+
+            {/* Shop by Category - SEO internal links */}
+            <div className="col-span-2 sm:col-span-2">
+              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
+                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
+                Shop by Category
+              </h4>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 sm:gap-y-2">
+                {categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/category/${c.slug}`}
+                    className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all truncate"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             {/* Contact + Admin combined on mobile */}
             <div>
               <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
