@@ -149,6 +149,29 @@ export const EmployeeManagement = () => {
     }
   };
 
+  const handleSaveZone = async () => {
+    if (!zoneEditMember) return;
+    setZoneSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-staff', {
+        body: {
+          action: 'set-zone',
+          user_id: zoneEditMember.id,
+          zone_id: zoneEditValue === "none" ? null : zoneEditValue,
+        }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Zone updated");
+      setZoneEditMember(null);
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update zone");
+    } finally {
+      setZoneSaving(false);
+    }
+  };
+
   const handleRemoveStaff = async (member: RegisteredUser) => {
     const name = member.profile?.name || member.email;
     if (!confirm(`Remove ${name} from staff? They will lose all access.`)) return;
