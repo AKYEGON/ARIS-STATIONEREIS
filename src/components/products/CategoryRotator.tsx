@@ -136,7 +136,7 @@ const MobileVerticalRotator = ({
                 type="button"
                 onClick={() => onSelectCategory(it.name)}
                 className={cn(
-                  "flex items-center gap-2 px-3 text-sm border-r border-border/40 transition-colors shrink-0 h-full",
+                  "flex items-center gap-2 px-3 text-sm border-r-2 border-primary transition-colors shrink-0 h-full",
                   isActive
                     ? "text-primary font-semibold"
                     : "text-foreground"
@@ -152,19 +152,6 @@ const MobileVerticalRotator = ({
             );
           })}
         </div>
-
-        {/* Centered green spotlight — whichever item is rotating through the middle
-            appears tinted light green with a green border underline */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 left-1/2 -translate-x-1/2 rounded-md"
-          style={{
-            width: "40%",
-            background: "hsl(var(--primary) / 0.18)",
-            boxShadow:
-              "inset 0 -2px 0 0 hsl(var(--primary)), inset 0 0 0 1px hsl(var(--primary) / 0.45)",
-          }}
-        />
       </div>
     </div>
   );
