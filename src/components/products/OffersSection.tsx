@@ -89,21 +89,21 @@ const OffersSection = () => {
           </Link>
         </div>
 
-        {/* Desktop: Vertical marquee — fixed height row that rotates cards upward in a straight line */}
+        {/* Desktop: Horizontal marquee — single row that rotates cards sideways, fixed height */}
         <div
-          className="hidden md:block relative overflow-hidden h-[280px] lg:h-[320px]"
+          className="hidden md:block relative overflow-hidden"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+            className="flex gap-4 w-max"
             style={{
-              animation: `vertical-marquee ${Math.max(bundles.length * 3, 12)}s linear infinite`,
+              animation: `horizontal-marquee ${Math.max(bundles.length * 5, 20)}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
             }}
           >
             {[...bundles, ...bundles].map((bundle, index) => (
-              <div key={`${bundle.id}-${index}`}>
+              <div key={`${bundle.id}-${index}`} className="w-[220px] lg:w-[240px] flex-shrink-0">
                 <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
               </div>
             ))}
