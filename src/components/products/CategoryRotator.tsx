@@ -2,7 +2,8 @@
 import { ProductCategory } from "@/types/product";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Package, icons } from "lucide-react";
+import { Package, ChevronRight, icons } from "lucide-react";
+import { useState } from "react";
 
 const getLucideIcon = (iconName: string | null, className = "h-4 w-4 shrink-0") => {
   if (!iconName) return <Package className={className} />;
@@ -43,42 +44,11 @@ const CategoryRotator = ({
     <section className="container px-4 pb-4">
       <div className="max-w-xl mx-auto">
         {useNativeSelectOnMobile && (
-          <div className="md:hidden">
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={() => onSelectCategory("all")}
-                className={cn(
-                  "flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
-                  selectedCategory === "all"
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-primary/30 text-foreground hover:bg-secondary"
-                )}
-              >
-                <Package className="h-4 w-4 shrink-0" />
-                <span className="truncate">All Categories</span>
-              </button>
-              {categories.map((cat) => {
-                const isActive = selectedCategory === cat.name;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => onSelectCategory(cat.name)}
-                    className={cn(
-                      "flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-primary/30 text-foreground hover:bg-secondary"
-                    )}
-                  >
-                    {getLucideIcon(cat.icon)}
-                    <span className="truncate">{cat.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <MobileVerticalRotator
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={onSelectCategory}
+          />
         )}
 
         <div className={cn(useNativeSelectOnMobile && "hidden md:block")}>
@@ -113,6 +83,91 @@ const CategoryRotator = ({
         </div>
       </div>
     </section>
+  );
+};
+
+interface MobileVerticalRotatorProps {
+  categories: ProductCategory[];
+  selectedCategory: string;
+  onSelectCategory: (category: string) => void;
+}
+
+const MobileVerticalRotator = ({
+  categories,
+  selectedCategory,
+  onSelectCategory,
+}: MobileVerticalRotatorProps) => {
+  const [isPaused, setIsPaused] = useState(false);
+
+  const items = [
+    { id: "__all__", name: "all", label: "All Categories", icon: null as string | null },
+    ...categories.map((c) => ({ id: c.id, name: c.name, label: c.name, icon: c.icon })),
+  ];
+
+  const ROW_H = 44; // px per row
+  const visibleRows = Math.min(items.length, 5);
+  const containerH = visibleRows * ROW_H;
+  // Slow rotation: ~2.2s per row
+  const durationS = Math.max(items.length * 2.2, 12);
+
+  return (
+    <div className="md:hidden">
+      <div className="flex gap-2">
+        {/* Green pointer column */}
+        <div
+          className="flex flex-col items-center justify-center shrink-0 rounded-md bg-primary/10 border border-primary/30"
+          style={{ width: 28, height: containerH }}
+          aria-hidden="true"
+        >
+          <ChevronRight className="h-5 w-5 text-primary" />
+        </div>
+
+        {/* Vertical marquee viewport */}
+        <div
+          className="relative flex-1 overflow-hidden rounded-md border border-primary/20 bg-background"
+          style={{ height: containerH, contain: "layout paint", isolation: "isolate" }}
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
+        >
+          <div
+            className="flex flex-col will-change-transform"
+            style={{
+              animation: `vertical-marquee ${durationS}s linear infinite`,
+              animationPlayState: isPaused ? "paused" : "running",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
+            }}
+          >
+            {[...items, ...items].map((it, idx) => {
+              const isActive = selectedCategory === it.name;
+              return (
+                <button
+                  key={`${it.id}-${idx}`}
+                  type="button"
+                  onClick={() => onSelectCategory(it.name)}
+                  style={{ height: ROW_H }}
+                  className={cn(
+                    "flex items-center gap-2 w-full text-left px-3 text-sm border-b border-border/40 last:border-b-0 transition-colors",
+                    isActive
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-foreground hover:bg-secondary"
+                  )}
+                >
+                  {it.name === "all" ? (
+                    <Package className="h-4 w-4 shrink-0 text-primary" />
+                  ) : (
+                    getLucideIcon(it.icon)
+                  )}
+                  <span className="truncate">{it.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
