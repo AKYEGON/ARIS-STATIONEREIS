@@ -111,58 +111,46 @@ const MobileVerticalRotator = ({
 
   return (
     <div className="md:hidden">
-      <div className="flex items-stretch gap-2">
-        {/* Green pointer (left) */}
+      <div
+        className="relative overflow-hidden rounded-md border border-primary/20 bg-background"
+        style={{ height: HEIGHT, contain: "layout paint", isolation: "isolate" }}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        onTouchStart={() => setIsPaused(true)}
+        onTouchEnd={() => setIsPaused(false)}
+      >
         <div
-          className="flex items-center justify-center shrink-0 rounded-md bg-primary/10 border border-primary/30"
-          style={{ width: 28, height: HEIGHT }}
-          aria-hidden="true"
+          className="flex w-max will-change-transform h-full"
+          style={{
+            animation: `horizontal-marquee ${durationS}s linear infinite`,
+            animationPlayState: isPaused ? "paused" : "running",
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+          }}
         >
-          <ChevronRight className="h-5 w-5 text-primary" />
-        </div>
-
-        {/* Horizontal marquee viewport */}
-        <div
-          className="relative flex-1 overflow-hidden rounded-md border border-primary/20 bg-background"
-          style={{ height: HEIGHT, contain: "layout paint", isolation: "isolate" }}
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
-        >
-          <div
-            className="flex w-max will-change-transform h-full"
-            style={{
-              animation: `horizontal-marquee ${durationS}s linear infinite`,
-              animationPlayState: isPaused ? "paused" : "running",
-              transform: "translateZ(0)",
-              backfaceVisibility: "hidden",
-            }}
-          >
-            {[...items, ...items].map((it, idx) => {
-              const isActive = selectedCategory === it.name;
-              return (
-                <button
-                  key={`${it.id}-${idx}`}
-                  type="button"
-                  onClick={() => onSelectCategory(it.name)}
-                  className={cn(
-                    "flex items-center gap-2 px-3 text-sm border-r border-border/40 transition-colors shrink-0 h-full",
-                    isActive
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-foreground hover:bg-secondary"
-                  )}
-                >
-                  {it.name === "all" ? (
-                    <Package className="h-4 w-4 shrink-0 text-primary" />
-                  ) : (
-                    getLucideIcon(it.icon)
-                  )}
-                  <span className="whitespace-nowrap">{it.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          {[...items, ...items].map((it, idx) => {
+            const isActive = selectedCategory === it.name;
+            return (
+              <button
+                key={`${it.id}-${idx}`}
+                type="button"
+                onClick={() => onSelectCategory(it.name)}
+                className={cn(
+                  "flex items-center gap-2 px-3 text-sm border-r border-border/40 transition-colors shrink-0 h-full",
+                  isActive
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "text-foreground hover:bg-secondary"
+                )}
+              >
+                {it.name === "all" ? (
+                  <Package className={cn("h-4 w-4 shrink-0", isActive ? "text-primary-foreground" : "text-primary")} />
+                ) : (
+                  getLucideIcon(it.icon)
+                )}
+                <span className="whitespace-nowrap">{it.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
