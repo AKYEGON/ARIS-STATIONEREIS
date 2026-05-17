@@ -166,10 +166,74 @@ const CategoryLanding = () => {
     );
   }
 
-  const title = `${category.name} in Kenya — Buy Online`;
-  const description = `Shop ${category.name.toLowerCase()} at Aris Stationeries Nairobi. Affordable prices, fast delivery countrywide, and trusted by students across UoN, Kenyatta, Strathmore, JKUAT and USIU. ${products.length} products available.`;
+  const COPY: Record<string, { title: string; desc: string; intro: string }> = {
+    "notebooks-books": {
+      title: "Notebooks & Exercise Books in Kenya",
+      desc: "A5, A6 and A4 notebooks, exercise books and journals from KSh 30. Same-day pickup in Nairobi, delivery countrywide.",
+      intro: "Notebooks from KSh 30. Exercise books, A5 hardcovers, leather journals, gazzel notebooks and spiral pads — all in stock and ready today. Order on WhatsApp +254 119 774470 for instant pricing or pick up at our Nairobi shop.",
+    },
+    "scientific-calculators": {
+      title: "Scientific Calculators in Kenya",
+      desc: "Casio fx-991EX, fx-82MS and more. Genuine units, best prices in Nairobi, delivered the same day.",
+      intro: "Genuine Casio scientific calculators — fx-991EX (552 functions), fx-82MS and the full school range. Lowest verified prices in Nairobi, sealed boxes, one-year guarantee. WhatsApp +254 119 774470 and we'll deliver today.",
+    },
+    "engineering-drawing": {
+      title: "Engineering & Drawing Sets in Kenya",
+      desc: "T-squares, set squares, French curves, scale rulers and drawing boards for UoN, JKUAT, Kenyatta and Strathmore students.",
+      intro: "Everything an engineering or architecture student needs — T-squares, set squares, French curves, scale rulers, drawing boards. Stocked for first-year kits at UoN, JKUAT, Kenyatta, Strathmore and USIU. WhatsApp +254 119 774470 for a full kit price.",
+    },
+    "mathematics-equipments": {
+      title: "Mathematics Sets & Equipment in Kenya",
+      desc: "Geometry sets, compasses, protractors and rulers for school and exam use. Affordable, in stock, delivered fast.",
+      intro: "Geometry sets, compasses, protractors, rulers and dividers — exam-ready and priced for parents and students. Same-day pickup in Nairobi, countrywide delivery. WhatsApp +254 119 774470 to order.",
+    },
+    "writing-instruments": {
+      title: "Pens & Writing Instruments in Kenya",
+      desc: "BIC, M&G, Staedtler pens and pencils. Singles, boxes and bulk orders at wholesale rates.",
+      intro: "Pens, pencils, markers and refills from BIC, M&G and Staedtler — singles or full boxes. Wholesale rates for offices, schools and resellers. WhatsApp +254 119 774470 for a quote.",
+    },
+    "filing-organization": {
+      title: "Files, Folders & Office Organization in Kenya",
+      desc: "Box files, lever arch files, document wallets and dividers. Bulk pricing for offices and law firms.",
+      intro: "Box files, lever arch files, document wallets, ring binders and dividers — everything to keep an office in order. Bulk pricing for firms, schools and clinics. WhatsApp +254 119 774470 for a quote.",
+    },
+    "art-craft-supplies": {
+      title: "Art & Craft Supplies in Kenya",
+      desc: "Sketchbooks, brushes, paints, charcoal and craft kits for artists and design students.",
+      intro: "Sketchbooks, brushes, watercolours, charcoal and craft kits — picked for art and design students across Nairobi. Restocked weekly. WhatsApp +254 119 774470 if you need a specific item.",
+    },
+    "office-supplies": {
+      title: "Office Supplies in Kenya",
+      desc: "Staplers, punches, tape, sticky notes, paper and everything an office runs on. Bulk orders welcome.",
+      intro: "Staplers, punches, tape dispensers, sticky notes, printer paper — the everyday office essentials, in stock and priced for bulk orders. WhatsApp +254 119 774470 for an office quote.",
+    },
+    "exam-essentials": {
+      title: "Exam Essentials in Kenya",
+      desc: "KCSE and university exam packs — pens, pencils, foolscaps, calculators and geometry sets in one go.",
+      intro: "Exam-day essentials in one drop — pens, pencils, foolscaps, calculators, geometry sets and pad covers. Save by buying the bundle. WhatsApp +254 119 774470 to reserve before your exam date.",
+    },
+    "gifts-accessories": {
+      title: "Stationery Gifts & Accessories in Kenya",
+      desc: "Executive gift sets, branded notebooks, pen sets and corporate gifts for staff and clients.",
+      intro: "Executive gift sets, leather notebooks, branded pen sets and corporate giveaways — ideal for staff appreciation, conferences and clients. Branding available. WhatsApp +254 119 774470 to discuss your gift.",
+    },
+    "general-stationery": {
+      title: "General Stationery in Kenya",
+      desc: "Everyday stationery for homes, schools and offices. One stop, fair prices, fast delivery.",
+      intro: "Everyday stationery for home, school and office in one place. Fair prices, same-day Nairobi pickup, countrywide delivery. WhatsApp +254 119 774470 to order.",
+    },
+  };
 
-  const intro = `Looking for ${category.name.toLowerCase()} in Kenya? Aris Stationeries stocks a curated range trusted by university students, professionals and offices across Nairobi and countrywide. From entry-level essentials to premium picks, every item is priced for student budgets and delivered fast. Browse the full ${category.name.toLowerCase()} collection below, or chat with us on WhatsApp at +254 119 774470 for recommendations, bulk pricing or campus pickup at UoN, Kenyatta University, Strathmore, JKUAT and USIU.`;
+  const fallback = {
+    title: `${category.name} in Kenya`,
+    desc: `Shop ${category.name.toLowerCase()} at Aris Stationeries — fair prices, in stock, fast Nairobi delivery.`,
+    intro: `Shop ${category.name.toLowerCase()} at Aris Stationeries — in stock and ready to ship. Same-day pickup in Nairobi, delivery countrywide. WhatsApp +254 119 774470 to order or ask for a bulk quote.`,
+  };
+
+  const copy = COPY[category.slug] || fallback;
+  const title = copy.title;
+  const description = copy.desc;
+  const intro = copy.intro;
 
   const structuredData = [
     {
