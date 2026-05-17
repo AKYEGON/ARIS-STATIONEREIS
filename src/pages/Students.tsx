@@ -183,7 +183,7 @@ const Students = () => {
       setProducts(mapped);
       setProductYears(py);
       setYears((yearRows as CourseYear[]) || []);
-      setCourseBundles((bundleRows as CourseBundleRow[]) || []);
+      setCourseBundles(bundlesWithItems);
       setActiveYearId("all");
     };
     loadCourseData();
