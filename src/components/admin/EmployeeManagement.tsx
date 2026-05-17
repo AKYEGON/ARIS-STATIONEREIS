@@ -165,6 +165,34 @@ export const EmployeeManagement = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Role privileges legend */}
+      <Card className="border-primary/20">
+        <CardHeader className="p-3 sm:p-4 pb-2">
+          <CardTitle className="text-sm sm:text-base flex items-center gap-2">
+            <Shield className="h-4 w-4 text-primary" />
+            Role Privileges
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 sm:p-4 pt-0 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 text-xs sm:text-sm">
+          <div className="rounded-md border bg-muted/30 p-2.5">
+            <div className="font-semibold text-primary mb-1">Admin</div>
+            <p className="text-muted-foreground leading-snug">Full access. Sees cost &amp; profit. Manages team, products, bundles, reviews and settings.</p>
+          </div>
+          <div className="rounded-md border bg-muted/30 p-2.5">
+            <div className="font-semibold text-primary mb-1">Manager</div>
+            <p className="text-muted-foreground leading-snug">Orders, inventory (adjust stock), sales view and settings. No cost / profit. No team, products, bundles or reviews.</p>
+          </div>
+          <div className="rounded-md border bg-muted/30 p-2.5">
+            <div className="font-semibold text-primary mb-1">Employee</div>
+            <p className="text-muted-foreground leading-snug">Orders &amp; Quick Sale only. Cannot adjust stock or see any financial analytics.</p>
+          </div>
+          <div className="rounded-md border bg-muted/30 p-2.5">
+            <div className="font-semibold text-primary mb-1">Agent</div>
+            <p className="text-muted-foreground leading-snug">View &amp; update only orders inside their assigned zone. No Quick Sale, no inventory, no financials.</p>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Stats Cards */}
       <div className="grid gap-3 sm:gap-4 grid-cols-1 xs:grid-cols-3">
         <Card>
