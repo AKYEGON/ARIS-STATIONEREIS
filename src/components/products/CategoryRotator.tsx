@@ -44,42 +44,11 @@ const CategoryRotator = ({
     <section className="container px-4 pb-4">
       <div className="max-w-xl mx-auto">
         {useNativeSelectOnMobile && (
-          <div className="md:hidden">
-            <div className="flex flex-col gap-1.5">
-              <button
-                type="button"
-                onClick={() => onSelectCategory("all")}
-                className={cn(
-                  "flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
-                  selectedCategory === "all"
-                    ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background border-primary/30 text-foreground hover:bg-secondary"
-                )}
-              >
-                <Package className="h-4 w-4 shrink-0" />
-                <span className="truncate">All Categories</span>
-              </button>
-              {categories.map((cat) => {
-                const isActive = selectedCategory === cat.name;
-                return (
-                  <button
-                    key={cat.id}
-                    type="button"
-                    onClick={() => onSelectCategory(cat.name)}
-                    className={cn(
-                      "flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
-                      isActive
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-background border-primary/30 text-foreground hover:bg-secondary"
-                    )}
-                  >
-                    {getLucideIcon(cat.icon)}
-                    <span className="truncate">{cat.name}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          <MobileVerticalRotator
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={onSelectCategory}
+          />
         )}
 
         <div className={cn(useNativeSelectOnMobile && "hidden md:block")}>
