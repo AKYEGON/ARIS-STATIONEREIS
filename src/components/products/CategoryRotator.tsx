@@ -29,19 +29,7 @@ interface CategoryRotatorProps {
 }
 
 const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: CategoryRotatorProps) => {
-  const [rotatingIndex, setRotatingIndex] = useState(0);
-
-  useEffect(() => {
-    if (categories.length === 0 || selectedCategory !== "all") return;
-    const interval = setInterval(() => {
-      setRotatingIndex((prev) => (prev + 1) % categories.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, [categories.length, selectedCategory]);
-
   if (categories.length === 0) return null;
-
-  const rotatingCat = categories[rotatingIndex];
 
   return (
     <section className="container px-4 pb-4">
@@ -49,10 +37,9 @@ const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: Cat
         <Select value={selectedCategory} onValueChange={onSelectCategory}>
           <SelectTrigger className="w-full bg-secondary border-primary/30 [&>span:first-child]:flex [&>span:first-child]:items-center [&>span:first-child]:gap-2">
             {selectedCategory === "all" ? (
-              <span className="flex items-center gap-1 text-muted-foreground animate-fade-in" key={rotatingIndex}>
-                <span className="font-medium text-foreground/70">Categories:</span>
-                {getLucideIcon(rotatingCat?.icon)}
-                <span className="truncate">{rotatingCat?.name || "Browse by category"}</span>
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <Package className="h-4 w-4 shrink-0" />
+                <span className="truncate">Browse by category</span>
               </span>
             ) : (
               <SelectValue />
