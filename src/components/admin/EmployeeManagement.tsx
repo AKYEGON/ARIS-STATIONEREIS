@@ -24,6 +24,7 @@ interface RegisteredUser {
     phone: string | null;
     is_active: boolean;
   } | null;
+  zone: { id: string; name: string | null } | null;
 }
 
 export const EmployeeManagement = () => {
