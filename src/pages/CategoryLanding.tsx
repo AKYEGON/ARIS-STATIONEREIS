@@ -279,13 +279,10 @@ const CategoryLanding = () => {
         </nav>
 
         <header className="mb-4">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 flex items-center gap-2">
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
             <Package className="h-6 w-6 text-primary" />
-            {category.name} in Kenya
+            {category.name}
           </h1>
-          <p className="text-sm md:text-base text-muted-foreground leading-relaxed">
-            {intro}
-          </p>
         </header>
 
         {products.length === 0 ? (
