@@ -7,11 +7,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, ChevronRight, GraduationCap, BookOpen, Package, Search } from "lucide-react";
+import { ArrowLeft, ChevronRight, GraduationCap, BookOpen, Package, Search, Layers } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 import { Product, ProductVariant } from "@/types/product";
+import { Bundle } from "@/types/bundle";
 import ProductCard from "@/components/products/ProductCard";
 
 interface Faculty {
@@ -28,6 +29,24 @@ interface Course {
   description: string | null;
 }
 
+interface CourseYear {
+  id: string;
+  label: string;
+  display_order: number;
+}
+
+interface CourseBundleRow {
+  id: string;
+  course_year_id: string;
+  name: string;
+  description: string | null;
+  image: string;
+  bundle_price: number;
+  original_total_price: number;
+  display_order: number;
+  items?: { id: string; product_id: string; quantity: number }[];
+}
+
 const renderIcon = (iconName: string | null, className = "h-7 w-7") => {
   if (!iconName) return <GraduationCap className={className} />;
   const IconComp = (icons as Record<string, any>)[iconName];
@@ -35,7 +54,7 @@ const renderIcon = (iconName: string | null, className = "h-7 w-7") => {
 };
 
 const Students = () => {
-  const { addToCart, getCartItemCount } = useCart();
+  const { addToCart, addBundleToCart, getCartItemCount } = useCart();
   const [searchParams, setSearchParams] = useSearchParams();
   const facultyId = searchParams.get("faculty");
   const courseId = searchParams.get("course");
@@ -44,6 +63,11 @@ const Students = () => {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  // map: productId -> Set of courseYearId tagged (empty Set = all years)
+  const [productYears, setProductYears] = useState<Record<string, Set<string>>>({});
+  const [years, setYears] = useState<CourseYear[]>([]);
+  const [courseBundles, setCourseBundles] = useState<CourseBundleRow[]>([]);
+  const [activeYearId, setActiveYearId] = useState<string>("all");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -52,16 +76,8 @@ const Students = () => {
     const load = async () => {
       setLoading(true);
       const [{ data: facs }, { data: crs }] = await Promise.all([
-        supabase
-          .from("faculties")
-          .select("*")
-          .eq("is_active", true)
-          .order("display_order", { ascending: true }),
-        supabase
-          .from("courses")
-          .select("*")
-          .eq("is_active", true)
-          .order("display_order", { ascending: true }),
+        supabase.from("faculties").select("*").eq("is_active", true).order("display_order", { ascending: true }),
+        supabase.from("courses").select("*").eq("is_active", true).order("display_order", { ascending: true }),
       ]);
       setFaculties((facs as Faculty[]) || []);
       setAllCourses((crs as Course[]) || []);
@@ -83,7 +99,6 @@ const Students = () => {
     setCourses(allCourses.filter((c) => c.faculty_id === facultyId));
   }, [facultyId, allCourses]);
 
-  // Smart fuzzy-ish matcher: tokenize query, match any token in name/description
   const smartMatch = (text: string, query: string) => {
     if (!query) return true;
     const haystack = text.toLowerCase();
@@ -94,18 +109,39 @@ const Students = () => {
   useEffect(() => {
     if (!courseId) {
       setProducts([]);
+      setYears([]);
+      setCourseBundles([]);
+      setProductYears({});
+      setActiveYearId("all");
       return;
     }
-    const loadProducts = async () => {
-      const { data } = await supabase
-        .from("course_products")
-        .select("display_order, product:products(*)")
-        .eq("course_id", courseId)
-        .order("display_order", { ascending: true });
-      const mapped: Product[] = (data || [])
-        .map((row: any) => row.product)
-        .filter(Boolean)
-        .map((p: any) => ({
+    const loadCourseData = async () => {
+      const [{ data: cpRows }, { data: yearRows }, { data: bundleRows }] = await Promise.all([
+        supabase
+          .from("course_products")
+          .select("id, display_order, product:products(*), course_product_years(course_year_id)")
+          .eq("course_id", courseId)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("course_years")
+          .select("id, label, display_order")
+          .eq("course_id", courseId)
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("course_bundles")
+          .select("*, items:course_bundle_items(*)")
+          .eq("course_id", courseId)
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+      ]);
+
+      const mapped: Product[] = [];
+      const py: Record<string, Set<string>> = {};
+      (cpRows || []).forEach((row: any) => {
+        const p = row.product;
+        if (!p) return;
+        mapped.push({
           id: p.id,
           name: p.name,
           description: p.description || "",
@@ -115,10 +151,18 @@ const Students = () => {
           category: p.category,
           stock: p.stock ?? 0,
           is_featured: p.is_featured,
-        }));
+        });
+        py[p.id] = new Set(
+          (row.course_product_years || []).map((y: any) => y.course_year_id)
+        );
+      });
       setProducts(mapped);
+      setProductYears(py);
+      setYears((yearRows as CourseYear[]) || []);
+      setCourseBundles((bundleRows as CourseBundleRow[]) || []);
+      setActiveYearId("all");
     };
-    loadProducts();
+    loadCourseData();
   }, [courseId]);
 
   const activeFaculty = useMemo(
@@ -130,8 +174,43 @@ const Students = () => {
     [courses, courseId]
   );
 
+  const filteredProducts = useMemo(() => {
+    if (activeYearId === "all") return products;
+    return products.filter((p) => {
+      const tags = productYears[p.id];
+      if (!tags || tags.size === 0) return true; // untagged = all years
+      return tags.has(activeYearId);
+    });
+  }, [products, productYears, activeYearId]);
+
+  const filteredBundles = useMemo(() => {
+    if (activeYearId === "all") return courseBundles;
+    return courseBundles.filter((b) => b.course_year_id === activeYearId);
+  }, [courseBundles, activeYearId]);
+
   const handleAddToCart = (product: Product, variant?: ProductVariant) => {
     addToCart(product, variant);
+  };
+
+  const handleAddBundle = (b: CourseBundleRow) => {
+    const bundle: Bundle = {
+      id: b.id,
+      name: b.name,
+      description: b.description,
+      bundle_price: Number(b.bundle_price),
+      original_total_price: Number(b.original_total_price),
+      image: b.image,
+      is_active: true,
+      display_order: b.display_order,
+      created_at: "",
+      items: (b.items || []).map((it) => ({
+        id: it.id,
+        bundle_id: b.id,
+        product_id: it.product_id,
+        quantity: it.quantity,
+      })),
+    };
+    addBundleToCart(bundle);
   };
 
   const goHome = () => setSearchParams({});
@@ -148,7 +227,7 @@ const Students = () => {
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
         title="Shop Stationery by Course | Aris Stationeries Kenya"
-        description="Find the exact stationery you need for your course. Browse by faculty and course — Engineering, Business, Medicine and more."
+        description="Find the exact stationery you need for your course. Browse by faculty, course and academic year."
         canonicalUrl="/students"
         breadcrumbs={breadcrumbs}
       />
@@ -191,11 +270,7 @@ const Students = () => {
               </Badge>
             </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-primary uppercase tracking-tight">
-              {activeCourse
-                ? activeCourse.name
-                : activeFaculty
-                ? activeFaculty.name
-                : "SHOP BY COURSE"}
+              {activeCourse ? activeCourse.name : activeFaculty ? activeFaculty.name : "SHOP BY COURSE"}
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
               {activeCourse
@@ -221,7 +296,6 @@ const Students = () => {
             </Button>
           )}
 
-          {/* Search bar — visible on faculty + course pickers */}
           {!activeCourse && (
             <div className="relative mb-5 max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -239,16 +313,13 @@ const Students = () => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
             </div>
           ) : !activeFaculty ? (
-            // Faculty grid + cross-faculty course matches when searching
             (() => {
               const q = search.trim();
               const filteredFaculties = faculties.filter((f) =>
                 smartMatch(`${f.name} ${f.description || ""}`, q)
               );
               const matchingCourses = q
-                ? allCourses.filter((c) =>
-                    smartMatch(`${c.name} ${c.description || ""}`, q)
-                  )
+                ? allCourses.filter((c) => smartMatch(`${c.name} ${c.description || ""}`, q))
                 : [];
               const facultyById = (id: string) => faculties.find((f) => f.id === id);
               return (
@@ -277,9 +348,7 @@ const Students = () => {
                                     {f.name}
                                   </h3>
                                   {f.description && (
-                                    <p className="text-xs text-muted-foreground line-clamp-2">
-                                      {f.description}
-                                    </p>
+                                    <p className="text-xs text-muted-foreground line-clamp-2">{f.description}</p>
                                   )}
                                 </div>
                                 <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
@@ -322,9 +391,7 @@ const Students = () => {
                                     </Badge>
                                   )}
                                   {c.description && (
-                                    <p className="text-xs text-muted-foreground line-clamp-2">
-                                      {c.description}
-                                    </p>
+                                    <p className="text-xs text-muted-foreground line-clamp-2">{c.description}</p>
                                   )}
                                 </CardContent>
                               </Card>
@@ -345,7 +412,6 @@ const Students = () => {
               );
             })()
           ) : !activeCourse ? (
-            // Course grid for selected faculty
             (() => {
               const q = search.trim();
               const filtered = courses.filter((c) =>
@@ -368,9 +434,7 @@ const Students = () => {
                             {c.name}
                           </h3>
                           {c.description && (
-                            <p className="text-xs text-muted-foreground line-clamp-2">
-                              {c.description}
-                            </p>
+                            <p className="text-xs text-muted-foreground line-clamp-2">{c.description}</p>
                           )}
                         </CardContent>
                       </Card>
@@ -386,16 +450,99 @@ const Students = () => {
               );
             })()
           ) : (
-            // Products for selected course
+            // Products + Bundles for selected course
             <>
-              {products.length === 0 ? (
+              {/* Year chips */}
+              {years.length > 0 && (
+                <div className="mb-5">
+                  <div className="flex items-center gap-2 mb-2 text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+                    <Layers className="h-3.5 w-3.5" /> Academic Year
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      onClick={() => setActiveYearId("all")}
+                      className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border-2 transition-all ${
+                        activeYearId === "all"
+                          ? "bg-primary text-primary-foreground border-primary"
+                          : "bg-background border-border hover:border-primary/50"
+                      }`}
+                    >
+                      All Years
+                    </button>
+                    {years.map((y) => (
+                      <button
+                        key={y.id}
+                        onClick={() => setActiveYearId(y.id)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wide border-2 transition-all ${
+                          activeYearId === y.id
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {y.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Course bundles for the selected year */}
+              {filteredBundles.length > 0 && (
+                <div className="mb-6">
+                  <h2 className="text-sm uppercase tracking-widest text-muted-foreground font-semibold mb-3 flex items-center gap-2">
+                    <Package className="h-4 w-4" /> Bundle Offers · {filteredBundles.length}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredBundles.map((b) => {
+                      const savings = Number(b.original_total_price) - Number(b.bundle_price);
+                      const yearLabel = years.find((y) => y.id === b.course_year_id)?.label;
+                      return (
+                        <Card key={b.id} className="overflow-hidden border-2 hover:border-primary/40 transition-all">
+                          <div className="aspect-video bg-muted relative">
+                            <img src={b.image} alt={b.name} className="w-full h-full object-cover" />
+                            {yearLabel && (
+                              <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground uppercase text-[10px]">
+                                {yearLabel}
+                              </Badge>
+                            )}
+                          </div>
+                          <CardContent className="p-4 space-y-2">
+                            <h3 className="font-bold text-base uppercase tracking-tight">{b.name}</h3>
+                            {b.description && (
+                              <p className="text-xs text-muted-foreground line-clamp-2">{b.description}</p>
+                            )}
+                            <div className="flex items-baseline gap-2">
+                              <span className="text-lg font-bold text-primary">Ksh {Number(b.bundle_price).toFixed(0)}</span>
+                              <span className="text-xs text-muted-foreground line-through">
+                                Ksh {Number(b.original_total_price).toFixed(0)}
+                              </span>
+                              {savings > 0 && (
+                                <Badge variant="secondary" className="text-[10px]">Save Ksh {savings.toFixed(0)}</Badge>
+                              )}
+                            </div>
+                            <Button onClick={() => handleAddBundle(b)} className="w-full mt-1" size="sm">
+                              Add Bundle
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {filteredProducts.length === 0 ? (
                 <div className="text-center py-16 text-muted-foreground">
                   <Package className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                  <p>No stationery has been allocated to this course yet.</p>
+                  <p>
+                    {products.length === 0
+                      ? "No stationery has been allocated to this course yet."
+                      : "No stationery tagged for this year yet."}
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-                  {products.map((p) => (
+                  {filteredProducts.map((p) => (
                     <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
                   ))}
                 </div>
