@@ -1,8 +1,24 @@
 import { Link } from "react-router-dom";
 import { Shield, Phone, MapPin, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const Footer = () => {
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("product_categories")
+      .select("name,slug,display_order")
+      .eq("is_active", true)
+      .order("display_order")
+      .limit(6)
+      .then(({ data }) => {
+        if (data) setCategories(data as any);
+      });
+  }, []);
+
   return (
     <footer className="relative mt-auto overflow-hidden">
       {/* Decorative top wave/curve */}
