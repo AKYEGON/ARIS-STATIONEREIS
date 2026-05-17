@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import BundleCard from "./BundleCard";
@@ -6,15 +6,10 @@ import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 
-
-const AUTO_SCROLL_INTERVAL = 3000;
-
 const OffersSection = () => {
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addBundleToCart } = useCart();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
@@ -45,35 +40,8 @@ const OffersSection = () => {
     }
   };
 
-  const scroll = useCallback((direction: "left" | "right") => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const cardWidth = container.querySelector("div")?.offsetWidth || 160;
-    const gap = 8;
-    const scrollAmount = direction === "left" ? -(cardWidth + gap) : (cardWidth + gap);
-    
-    // If at the end, loop back to start
-    if (direction === "right" && 
-        container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
-      container.scrollTo({ left: 0, behavior: "smooth" });
-    } else {
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  }, []);
-
-  // Auto-scroll
-  useEffect(() => {
-    if (bundles.length <= 1 || isPaused) return;
-
-    autoScrollRef.current = setInterval(() => {
-      scroll("right");
-    }, AUTO_SCROLL_INTERVAL);
-
-    return () => {
-      if (autoScrollRef.current) clearInterval(autoScrollRef.current);
-    };
-  }, [bundles.length, isPaused, scroll]);
+  // Auto-scroll removed on mobile — was causing repaint smearing on Chrome Android
+  // that bled into sibling Select dropdowns. Manual swipe still works.
 
   if (isLoading || bundles.length === 0) return null;
 
@@ -89,17 +57,20 @@ const OffersSection = () => {
           </Link>
         </div>
 
-        {/* Desktop: Horizontal marquee — single row that rotates cards sideways, fixed height */}
+        {/* Desktop: Horizontal marquee */}
         <div
           className="hidden md:block relative overflow-hidden"
+          style={{ contain: "layout paint", isolation: "isolate" }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-4 w-max"
+            className="flex gap-4 w-max will-change-transform"
             style={{
               animation: `horizontal-marquee ${Math.max(bundles.length * 5, 20)}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
             }}
           >
             {[...bundles, ...bundles].map((bundle, index) => (
@@ -110,22 +81,19 @@ const OffersSection = () => {
           </div>
         </div>
 
-        {/* Mobile: Horizontal scroll */}
-        <div 
+        {/* Mobile: Horizontal swipe (no auto-scroll — caused Chrome Android repaint bleed) */}
+        <div
           className="relative md:hidden"
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setTimeout(() => setIsPaused(false), 5000)}
+          style={{ contain: "layout paint", isolation: "isolate" }}
         >
           <div
-            ref={containerRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory scroll-smooth pb-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none", transform: "translateZ(0)" }}
           >
             {bundles.map((bundle, index) => (
               <div
                 key={bundle.id}
-                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start animate-fade-in flex-shrink-0"
-                style={{ animationDelay: `${index * 0.1}s` }}
+                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start flex-shrink-0"
               >
                 <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
               </div>
