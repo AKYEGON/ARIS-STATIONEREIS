@@ -269,12 +269,23 @@ const Index = () => {
                 id="mobile-sort-select"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="h-9 w-full rounded-md border border-primary/30 bg-secondary px-3 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                style={{
+                  colorScheme: "light",
+                  backgroundImage:
+                    "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23166534' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "right 12px center",
+                  backgroundSize: "12px",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  appearance: "none",
+                }}
+                className="h-9 w-full rounded-md border border-primary/30 bg-secondary px-3 pr-9 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               >
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="name-asc">Name: A to Z</option>
-                <option value="featured">Featured</option>
+                <option value="price-asc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Price: Low to High</option>
+                <option value="price-desc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Price: High to Low</option>
+                <option value="name-asc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Name: A to Z</option>
+                <option value="featured" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Featured</option>
               </select>
             </div>
 
