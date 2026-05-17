@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+// Static category selector
 import { ProductCategory } from "@/types/product";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { icons } from "lucide-react";
