@@ -91,14 +91,14 @@
     <priority>0.85</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/foolscaps-3-scaps-ksh-10-73dbaa</loc>
-    <lastmod>2026-05-04</lastmod>
+    <loc>https://arisstationaries.co.ke/product/180-transparent-protractor-6c7fbc</loc>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/180-transparent-protractor-6c7fbc</loc>
-    <lastmod>2026-05-15</lastmod>
+    <loc>https://arisstationaries.co.ke/product/foolscaps-3-scaps-ksh-10-73dbaa</loc>
+    <lastmod>2026-05-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -175,12 +175,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/30cm-rok-ruler-9143d7</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://arisstationaries.co.ke/product/asst-permanent-marker-piang-xiang-ebdc20</loc>
     <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -224,12 +218,6 @@
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/product/half-size-2-quire-eco-counter-book-989dad</loc>
-    <lastmod>2025-11-19</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://arisstationaries.co.ke/product/nataraj-dustless-eraser-684cd3</loc>
     <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -314,6 +302,18 @@
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/product/big-engineering-drawing-set-7d488d</loc>
+    <lastmod>2025-11-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arisstationaries.co.ke/product/30cm-rok-ruler-9143d7</loc>
+    <lastmod>2025-11-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arisstationaries.co.ke/product/nataraj-dustless-eraser-684cd3</loc>
     <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
@@ -457,12 +457,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/damasa-hb-pencil-83fe8b</loc>
-    <lastmod>2025-11-28</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://arisstationaries.co.ke/product/casio-fx-991-es-plus-417-calculator-4d2f3e</loc>
     <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -481,8 +475,8 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/nataral-sharperner-adfff6</loc>
-    <lastmod>2025-11-19</lastmod>
+    <loc>https://arisstationaries.co.ke/product/damasa-hb-pencil-83fe8b</loc>
+    <lastmod>2025-11-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -603,6 +597,12 @@
   <url>
     <loc>https://arisstationaries.co.ke/product/pvc-t-square-60cm-6f9cdc</loc>
     <lastmod>2026-04-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arisstationaries.co.ke/product/nataral-sharperner-adfff6</loc>
+    <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
