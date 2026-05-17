@@ -1,67 +1,32 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
 import CategoryRotator from "@/components/products/CategoryRotator";
 
 const PRODUCTS_PER_PAGE = 8;
+
 const SEARCH_STORAGE_KEY = "aris-search-query";
 
-/* ─── Offers ticker component ─────────────────────────────────── */
-const OffersTicker = () => {
-  const items = [
-    "🎒 Buy 3 notebooks, get 1 free",
-    "📐 Student bundles for UoN · KU · Strathmore · USIU",
-    "🖩 20% off all Casio calculators",
-    "🚚 Same-day delivery in Nairobi",
-    "✏️ Back to school — 20% off sitewide",
-  ];
 
-  return (
-    <div
-      className="overflow-hidden border-b"
-      style={{ background: "#EFF6F0", borderColor: "#DDE8DF" }}
-    >
-      <div
-        className="flex gap-12 py-2.5 w-max"
-        style={{ animation: "ticker 32s linear infinite" }}
-      >
-        {[...items, ...items].map((item, i) => (
-          <span
-            key={i}
-            className="flex items-center gap-2 text-[12.5px] font-medium whitespace-nowrap"
-            style={{ color: "#5C7A5F" }}
-          >
-            {item}
-          </span>
-        ))}
-      </div>
-      <style>{`
-        @keyframes ticker {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-      `}</style>
-    </div>
-  );
-};
-
-/* ─── Main Page ───────────────────────────────────────────────── */
 const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
-
   const [searchQuery, setSearchQuery] = useState(() => {
-    try { return sessionStorage.getItem(SEARCH_STORAGE_KEY) || ""; }
-    catch { return ""; }
+    try {
+      return sessionStorage.getItem(SEARCH_STORAGE_KEY) || "";
+    } catch {
+      return "";
+    }
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState<Product[]>([]);
@@ -70,33 +35,29 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProductMap, setCategoryProductMap] = useState<Record<string, string[]>>({});
   const [sortBy, setSortBy] = useState<string>("price-asc");
-  const [screenSize, setScreenSize] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth : 1024
-  );
 
+  // Persist search query to sessionStorage
   useEffect(() => {
     sessionStorage.setItem(SEARCH_STORAGE_KEY, searchQuery);
   }, [searchQuery]);
-
-  useEffect(() => {
-    const handle = () => setScreenSize(window.innerWidth);
-    window.addEventListener("resize", handle);
-    return () => window.removeEventListener("resize", handle);
-  }, []);
 
   const fetchProducts = useCallback(async () => {
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from("products")
-        .select(`*, media:product_media(*), variants:product_variants(*)`)
+        .select(`
+          *,
+          media:product_media(*),
+          variants:product_variants(*)
+        `)
         .order("is_featured", { ascending: false })
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-
-      const formatted = (data || []).map((p) => ({
+      
+      const formattedProducts = (data || []).map(p => ({
         id: p.id,
         name: p.name,
         description: p.description || "",
@@ -109,31 +70,32 @@ const Index = () => {
         slug: (p as any).slug,
         media: ((p as any).media || []).map((m: any) => ({
           ...m,
-          media_type: m.media_type as "image" | "video",
+          media_type: m.media_type as 'image' | 'video'
         })),
-        variants: ((p as any).variants || [])
-          .filter((v: any) => v.is_active)
-          .map((v: any) => ({
-            ...v,
-            price: Number(v.price),
-            cost_price: Number(v.cost_price),
-          })),
+        variants: ((p as any).variants || []).filter((v: any) => v.is_active).map((v: any) => ({
+          ...v,
+          price: Number(v.price),
+          cost_price: Number(v.cost_price),
+        }))
       }));
 
-      formatted.sort((a, b) => {
+      // Sort: featured first, then by display_order (>0 first in ascending order, 0 = unset goes last)
+      formattedProducts.sort((a, b) => {
+        // Featured products first
         if (a.is_featured && !b.is_featured) return -1;
         if (!a.is_featured && b.is_featured) return 1;
-        const aO = a.display_order || 0;
-        const bO = b.display_order || 0;
-        if (aO > 0 && bO === 0) return -1;
-        if (aO === 0 && bO > 0) return 1;
-        if (aO > 0 && bO > 0) return aO - bO;
-        return 0;
+        // Within same featured group: products with display_order > 0 come first
+        const aOrder = a.display_order || 0;
+        const bOrder = b.display_order || 0;
+        if (aOrder > 0 && bOrder === 0) return -1;
+        if (aOrder === 0 && bOrder > 0) return 1;
+        if (aOrder > 0 && bOrder > 0) return aOrder - bOrder;
+        return 0; // both 0, keep original order
       });
 
-      setProducts(formatted);
-    } catch (err) {
-      console.error("Error fetching products:", err);
+      setProducts(formattedProducts);
+    } catch (error) {
+      console.error("Error fetching products:", error);
     } finally {
       setIsLoading(false);
     }
@@ -142,16 +104,24 @@ const Index = () => {
   const fetchCategories = useCallback(async () => {
     try {
       const [catRes, assignRes] = await Promise.all([
-        supabase.from("product_categories").select("*").eq("is_active", true).order("display_order", { ascending: true }),
-        supabase.from("product_category_assignments").select("product_id, category_id"),
+        supabase
+          .from("product_categories")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("product_category_assignments")
+          .select("product_id, category_id")
       ]);
+
       if (catRes.error) throw catRes.error;
       setCategories(catRes.data || []);
 
+      // Build a map: category_name -> product_id[]
       const catMap: Record<string, string[]> = {};
       const catIdToName: Record<string, string> = {};
-      (catRes.data || []).forEach((c) => { catIdToName[c.id] = c.name; });
-      (assignRes.data || []).forEach((a) => {
+      (catRes.data || []).forEach(c => { catIdToName[c.id] = c.name; });
+      (assignRes.data || []).forEach(a => {
         const name = catIdToName[a.category_id];
         if (name) {
           if (!catMap[name]) catMap[name] = [];
@@ -159,8 +129,8 @@ const Index = () => {
         }
       });
       setCategoryProductMap(catMap);
-    } catch (err) {
-      console.error("Error fetching categories:", err);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   }, []);
 
@@ -169,16 +139,16 @@ const Index = () => {
     fetchCategories();
   }, [fetchProducts, fetchCategories]);
 
+
   const filteredProducts = useMemo(() => {
-    const list = products.filter((p) => {
-      const matchSearch =
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.category.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchCat =
-        selectedCategory === "all" ||
-        (categoryProductMap[selectedCategory]?.includes(p.id) ?? false);
-      return matchSearch && matchCat;
+    const list = products.filter((product) => {
+      const matchesSearch =
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesCategory = selectedCategory === "all" ||
+        (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
+      return matchesSearch && matchesCategory;
     });
     if (sortBy === "price-asc") return [...list].sort((a, b) => a.price - b.price);
     if (sortBy === "price-desc") return [...list].sort((a, b) => b.price - a.price);
@@ -188,196 +158,219 @@ const Index = () => {
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
   const startIndex = (currentPage - 1) * PRODUCTS_PER_PAGE;
-  const currentProducts = filteredProducts.slice(startIndex, startIndex + PRODUCTS_PER_PAGE);
+  const endIndex = startIndex + PRODUCTS_PER_PAGE;
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
 
+  // Track screen size for responsive pagination
+  const [screenSize, setScreenSize] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth;
+    }
+    return 640; // Default
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenSize(window.innerWidth);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Fixed pagination logic - show different number of pages by screen size
   const visiblePages = useMemo(() => {
-    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
-    const max = screenSize < 640 ? 5 : 7;
-    let start = Math.max(1, currentPage - Math.floor(max / 2));
-    let end = start + max - 1;
-    if (end > totalPages) { end = totalPages; start = Math.max(1, end - max + 1); }
-    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+    if (totalPages <= 5) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    
+    // Determine max pages to show based on screen size
+    const maxPages = screenSize < 640 ? 5 : 8; // Mobile: 5, Tablet/Desktop: 8
+    const pages: number[] = [];
+    
+    // Calculate start and end pages to show
+    let startPage = Math.max(1, currentPage - Math.floor(maxPages / 2));
+    let endPage = startPage + maxPages - 1;
+    
+    // Adjust if we go beyond total pages
+    if (endPage > totalPages) {
+      endPage = totalPages;
+      startPage = Math.max(1, endPage - maxPages + 1);
+    }
+    
+    // Generate the page numbers
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    return pages;
   }, [totalPages, currentPage, screenSize]);
 
-  useEffect(() => { setCurrentPage(1); }, [searchQuery, selectedCategory, sortBy]);
+  // Reset to page 1 when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, sortBy]);
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "#FAF8F4", paddingBottom: "58px" /* mobile nav */ }}>
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
         title="Aris Stationeries | Affordable Stationery in Kenya — Order Online"
         description="Buy affordable stationery in Kenya. Pens, notebooks, calculators, drawing sets — delivered to UoN, KU, Strathmore, USIU and nationwide. Best prices guaranteed."
         canonicalUrl="/"
         breadcrumbs={[{ name: "Home", url: "/" }]}
       />
-
-      {/* Header — pass search down so it lives in the header on mobile */}
-      <Header
-        cartItemCount={getCartItemCount()}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-      />
-
-      {/* Offers ticker */}
-      <OffersTicker />
-
-      {/* Legacy OffersSection (keeps any banner cards / promos) */}
+      <Header cartItemCount={getCartItemCount()} />
+      
+      {/* Offers Section - moved to top */}
       <OffersSection />
 
-      {/* ── Category Rotator ── */}
+      {/* Search Section */}
+      <section className="container py-4 sm:py-6 md:py-8 px-4">
+        <div className="max-w-xl mx-auto space-y-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+            <Input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 sm:pl-10 pr-9 bg-secondary border-primary/30 transition-all duration-200 focus:ring-2 focus:ring-primary"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">Sort by:</span>
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="h-9 bg-secondary border-primary/30">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                <SelectItem value="name-asc">Name: A to Z</SelectItem>
+                <SelectItem value="featured">Featured</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex justify-center md:hidden">
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/testimonials">
+                <Users className="h-4 w-4 mr-2" />
+                Happy Customers
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Category Rotator */}
       <CategoryRotator
         categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
       />
 
-      {/* ── Toolbar: result count + sort ── */}
-      <div className="max-w-screen-xl mx-auto w-full px-4 md:px-8 py-4 flex items-center justify-between gap-3">
-        <p className="text-[13px] text-[#7A8C80]">
-          {isLoading ? "Loading…" : (
-            <>
-              <span className="font-semibold text-[#2C3E35]">{filteredProducts.length} products</span>
-              {selectedCategory !== "all" && ` in ${selectedCategory}`}
-              {searchQuery && ` for "${searchQuery}"`}
-            </>
-          )}
-        </p>
-
-        <div className="flex items-center gap-2">
-          <SlidersHorizontal className="h-4 w-4 text-[#7A8C80]" />
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger
-              className="h-9 text-[13px] border-[#DDE8DF] bg-white text-[#2C3E35] rounded-lg focus:ring-[#7A9E7E] focus:border-[#7A9E7E]"
-              style={{ minWidth: 160 }}
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="price-asc">Price: Low to High</SelectItem>
-              <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              <SelectItem value="name-asc">Name: A to Z</SelectItem>
-              <SelectItem value="featured">Featured First</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* ── Product Grid ── */}
-      <main className="flex-1 max-w-screen-xl mx-auto w-full px-4 md:px-8 pb-12">
+      {/* Products Section */}
+      <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
         {isLoading ? (
-          /* Skeleton loader */
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="rounded-2xl overflow-hidden border border-[#DDE8DF]"
-                style={{ background: "#fff", animationDelay: `${i * 0.06}s` }}
-              >
-                <div
-                  className="animate-pulse"
-                  style={{ background: "#EFF6F0", aspectRatio: "1/1" }}
-                />
-                <div className="p-4 space-y-2 animate-pulse">
-                  <div className="h-2 rounded-full w-1/3" style={{ background: "#EFF6F0" }} />
-                  <div className="h-3 rounded-full w-3/4" style={{ background: "#EFF6F0" }} />
-                  <div className="h-3 rounded-full w-1/2" style={{ background: "#EFF6F0" }} />
-                </div>
-              </div>
-            ))}
+          <div className="text-center py-12 sm:py-16">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Loading products...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4 text-3xl"
-              style={{ background: "#EFF6F0" }}
-            >
-              🔍
-            </div>
-            <p className="text-[17px] font-medium text-[#2C3E35] mb-1">No products found</p>
-            <p className="text-[13px] text-[#7A8C80]">
-              Try a different search or category
-            </p>
-            <button
-              className="mt-6 px-5 py-2.5 rounded-lg text-[13px] font-medium text-white transition-colors"
-              style={{ background: "#2C3E35" }}
-              onClick={() => { setSearchQuery(""); setSelectedCategory("all"); }}
-            >
-              Clear filters
-            </button>
+          <div className="text-center py-12 sm:py-16">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">No products found</p>
           </div>
         ) : (
           <>
-            {/* Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {currentProducts.map((product, i) => (
-                <div
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-6 auto-rows-max">
+              {currentProducts.map((product, index) => (
+                <div 
                   key={product.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${i * 0.04}s` }}
+                  className="animate-fade-in h-full"
+                  style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <ProductCard product={product} onAddToCart={addToCart} />
+                  <ProductCard
+                    product={product}
+                    onAddToCart={addToCart}
+                  />
                 </div>
               ))}
             </div>
-
-            {/* ── Pagination ── */}
+            
+            {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="mt-10 flex flex-col items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  {/* Prev */}
-                  <button
-                    onClick={() => { setCurrentPage((p) => Math.max(1, p - 1)); scrollTop(); }}
+              <>
+              <div className="flex flex-col items-center gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-12">
+                <div className="flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3 flex-wrap max-w-full overflow-x-auto px-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handlePrevPage}
                     disabled={currentPage === 1}
-                    className="flex items-center justify-center rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{
-                      width: 38, height: 38,
-                      borderColor: "#DDE8DF",
-                      background: "#fff",
-                      color: "#4A5C50",
-                    }}
+                    className="h-9 w-9 xs:h-10 xs:w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation flex-shrink-0"
                   >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-
-                  {/* Page numbers */}
-                  {visiblePages.map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => { setCurrentPage(page); scrollTop(); }}
-                      className="flex items-center justify-center rounded-lg border text-[13px] font-medium transition-colors"
-                      style={{
-                        width: 38, height: 38,
-                        background: currentPage === page ? "#2C3E35" : "#fff",
-                        color: currentPage === page ? "#fff" : "#4A5C50",
-                        borderColor: currentPage === page ? "#2C3E35" : "#DDE8DF",
-                      }}
-                    >
-                      {page}
-                    </button>
-                  ))}
-
-                  {/* Next */}
-                  <button
-                    onClick={() => { setCurrentPage((p) => Math.min(totalPages, p + 1)); scrollTop(); }}
+                    <ChevronLeft className="h-4 w-4 xs:h-5 xs:w-5" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-0.5 sm:gap-1 md:gap-1.5 flex-wrap justify-center">
+                    {visiblePages.map((page) => (
+                      <Button
+                        key={page}
+                        variant={currentPage === page ? "default" : "outline"}
+                        size="icon"
+                        onClick={() => {
+                          setCurrentPage(page);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className={`h-8 w-8 xs:h-9 xs:w-9 sm:h-10 sm:w-10 text-xs xs:text-sm sm:text-base transition-all duration-200 touch-manipulation flex-shrink-0 ${
+                          currentPage === page ? 'scale-105 xs:scale-110' : ''
+                        }`}
+                      >
+                        {page}
+                      </Button>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleNextPage}
                     disabled={currentPage === totalPages}
-                    className="flex items-center justify-center rounded-lg border transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{
-                      width: 38, height: 38,
-                      borderColor: "#DDE8DF",
-                      background: "#fff",
-                      color: "#4A5C50",
-                    }}
+                    className="h-9 w-9 xs:h-10 xs:w-10 sm:h-10 sm:w-10 transition-all duration-200 disabled:opacity-50 touch-manipulation flex-shrink-0"
                   >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                    <ChevronRight className="h-4 w-4 xs:h-5 xs:w-5" />
+                  </Button>
                 </div>
-
-                <p className="text-[12px] tracking-wide" style={{ color: "#7A8C80" }}>
-                  Showing {startIndex + 1}–{Math.min(startIndex + PRODUCTS_PER_PAGE, filteredProducts.length)} of {filteredProducts.length} products
-                </p>
+                
+                <div className="text-center text-xs xs:text-sm text-muted-foreground px-4">
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
+                </div>
               </div>
+              </>
             )}
+            
           </>
         )}
       </main>

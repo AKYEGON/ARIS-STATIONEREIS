@@ -1579,90 +1579,45 @@ const Admin = () => {
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <Header cartItemCount={getCartItemCount()} />
       
-      <main className="flex-1 py-4 sm:py-6 md:py-8" style={{ background: "#EFF6F0" }}>
-        <div className="max-w-screen-xl mx-auto px-4 md:px-8">
-          <div className="flex justify-between items-start mb-6 md:mb-8 gap-4 flex-col sm:flex-row">
-            {/* ── Section header ── */}
-            <div className="flex items-center gap-3">
-              {/* Accent pip */}
-              <span
-                className="hidden sm:block w-1 h-6 rounded-full"
-                style={{ background: "linear-gradient(180deg,#5C7A5F,#A8C5AB)" }}
-              />
-              <div>
-                <p
-                  className="text-[10px] tracking-[0.15em] uppercase font-semibold mb-0.5"
-                  style={{ color: "#7A9E7E" }}
-                >
-                  Management
-                </p>
-                <h1
-                  className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight"
-                  style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
-                >
-                  Admin Dashboard
-                </h1>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 w-full sm:w-auto">
-              <button
-                onClick={() => setIsQuickSaleOpen(true)}
-                className="flex-1 sm:flex-none gap-1.5 sm:gap-2 rounded-lg py-2 px-3.5 text-[11px] sm:text-[12.5px] font-medium transition-colors flex items-center justify-center"
-                style={{ background: "#2C3E35", color: "#fff" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#5C7A5F";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#2C3E35";
-                }}
-              >
-                <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden xs:inline">Quick Sale</span>
-                <span className="xs:hidden">Sale</span>
-              </button>
-              <button
-                onClick={async () => { await supabase.auth.signOut(); toast.success("Signed out successfully"); navigate("/auth"); }}
-                className="flex-1 sm:flex-none gap-1.5 sm:gap-2 rounded-lg py-2 px-3.5 text-[11px] sm:text-[12.5px] font-medium transition-colors flex items-center justify-center"
-                style={{ color: "#5C7A5F", background: "#fff", border: "1px solid #C8DCCA" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#5C7A5F";
-                  (e.currentTarget as HTMLElement).style.color = "#fff";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#fff";
-                  (e.currentTarget as HTMLElement).style.color = "#5C7A5F";
-                }}
-              >
-                <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </button>
-            </div>
+      <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
+        <div className="flex justify-between items-center mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-4">
+          <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-primary">Admin</h1>
+          <div className="flex gap-1.5 sm:gap-2">
+            <Button onClick={() => setIsQuickSaleOpen(true)} className="gap-1.5 sm:gap-2 bg-primary hover:bg-primary/90 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
+              <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Quick Sale</span>
+              <span className="xs:hidden">Sale</span>
+            </Button>
+            <Button variant="outline" onClick={async () => { await supabase.auth.signOut(); toast.success("Signed out successfully"); navigate("/auth"); }} className="gap-1.5 sm:gap-2 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
+              <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </Button>
           </div>
-          
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="overflow-x-auto -mx-4 px-4 mb-6">
-              <TabsList className={`inline-flex w-auto min-w-full sm:grid sm:w-full gap-1`} style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))`, background: "transparent" }}>
-                {visibleTabs.includes("products") && (
-                  <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap" style={{ color: "#7A8C80", borderRadius: "8px" }}>
-                    <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Products</span>
-                    <span className="xs:hidden">Prod</span>
-                  </TabsTrigger>
-                )}
-                {visibleTabs.includes("bundles") && (
-                  <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap" style={{ color: "#7A8C80", borderRadius: "8px" }}>
-                    <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Bundles</span>
-                    <span className="xs:hidden">Bndl</span>
-                  </TabsTrigger>
-                )}
-                {visibleTabs.includes("inventory") && (
-                  <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap" style={{ color: "#7A8C80", borderRadius: "8px" }}>
-                    <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                    <span className="hidden xs:inline">Inventory</span>
-                    <span className="xs:hidden">Inv</span>
-                  </TabsTrigger>
+        </div>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="overflow-x-auto -mx-4 px-4 mb-6">
+            <TabsList className={`inline-flex w-auto min-w-full sm:grid sm:w-full gap-1`} style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}>
+              {visibleTabs.includes("products") && (
+                <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Products</span>
+                  <span className="xs:hidden">Prod</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("bundles") && (
+                <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Bundles</span>
+                  <span className="xs:hidden">Bndl</span>
+                </TabsTrigger>
+              )}
+              {visibleTabs.includes("inventory") && (
+                <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Inventory</span>
+                  <span className="xs:hidden">Inv</span>
+                </TabsTrigger>
               )}
               {visibleTabs.includes("sales") && (
                 <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
@@ -3277,7 +3232,6 @@ const Admin = () => {
             )}
           </DialogContent>
         </Dialog>
-        </div>
       </main>
       
       <Footer />

@@ -114,36 +114,11 @@ const Testimonials = () => {
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Hero Section with Story Circles */}
-      <section className="py-8 sm:py-12 md:py-16" style={{ background: "#EFF6F0" }}>
-        <div className="max-w-screen-xl mx-auto px-4 md:px-8">
-          {/* ── Section header ── */}
-          <div className="mb-6 md:mb-8 flex items-center gap-3">
-            {/* Accent pip */}
-            <span
-              className="hidden sm:block w-1 h-6 rounded-full"
-              style={{ background: "linear-gradient(180deg,#5C7A5F,#A8C5AB)" }}
-            />
-            <div>
-              <p
-                className="text-[10px] tracking-[0.15em] uppercase font-semibold mb-0.5"
-                style={{ color: "#7A9E7E" }}
-              >
-                Real Stories
-              </p>
-              <h1
-                className="text-lg sm:text-2xl md:text-3xl lg:text-4xl font-semibold leading-tight"
-                style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
-              >
-                Happy Customers
-              </h1>
-            </div>
-          </div>
-          
-          <p
-            className="text-[13px] sm:text-[14px] mb-6 md:mb-8 max-w-2xl"
-            style={{ color: "#7A8C80" }}
-          >
-            Tap to watch what our customers say about their experience with ARIS STATIONERIES
+      <section className="bg-gradient-to-br from-primary/5 to-primary/10 py-8 sm:py-12">
+        <div className="container mx-auto px-3 sm:px-4">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2 text-center">Customer Stories</h1>
+          <p className="text-center text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+            Tap to watch what our customers say
           </p>
           
           {testimonials.length > 0 ? (
@@ -154,7 +129,7 @@ const Testimonials = () => {
               />
             </div>
           ) : (
-            <div className="text-center py-8 sm:py-12 text-[13px] sm:text-[14px]" style={{ color: "#7A8C80" }}>
+            <div className="text-center py-8 sm:py-12 text-muted-foreground text-sm sm:text-base">
               No stories available yet. Check back soon!
             </div>
           )}
@@ -162,36 +137,11 @@ const Testimonials = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-8 sm:py-12 md:py-16">
-        <div className="max-w-screen-xl mx-auto px-4 md:px-8">
-          {/* ── Section header ── */}
-          <div className="mb-6 md:mb-8 flex items-center gap-3">
-            {/* Accent pip */}
-            <span
-              className="hidden sm:block w-1 h-6 rounded-full"
-              style={{ background: "linear-gradient(180deg,#5C7A5F,#A8C5AB)" }}
-            />
-            <div>
-              <p
-                className="text-[10px] tracking-[0.15em] uppercase font-semibold mb-0.5"
-                style={{ color: "#7A9E7E" }}
-              >
-                Share Your Experience
-              </p>
-              <h2
-                className="text-lg sm:text-2xl md:text-3xl font-semibold leading-tight"
-                style={{ color: "#2C3E35", fontFamily: "Georgia, serif" }}
-              >
-                We'd Love to Hear From You
-              </h2>
-            </div>
-          </div>
-          
-          <p
-            className="text-[13px] sm:text-[14px] mb-6 md:mb-8 max-w-2xl"
-            style={{ color: "#7A8C80" }}
-          >
-            Had a great experience with ARIS STATIONERIES? Share your story and help other customers discover why we're Kenya's favorite stationery store.
+      <section className="container mx-auto px-3 sm:px-4 py-8 sm:py-12 text-center">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">Share Your Experience</h2>
+          <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+            Had a great experience with ARIS STATIONERIES? We'd love to hear from you!
           </p>
           
           <Dialog open={isSubmitDialogOpen} onOpenChange={(open) => {
@@ -203,18 +153,9 @@ const Testimonials = () => {
               }
             }}>
             <DialogTrigger asChild>
-              <button
-                className="inline-flex items-center justify-center gap-2 rounded-xl py-2.5 px-6 text-[12.5px] font-medium transition-colors"
-                style={{ background: "#2C3E35", color: "#fff" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#5C7A5F";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "#2C3E35";
-                }}
-              >
+              <Button size="lg" className="gap-2 h-10 sm:h-11 text-sm sm:text-base px-4 sm:px-6">
                 📝 Submit Your Review
-              </button>
+              </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
               <DialogHeader>

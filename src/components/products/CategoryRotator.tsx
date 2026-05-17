@@ -1,121 +1,82 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ProductCategory } from "@/types/product";
-import { icons, Package } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { icons } from "lucide-react";
+import { Package } from "lucide-react";
 
-/* ── Icon resolver ─────────────────────────────────────────────── */
-const getLucideIcon = (iconName: string | null, size = 14) => {
-  if (!iconName) return <Package style={{ width: size, height: size, flexShrink: 0 }} />;
-
-  // Emoji / non-ASCII
+const getLucideIcon = (iconName: string | null, className = "h-4 w-4 shrink-0") => {
+  if (!iconName) return <Package className={className} />;
+  
+  // Check if it's an emoji (non-ASCII character)
   if (/[^\x00-\x7F]/.test(iconName)) {
-    return <span style={{ fontSize: size + 2, lineHeight: 1, flexShrink: 0 }}>{iconName}</span>;
+    return <span className="text-sm shrink-0">{iconName}</span>;
   }
 
+  // Try to find the Lucide icon by name (PascalCase)
   const IconComponent = (icons as Record<string, any>)[iconName];
-  if (IconComponent) return <IconComponent style={{ width: size, height: size, flexShrink: 0 }} />;
-  return <Package style={{ width: size, height: size, flexShrink: 0 }} />;
+  if (IconComponent) {
+    return <IconComponent className={className} />;
+  }
+
+  // Fallback
+  return <Package className={className} />;
 };
 
-/* ── Props ─────────────────────────────────────────────────────── */
 interface CategoryRotatorProps {
   categories: ProductCategory[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
 }
 
-/* ── Component ─────────────────────────────────────────────────── */
 const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: CategoryRotatorProps) => {
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [rotatingIndex, setRotatingIndex] = useState(0);
 
-  // Rotate label when "all" is selected
   useEffect(() => {
     if (categories.length === 0 || selectedCategory !== "all") return;
-    const id = setInterval(() => {
+    const interval = setInterval(() => {
       setRotatingIndex((prev) => (prev + 1) % categories.length);
-    }, 2600);
-    return () => clearInterval(id);
+    }, 2500);
+    return () => clearInterval(interval);
   }, [categories.length, selectedCategory]);
-
-  // Auto-scroll active pill into view
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const active = container.querySelector("[data-active='true']") as HTMLElement | null;
-    if (active) {
-      const containerRect = container.getBoundingClientRect();
-      const pillRect = active.getBoundingClientRect();
-      const offset =
-        pillRect.left - containerRect.left - containerRect.width / 2 + pillRect.width / 2;
-      container.scrollBy({ left: offset, behavior: "smooth" });
-    }
-  }, [selectedCategory]);
 
   if (categories.length === 0) return null;
 
-  const allCategories = [{ id: "all", name: "All Products", icon: null }, ...categories];
+  const rotatingCat = categories[rotatingIndex];
 
   return (
-    <div 
-      className="sticky top-[50px] md:top-[65px] z-40 w-full border-b border-[#DDE8DF]/60 bg-white/80 backdrop-blur-md transition-all duration-300 shadow-[0_4px_12px_rgba(92,122,95,0.03)]"
-    >
-      <div className="max-w-screen-xl mx-auto px-4 md:px-8">
-        <div
-          ref={scrollRef}
-          className="flex items-center gap-2 overflow-x-auto py-3 scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {allCategories.map((cat) => {
-            const isActive = cat.id === "all"
-              ? selectedCategory === "all"
-              : selectedCategory === cat.name;
-
-            return (
-              <button
-                key={cat.id}
-                data-active={isActive}
-                onClick={() => onSelectCategory(cat.id === "all" ? "all" : cat.name)}
-                className={`
-                  flex items-center gap-2 whitespace-nowrap flex-shrink-0 
-                  rounded-full px-4 py-1.5 text-xs font-semibold 
-                  transition-all duration-200 transform active:scale-[0.97]
-                  ${
-                    isActive
-                      ? "bg-[#2C3E35] text-white border border-[#2C3E35] shadow-sm shadow-[#2C3E35]/10"
-                      : "bg-[#F4F7F5]/40 text-[#4A5C50] border border-[#DDE8DF]/80 hover:border-[#7A9E7E] hover:text-[#2C3E35] hover:bg-white"
-                  }
-                `}
-              >
-                {cat.id === "all" ? (
-                  /* Rotating preview when "All" is selected */
-                  isActive && selectedCategory === "all" ? (
-                    <div className="flex items-center gap-1.5">
-                      <span className="opacity-70">All</span>
-                      <span
-                        className="flex items-center gap-1 animate-fade-in text-[#A8C5AB] text-[11px]"
-                        key={rotatingIndex}
-                      >
-                        • {getLucideIcon(categories[rotatingIndex]?.icon, 12)}
-                        {categories[rotatingIndex]?.name}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="flex items-center gap-1.5">
-                      <Package className="w-3.5 h-3.5 flex-shrink-0" />
-                      All Products
-                    </span>
-                  )
-                ) : (
-                  <>
-                    {getLucideIcon(cat.icon, 14)}
-                    {cat.name}
-                  </>
-                )}
-              </button>
-            );
-          })}
-        </div>
+    <section className="container px-4 pb-4">
+      <div className="max-w-xl mx-auto">
+        <Select value={selectedCategory} onValueChange={onSelectCategory}>
+          <SelectTrigger className="w-full bg-secondary border-primary/30 [&>span:first-child]:flex [&>span:first-child]:items-center [&>span:first-child]:gap-2">
+            {selectedCategory === "all" ? (
+              <span className="flex items-center gap-1 text-muted-foreground animate-fade-in" key={rotatingIndex}>
+                <span className="font-medium text-foreground/70">Categories:</span>
+                {getLucideIcon(rotatingCat?.icon)}
+                <span className="truncate">{rotatingCat?.name || "Browse by category"}</span>
+              </span>
+            ) : (
+              <SelectValue />
+            )}
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <span className="flex items-center gap-2">
+                <Package className="h-4 w-4 shrink-0" />
+                <span>All Categories</span>
+              </span>
+            </SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name}>
+                <span className="flex items-center gap-2">
+                  {getLucideIcon(cat.icon)}
+                  <span>{cat.name}</span>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
-    </div>
+    </section>
   );
 };
 
