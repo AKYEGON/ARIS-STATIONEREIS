@@ -33,6 +33,12 @@ const ReviewSubmissionForm = ({ onSuccess, prefillData }: ReviewSubmissionFormPr
   const [showPhotoCamera, setShowPhotoCamera] = useState(false);
   const [showVideoCamera, setShowVideoCamera] = useState(false);
 
+  // Hide bottom navigation bar while review form is open so submit button stays accessible
+  useEffect(() => {
+    document.body.classList.add('stories-open');
+    return () => document.body.classList.remove('stories-open');
+  }, []);
+
   // Update form when prefill data changes
   useEffect(() => {
     if (prefillData) {
