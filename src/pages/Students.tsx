@@ -160,6 +160,18 @@ const Students = () => {
         items: itemsByBundle[b.id] || [],
       }));
 
+      const cpIds = (cpRows || []).map((r: any) => r.id);
+      let yearsByCp: Record<string, string[]> = {};
+      if (cpIds.length > 0) {
+        const { data: cpyRows } = await supabase
+          .from("course_product_years")
+          .select("course_product_id, course_year_id")
+          .in("course_product_id", cpIds);
+        (cpyRows || []).forEach((r: any) => {
+          (yearsByCp[r.course_product_id] ||= []).push(r.course_year_id);
+        });
+      }
+
       const mapped: Product[] = [];
       const py: Record<string, Set<string>> = {};
       (cpRows || []).forEach((row: any) => {
@@ -176,9 +188,7 @@ const Students = () => {
           stock: p.stock ?? 0,
           is_featured: p.is_featured,
         });
-        py[p.id] = new Set(
-          (row.course_product_years || []).map((y: any) => y.course_year_id)
-        );
+        py[p.id] = new Set(yearsByCp[row.id] || []);
       });
       setProducts(mapped);
       setProductYears(py);
