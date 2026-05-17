@@ -98,7 +98,10 @@ const MobileVerticalRotator = ({
   onSelectCategory,
 }: MobileVerticalRotatorProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const items = [
     { id: "__all__", name: "all", label: "All Categories", icon: null as string | null },
@@ -107,9 +110,35 @@ const MobileVerticalRotator = ({
 
   const HEIGHT = 44;
   const hasSelection = selectedCategory !== "all";
-  // Stop rotation when user picked a category, when paused, or while scrolling manually
-  const shouldAnimate = !hasSelection && !isPaused;
+  // Pause when: user picked a category, hovered/touched, offscreen, or page is being scrolled (prevents Android compositor smearing artifacts)
+  const shouldAnimate = !hasSelection && !isPaused && isVisible && !isScrolling;
   const durationS = Math.max(items.length * 4, 24);
+
+  // Pause animation while the user scrolls the page — fixes painting artifacts on some Android devices
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    const onScroll = () => {
+      setIsScrolling(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setIsScrolling(false), 180);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  // Only animate when on-screen
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.01 }
+    );
+    obs.observe(containerRef.current);
+    return () => obs.disconnect();
+  }, []);
 
   // When user picks a category, scroll it into view
   useEffect(() => {
@@ -123,22 +152,26 @@ const MobileVerticalRotator = ({
   }, [selectedCategory, hasSelection]);
 
   return (
-    <div className="md:hidden">
+    <div ref={containerRef} className="md:hidden">
       <div
         ref={scrollRef}
         className="relative overflow-x-auto overflow-y-hidden rounded-md border border-primary/20 bg-background no-scrollbar"
-        style={{ height: HEIGHT, WebkitOverflowScrolling: "touch" }}
+        style={{
+          height: HEIGHT,
+          WebkitOverflowScrolling: "touch",
+          contain: "paint",
+          isolation: "isolate",
+          transform: "translateZ(0)",
+        }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
       >
         <div
-          className="flex w-max h-full will-change-transform"
+          className="flex w-max h-full"
           style={{
             animation: `horizontal-marquee ${durationS}s linear infinite`,
             animationPlayState: shouldAnimate ? "running" : "paused",
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
           }}
         >
           {[...items, ...items].map((it, idx) => {
