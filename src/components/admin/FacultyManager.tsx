@@ -63,8 +63,17 @@ export const FacultyManager = () => {
   const [activeCourse, setActiveCourse] = useState<Course | null>(null);
   const [allProducts, setAllProducts] = useState<ProductLite[]>([]);
   const [assignedProductIds, setAssignedProductIds] = useState<Set<string>>(new Set());
+  // courseProductId per productId for the active course
+  const [cpIdByProduct, setCpIdByProduct] = useState<Record<string, string>>({});
+  // courseYears for active course
+  const [courseYears, setCourseYears] = useState<{ id: string; label: string }[]>([]);
+  // For each productId: Set of course_year_ids it is tagged to (empty = all years)
+  const [productYearTags, setProductYearTags] = useState<Record<string, Set<string>>>({});
   const [productSearch, setProductSearch] = useState("");
   const [loading, setLoading] = useState(true);
+
+  const [yearsDialogCourse, setYearsDialogCourse] = useState<Course | null>(null);
+  const [bundlesDialogCourse, setBundlesDialogCourse] = useState<Course | null>(null);
 
   // Faculty form
   const [facDialogOpen, setFacDialogOpen] = useState(false);
