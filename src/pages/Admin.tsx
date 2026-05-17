@@ -89,6 +89,7 @@ const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [productList, setProductList] = useState<Product[]>([]);
+  const [coursesDialogProduct, setCoursesDialogProduct] = useState<Product | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
