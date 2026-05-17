@@ -7,7 +7,7 @@ import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users, X, ChevronDown } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
@@ -261,17 +261,39 @@ const Index = () => {
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground whitespace-nowrap">Sort by:</span>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="h-9 bg-secondary border-primary/30">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                <SelectItem value="name-asc">Name: A to Z</SelectItem>
-                <SelectItem value="featured">Featured</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="relative flex-1 md:hidden">
+              <label htmlFor="mobile-sort-select" className="sr-only">
+                Sort products
+              </label>
+              <select
+                id="mobile-sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="h-9 w-full appearance-none rounded-md border border-primary/30 bg-secondary px-3 pr-10 text-sm text-foreground outline-none transition-colors focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              >
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="name-asc">Name: A to Z</option>
+                <option value="featured">Featured</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
+                <ChevronDown className="h-4 w-4" />
+              </div>
+            </div>
+
+            <div className="hidden flex-1 md:block">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="h-9 bg-secondary border-primary/30">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                  <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                  <SelectItem value="name-asc">Name: A to Z</SelectItem>
+                  <SelectItem value="featured">Featured</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           
           <div className="flex justify-center md:hidden">
@@ -290,6 +312,7 @@ const Index = () => {
         categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
+        useNativeSelectOnMobile
       />
 
       {/* Products Section */}
