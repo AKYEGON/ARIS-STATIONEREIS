@@ -500,6 +500,50 @@ export const EmployeeManagement = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Manage Zone Dialog */}
+      <Dialog open={!!zoneEditMember} onOpenChange={(open) => !open && setZoneEditMember(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" />
+              Manage Agent Zone
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 sm:space-y-4">
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Assign <span className="font-medium text-foreground">{zoneEditMember?.profile?.name || zoneEditMember?.email}</span> to a zone. They will only see orders from that area.
+            </p>
+            <div>
+              <Label className="text-xs sm:text-sm">Zone</Label>
+              <Select value={zoneEditValue} onValueChange={setZoneEditValue}>
+                <SelectTrigger className="h-9 sm:h-10 text-sm">
+                  <SelectValue placeholder="Select zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned (no zone)</SelectItem>
+                  {agentZones.map(z => (
+                    <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {agentZones.length === 0 && (
+                <p className="text-[11px] text-destructive mt-1">
+                  No zones available. Create zones in Settings → Agent Zones first.
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setZoneEditMember(null)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSaveZone} disabled={zoneSaving}>
+                {zoneSaving ? "Saving..." : "Save Zone"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
