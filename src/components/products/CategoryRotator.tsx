@@ -1,8 +1,8 @@
 // Static category selector
 import { ProductCategory } from "@/types/product";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { icons } from "lucide-react";
-import { Package } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ChevronDown, Package, icons } from "lucide-react";
 
 const getLucideIcon = (iconName: string | null, className = "h-4 w-4 shrink-0") => {
   if (!iconName) return <Package className={className} />;
@@ -26,42 +26,82 @@ interface CategoryRotatorProps {
   categories: ProductCategory[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
+  useNativeSelectOnMobile?: boolean;
 }
 
-const CategoryRotator = ({ categories, selectedCategory, onSelectCategory }: CategoryRotatorProps) => {
+const CategoryRotator = ({
+  categories,
+  selectedCategory,
+  onSelectCategory,
+  useNativeSelectOnMobile = false,
+}: CategoryRotatorProps) => {
   if (categories.length === 0) return null;
+
+  const selectedCategoryData = categories.find((cat) => cat.name === selectedCategory);
 
   return (
     <section className="container px-4 pb-4">
       <div className="max-w-xl mx-auto">
-        <Select value={selectedCategory} onValueChange={onSelectCategory}>
-          <SelectTrigger className="w-full bg-secondary border-primary/30 [&>span:first-child]:flex [&>span:first-child]:items-center [&>span:first-child]:gap-2">
-            {selectedCategory === "all" ? (
-              <span className="flex items-center gap-2 text-muted-foreground">
-                <Package className="h-4 w-4 shrink-0" />
-                <span className="truncate">Browse by category</span>
-              </span>
-            ) : (
-              <SelectValue />
-            )}
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">
-              <span className="flex items-center gap-2">
-                <Package className="h-4 w-4 shrink-0" />
-                <span>All Categories</span>
-              </span>
-            </SelectItem>
-            {categories.map((cat) => (
-              <SelectItem key={cat.id} value={cat.name}>
+        {useNativeSelectOnMobile && (
+          <div className="relative md:hidden">
+            <label htmlFor="mobile-category-select" className="sr-only">
+              Browse by category
+            </label>
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
+              {selectedCategory === "all" ? getLucideIcon(null) : getLucideIcon(selectedCategoryData?.icon ?? null)}
+            </div>
+            <select
+              id="mobile-category-select"
+              value={selectedCategory}
+              onChange={(e) => onSelectCategory(e.target.value)}
+              className={cn(
+                "h-10 w-full appearance-none rounded-md border border-primary/30 bg-secondary pl-10 pr-10 text-sm text-foreground outline-none transition-colors",
+                "focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              )}
+            >
+              <option value="all">Browse by category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.name}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
+              <ChevronDown className="h-4 w-4" />
+            </div>
+          </div>
+        )}
+
+        <div className={cn(useNativeSelectOnMobile && "hidden md:block")}>
+          <Select value={selectedCategory} onValueChange={onSelectCategory}>
+            <SelectTrigger className="w-full bg-secondary border-primary/30 [&>span:first-child]:flex [&>span:first-child]:items-center [&>span:first-child]:gap-2">
+              {selectedCategory === "all" ? (
+                <span className="flex items-center gap-2 text-muted-foreground">
+                  <Package className="h-4 w-4 shrink-0" />
+                  <span className="truncate">Browse by category</span>
+                </span>
+              ) : (
+                <SelectValue />
+              )}
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
                 <span className="flex items-center gap-2">
-                  {getLucideIcon(cat.icon)}
-                  <span>{cat.name}</span>
+                  <Package className="h-4 w-4 shrink-0" />
+                  <span>All Categories</span>
                 </span>
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>
+                  <span className="flex items-center gap-2">
+                    {getLucideIcon(cat.icon)}
+                    <span>{cat.name}</span>
+                  </span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </section>
   );
