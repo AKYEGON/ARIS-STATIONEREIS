@@ -288,7 +288,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                       )}
                       <TableCell className="text-right p-2 sm:p-4">
                         <div className="flex justify-end gap-1 sm:gap-2">
-                          {userRole !== 'employee' && (
+                          {(userRole === 'admin' || userRole === 'manager') && (
                             <>
                               <Button
                                 size="icon"
