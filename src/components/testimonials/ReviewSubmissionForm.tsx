@@ -361,9 +361,9 @@ const ReviewSubmissionForm = ({ onSuccess, prefillData }: ReviewSubmissionFormPr
         <p className="text-xs text-muted-foreground mt-1">Max 50MB</p>
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="submit" disabled={isSubmitting}>
+      {/* Submit Button — sticky on mobile so it's always reachable */}
+      <div className="sticky bottom-0 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 bg-background border-t sm:border-t-0 sm:bg-transparent sm:py-0 sm:pt-4 sm:flex sm:justify-end z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
+        <Button type="submit" disabled={isSubmitting} size="lg" className="w-full sm:w-auto">
           {isSubmitting ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
