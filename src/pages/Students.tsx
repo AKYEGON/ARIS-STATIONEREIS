@@ -41,6 +41,7 @@ const Students = () => {
   const courseId = searchParams.get("course");
 
   const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -50,17 +51,20 @@ const Students = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data: facs } = await supabase
-        .from("faculties")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+      const [{ data: facs }, { data: crs }] = await Promise.all([
+        supabase
+          .from("faculties")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("courses")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+      ]);
       setFaculties((facs as Faculty[]) || []);
-
-      const { data: crs } = await supabase
-        .from("courses")
-        .select("id, faculty_id")
-        .eq("is_active", true);
+      setAllCourses((crs as Course[]) || []);
       const c: Record<string, number> = {};
       (crs || []).forEach((row: any) => {
         c[row.faculty_id] = (c[row.faculty_id] || 0) + 1;
@@ -76,14 +80,16 @@ const Students = () => {
       setCourses([]);
       return;
     }
-    supabase
-      .from("courses")
-      .select("*")
-      .eq("faculty_id", facultyId)
-      .eq("is_active", true)
-      .order("display_order", { ascending: true })
-      .then(({ data }) => setCourses((data as Course[]) || []));
-  }, [facultyId]);
+    setCourses(allCourses.filter((c) => c.faculty_id === facultyId));
+  }, [facultyId, allCourses]);
+
+  // Smart fuzzy-ish matcher: tokenize query, match any token in name/description
+  const smartMatch = (text: string, query: string) => {
+    if (!query) return true;
+    const haystack = text.toLowerCase();
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return tokens.every((t) => haystack.includes(t));
+  };
 
   useEffect(() => {
     if (!courseId) {
@@ -233,47 +239,106 @@ const Students = () => {
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
             </div>
           ) : !activeFaculty ? (
-            // Faculty grid (with search across faculties + courses)
+            // Faculty grid + cross-faculty course matches when searching
             (() => {
-              const q = search.trim().toLowerCase();
-              const filtered = q
-                ? faculties.filter((f) => f.name.toLowerCase().includes(q))
-                : faculties;
+              const q = search.trim();
+              const filteredFaculties = faculties.filter((f) =>
+                smartMatch(`${f.name} ${f.description || ""}`, q)
+              );
+              const matchingCourses = q
+                ? allCourses.filter((c) =>
+                    smartMatch(`${c.name} ${c.description || ""}`, q)
+                  )
+                : [];
+              const facultyById = (id: string) => faculties.find((f) => f.id === id);
               return (
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-                  {filtered.map((f) => (
-                    <button
-                      key={f.id}
-                      onClick={() => { setSearch(""); goFaculty(f.id); }}
-                      className="group text-left"
-                    >
-                      <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 border-2">
-                        <CardContent className="p-4 sm:p-6 flex flex-col items-start gap-3">
-                          <div className="bg-primary/10 text-primary p-3 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                            {renderIcon(f.icon)}
-                          </div>
-                          <div className="space-y-1">
-                            <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight leading-tight">
-                              {f.name}
-                            </h3>
-                            {f.description && (
-                              <p className="text-xs text-muted-foreground line-clamp-2">
-                                {f.description}
-                              </p>
-                            )}
-                          </div>
-                          <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
-                            <BookOpen className="h-3 w-3 mr-1" />
-                            {counts[f.id] || 0} Courses
-                          </Badge>
-                        </CardContent>
-                      </Card>
-                    </button>
-                  ))}
-                  {filtered.length === 0 && (
-                    <div className="col-span-full text-center py-16 text-muted-foreground">
+                <div className="space-y-8">
+                  {filteredFaculties.length > 0 && (
+                    <div>
+                      {q && (
+                        <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-3">
+                          Faculties · {filteredFaculties.length}
+                        </h2>
+                      )}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                        {filteredFaculties.map((f) => (
+                          <button
+                            key={f.id}
+                            onClick={() => { setSearch(""); goFaculty(f.id); }}
+                            className="group text-left"
+                          >
+                            <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 border-2">
+                              <CardContent className="p-4 sm:p-6 flex flex-col items-start gap-3">
+                                <div className="bg-primary/10 text-primary p-3 rounded-xl group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                                  {renderIcon(f.icon)}
+                                </div>
+                                <div className="space-y-1">
+                                  <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight leading-tight">
+                                    {f.name}
+                                  </h3>
+                                  {f.description && (
+                                    <p className="text-xs text-muted-foreground line-clamp-2">
+                                      {f.description}
+                                    </p>
+                                  )}
+                                </div>
+                                <Badge variant="secondary" className="text-[10px] uppercase tracking-wider">
+                                  <BookOpen className="h-3 w-3 mr-1" />
+                                  {counts[f.id] || 0} Courses
+                                </Badge>
+                              </CardContent>
+                            </Card>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {q && matchingCourses.length > 0 && (
+                    <div>
+                      <h2 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold mb-3">
+                        Courses · {matchingCourses.length}
+                      </h2>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                        {matchingCourses.map((c) => {
+                          const fac = facultyById(c.faculty_id);
+                          return (
+                            <button
+                              key={c.id}
+                              onClick={() => { setSearch(""); setSearchParams({ faculty: c.faculty_id, course: c.id }); }}
+                              className="group text-left"
+                            >
+                              <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1 hover:border-primary/40 border-2">
+                                <CardContent className="p-4 sm:p-5 flex flex-col gap-2">
+                                  <div className="bg-primary/10 text-primary p-2.5 rounded-lg w-fit group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                                    <BookOpen className="h-5 w-5" />
+                                  </div>
+                                  <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight leading-tight">
+                                    {c.name}
+                                  </h3>
+                                  {fac && (
+                                    <Badge variant="outline" className="text-[10px] uppercase tracking-wider w-fit">
+                                      {fac.name}
+                                    </Badge>
+                                  )}
+                                  {c.description && (
+                                    <p className="text-xs text-muted-foreground line-clamp-2">
+                                      {c.description}
+                                    </p>
+                                  )}
+                                </CardContent>
+                              </Card>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {q && filteredFaculties.length === 0 && matchingCourses.length === 0 && (
+                    <div className="text-center py-16 text-muted-foreground">
                       <GraduationCap className="h-12 w-12 mx-auto mb-3 opacity-40" />
-                      <p>No faculties match your search.</p>
+                      <p>No faculties or courses match "{q}".</p>
                     </div>
                   )}
                 </div>
@@ -282,13 +347,10 @@ const Students = () => {
           ) : !activeCourse ? (
             // Course grid for selected faculty
             (() => {
-              const q = search.trim().toLowerCase();
-              const filtered = q
-                ? courses.filter((c) =>
-                    c.name.toLowerCase().includes(q) ||
-                    (c.description || "").toLowerCase().includes(q)
-                  )
-                : courses;
+              const q = search.trim();
+              const filtered = courses.filter((c) =>
+                smartMatch(`${c.name} ${c.description || ""}`, q)
+              );
               return (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
                   {filtered.map((c) => (
