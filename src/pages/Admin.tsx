@@ -2072,8 +2072,18 @@ const Admin = () => {
                                 size="icon"
                                 className="h-8 w-8 sm:h-9 sm:w-9 transition-all duration-200 hover:scale-110 active:scale-95"
                                 onClick={() => openEditDialog(product)}
+                                title="Edit product"
                               >
                                 <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                className="h-8 w-8 sm:h-9 sm:w-9 transition-all duration-200 hover:scale-110 active:scale-95"
+                                onClick={() => setCoursesDialogProduct(product)}
+                                title="Assign to courses"
+                              >
+                                <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4" />
                               </Button>
                               <Button
                                 variant="destructive"
