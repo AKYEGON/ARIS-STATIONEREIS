@@ -57,15 +57,17 @@ const OffersSection = () => {
           </Link>
         </div>
 
-        {/* Desktop: Horizontal marquee */}
+        {/* Horizontal marquee — same straight-line rotation on mobile and desktop */}
         <div
-          className="hidden md:block relative overflow-hidden"
+          className="relative overflow-hidden"
           style={{ contain: "layout paint", isolation: "isolate" }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={() => setIsPaused(true)}
+          onTouchEnd={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-4 w-max will-change-transform"
+            className="flex gap-2 md:gap-4 w-max will-change-transform"
             style={{
               animation: `horizontal-marquee ${Math.max(bundles.length * 5, 20)}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
@@ -74,20 +76,14 @@ const OffersSection = () => {
             }}
           >
             {[...bundles, ...bundles].map((bundle, index) => (
-              <div key={`${bundle.id}-${index}`} className="w-[220px] lg:w-[240px] flex-shrink-0">
+              <div
+                key={`${bundle.id}-${index}`}
+                className="w-[150px] sm:w-[180px] md:w-[220px] lg:w-[240px] flex-shrink-0"
+              >
                 <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Mobile: simple grid to avoid Xiaomi/Chrome paint trails from nested scrolling layers */}
-        <div className="grid grid-cols-2 gap-2 md:hidden">
-          {bundles.slice(0, 4).map((bundle) => (
-            <div key={bundle.id} className="min-w-0">
-              <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
-            </div>
-          ))}
         </div>
       </div>
     </section>
