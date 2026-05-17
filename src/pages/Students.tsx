@@ -130,11 +130,35 @@ const Students = () => {
           .order("display_order", { ascending: true }),
         supabase
           .from("course_bundles")
-          .select("*, items:course_bundle_items(*)")
+          .select("*")
           .eq("course_id", courseId)
           .eq("is_active", true)
           .order("display_order", { ascending: true }),
       ]);
+      const bundleIds = (bundleRows || []).map((b: any) => b.id);
+      let itemsByBundle: Record<string, { id: string; product_id: string; quantity: number }[]> = {};
+      if (bundleIds.length > 0) {
+        const { data: itemRows } = await supabase
+          .from("course_bundle_items")
+          .select("id, course_bundle_id, product_id, quantity")
+          .in("course_bundle_id", bundleIds);
+        (itemRows || []).forEach((it: any) => {
+          (itemsByBundle[it.course_bundle_id] ||= []).push({
+            id: it.id, product_id: it.product_id, quantity: it.quantity,
+          });
+        });
+      }
+      const bundlesWithItems: CourseBundleRow[] = (bundleRows || []).map((b: any) => ({
+        id: b.id,
+        course_year_id: b.course_year_id,
+        name: b.name,
+        description: b.description,
+        image: b.image,
+        bundle_price: Number(b.bundle_price),
+        original_total_price: Number(b.original_total_price),
+        display_order: b.display_order,
+        items: itemsByBundle[b.id] || [],
+      }));
 
       const mapped: Product[] = [];
       const py: Record<string, Set<string>> = {};
