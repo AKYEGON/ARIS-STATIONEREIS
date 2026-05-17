@@ -40,35 +40,8 @@ const OffersSection = () => {
     }
   };
 
-  const scroll = useCallback((direction: "left" | "right") => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const cardWidth = container.querySelector("div")?.offsetWidth || 160;
-    const gap = 8;
-    const scrollAmount = direction === "left" ? -(cardWidth + gap) : (cardWidth + gap);
-    
-    // If at the end, loop back to start
-    if (direction === "right" && 
-        container.scrollLeft + container.clientWidth >= container.scrollWidth - 10) {
-      container.scrollTo({ left: 0, behavior: "smooth" });
-    } else {
-      container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-    }
-  }, []);
-
-  // Auto-scroll
-  useEffect(() => {
-    if (bundles.length <= 1 || isPaused) return;
-
-    autoScrollRef.current = setInterval(() => {
-      scroll("right");
-    }, AUTO_SCROLL_INTERVAL);
-
-    return () => {
-      if (autoScrollRef.current) clearInterval(autoScrollRef.current);
-    };
-  }, [bundles.length, isPaused, scroll]);
+  // Auto-scroll removed on mobile — was causing repaint smearing on Chrome Android
+  // that bled into sibling Select dropdowns. Manual swipe still works.
 
   if (isLoading || bundles.length === 0) return null;
 
