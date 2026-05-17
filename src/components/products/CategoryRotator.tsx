@@ -104,11 +104,6 @@ const MobileVerticalRotator = ({
     ...categories.map((c) => ({ id: c.id, name: c.name, label: c.name, icon: c.icon })),
   ];
 
-  const ROW_H = 44; // px per row
-  const visibleRows = Math.min(items.length, 5);
-  const containerH = visibleRows * ROW_H;
-  // Slow rotation: ~2.2s per row
-  const durationS = Math.max(items.length * 2.2, 12);
 
   const HEIGHT = 44;
   // Slow horizontal rotation
