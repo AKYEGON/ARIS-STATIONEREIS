@@ -606,6 +606,28 @@ export const FacultyManager = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {yearsDialogCourse && (
+        <CourseYearsDialog
+          open={!!yearsDialogCourse}
+          onOpenChange={(o) => {
+            if (!o) {
+              setYearsDialogCourse(null);
+              if (activeCourse?.id === yearsDialogCourse.id) fetchProductsForCourse(activeCourse.id);
+            }
+          }}
+          courseId={yearsDialogCourse.id}
+          courseName={yearsDialogCourse.name}
+        />
+      )}
+      {bundlesDialogCourse && (
+        <CourseBundlesDialog
+          open={!!bundlesDialogCourse}
+          onOpenChange={(o) => { if (!o) setBundlesDialogCourse(null); }}
+          courseId={bundlesDialogCourse.id}
+          courseName={bundlesDialogCourse.name}
+        />
+      )}
     </Card>
   );
 };
