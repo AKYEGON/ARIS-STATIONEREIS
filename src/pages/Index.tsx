@@ -223,6 +223,8 @@ const Index = () => {
     }
   };
 
+  const isMobileLayout = screenSize < 768;
+
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
@@ -239,25 +241,50 @@ const Index = () => {
       {/* Search Section */}
       <section className="container py-4 sm:py-6 md:py-8 px-4">
         <div className="max-w-xl mx-auto space-y-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 pr-9 bg-secondary border-primary/30 transition-all duration-200 focus:ring-2 focus:ring-primary"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+          {isMobileLayout ? (
+            <div className="space-y-2">
+              <label htmlFor="mobile-search" className="sr-only">
+                Search products
+              </label>
+              <input
+                id="mobile-search"
+                type="search"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-11 w-full rounded-md border border-primary/30 bg-background px-3 text-base text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+              />
+              {searchQuery && (
+                <div className="flex justify-end">
+                  <Button variant="outline" size="sm" onClick={() => setSearchQuery("")}
+                  >
+                    <X className="h-4 w-4 mr-1" />
+                    Clear
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 sm:h-5 sm:w-5" />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 sm:pl-10 pr-9 bg-secondary border-primary/30 transition-all duration-200 focus:ring-2 focus:ring-primary"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground whitespace-nowrap">Sort by:</span>
@@ -280,7 +307,7 @@ const Index = () => {
                   MozAppearance: "none",
                   appearance: "none",
                 }}
-                className="h-9 w-full rounded-md border border-primary/30 bg-secondary px-3 pr-9 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
+                className="h-10 w-full rounded-md border border-primary/30 bg-background px-3 pr-9 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               >
                 <option value="price-asc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Price: Low to High</option>
                 <option value="price-desc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Price: High to Low</option>

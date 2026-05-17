@@ -40,8 +40,8 @@ const OffersSection = () => {
     }
   };
 
-  // Auto-scroll removed on mobile — was causing repaint smearing on Chrome Android
-  // that bled into sibling Select dropdowns. Manual swipe still works.
+  // Auto-scroll removed on mobile — was causing repaint smearing on Chrome Android.
+  // Mobile now uses a simple grid instead of a horizontally scrolling layer.
 
   if (isLoading || bundles.length === 0) return null;
 
@@ -81,24 +81,13 @@ const OffersSection = () => {
           </div>
         </div>
 
-        {/* Mobile: Horizontal swipe (no auto-scroll — caused Chrome Android repaint bleed) */}
-        <div
-          className="relative md:hidden"
-          style={{ contain: "layout paint", isolation: "isolate" }}
-        >
-          <div
-            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none", transform: "translateZ(0)" }}
-          >
-            {bundles.map((bundle, index) => (
-              <div
-                key={bundle.id}
-                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start flex-shrink-0"
-              >
-                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
-              </div>
-            ))}
-          </div>
+        {/* Mobile: simple grid to avoid Xiaomi/Chrome paint trails from nested scrolling layers */}
+        <div className="grid grid-cols-2 gap-2 md:hidden">
+          {bundles.slice(0, 4).map((bundle) => (
+            <div key={bundle.id} className="min-w-0">
+              <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
+            </div>
+          ))}
         </div>
       </div>
     </section>
