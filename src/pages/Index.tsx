@@ -7,8 +7,16 @@ import ProductCard from "@/components/products/ProductCard";
 import SEO from "@/components/common/SEO";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, ChevronLeft, ChevronRight, Users, X } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Users, X, SlidersHorizontal, Check } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
@@ -34,7 +42,7 @@ const Index = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
   const [categoryProductMap, setCategoryProductMap] = useState<Record<string, string[]>>({});
-  const [sortBy, setSortBy] = useState<string>("price-asc");
+  const [sortBy, setSortBy] = useState<string>("featured");
 
   // Persist search query to sessionStorage
   useEffect(() => {
@@ -153,7 +161,7 @@ const Index = () => {
     if (sortBy === "price-asc") return [...list].sort((a, b) => a.price - b.price);
     if (sortBy === "price-desc") return [...list].sort((a, b) => b.price - a.price);
     if (sortBy === "name-asc") return [...list].sort((a, b) => a.name.localeCompare(b.name));
-    return list;
+    return list; // "featured" preserves the default featured/display_order sort
   }, [products, searchQuery, selectedCategory, categoryProductMap, sortBy]);
 
   const totalPages = Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE);
