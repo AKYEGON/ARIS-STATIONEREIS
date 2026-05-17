@@ -3,7 +3,7 @@ import { ProductCategory } from "@/types/product";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Package, ChevronRight, icons } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 
 const getLucideIcon = (iconName: string | null, className = "h-4 w-4 shrink-0") => {
   if (!iconName) return <Package className={className} />;
