@@ -237,13 +237,14 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                   <TableHead className="w-[70px]">Stock</TableHead>
                   {userRole === 'admin' && <TableHead className="hidden sm:table-cell">Cost</TableHead>}
                   <TableHead className="hidden md:table-cell">Sell</TableHead>
-                  {userRole === 'admin' && <TableHead className="hidden lg:table-cell">Profit</TableHead>}
+                  {userRole === 'admin' && <TableHead className="w-[80px] sm:w-auto">Margin</TableHead>}
                   <TableHead className="text-right w-[100px] sm:w-auto">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => {
                   const profit = calculateProfit(product.price, product.cost_price);
+                  const marginPct = product.price > 0 ? (profit / product.price) * 100 : 0;
                   return (
                     <TableRow key={product.id}>
                       <TableCell className="p-2 sm:p-4">
@@ -274,10 +275,15 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                       )}
                       <TableCell className="hidden md:table-cell text-xs sm:text-sm">KSh {product.price.toFixed(0)}</TableCell>
                       {userRole === 'admin' && (
-                        <TableCell className="hidden lg:table-cell">
-                          <span className={`text-xs sm:text-sm ${profit > 0 ? "text-green-600 font-medium" : "text-red-600"}`}>
-                            KSh {profit.toFixed(0)}
-                          </span>
+                        <TableCell className="p-2 sm:p-4">
+                          <div className="flex flex-col leading-tight">
+                            <span className={`text-xs sm:text-sm font-medium ${profit > 0 ? "text-green-600" : "text-red-600"}`}>
+                              KSh {profit.toFixed(0)}
+                            </span>
+                            <span className="text-[10px] sm:text-xs text-muted-foreground">
+                              {marginPct.toFixed(0)}%
+                            </span>
+                          </div>
                         </TableCell>
                       )}
                       <TableCell className="text-right p-2 sm:p-4">
