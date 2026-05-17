@@ -32,7 +32,7 @@ const Footer = () => {
         
         <div className="container py-4 sm:py-6 px-4 relative z-10">
           {/* Mobile: Compact 2-column layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
             {/* Brand Section - Full width on mobile */}
             <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10 flex-shrink-0">
