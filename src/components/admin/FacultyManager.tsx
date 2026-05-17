@@ -473,21 +473,47 @@ export const FacultyManager = () => {
               <div className="space-y-1">
                 {filteredProducts.map((p) => {
                   const checked = assignedProductIds.has(p.id);
+                  const tags = productYearTags[p.id] || new Set<string>();
                   return (
-                    <label
-                      key={p.id}
-                      className="flex items-center gap-3 p-2 rounded hover:bg-muted cursor-pointer"
-                    >
-                      <Checkbox
-                        checked={checked}
-                        onCheckedChange={(v) => toggleProduct(p.id, !!v)}
-                      />
-                      <img src={p.image} alt={p.name} className="h-10 w-10 object-contain rounded bg-muted" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{p.name}</p>
-                        <p className="text-xs text-muted-foreground">Ksh {p.price.toFixed(0)}</p>
-                      </div>
-                    </label>
+                    <div key={p.id} className="rounded hover:bg-muted p-2">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <Checkbox checked={checked} onCheckedChange={(v) => toggleProduct(p.id, !!v)} />
+                        <img src={p.image} alt={p.name} className="h-10 w-10 object-contain rounded bg-muted" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{p.name}</p>
+                          <p className="text-xs text-muted-foreground">Ksh {p.price.toFixed(0)}</p>
+                        </div>
+                      </label>
+                      {checked && courseYears.length > 0 && (
+                        <div className="pl-8 pt-2 flex flex-wrap gap-1.5">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground self-center mr-1">
+                            Years:
+                          </span>
+                          {courseYears.map((y) => {
+                            const on = tags.has(y.id);
+                            return (
+                              <button
+                                key={y.id}
+                                type="button"
+                                onClick={() => toggleProductYear(p.id, y.id, !on)}
+                                className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide border transition-colors ${
+                                  on
+                                    ? "bg-primary text-primary-foreground border-primary"
+                                    : "bg-background border-border hover:border-primary/50"
+                                }`}
+                              >
+                                {y.label}
+                              </button>
+                            );
+                          })}
+                          {tags.size === 0 && (
+                            <span className="text-[10px] text-muted-foreground italic self-center">
+                              (visible in all years)
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
                 {filteredProducts.length === 0 && (
@@ -495,6 +521,11 @@ export const FacultyManager = () => {
                 )}
               </div>
             </ScrollArea>
+            {activeCourse && courseYears.length === 0 && (
+              <p className="text-[11px] text-amber-600 italic">
+                💡 Add years on this course (Years button) to tag products to specific academic years.
+              </p>
+            )}
           </div>
         )}
       </CardContent>
