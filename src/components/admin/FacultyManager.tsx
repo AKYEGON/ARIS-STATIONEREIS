@@ -11,10 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Plus, Pencil, Trash2, GraduationCap, BookOpen, Package, ChevronRight, ArrowLeft, icons,
+  Plus, Pencil, Trash2, GraduationCap, BookOpen, Package, ChevronRight, ArrowLeft, Layers, icons,
 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CourseYearsDialog } from "./CourseYearsDialog";
+import { CourseBundlesDialog } from "./CourseBundlesDialog";
 
 const SUGGESTED_ICONS = [
   "GraduationCap", "Wrench", "FlaskConical", "Stethoscope", "Scale",
