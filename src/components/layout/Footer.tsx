@@ -1,8 +1,24 @@
 import { Link } from "react-router-dom";
 import { Shield, Phone, MapPin, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
 const Footer = () => {
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("product_categories")
+      .select("name,slug,display_order")
+      .eq("is_active", true)
+      .order("display_order")
+      .limit(6)
+      .then(({ data }) => {
+        if (data) setCategories(data as any);
+      });
+  }, []);
+
   return (
     <footer className="relative mt-auto overflow-hidden">
       {/* Decorative top wave/curve */}
@@ -16,7 +32,7 @@ const Footer = () => {
         
         <div className="container py-4 sm:py-6 px-4 relative z-10">
           {/* Mobile: Compact 2-column layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
             {/* Brand Section - Full width on mobile */}
             <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10 flex-shrink-0">
@@ -51,7 +67,26 @@ const Footer = () => {
                 </Link>
               </div>
             </div>
-            
+
+            {/* Shop by Category - SEO internal links */}
+            <div className="col-span-2 sm:col-span-2">
+              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
+                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
+                Shop by Category
+              </h4>
+              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 sm:gap-y-2">
+                {categories.map((c) => (
+                  <Link
+                    key={c.slug}
+                    to={`/category/${c.slug}`}
+                    className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all truncate"
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
             {/* Contact + Admin combined on mobile */}
             <div>
               <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
