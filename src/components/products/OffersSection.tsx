@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import BundleCard from "./BundleCard";
@@ -6,15 +6,10 @@ import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
 
-
-const AUTO_SCROLL_INTERVAL = 3000;
-
 const OffersSection = () => {
   const [bundles, setBundles] = useState<Bundle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { addBundleToCart } = useCart();
-  const containerRef = useRef<HTMLDivElement>(null);
-  const autoScrollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
