@@ -169,12 +169,16 @@ const MobileVerticalRotator = ({
       >
         <div
           className="flex w-max h-full"
-          style={{
-            animation: `horizontal-marquee ${durationS}s linear infinite`,
-            animationPlayState: shouldAnimate ? "running" : "paused",
-          }}
+          style={
+            hasSelection
+              ? undefined
+              : {
+                  animation: `horizontal-marquee ${durationS}s linear infinite`,
+                  animationPlayState: shouldAnimate ? "running" : "paused",
+                }
+          }
         >
-          {[...items, ...items].map((it, idx) => {
+          {(hasSelection ? items : [...items, ...items]).map((it, idx) => {
             const isActive = selectedCategory === it.name;
             return (
               <button
