@@ -89,17 +89,25 @@ const OffersSection = () => {
           </Link>
         </div>
 
-        {/* Desktop: Grid layout */}
-        <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {bundles.map((bundle, index) => (
-            <div
-              key={bundle.id}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
-            </div>
-          ))}
+        {/* Desktop: Vertical marquee — fixed height, cards rotate upward in a straight line */}
+        <div
+          className="hidden md:block relative overflow-hidden h-[360px] lg:h-[400px]"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div
+            className="flex flex-col gap-4"
+            style={{
+              animation: `vertical-marquee ${Math.max(bundles.length * 4, 16)}s linear infinite`,
+              animationPlayState: isPaused ? "paused" : "running",
+            }}
+          >
+            {[...bundles, ...bundles].map((bundle, index) => (
+              <div key={`${bundle.id}-${index}`} className="grid grid-cols-3 lg:grid-cols-4 gap-4">
+                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Mobile: Horizontal scroll */}
