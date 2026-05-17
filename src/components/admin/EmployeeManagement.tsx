@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Trash2, Users, Shield, UserCheck, UserPlus, Clock } from "lucide-react";
+import { Trash2, Users, Shield, UserCheck, UserPlus, Clock, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -24,6 +24,7 @@ interface RegisteredUser {
     phone: string | null;
     is_active: boolean;
   } | null;
+  zone: { id: string; name: string | null } | null;
 }
 
 export const EmployeeManagement = () => {
@@ -38,6 +39,9 @@ export const EmployeeManagement = () => {
   });
   const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState("");
+  const [zoneEditMember, setZoneEditMember] = useState<RegisteredUser | null>(null);
+  const [zoneEditValue, setZoneEditValue] = useState<string>("none");
+  const [zoneSaving, setZoneSaving] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -142,6 +146,29 @@ export const EmployeeManagement = () => {
       fetchUsers();
     } catch (error: any) {
       toast.error(error.message || "Failed to update role");
+    }
+  };
+
+  const handleSaveZone = async () => {
+    if (!zoneEditMember) return;
+    setZoneSaving(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-staff', {
+        body: {
+          action: 'set-zone',
+          user_id: zoneEditMember.id,
+          zone_id: zoneEditValue === "none" ? null : zoneEditValue,
+        }
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success("Zone updated");
+      setZoneEditMember(null);
+      fetchUsers();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update zone");
+    } finally {
+      setZoneSaving(false);
     }
   };
 
@@ -292,26 +319,34 @@ export const EmployeeManagement = () => {
                   <TableHead className="min-w-[120px]">Name</TableHead>
                   <TableHead className="hidden sm:table-cell">Email</TableHead>
                   <TableHead>Role</TableHead>
+                  <TableHead className="hidden md:table-cell">Zone</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right w-[80px]">Actions</TableHead>
+                  <TableHead className="text-right w-[110px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {staffMembers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                       {loading ? "Loading..." : "No staff members yet. Approve pending users above!"}
                     </TableCell>
                   </TableRow>
                 ) : (
                   staffMembers.map((member) => {
                     const currentRole = member.roles.includes("manager") ? "manager" : member.roles.includes("agent") ? "agent" : "employee";
+                    const isAgent = currentRole === "agent";
                     return (
                       <TableRow key={member.id}>
                         <TableCell className="p-2 sm:p-4">
                           <div>
                             <div className="font-medium text-xs sm:text-sm">{member.profile?.name || "—"}</div>
                             <div className="text-[10px] sm:text-xs text-muted-foreground sm:hidden">{member.email}</div>
+                            {isAgent && (
+                              <div className="text-[10px] text-muted-foreground md:hidden flex items-center gap-1 mt-0.5">
+                                <MapPin className="h-2.5 w-2.5" />
+                                {member.zone?.name || <span className="text-destructive">No zone</span>}
+                              </div>
+                            )}
                           </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{member.email}</TableCell>
@@ -330,6 +365,20 @@ export const EmployeeManagement = () => {
                             </SelectContent>
                           </Select>
                         </TableCell>
+                        <TableCell className="hidden md:table-cell p-2 sm:p-4 text-xs sm:text-sm">
+                          {isAgent ? (
+                            member.zone?.name ? (
+                              <span className="inline-flex items-center gap-1">
+                                <MapPin className="h-3 w-3 text-primary" />
+                                {member.zone.name}
+                              </span>
+                            ) : (
+                              <Badge variant="destructive" className="text-[10px]">No zone</Badge>
+                            )
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </TableCell>
                         <TableCell className="p-2 sm:p-4">
                           <div className="flex items-center gap-2">
                             <Switch
@@ -346,14 +395,30 @@ export const EmployeeManagement = () => {
                           </div>
                         </TableCell>
                         <TableCell className="text-right p-2 sm:p-4">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => handleRemoveStaff(member)}
-                            className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                          </Button>
+                          <div className="flex justify-end gap-1">
+                            {isAgent && (
+                              <Button
+                                size="icon"
+                                variant="outline"
+                                title="Manage zone"
+                                onClick={() => {
+                                  setZoneEditMember(member);
+                                  setZoneEditValue(member.zone?.id || "none");
+                                }}
+                                className="h-7 w-7 sm:h-8 sm:w-8"
+                              >
+                                <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              onClick={() => handleRemoveStaff(member)}
+                              className="h-7 w-7 sm:h-8 sm:w-8 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -432,6 +497,50 @@ export const EmployeeManagement = () => {
             <Button onClick={handleApprove} className="w-full h-9 sm:h-10 text-sm" disabled={approveLoading}>
               {approveLoading ? "Approving..." : "Approve & Set Role"}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manage Zone Dialog */}
+      <Dialog open={!!zoneEditMember} onOpenChange={(open) => !open && setZoneEditMember(null)}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm sm:text-base flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" />
+              Manage Agent Zone
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 sm:space-y-4">
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Assign <span className="font-medium text-foreground">{zoneEditMember?.profile?.name || zoneEditMember?.email}</span> to a zone. They will only see orders from that area.
+            </p>
+            <div>
+              <Label className="text-xs sm:text-sm">Zone</Label>
+              <Select value={zoneEditValue} onValueChange={setZoneEditValue}>
+                <SelectTrigger className="h-9 sm:h-10 text-sm">
+                  <SelectValue placeholder="Select zone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned (no zone)</SelectItem>
+                  {agentZones.map(z => (
+                    <SelectItem key={z.id} value={z.id}>{z.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {agentZones.length === 0 && (
+                <p className="text-[11px] text-destructive mt-1">
+                  No zones available. Create zones in Settings → Agent Zones first.
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setZoneEditMember(null)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={handleSaveZone} disabled={zoneSaving}>
+                {zoneSaving ? "Saving..." : "Save Zone"}
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
