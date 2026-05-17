@@ -90,8 +90,11 @@ const OffersSection = () => {
             className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none", transform: "translateZ(0)" }}
           >
-            {[...bundles, ...bundles].map((bundle, index) => (
-              <div key={`${bundle.id}-${index}`} className="w-[220px] lg:w-[240px] flex-shrink-0">
+            {bundles.map((bundle, index) => (
+              <div
+                key={bundle.id}
+                className="min-w-[140px] max-w-[160px] sm:min-w-[150px] sm:max-w-[170px] snap-start flex-shrink-0"
+              >
                 <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
               </div>
             ))}
