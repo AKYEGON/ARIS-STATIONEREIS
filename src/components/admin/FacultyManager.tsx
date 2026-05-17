@@ -222,11 +222,14 @@ export const FacultyManager = () => {
   const toggleProduct = async (productId: string, checked: boolean) => {
     if (!activeCourse) return;
     if (checked) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("course_products")
-        .insert({ course_id: activeCourse.id, product_id: productId });
-      if (error) return toast.error("Failed to assign");
+        .insert({ course_id: activeCourse.id, product_id: productId })
+        .select("id")
+        .single();
+      if (error || !data) return toast.error("Failed to assign");
       setAssignedProductIds((prev) => new Set(prev).add(productId));
+      setCpIdByProduct((prev) => ({ ...prev, [productId]: data.id }));
     } else {
       const { error } = await supabase
         .from("course_products")
@@ -237,6 +240,48 @@ export const FacultyManager = () => {
       setAssignedProductIds((prev) => {
         const next = new Set(prev);
         next.delete(productId);
+        return next;
+      });
+      setCpIdByProduct((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
+      setProductYearTags((prev) => {
+        const next = { ...prev };
+        delete next[productId];
+        return next;
+      });
+    }
+  };
+
+  const toggleProductYear = async (productId: string, yearId: string, checked: boolean) => {
+    const cpId = cpIdByProduct[productId];
+    if (!cpId) return;
+    if (checked) {
+      const { error } = await supabase
+        .from("course_product_years")
+        .insert({ course_product_id: cpId, course_year_id: yearId });
+      if (error) return toast.error("Failed to tag year");
+      setProductYearTags((prev) => {
+        const next = { ...prev };
+        const set = new Set(next[productId] || []);
+        set.add(yearId);
+        next[productId] = set;
+        return next;
+      });
+    } else {
+      const { error } = await supabase
+        .from("course_product_years")
+        .delete()
+        .eq("course_product_id", cpId)
+        .eq("course_year_id", yearId);
+      if (error) return toast.error("Failed to untag year");
+      setProductYearTags((prev) => {
+        const next = { ...prev };
+        const set = new Set(next[productId] || []);
+        set.delete(yearId);
+        next[productId] = set;
         return next;
       });
     }
