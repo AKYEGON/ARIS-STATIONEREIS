@@ -257,6 +257,56 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "set-zone") {
+      const { user_id, zone_id } = body;
+
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "user_id is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Verify target user is an agent
+      const { data: agentRole } = await supabaseClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user_id)
+        .eq("role", "agent")
+        .maybeSingle();
+
+      if (!agentRole) {
+        return new Response(JSON.stringify({ error: "Target user is not an agent" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Clear existing assignments
+      await supabaseClient
+        .from("agent_zone_assignments")
+        .delete()
+        .eq("user_id", user_id);
+
+      // Insert new one if provided (null = unassign)
+      if (zone_id) {
+        const { error: insertError } = await supabaseClient
+          .from("agent_zone_assignments")
+          .insert({ user_id, zone_id });
+
+        if (insertError) {
+          return new Response(JSON.stringify({ error: "Failed to assign zone: " + insertError.message }), {
+            status: 500,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     return new Response(JSON.stringify({ error: "Unknown action" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
