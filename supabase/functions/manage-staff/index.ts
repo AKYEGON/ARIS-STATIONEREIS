@@ -88,11 +88,17 @@ Deno.serve(async (req) => {
         .from("employee_profiles")
         .select("*");
 
+      // Get all agent zone assignments + zone names
+      const { data: zoneAssignments } = await supabaseClient
+        .from("agent_zone_assignments")
+        .select("user_id, zone_id, agent_zones(id, name)");
+
       const usersWithRoles = allUsers
         .filter(u => u.id !== caller.id) // Exclude the admin themselves
         .map(user => {
           const userRoles = (roles || []).filter(r => r.user_id === user.id);
           const profile = (profiles || []).find(p => p.user_id === user.id);
+          const za = (zoneAssignments || []).find((z: any) => z.user_id === user.id);
           return {
             id: user.id,
             email: user.email,
@@ -100,6 +106,7 @@ Deno.serve(async (req) => {
             email_confirmed_at: user.email_confirmed_at,
             roles: userRoles.map(r => r.role),
             profile: profile || null,
+            zone: za ? { id: (za as any).zone_id, name: (za as any).agent_zones?.name || null } : null,
           };
         });
 
