@@ -123,7 +123,7 @@ const CategoryLanding = () => {
   }, [load]);
 
   const handleAdd = (product: Product, variant?: any) => {
-    addToCart(product, 1, variant);
+    addToCart(product, variant);
     toast.success(`${product.name} added to cart`);
   };
 
