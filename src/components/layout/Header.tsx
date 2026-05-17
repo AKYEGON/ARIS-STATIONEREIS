@@ -26,7 +26,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background transition-all duration-300 md:bg-background/95 md:backdrop-blur md:supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background md:bg-background/95 md:backdrop-blur md:supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 sm:h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center space-x-2 sm:space-x-3 transition-transform duration-200 hover:scale-105">
             <img src={logo} alt="ARIS STATIONERIES Logo" className="h-8 sm:h-10 md:h-12" />
@@ -86,7 +86,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors ${
+                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 ${
                   active ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
