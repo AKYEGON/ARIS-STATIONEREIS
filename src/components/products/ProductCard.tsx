@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
@@ -6,6 +6,7 @@ import { ShoppingCart, Images } from "lucide-react";
 import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +17,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
+  const isMobile = useIsMobile();
 
   const hasMultipleMedia = product.media && product.media.length > 0;
   const totalMediaCount = 1 + (product.media?.length || 0);
@@ -31,6 +33,10 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
     : {};
 
   const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+
+  useEffect(() => {
+    setImageLoaded(false);
+  }, [product.image]);
 
   // Generate product URL for SEO
   const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
@@ -70,21 +76,21 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
       />
       
-      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1 flex flex-col h-full">
+      <Card className="overflow-hidden flex flex-col h-full shadow-sm">
         <Link
           to={`/product/${(product as any).slug || product.id}`}
           className="aspect-square overflow-hidden bg-white relative cursor-pointer flex items-center justify-center group/img"
           aria-label={`View ${product.name} details`}
         >
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
+            <div className="absolute inset-0 bg-muted" />
           )}
           <img
             src={product.image}
             alt={`${product.name} - ${product.description} - Buy at ARIS STATIONERIES Nairobi Kenya`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
-            className={`max-h-full max-w-full object-contain p-2 transition-all duration-500 group-hover:scale-110 ${
+            className={`max-h-full max-w-full object-contain p-2 ${!isMobile ? 'transition-all duration-300 group-hover:scale-105' : ''} ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
@@ -94,7 +100,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             <button
               type="button"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setViewerOpen(true); }}
-              className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 bg-black/70 text-white px-1.5 py-0.5 xs:px-2 xs:py-1 rounded-full flex items-center gap-0.5 xs:gap-1 text-[10px] xs:text-xs font-medium backdrop-blur-sm hover:bg-black/90"
+              className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 rounded-full bg-black/80 px-1.5 py-0.5 text-[10px] font-medium text-white xs:px-2 xs:py-1 xs:text-xs"
               aria-label="View gallery"
             >
               <Images className="h-2.5 w-2.5 xs:h-3 xs:w-3" />
