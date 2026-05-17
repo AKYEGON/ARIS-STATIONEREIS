@@ -39,6 +39,9 @@ export const EmployeeManagement = () => {
   });
   const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState("");
+  const [zoneEditMember, setZoneEditMember] = useState<RegisteredUser | null>(null);
+  const [zoneEditValue, setZoneEditValue] = useState<string>("none");
+  const [zoneSaving, setZoneSaving] = useState(false);
 
   useEffect(() => {
     fetchUsers();
