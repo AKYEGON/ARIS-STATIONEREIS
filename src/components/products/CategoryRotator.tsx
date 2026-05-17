@@ -134,17 +134,14 @@ const MobileVerticalRotator = ({
       >
         <div
           className="flex w-max h-full will-change-transform"
-          style={
-            shouldAnimate
-              ? {
-                  animation: `horizontal-marquee ${durationS}s linear infinite`,
-                  transform: "translateZ(0)",
-                  backfaceVisibility: "hidden",
-                }
-              : undefined
-          }
+          style={{
+            animation: `horizontal-marquee ${durationS}s linear infinite`,
+            animationPlayState: shouldAnimate ? "running" : "paused",
+            transform: "translateZ(0)",
+            backfaceVisibility: "hidden",
+          }}
         >
-          {(shouldAnimate ? [...items, ...items] : items).map((it, idx) => {
+          {[...items, ...items].map((it, idx) => {
             const isActive = selectedCategory === it.name;
             return (
               <button
