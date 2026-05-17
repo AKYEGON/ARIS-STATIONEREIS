@@ -110,31 +110,35 @@ const MobileVerticalRotator = ({
   // Slow rotation: ~2.2s per row
   const durationS = Math.max(items.length * 2.2, 12);
 
+  const HEIGHT = 44;
+  // Slow horizontal rotation
+  const durationS = Math.max(items.length * 4, 24);
+
   return (
     <div className="md:hidden">
-      <div className="flex gap-2">
-        {/* Green pointer column */}
+      <div className="flex items-stretch gap-2">
+        {/* Green pointer (left) */}
         <div
-          className="flex flex-col items-center justify-center shrink-0 rounded-md bg-primary/10 border border-primary/30"
-          style={{ width: 28, height: containerH }}
+          className="flex items-center justify-center shrink-0 rounded-md bg-primary/10 border border-primary/30"
+          style={{ width: 28, height: HEIGHT }}
           aria-hidden="true"
         >
           <ChevronRight className="h-5 w-5 text-primary" />
         </div>
 
-        {/* Vertical marquee viewport */}
+        {/* Horizontal marquee viewport */}
         <div
           className="relative flex-1 overflow-hidden rounded-md border border-primary/20 bg-background"
-          style={{ height: containerH, contain: "layout paint", isolation: "isolate" }}
+          style={{ height: HEIGHT, contain: "layout paint", isolation: "isolate" }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
           onTouchStart={() => setIsPaused(true)}
           onTouchEnd={() => setIsPaused(false)}
         >
           <div
-            className="flex flex-col will-change-transform"
+            className="flex w-max will-change-transform h-full"
             style={{
-              animation: `vertical-marquee ${durationS}s linear infinite`,
+              animation: `horizontal-marquee ${durationS}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
               transform: "translateZ(0)",
               backfaceVisibility: "hidden",
@@ -147,9 +151,8 @@ const MobileVerticalRotator = ({
                   key={`${it.id}-${idx}`}
                   type="button"
                   onClick={() => onSelectCategory(it.name)}
-                  style={{ height: ROW_H }}
                   className={cn(
-                    "flex items-center gap-2 w-full text-left px-3 text-sm border-b border-border/40 last:border-b-0 transition-colors",
+                    "flex items-center gap-2 px-3 text-sm border-r border-border/40 transition-colors shrink-0 h-full",
                     isActive
                       ? "bg-primary/10 text-primary font-medium"
                       : "text-foreground hover:bg-secondary"
@@ -160,7 +163,7 @@ const MobileVerticalRotator = ({
                   ) : (
                     getLucideIcon(it.icon)
                   )}
-                  <span className="truncate">{it.label}</span>
+                  <span className="whitespace-nowrap">{it.label}</span>
                 </button>
               );
             })}
