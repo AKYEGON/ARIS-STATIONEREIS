@@ -44,42 +44,40 @@ const CategoryRotator = ({
       <div className="max-w-xl mx-auto">
         {useNativeSelectOnMobile && (
           <div className="md:hidden">
-            <label htmlFor="mobile-category-select" className="sr-only">
-              Browse by category
-            </label>
-            <select
-              id="mobile-category-select"
-              value={selectedCategory}
-              onChange={(e) => onSelectCategory(e.target.value)}
-              style={{
-                colorScheme: "light",
-                backgroundImage:
-                  "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23166534' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 12px center",
-                backgroundSize: "12px",
-                WebkitAppearance: "none",
-                MozAppearance: "none",
-                appearance: "none",
-              }}
-              className={cn(
-                "h-11 w-full rounded-md border border-primary/30 bg-background px-3 pr-9 text-base text-foreground outline-none",
-                "focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              )}
-            >
-              <option value="all" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>
-                Browse by category
-              </option>
-              {categories.map((cat) => (
-                <option
-                  key={cat.id}
-                  value={cat.name}
-                  style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}
-                >
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-col gap-1.5">
+              <button
+                type="button"
+                onClick={() => onSelectCategory("all")}
+                className={cn(
+                  "flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
+                  selectedCategory === "all"
+                    ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background border-primary/30 text-foreground hover:bg-secondary"
+                )}
+              >
+                <Package className="h-4 w-4 shrink-0" />
+                <span className="truncate">All Categories</span>
+              </button>
+              {categories.map((cat) => {
+                const isActive = selectedCategory === cat.name;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => onSelectCategory(cat.name)}
+                    className={cn(
+                      "flex items-center gap-2 w-full text-left px-3 py-2.5 rounded-md border text-sm transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-background border-primary/30 text-foreground hover:bg-secondary"
+                    )}
+                  >
+                    {getLucideIcon(cat.icon)}
+                    <span className="truncate">{cat.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
 
