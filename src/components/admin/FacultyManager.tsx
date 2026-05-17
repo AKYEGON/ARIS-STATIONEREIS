@@ -431,10 +431,16 @@ export const FacultyManager = () => {
                     )}
                   </div>
                 </button>
-                <Badge variant="outline" className="text-[10px] shrink-0">
-                  <Package className="h-3 w-3 mr-1" /> Allocate
-                </Badge>
-                <div className="flex gap-1 shrink-0">
+                <div className="flex gap-1 shrink-0 flex-wrap justify-end">
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setYearsDialogCourse(c)}>
+                    <Layers className="h-3 w-3 mr-1" /> Years
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setBundlesDialogCourse(c)}>
+                    <Package className="h-3 w-3 mr-1" /> Bundles
+                  </Button>
+                  <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => { setActiveCourse(c); setView("products"); fetchProductsForCourse(c.id); }}>
+                    <Package className="h-3 w-3 mr-1" /> Allocate
+                  </Button>
                   <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditCourse(c)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>
