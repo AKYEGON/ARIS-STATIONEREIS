@@ -106,17 +106,39 @@ export const FacultyManager = () => {
   };
 
   const fetchProductsForCourse = async (courseId: string) => {
-    const { data: prods } = await supabase
-      .from("products")
-      .select("id, name, image, price")
-      .order("name", { ascending: true });
+    const [{ data: prods }, { data: assigned }, { data: yrs }] = await Promise.all([
+      supabase.from("products").select("id, name, image, price").order("name", { ascending: true }),
+      supabase.from("course_products").select("id, product_id").eq("course_id", courseId),
+      supabase.from("course_years").select("id, label").eq("course_id", courseId).eq("is_active", true).order("display_order"),
+    ]);
     setAllProducts((prods as ProductLite[]) || []);
+    setCourseYears((yrs as { id: string; label: string }[]) || []);
 
-    const { data: assigned } = await supabase
-      .from("course_products")
-      .select("product_id")
-      .eq("course_id", courseId);
-    setAssignedProductIds(new Set((assigned || []).map((r: any) => r.product_id)));
+    const cpMap: Record<string, string> = {};
+    const assignedIds = new Set<string>();
+    (assigned || []).forEach((r: any) => {
+      cpMap[r.product_id] = r.id;
+      assignedIds.add(r.product_id);
+    });
+    setCpIdByProduct(cpMap);
+    setAssignedProductIds(assignedIds);
+
+    const cpIds = Object.values(cpMap);
+    const tagMap: Record<string, Set<string>> = {};
+    if (cpIds.length > 0) {
+      const { data: tagRows } = await supabase
+        .from("course_product_years")
+        .select("course_product_id, course_year_id")
+        .in("course_product_id", cpIds);
+      const productByCpId: Record<string, string> = {};
+      Object.entries(cpMap).forEach(([pid, cpid]) => { productByCpId[cpid] = pid; });
+      (tagRows || []).forEach((r: any) => {
+        const pid = productByCpId[r.course_product_id];
+        if (!pid) return;
+        (tagMap[pid] ||= new Set()).add(r.course_year_id);
+      });
+    }
+    setProductYearTags(tagMap);
   };
 
   useEffect(() => {
