@@ -408,9 +408,9 @@ export const EmployeeManagement = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="employee">Employee - Quick Sale & Orders only</SelectItem>
-                  <SelectItem value="manager">Manager - Inventory & Sales access</SelectItem>
-                  <SelectItem value="agent">Agent - Zone-based order access</SelectItem>
+                  <SelectItem value="employee">Employee — Orders + Quick Sale</SelectItem>
+                  <SelectItem value="manager">Manager — Orders, Inventory, Sales (no profit)</SelectItem>
+                  <SelectItem value="agent">Agent — Zone-only order access</SelectItem>
                 </SelectContent>
               </Select>
             </div>
