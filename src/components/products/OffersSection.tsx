@@ -57,18 +57,38 @@ const OffersSection = () => {
           </Link>
         </div>
 
-        {/* Desktop: Horizontal marquee — single row that rotates cards sideways, fixed height */}
+        {/* Desktop: Horizontal marquee */}
         <div
           className="hidden md:block relative overflow-hidden"
+          style={{ contain: "layout paint", isolation: "isolate" }}
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-4 w-max"
+            className="flex gap-4 w-max will-change-transform"
             style={{
               animation: `horizontal-marquee ${Math.max(bundles.length * 5, 20)}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
+              transform: "translateZ(0)",
+              backfaceVisibility: "hidden",
             }}
+          >
+            {[...bundles, ...bundles].map((bundle, index) => (
+              <div key={`${bundle.id}-${index}`} className="w-[220px] lg:w-[240px] flex-shrink-0">
+                <BundleCard bundle={bundle} onAddToCart={addBundleToCart} compact />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile: Horizontal swipe (no auto-scroll — caused Chrome Android repaint bleed) */}
+        <div
+          className="relative md:hidden"
+          style={{ contain: "layout paint", isolation: "isolate" }}
+        >
+          <div
+            className="flex gap-2 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-1"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none", transform: "translateZ(0)" }}
           >
             {[...bundles, ...bundles].map((bundle, index) => (
               <div key={`${bundle.id}-${index}`} className="w-[220px] lg:w-[240px] flex-shrink-0">
