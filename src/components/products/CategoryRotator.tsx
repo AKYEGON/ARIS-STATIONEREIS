@@ -51,14 +51,31 @@ const CategoryRotator = ({
               id="mobile-category-select"
               value={selectedCategory}
               onChange={(e) => onSelectCategory(e.target.value)}
+              style={{
+                colorScheme: "light",
+                backgroundImage:
+                  "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23166534' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "right 12px center",
+                backgroundSize: "12px",
+                WebkitAppearance: "none",
+                MozAppearance: "none",
+                appearance: "none",
+              }}
               className={cn(
-                "h-10 w-full rounded-md border border-primary/30 bg-secondary px-3 text-sm text-foreground outline-none",
+                "h-10 w-full rounded-md border border-primary/30 bg-secondary px-3 pr-9 text-sm text-foreground outline-none",
                 "focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               )}
             >
-              <option value="all">Browse by category</option>
+              <option value="all" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>
+                Browse by category
+              </option>
               {categories.map((cat) => (
-                <option key={cat.id} value={cat.name}>
+                <option
+                  key={cat.id}
+                  value={cat.name}
+                  style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}
+                >
                   {cat.name}
                 </option>
               ))}
