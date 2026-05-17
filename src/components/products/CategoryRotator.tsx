@@ -97,6 +97,7 @@ const MobileVerticalRotator = ({
   selectedCategory,
   onSelectCategory,
 }: MobileVerticalRotatorProps) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isPaused, setIsPaused] = useState(false);
 
   const items = [
@@ -104,41 +105,57 @@ const MobileVerticalRotator = ({
     ...categories.map((c) => ({ id: c.id, name: c.name, label: c.name, icon: c.icon })),
   ];
 
-
   const HEIGHT = 44;
-  // Slow horizontal rotation
+  const hasSelection = selectedCategory !== "all";
+  // Stop rotation when user picked a category, when paused, or while scrolling manually
+  const shouldAnimate = !hasSelection && !isPaused;
   const durationS = Math.max(items.length * 4, 24);
+
+  // When user picks a category, scroll it into view
+  useEffect(() => {
+    if (!hasSelection || !scrollRef.current) return;
+    const el = scrollRef.current.querySelector<HTMLButtonElement>(
+      `[data-cat-name="${CSS.escape(selectedCategory)}"]`
+    );
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+    }
+  }, [selectedCategory, hasSelection]);
 
   return (
     <div className="md:hidden">
       <div
-        className="relative overflow-hidden rounded-md border border-primary/20 bg-background"
-        style={{ height: HEIGHT, contain: "layout paint", isolation: "isolate" }}
+        ref={scrollRef}
+        className="relative overflow-x-auto overflow-y-hidden rounded-md border border-primary/20 bg-background no-scrollbar"
+        style={{ height: HEIGHT, WebkitOverflowScrolling: "touch" }}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
-        onTouchEnd={() => setIsPaused(false)}
       >
         <div
-          className="flex w-max will-change-transform h-full"
-          style={{
-            animation: `horizontal-marquee ${durationS}s linear infinite`,
-            animationPlayState: isPaused ? "paused" : "running",
-            transform: "translateZ(0)",
-            backfaceVisibility: "hidden",
-          }}
+          className="flex w-max h-full will-change-transform"
+          style={
+            shouldAnimate
+              ? {
+                  animation: `horizontal-marquee ${durationS}s linear infinite`,
+                  transform: "translateZ(0)",
+                  backfaceVisibility: "hidden",
+                }
+              : undefined
+          }
         >
-          {[...items, ...items].map((it, idx) => {
+          {(shouldAnimate ? [...items, ...items] : items).map((it, idx) => {
             const isActive = selectedCategory === it.name;
             return (
               <button
                 key={`${it.id}-${idx}`}
                 type="button"
+                data-cat-name={it.name}
                 onClick={() => onSelectCategory(it.name)}
                 className={cn(
                   "flex items-center gap-2 px-3 text-sm border-r-2 border-primary transition-colors shrink-0 h-full",
                   isActive
-                    ? "text-primary font-semibold"
+                    ? "bg-primary/10 text-primary font-semibold"
                     : "text-foreground"
                 )}
               >
