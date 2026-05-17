@@ -295,33 +295,37 @@ const Index = () => {
           )}
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground whitespace-nowrap">Sort by:</span>
-            <div className="flex-1 md:hidden">
-              <label htmlFor="mobile-sort-select" className="sr-only">
-                Sort products
-              </label>
-              <select
-                id="mobile-sort-select"
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                style={{
-                  colorScheme: "light",
-                  backgroundImage:
-                    "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23166534' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e\")",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "right 12px center",
-                  backgroundSize: "12px",
-                  WebkitAppearance: "none",
-                  MozAppearance: "none",
-                  appearance: "none",
-                }}
-                className="h-10 w-full rounded-md border border-primary/30 bg-background px-3 pr-9 text-sm text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
-              >
-                <option value="price-asc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Price: Low to High</option>
-                <option value="price-desc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Price: High to Low</option>
-                <option value="name-asc" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Name: A to Z</option>
-                <option value="featured" style={{ backgroundColor: "#ffffff", color: "#0a0a0a" }}>Featured</option>
-              </select>
+            <span className="text-xs text-muted-foreground whitespace-nowrap hidden md:inline">Sort by:</span>
+
+            {/* Mobile: Filter button on the side */}
+            <div className="md:hidden ml-auto">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <SlidersHorizontal className="h-4 w-4" />
+                    Filter
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 bg-background z-50">
+                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {[
+                    { value: "featured", label: "Featured" },
+                    { value: "price-asc", label: "Price: Low to High" },
+                    { value: "price-desc", label: "Price: High to Low" },
+                    { value: "name-asc", label: "Name: A to Z" },
+                  ].map((opt) => (
+                    <DropdownMenuItem
+                      key={opt.value}
+                      onClick={() => setSortBy(opt.value)}
+                      className="flex items-center justify-between cursor-pointer"
+                    >
+                      <span>{opt.label}</span>
+                      {sortBy === opt.value && <Check className="h-4 w-4 text-primary" />}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             <div className="hidden flex-1 md:block">
@@ -330,10 +334,10 @@ const Index = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="featured">Featured</SelectItem>
                   <SelectItem value="price-asc">Price: Low to High</SelectItem>
                   <SelectItem value="price-desc">Price: High to Low</SelectItem>
                   <SelectItem value="name-asc">Name: A to Z</SelectItem>
-                  <SelectItem value="featured">Featured</SelectItem>
                 </SelectContent>
               </Select>
             </div>
