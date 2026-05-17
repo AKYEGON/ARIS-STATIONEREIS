@@ -297,8 +297,14 @@ const Index = () => {
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground whitespace-nowrap hidden md:inline">Sort by:</span>
 
-            {/* Mobile: Filter button on the side */}
-            <div className="md:hidden ml-auto">
+            {/* Mobile: Happy Customers + Filter on same level */}
+            <div className="md:hidden flex items-center gap-2 ml-auto">
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/testimonials">
+                  <Users className="h-4 w-4 mr-1" />
+                  Happy Customers
+                </Link>
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-2">
@@ -343,14 +349,6 @@ const Index = () => {
             </div>
           </div>
           
-          <div className="flex justify-center md:hidden">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/testimonials">
-                <Users className="h-4 w-4 mr-2" />
-                Happy Customers
-              </Link>
-            </Button>
-          </div>
         </div>
       </section>
 
