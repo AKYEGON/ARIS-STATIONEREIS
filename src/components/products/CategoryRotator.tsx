@@ -63,7 +63,7 @@ const CategoryRotator = ({
                 appearance: "none",
               }}
               className={cn(
-                "h-10 w-full rounded-md border border-primary/30 bg-secondary px-3 pr-9 text-sm text-foreground outline-none",
+                "h-11 w-full rounded-md border border-primary/30 bg-background px-3 pr-9 text-base text-foreground outline-none",
                 "focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               )}
             >
