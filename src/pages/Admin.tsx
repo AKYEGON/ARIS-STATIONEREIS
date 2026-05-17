@@ -1583,11 +1583,13 @@ const Admin = () => {
         <div className="flex justify-between items-center mb-4 sm:mb-6 md:mb-8 gap-2 sm:gap-4">
           <h1 className="text-xl sm:text-2xl md:text-4xl font-bold text-primary">Admin</h1>
           <div className="flex gap-1.5 sm:gap-2">
-            <Button onClick={() => setIsQuickSaleOpen(true)} className="gap-1.5 sm:gap-2 bg-primary hover:bg-primary/90 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
-              <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-              <span className="hidden xs:inline">Quick Sale</span>
-              <span className="xs:hidden">Sale</span>
-            </Button>
+            {userRole !== 'agent' && (
+              <Button onClick={() => setIsQuickSaleOpen(true)} className="gap-1.5 sm:gap-2 bg-primary hover:bg-primary/90 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
+                <Store className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span className="hidden xs:inline">Quick Sale</span>
+                <span className="xs:hidden">Sale</span>
+              </Button>
+            )}
             <Button variant="outline" onClick={async () => { await supabase.auth.signOut(); toast.success("Signed out successfully"); navigate("/auth"); }} className="gap-1.5 sm:gap-2 h-8 sm:h-10 px-2.5 sm:px-4 text-xs sm:text-sm">
               <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Sign Out</span>
