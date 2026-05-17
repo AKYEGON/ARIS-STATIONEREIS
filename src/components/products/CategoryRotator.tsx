@@ -2,7 +2,7 @@
 import { ProductCategory } from "@/types/product";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { ChevronDown, Package, icons } from "lucide-react";
+import { Package, icons } from "lucide-react";
 
 const getLucideIcon = (iconName: string | null, className = "h-4 w-4 shrink-0") => {
   if (!iconName) return <Package className={className} />;
@@ -43,19 +43,16 @@ const CategoryRotator = ({
     <section className="container px-4 pb-4">
       <div className="max-w-xl mx-auto">
         {useNativeSelectOnMobile && (
-          <div className="relative md:hidden">
+          <div className="md:hidden">
             <label htmlFor="mobile-category-select" className="sr-only">
               Browse by category
             </label>
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
-              {selectedCategory === "all" ? getLucideIcon(null) : getLucideIcon(selectedCategoryData?.icon ?? null)}
-            </div>
             <select
               id="mobile-category-select"
               value={selectedCategory}
               onChange={(e) => onSelectCategory(e.target.value)}
               className={cn(
-                "h-10 w-full appearance-none rounded-md border border-primary/30 bg-secondary pl-10 pr-10 text-sm text-foreground outline-none transition-colors",
+                "h-10 w-full rounded-md border border-primary/30 bg-secondary px-3 text-sm text-foreground outline-none",
                 "focus:border-ring focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background"
               )}
             >
@@ -66,9 +63,6 @@ const CategoryRotator = ({
                 </option>
               ))}
             </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground">
-              <ChevronDown className="h-4 w-4" />
-            </div>
           </div>
         )}
 
