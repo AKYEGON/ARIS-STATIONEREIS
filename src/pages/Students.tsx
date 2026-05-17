@@ -41,6 +41,7 @@ const Students = () => {
   const courseId = searchParams.get("course");
 
   const [faculties, setFaculties] = useState<Faculty[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -50,17 +51,20 @@ const Students = () => {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const { data: facs } = await supabase
-        .from("faculties")
-        .select("*")
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+      const [{ data: facs }, { data: crs }] = await Promise.all([
+        supabase
+          .from("faculties")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+        supabase
+          .from("courses")
+          .select("*")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true }),
+      ]);
       setFaculties((facs as Faculty[]) || []);
-
-      const { data: crs } = await supabase
-        .from("courses")
-        .select("id, faculty_id")
-        .eq("is_active", true);
+      setAllCourses((crs as Course[]) || []);
       const c: Record<string, number> = {};
       (crs || []).forEach((row: any) => {
         c[row.faculty_id] = (c[row.faculty_id] || 0) + 1;
@@ -76,14 +80,16 @@ const Students = () => {
       setCourses([]);
       return;
     }
-    supabase
-      .from("courses")
-      .select("*")
-      .eq("faculty_id", facultyId)
-      .eq("is_active", true)
-      .order("display_order", { ascending: true })
-      .then(({ data }) => setCourses((data as Course[]) || []));
-  }, [facultyId]);
+    setCourses(allCourses.filter((c) => c.faculty_id === facultyId));
+  }, [facultyId, allCourses]);
+
+  // Smart fuzzy-ish matcher: tokenize query, match any token in name/description
+  const smartMatch = (text: string, query: string) => {
+    if (!query) return true;
+    const haystack = text.toLowerCase();
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return tokens.every((t) => haystack.includes(t));
+  };
 
   useEffect(() => {
     if (!courseId) {
