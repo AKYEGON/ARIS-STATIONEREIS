@@ -99,12 +99,8 @@ const Students = () => {
     setCourses(allCourses.filter((c) => c.faculty_id === facultyId));
   }, [facultyId, allCourses]);
 
-  const smartMatch = (text: string, query: string) => {
-    if (!query) return true;
-    const haystack = text.toLowerCase();
-    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-    return tokens.every((t) => haystack.includes(t));
-  };
+  const smartMatch = (text: string, query: string) =>
+    sharedSmartMatch(query, [text], { fuzzy: true });
 
   useEffect(() => {
     if (!courseId) {
