@@ -229,7 +229,7 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
       </div>
 
       {/* Top controls */}
-      <div className="absolute top-4 left-4 right-4 z-10 flex items-center justify-between mt-6">
+      <div className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between mt-6">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-white">
             {currentTestimonial.customer_photo ? (
