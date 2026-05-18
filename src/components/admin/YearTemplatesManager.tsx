@@ -122,7 +122,7 @@ export const YearTemplatesManager = () => {
 
   return (
     <div className="border rounded-lg p-3 bg-muted/30 space-y-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-col xs:flex-row sm:flex-row items-start sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <Layers className="h-4 w-4 text-primary shrink-0" />
           <div className="min-w-0">
@@ -130,7 +130,7 @@ export const YearTemplatesManager = () => {
             <p className="text-[11px] text-muted-foreground">Create once, apply to many courses — no more retyping Year 1, Year 2…</p>
           </div>
         </div>
-        <Button size="sm" onClick={openNew} className="bg-primary hover:bg-primary/90 shrink-0">
+        <Button size="sm" onClick={openNew} className="bg-primary hover:bg-primary/90 shrink-0 self-start sm:self-auto">
           <Plus className="h-3.5 w-3.5 mr-1" /> Template
         </Button>
       </div>
