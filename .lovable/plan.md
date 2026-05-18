@@ -1,56 +1,74 @@
-## Smarter product → course allocation
+## Stop typing years for every course
 
-Today you open every course and tick products one at a time. We'll flip that: from the **product side**, pick all the courses (across faculties) it belongs to in one shot.
+Two new tools in the admin:
 
-### What you'll see
+### 1. Year Templates (one-time setup, reusable forever)
 
-In **Admin → Products**, each product row gets a new **"Courses"** button.
-
-Clicking it opens a dialog:
+A new **"Year Templates"** section inside **Admin → Shop by Course** (top of the faculties view).
 
 ```text
-Manage courses for: Scientific Calculator
-─────────────────────────────────────────
-[ Search faculties / courses…        ]
-[ Select all visible ] [ Clear all ]
-Currently in 8 courses
-
-▾ Faculty of Engineering            (4 / 12)
-   ☑ Civil Engineering
-   ☑ Mechanical Engineering
-   ☐ Software Engineering
-   …
-▾ Faculty of Business               (0 / 6)
-   ☐ Accounting
-   ☐ Finance
-   …
-
-[ Cancel ]                    [ Save changes ]
+Year Templates                              [ + New template ]
+─────────────────────────────────────────────────────────────
+📚 Standard 4-Year        Year 1, Year 2, Year 3, Year 4         [Apply] [Edit] [Delete]
+🩺 Medicine 6-Year        Year 1 … Year 6, Clinical Year         [Apply] [Edit] [Delete]
+⚖️  Law 4-Year             Year 1 … Year 4, Bar Prep              [Apply] [Edit] [Delete]
 ```
 
-- Faculties are collapsible groups; each shows "x of y selected".
-- Smart search filters both faculty and course names.
-- **Select all visible / Clear all** act on the current filter only.
-- Save diffs against current allocations: inserts new `course_products` rows, deletes removed ones. Year tags stay "All years" (per your choice).
+Each template = a name + an ordered list of year labels.
+
+**Apply template** opens a course picker (same UX as the "Manage Courses" dialog you just got):
+
+```text
+Apply "Standard 4-Year" to courses
+[ Search faculties / courses… ]   [ Select all visible ] [ Clear all ]
+
+▾ Faculty of Engineering (12)
+   ☑ Civil Engineering          ← already has years (will merge)
+   ☑ Mechanical Engineering
+   ☐ Software Engineering
+▾ Faculty of Business (6)
+   ☐ Accounting
+   …
+
+Mode: ◉ Merge (add missing labels only — safe)        [ Cancel ] [ Apply to 8 courses ]
+```
+
+- **Merge only**: for each picked course, insert any template labels it doesn't already have (case-insensitive match on label). Existing years and their product tags stay untouched.
+- Display order continues from the course's current max.
+
+### 2. Bulk product → year tagging by label
+
+In the existing **"Manage Courses for: <product>"** dialog (the 🎓 button on each product row), add a small section above the course list:
+
+```text
+Apply to years (matched by label across all picked courses):
+[ All years ▼ ]   ☑ Year 1   ☑ Year 2   ☐ Year 3   ☐ Year 4   ☐ Clinical Year
+
+(Labels are gathered from every course you tick. Tagging happens for whichever
+ picked courses actually have that label — others stay "All years".)
+```
+
+On Save: after upserting `course_products`, for each picked course look up its `course_years` whose label is in the selected set and write the matching `course_product_years` rows (and remove rows that no longer match). If no labels are chosen → behaves like today ("All years").
+
+This means: tick "Year 1" once, and the product is tagged to Year 1 in **every** course you assigned it to that has a Year 1 — no per-course clicking.
 
 ### Where it lives
 
-- New component: `src/components/admin/ProductCoursesDialog.tsx`
-- Hook into the existing product list in `src/components/admin/` (the Products tab) — add a small **"Courses"** action button next to Edit.
+- New table: `year_templates` (id, name, display_order, is_active) + `year_template_items` (template_id, label, display_order)
+- New component: `src/components/admin/YearTemplatesManager.tsx` — list + add/edit/delete templates
+- New component: `src/components/admin/ApplyYearTemplateDialog.tsx` — course picker + merge action
+- Edit: `src/components/admin/FacultyManager.tsx` — render `<YearTemplatesManager />` at the top of the faculties view
+- Edit: `src/components/admin/ProductCoursesDialog.tsx` — add the "Apply to years" label chips + extended save logic
 
 ### Technical notes
 
-- On open, fetch:
-  - `faculties` (active, ordered)
-  - `courses` (active, ordered, with `faculty_id`)
-  - `course_products` where `product_id = <this product>` → seed selected set
-- On Save:
-  - Compute `toAdd` and `toRemove` from selected vs initial set.
-  - `insert` rows into `course_products` for `toAdd`.
-  - `delete` rows in `course_products` where `product_id = X AND course_id IN (toRemove)` — this cascades nothing extra; `course_product_years` rows for removed allocations are orphaned, so we also delete matching `course_product_years` rows first.
-- No schema changes. No changes to the existing course-side allocation UI — it stays as-is for fine-tuning year tags.
+- **Migration**: create `year_templates` and `year_template_items` with admin-only RLS (mirror existing `faculties` policies); `SELECT` open to all so dropdowns work everywhere.
+- **Apply (merge)**: client-side per picked course → fetch existing `course_years.label` (lowercased), diff against template labels, bulk-insert the missing ones with continued `display_order`.
+- **Year-label tagging in ProductCoursesDialog**: when the user ticks courses, union all their `course_years` into a label set (deduped, case-insensitive) and render as chips. On Save, for each finally-selected `course_product`, look up its course's `course_years` whose label matches a chosen chip, then sync `course_product_years` (insert missing, delete removed). Labels chosen but absent in a given course → silently skipped for that course.
+- No schema change to `course_years` / `course_product_years` — we keep year IDs per course, just spare the admin from creating them manually.
 
 ### Out of scope
 
-- Bulk year-tag assignment (you chose "All years" only).
-- Category-based auto-assign, course templates, copy-from-course (can add later if needed).
+- Auto-applying a faculty default to brand-new courses (you picked templates only).
+- Renaming a year label everywhere at once (can add later).
+- Deleting years through "replace" mode (you picked merge-only).
