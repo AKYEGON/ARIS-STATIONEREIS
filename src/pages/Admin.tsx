@@ -2223,15 +2223,7 @@ const Admin = () => {
                       {ordersList
                         .filter(order => {
                           if (orderStatusFilter !== "all" && order.status.toLowerCase() !== orderStatusFilter) return false;
-                          if (!orderSearchQuery) return true;
-                          const query = orderSearchQuery.toLowerCase();
-                          return (
-                            order.id.toLowerCase().includes(query) ||
-                            order.customer_name.toLowerCase().includes(query) ||
-                            order.customer_email.toLowerCase().includes(query) ||
-                            order.customer_phone.toLowerCase().includes(query) ||
-                            order.status.toLowerCase().includes(query)
-                          );
+                          return smartMatch(orderSearchQuery, [order.id, order.customer_name, order.customer_email, order.customer_phone, order.status], { fuzzy: true });
                         })
                         .map((order, index) => (
                         <TableRow 
