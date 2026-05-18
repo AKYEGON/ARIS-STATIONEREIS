@@ -2509,18 +2509,9 @@ const Admin = () => {
                 </div>
                 <div className="overflow-x-auto">
                   {testimonialsList.filter(t => {
-                    // Apply status filter
                     if (testimonialFilter === "pending" && t.is_published) return false;
                     if (testimonialFilter === "published" && !t.is_published) return false;
-                    
-                    // Apply search filter
-                    if (!testimonialSearchQuery) return true;
-                    const query = testimonialSearchQuery.toLowerCase();
-                    return (
-                      t.customer_name.toLowerCase().includes(query) ||
-                      (t.product_name && t.product_name.toLowerCase().includes(query)) ||
-                      t.review_text.toLowerCase().includes(query)
-                    );
+                    return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
                   }).length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       {testimonialSearchQuery ? 'No testimonials match your search' : 'No testimonials yet'}
@@ -2540,18 +2531,9 @@ const Admin = () => {
                       <TableBody>
                         {testimonialsList
                           .filter(t => {
-                            // Apply status filter
                             if (testimonialFilter === "pending" && t.is_published) return false;
                             if (testimonialFilter === "published" && !t.is_published) return false;
-                            
-                            // Apply search filter
-                            if (!testimonialSearchQuery) return true;
-                            const query = testimonialSearchQuery.toLowerCase();
-                            return (
-                              t.customer_name.toLowerCase().includes(query) ||
-                              (t.product_name && t.product_name.toLowerCase().includes(query)) ||
-                              t.review_text.toLowerCase().includes(query)
-                            );
+                            return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
                           })
                           .map((testimonial, index) => {
                             const getInitials = (name: string) => {
