@@ -1046,6 +1046,65 @@ export type Database = {
         }
         Relationships: []
       }
+      year_template_items: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          label: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          label?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "year_template_items_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "year_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      year_templates: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       testimonial_performance: {

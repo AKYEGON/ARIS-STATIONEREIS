@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseYearsDialog } from "./CourseYearsDialog";
 import { CourseBundlesDialog } from "./CourseBundlesDialog";
+import { YearTemplatesManager } from "./YearTemplatesManager";
 
 const SUGGESTED_ICONS = [
   "GraduationCap", "Wrench", "FlaskConical", "Stethoscope", "Scale",
@@ -358,54 +359,57 @@ export const FacultyManager = () => {
 
         {/* Faculties grid */}
         {view === "faculties" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {faculties.map((f) => (
-              <div
-                key={f.id}
-                className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
-              >
-                <button
-                  className="flex items-center gap-3 flex-1 min-w-0 text-left"
-                  onClick={() => { setActiveFaculty(f); setView("courses"); fetchCourses(f.id); }}
+          <div className="space-y-3">
+            <YearTemplatesManager />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {faculties.map((f) => (
+                <div
+                  key={f.id}
+                  className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
                 >
-                  <div className="bg-primary/10 text-primary p-2 rounded-lg shrink-0">
-                    {renderIcon(f.icon)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{f.name}</p>
-                    <Badge variant={f.is_active ? "default" : "secondary"} className="text-[10px] mt-0.5">
-                      {f.is_active ? "Active" : "Hidden"}
-                    </Badge>
-                  </div>
-                </button>
-                <div className="flex gap-1 shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-[10px]"
+                  <button
+                    className="flex items-center gap-3 flex-1 min-w-0 text-left"
                     onClick={() => { setActiveFaculty(f); setView("courses"); fetchCourses(f.id); }}
                   >
-                    <BookOpen className="h-3 w-3 mr-1" /> Courses
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditFaculty(f)}>
-                    <Pencil className="h-3.5 w-3.5" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteFaculty(f)}>
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                    <div className="bg-primary/10 text-primary p-2 rounded-lg shrink-0">
+                      {renderIcon(f.icon)}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-sm truncate">{f.name}</p>
+                      <Badge variant={f.is_active ? "default" : "secondary"} className="text-[10px] mt-0.5">
+                        {f.is_active ? "Active" : "Hidden"}
+                      </Badge>
+                    </div>
+                  </button>
+                  <div className="flex gap-1 shrink-0">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 px-2 text-[10px]"
+                      onClick={() => { setActiveFaculty(f); setView("courses"); fetchCourses(f.id); }}
+                    >
+                      <BookOpen className="h-3 w-3 mr-1" /> Courses
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditFaculty(f)}>
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => deleteFaculty(f)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {faculties.length === 0 && (
-              <p className="col-span-full text-center text-sm text-muted-foreground py-6">
-                No faculties yet. Add one to begin.
-              </p>
-            )}
-            {faculties.length > 0 && (
-              <p className="col-span-full text-[11px] text-muted-foreground italic mt-1">
-                💡 Tip: Click a faculty (or its "Courses" button) to add courses and allocate products.
-              </p>
-            )}
+              ))}
+              {faculties.length === 0 && (
+                <p className="col-span-full text-center text-sm text-muted-foreground py-6">
+                  No faculties yet. Add one to begin.
+                </p>
+              )}
+              {faculties.length > 0 && (
+                <p className="col-span-full text-[11px] text-muted-foreground italic mt-1">
+                  💡 Tip: Click a faculty (or its "Courses" button) to add courses and allocate products.
+                </p>
+              )}
+            </div>
           </div>
         )}
 
