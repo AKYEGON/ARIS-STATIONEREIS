@@ -14,6 +14,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Product, ProductVariant } from "@/types/product";
 import { Bundle } from "@/types/bundle";
 import ProductCard from "@/components/products/ProductCard";
+import { smartMatch as sharedSmartMatch } from "@/lib/smart-search";
 
 interface Faculty {
   id: string;
@@ -99,12 +100,8 @@ const Students = () => {
     setCourses(allCourses.filter((c) => c.faculty_id === facultyId));
   }, [facultyId, allCourses]);
 
-  const smartMatch = (text: string, query: string) => {
-    if (!query) return true;
-    const haystack = text.toLowerCase();
-    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
-    return tokens.every((t) => haystack.includes(t));
-  };
+  const smartMatch = (text: string, query: string) =>
+    sharedSmartMatch(query, [text], { fuzzy: true });
 
   useEffect(() => {
     if (!courseId) {

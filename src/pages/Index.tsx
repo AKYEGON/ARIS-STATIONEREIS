@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
 import CategoryRotator from "@/components/products/CategoryRotator";
+import { smartMatch } from "@/lib/smart-search";
 
 const PRODUCTS_PER_PAGE = 8;
 
@@ -150,10 +151,7 @@ const Index = () => {
 
   const filteredProducts = useMemo(() => {
     const list = products.filter((product) => {
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = smartMatch(searchQuery, [product.name, product.description, product.category], { fuzzy: true });
       const matchesCategory = selectedCategory === "all" ||
         (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
       return matchesSearch && matchesCategory;

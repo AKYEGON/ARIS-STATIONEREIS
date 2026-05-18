@@ -1,74 +1,53 @@
-## Stop typing years for every course
+## Goal
+Make every search box on the site behave "smartly" — tolerant of extra whitespace, word order, casing, accents, punctuation, and partial words — using one shared helper so behaviour stays consistent.
 
-Two new tools in the admin:
+## What "smart search" will do
+1. **Normalize** both query and target: lowercase, strip diacritics (`é → e`), collapse all whitespace (incl. tabs/non-breaking spaces), trim, treat punctuation (`-`, `_`, `/`, `.`, `,`) as spaces.
+2. **Tokenize** the query into words. A row matches when **every token** appears somewhere in the combined searchable text (AND logic, any order). So `"blue   pen A4"` matches "A4 Blue Pen".
+3. **Partial match** per token (substring) so `"calc"` finds "Calculator".
+4. **Multi-field** match: each item exposes a list of fields (name, category, description, tags, SKU, phone, etc.) joined into one haystack.
+5. **Optional fuzzy fallback**: if no exact-token match, allow 1-character typo tolerance on tokens ≥4 chars (lightweight Levenshtein, no dependency). Off by default per call; on for product/customer search.
+6. **Highlight helper** (optional, opt-in): returns matched ranges so we can later bold matches in results — not wired into UI in this pass unless trivial.
 
-### 1. Year Templates (one-time setup, reusable forever)
+## New shared helper
+`src/lib/smart-search.ts`
+- `normalize(text: string): string`
+- `tokenize(query: string): string[]`
+- `smartMatch(query: string, fields: (string | null | undefined)[], opts?: { fuzzy?: boolean }): boolean`
+- `smartFilter<T>(items: T[], query: string, getFields: (item: T) => (string|null|undefined)[], opts?): T[]`
 
-A new **"Year Templates"** section inside **Admin → Shop by Course** (top of the faculties view).
+Zero new dependencies.
 
-```text
-Year Templates                              [ + New template ]
-─────────────────────────────────────────────────────────────
-📚 Standard 4-Year        Year 1, Year 2, Year 3, Year 4         [Apply] [Edit] [Delete]
-🩺 Medicine 6-Year        Year 1 … Year 6, Clinical Year         [Apply] [Edit] [Delete]
-⚖️  Law 4-Year             Year 1 … Year 4, Bar Prep              [Apply] [Edit] [Delete]
-```
+## Rollout — replace existing `.toLowerCase().includes(...)` filters
 
-Each template = a name + an ordered list of year labels.
+Public:
+- `src/pages/Index.tsx` — product search (name, description, category)
+- `src/pages/Students.tsx` — faculty/course/product search
+- `src/pages/Testimonials.tsx` — if a search exists
+- `src/pages/CategoryLanding.tsx`, `src/pages/Offers.tsx`, `src/pages/Cart.tsx` — only if they currently have search
 
-**Apply template** opens a course picker (same UX as the "Manage Courses" dialog you just got):
+Admin:
+- `src/pages/Admin.tsx` — products tab (name/category/description), orders tab (id/name/email/phone/status/tags), testimonials tab (name/product/review)
+- `src/components/admin/InventoryDashboard.tsx` — product search
+- `src/components/admin/QuickSaleDialog.tsx` — product search
+- `src/components/admin/ProductCoursesDialog.tsx` — faculty/course search
+- `src/components/admin/ApplyYearTemplateDialog.tsx` — faculty/course search
 
-```text
-Apply "Standard 4-Year" to courses
-[ Search faculties / courses… ]   [ Select all visible ] [ Clear all ]
+Behaviour upgrades vs today:
+- Extra spaces between words no longer break matches.
+- Word order no longer matters (`"pen blue"` == `"blue pen"`).
+- Diacritics/accents ignored.
+- Punctuation in product names (`A4-200pg`) searchable as `"a4 200"`.
+- Fuzzy on for products + orders so `"calcualtor"` still finds "Calculator".
 
-▾ Faculty of Engineering (12)
-   ☑ Civil Engineering          ← already has years (will merge)
-   ☑ Mechanical Engineering
-   ☐ Software Engineering
-▾ Faculty of Business (6)
-   ☐ Accounting
-   …
+## Out of scope
+- Server-side full-text search (Postgres `tsvector`) — not needed at current data sizes; can revisit later.
+- Visual highlighting of matched terms in result lists.
+- Adding new search inputs to pages that don't have one.
+- Synonym dictionary (e.g. "biro" → "pen").
 
-Mode: ◉ Merge (add missing labels only — safe)        [ Cancel ] [ Apply to 8 courses ]
-```
-
-- **Merge only**: for each picked course, insert any template labels it doesn't already have (case-insensitive match on label). Existing years and their product tags stay untouched.
-- Display order continues from the course's current max.
-
-### 2. Bulk product → year tagging by label
-
-In the existing **"Manage Courses for: <product>"** dialog (the 🎓 button on each product row), add a small section above the course list:
-
-```text
-Apply to years (matched by label across all picked courses):
-[ All years ▼ ]   ☑ Year 1   ☑ Year 2   ☐ Year 3   ☐ Year 4   ☐ Clinical Year
-
-(Labels are gathered from every course you tick. Tagging happens for whichever
- picked courses actually have that label — others stay "All years".)
-```
-
-On Save: after upserting `course_products`, for each picked course look up its `course_years` whose label is in the selected set and write the matching `course_product_years` rows (and remove rows that no longer match). If no labels are chosen → behaves like today ("All years").
-
-This means: tick "Year 1" once, and the product is tagged to Year 1 in **every** course you assigned it to that has a Year 1 — no per-course clicking.
-
-### Where it lives
-
-- New table: `year_templates` (id, name, display_order, is_active) + `year_template_items` (template_id, label, display_order)
-- New component: `src/components/admin/YearTemplatesManager.tsx` — list + add/edit/delete templates
-- New component: `src/components/admin/ApplyYearTemplateDialog.tsx` — course picker + merge action
-- Edit: `src/components/admin/FacultyManager.tsx` — render `<YearTemplatesManager />` at the top of the faculties view
-- Edit: `src/components/admin/ProductCoursesDialog.tsx` — add the "Apply to years" label chips + extended save logic
-
-### Technical notes
-
-- **Migration**: create `year_templates` and `year_template_items` with admin-only RLS (mirror existing `faculties` policies); `SELECT` open to all so dropdowns work everywhere.
-- **Apply (merge)**: client-side per picked course → fetch existing `course_years.label` (lowercased), diff against template labels, bulk-insert the missing ones with continued `display_order`.
-- **Year-label tagging in ProductCoursesDialog**: when the user ticks courses, union all their `course_years` into a label set (deduped, case-insensitive) and render as chips. On Save, for each finally-selected `course_product`, look up its course's `course_years` whose label matches a chosen chip, then sync `course_product_years` (insert missing, delete removed). Labels chosen but absent in a given course → silently skipped for that course.
-- No schema change to `course_years` / `course_product_years` — we keep year IDs per course, just spare the admin from creating them manually.
-
-### Out of scope
-
-- Auto-applying a faculty default to brand-new courses (you picked templates only).
-- Renaming a year label everywhere at once (can add later).
-- Deleting years through "replace" mode (you picked merge-only).
+## Technical notes
+- Pure client-side; existing data is already loaded into memory for each search context.
+- Helper is stateless and tree-shakeable.
+- Memoize haystacks inside `useMemo` filter blocks to keep perf identical to today.
+- Levenshtein implementation capped at distance 1 and length ≥4 so cost stays O(n·m) on short strings only.
