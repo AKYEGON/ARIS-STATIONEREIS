@@ -144,7 +144,7 @@ export const YearTemplatesManager = () => {
       ) : (
         <div className="space-y-2">
           {templates.map((t) => (
-            <div key={t.id} className="flex items-start justify-between gap-2 p-2.5 bg-background rounded-md border">
+            <div key={t.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 p-2.5 bg-background rounded-md border">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium truncate">{t.name}</p>
                 <div className="flex flex-wrap gap-1 mt-1">
@@ -155,7 +155,7 @@ export const YearTemplatesManager = () => {
                   ))}
                 </div>
               </div>
-              <div className="flex gap-1 shrink-0">
+              <div className="flex gap-1 shrink-0 flex-wrap justify-end">
                 <Button size="sm" variant="outline" className="h-7 px-2 text-[10px]" onClick={() => setApplyFor(t)} disabled={t.items.length === 0}>
                   <Send className="h-3 w-3 mr-1" /> Apply
                 </Button>
