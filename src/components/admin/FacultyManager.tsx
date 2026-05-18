@@ -419,7 +419,7 @@ export const FacultyManager = () => {
             {courses.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
               >
                 <button
                   className="flex items-center gap-3 flex-1 min-w-0 text-left"
