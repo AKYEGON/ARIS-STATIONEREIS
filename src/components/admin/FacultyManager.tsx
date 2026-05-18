@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CourseYearsDialog } from "./CourseYearsDialog";
 import { CourseBundlesDialog } from "./CourseBundlesDialog";
+import { YearTemplatesManager } from "./YearTemplatesManager";
 
 const SUGGESTED_ICONS = [
   "GraduationCap", "Wrench", "FlaskConical", "Stethoscope", "Scale",
