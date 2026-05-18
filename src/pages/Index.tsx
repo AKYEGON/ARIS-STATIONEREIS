@@ -150,10 +150,7 @@ const Index = () => {
 
   const filteredProducts = useMemo(() => {
     const list = products.filter((product) => {
-      const matchesSearch =
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = smartMatch(searchQuery, [product.name, product.description, product.category], { fuzzy: true });
       const matchesCategory = selectedCategory === "all" ||
         (categoryProductMap[selectedCategory]?.includes(product.id) ?? false);
       return matchesSearch && matchesCategory;
