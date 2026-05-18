@@ -536,7 +536,7 @@ export const FacultyManager = () => {
 
       {/* Faculty Dialog */}
       <Dialog open={facDialogOpen} onOpenChange={setFacDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingFaculty ? "Edit Faculty" : "Add Faculty"}</DialogTitle>
           </DialogHeader>
@@ -583,7 +583,7 @@ export const FacultyManager = () => {
 
       {/* Course Dialog */}
       <Dialog open={courseDialogOpen} onOpenChange={setCourseDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCourse ? "Edit Course" : "Add Course"}</DialogTitle>
           </DialogHeader>
