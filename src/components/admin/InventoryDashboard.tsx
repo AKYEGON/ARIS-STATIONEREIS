@@ -49,8 +49,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
 
   // Filter products based on search query
   const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+    smartMatch(searchQuery, [product.name, product.category], { fuzzy: true })
   );
 
   useEffect(() => {
