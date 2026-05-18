@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronRight, Search, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { smartMatch } from "@/lib/smart-search";
 
 interface Faculty { id: string; name: string; display_order: number; }
 interface Course { id: string; name: string; faculty_id: string; display_order: number; }
@@ -89,17 +90,16 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
     })();
   }, [open, productId]);
 
-  const term = search.trim().toLowerCase();
   const filtered = useMemo(() => {
     const grouped: Record<string, Course[]> = {};
     for (const c of courses) {
       const fac = faculties.find((f) => f.id === c.faculty_id);
-      const matches = !term || c.name.toLowerCase().includes(term) || (fac?.name.toLowerCase().includes(term) ?? false);
+      const matches = smartMatch(search, [c.name, fac?.name]);
       if (!matches) continue;
       (grouped[c.faculty_id] ||= []).push(c);
     }
     return grouped;
-  }, [courses, faculties, term]);
+  }, [courses, faculties, search]);
 
   const visibleCourseIds = useMemo(() => {
     const ids: string[] = [];

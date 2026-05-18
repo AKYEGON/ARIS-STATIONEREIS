@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { smartMatch } from "@/lib/smart-search";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";

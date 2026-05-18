@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Minus, Package, AlertTriangle, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { smartMatch } from "@/lib/smart-search";
 
 interface Product {
   id: string;

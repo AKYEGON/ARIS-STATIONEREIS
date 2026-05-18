@@ -12,6 +12,7 @@ import { Plus, Minus, Trash2, Search, ShoppingCart, Percent, DollarSign, Package
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { QuickSaleSuccessDialog } from "./QuickSaleSuccessDialog";
+import { smartMatch } from "@/lib/smart-search";
 
 interface QuickSaleItem {
   product: Product;
@@ -44,9 +45,8 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
     customerPhone: string;
   } | null>(null);
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(p =>
+    smartMatch(searchQuery, [p.name, p.category], { fuzzy: true })
   );
 
   const addProductToSale = (product: Product) => {
