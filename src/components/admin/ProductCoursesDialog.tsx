@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 interface Faculty { id: string; name: string; display_order: number; }
 interface Course { id: string; name: string; faculty_id: string; display_order: number; }
+interface CourseYear { id: string; course_id: string; label: string; }
 
 interface Props {
   open: boolean;
@@ -18,13 +19,20 @@ interface Props {
   productName?: string;
 }
 
+const norm = (s: string) => s.trim().toLowerCase();
+
 export const ProductCoursesDialog = ({ open, onOpenChange, productId, productName }: Props) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [faculties, setFaculties] = useState<Faculty[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [allYears, setAllYears] = useState<CourseYear[]>([]); // active years across all courses
   const [initial, setInitial] = useState<Set<string>>(new Set());
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // initial year-label tags per course (label keys, lowercased) for this product
+  const [initialLabelsByCourse, setInitialLabelsByCourse] = useState<Record<string, Set<string>>>({});
+  // labels chosen to apply across all currently-selected courses
+  const [chosenLabels, setChosenLabels] = useState<Set<string>>(new Set()); // lowercase keys
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
 
@@ -32,16 +40,51 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
     if (!open || !productId) return;
     (async () => {
       setLoading(true);
-      const [{ data: fac }, { data: crs }, { data: cp }] = await Promise.all([
+      const [{ data: fac }, { data: crs }, { data: yrs }, { data: cp }] = await Promise.all([
         supabase.from("faculties").select("id,name,display_order").eq("is_active", true).order("display_order"),
         supabase.from("courses").select("id,name,faculty_id,display_order").eq("is_active", true).order("display_order"),
-        supabase.from("course_products").select("course_id").eq("product_id", productId),
+        supabase.from("course_years").select("id,course_id,label").eq("is_active", true).order("display_order"),
+        supabase.from("course_products").select("id,course_id").eq("product_id", productId),
       ]);
       setFaculties(fac || []);
       setCourses(crs || []);
+      setAllYears(yrs || []);
       const init = new Set<string>((cp || []).map((r: any) => r.course_id));
       setInitial(init);
       setSelected(new Set(init));
+
+      // Load existing year tags for this product
+      const cpRows = cp || [];
+      const cpIds = cpRows.map((r: any) => r.id);
+      const courseByCp: Record<string, string> = {};
+      cpRows.forEach((r: any) => { courseByCp[r.id] = r.course_id; });
+      const labelsByCourse: Record<string, Set<string>> = {};
+      if (cpIds.length) {
+        const { data: tagRows } = await supabase
+          .from("course_product_years")
+          .select("course_product_id,course_year_id")
+          .in("course_product_id", cpIds);
+        const yearById: Record<string, CourseYear> = {};
+        (yrs || []).forEach((y: any) => { yearById[y.id] = y; });
+        (tagRows || []).forEach((r: any) => {
+          const cid = courseByCp[r.course_product_id];
+          const y = yearById[r.course_year_id];
+          if (!cid || !y) return;
+          (labelsByCourse[cid] ||= new Set()).add(norm(y.label));
+        });
+      }
+      setInitialLabelsByCourse(labelsByCourse);
+
+      // Seed chosenLabels with labels that appear in ALL currently-tagged courses (most likely user intent)
+      const taggedCourseIds = Object.keys(labelsByCourse);
+      if (taggedCourseIds.length > 0) {
+        const intersection = [...labelsByCourse[taggedCourseIds[0]]].filter((l) =>
+          taggedCourseIds.every((cid) => labelsByCourse[cid].has(l))
+        );
+        setChosenLabels(new Set(intersection));
+      } else {
+        setChosenLabels(new Set());
+      }
       setLoading(false);
     })();
   }, [open, productId]);
@@ -64,49 +107,37 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
     return ids;
   }, [filtered]);
 
-  const toggleCourse = (id: string, on: boolean) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (on) next.add(id); else next.delete(id);
-      return next;
+  // Year labels available across currently-selected courses
+  const availableLabels = useMemo(() => {
+    const map: Map<string, string> = new Map(); // key -> displayLabel
+    allYears.forEach((y) => {
+      if (selected.has(y.course_id)) map.set(norm(y.label), y.label);
     });
-  };
+    return Array.from(map.entries()).map(([key, label]) => ({ key, label }));
+  }, [allYears, selected]);
 
-  const selectAllVisible = () => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      visibleCourseIds.forEach((id) => next.add(id));
-      return next;
-    });
-  };
-  const clearVisible = () => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      visibleCourseIds.forEach((id) => next.delete(id));
-      return next;
-    });
-  };
+  const toggleCourse = (id: string, on: boolean) =>
+    setSelected((p) => { const n = new Set(p); on ? n.add(id) : n.delete(id); return n; });
 
-  const toggleCollapse = (fid: string) => {
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(fid)) next.delete(fid); else next.add(fid);
-      return next;
-    });
-  };
+  const selectAllVisible = () =>
+    setSelected((p) => { const n = new Set(p); visibleCourseIds.forEach((id) => n.add(id)); return n; });
+  const clearVisible = () =>
+    setSelected((p) => { const n = new Set(p); visibleCourseIds.forEach((id) => n.delete(id)); return n; });
+
+  const toggleCollapse = (fid: string) =>
+    setCollapsed((p) => { const n = new Set(p); n.has(fid) ? n.delete(fid) : n.add(fid); return n; });
+
+  const toggleLabel = (key: string, on: boolean) =>
+    setChosenLabels((p) => { const n = new Set(p); on ? n.add(key) : n.delete(key); return n; });
 
   const handleSave = async () => {
     if (!productId) return;
     const toAdd = [...selected].filter((id) => !initial.has(id));
     const toRemove = [...initial].filter((id) => !selected.has(id));
-    if (toAdd.length === 0 && toRemove.length === 0) {
-      onOpenChange(false);
-      return;
-    }
     setSaving(true);
     try {
+      // 1. Remove unassigned course_products + cascade their year tags
       if (toRemove.length) {
-        // Find course_products rows to remove, then cascade course_product_years
         const { data: cpRows } = await supabase
           .from("course_products")
           .select("id")
@@ -118,12 +149,64 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
           await supabase.from("course_products").delete().in("id", cpIds);
         }
       }
+      // 2. Insert new course_products
       if (toAdd.length) {
         const rows = toAdd.map((cid) => ({ course_id: cid, product_id: productId }));
         const { error } = await supabase.from("course_products").insert(rows);
         if (error) throw error;
       }
-      toast.success(`Updated: +${toAdd.length} / -${toRemove.length} courses`);
+
+      // 3. Sync year-label tagging across all currently-selected courses
+      // Re-fetch course_products for accurate IDs
+      const { data: cpRows2 } = await supabase
+        .from("course_products")
+        .select("id,course_id")
+        .eq("product_id", productId)
+        .in("course_id", [...selected]);
+      const cpByCourse: Record<string, string> = {};
+      (cpRows2 || []).forEach((r: any) => { cpByCourse[r.course_id] = r.id; });
+
+      const yearsByCourse: Record<string, CourseYear[]> = {};
+      allYears.forEach((y) => { (yearsByCourse[y.course_id] ||= []).push(y); });
+
+      const insertRows: { course_product_id: string; course_year_id: string }[] = [];
+      const deleteYearIdsByCp: Record<string, string[]> = {};
+
+      for (const cid of selected) {
+        const cpId = cpByCourse[cid];
+        if (!cpId) continue;
+        const courseYears = yearsByCourse[cid] || [];
+        const desiredYearIds = new Set<string>();
+        courseYears.forEach((y) => { if (chosenLabels.has(norm(y.label))) desiredYearIds.add(y.id); });
+
+        // Current tags for this course (from initial state — only valid for previously-assigned courses)
+        const currentLabelKeys = initialLabelsByCourse[cid] || new Set<string>();
+        const currentYearIds = new Set<string>();
+        courseYears.forEach((y) => { if (currentLabelKeys.has(norm(y.label))) currentYearIds.add(y.id); });
+
+        // Inserts: desired - current
+        desiredYearIds.forEach((yid) => {
+          if (!currentYearIds.has(yid)) insertRows.push({ course_product_id: cpId, course_year_id: yid });
+        });
+        // Deletes: current - desired
+        const toDel: string[] = [];
+        currentYearIds.forEach((yid) => { if (!desiredYearIds.has(yid)) toDel.push(yid); });
+        if (toDel.length) deleteYearIdsByCp[cpId] = toDel;
+      }
+
+      // Apply deletes
+      for (const [cpId, yIds] of Object.entries(deleteYearIdsByCp)) {
+        await supabase.from("course_product_years")
+          .delete()
+          .eq("course_product_id", cpId)
+          .in("course_year_id", yIds);
+      }
+      // Apply inserts
+      if (insertRows.length) {
+        await supabase.from("course_product_years").insert(insertRows);
+      }
+
+      toast.success(`Saved · ${selected.size} course${selected.size === 1 ? "" : "s"}${chosenLabels.size ? ` · ${chosenLabels.size} year tag${chosenLabels.size === 1 ? "" : "s"}` : ""}`);
       onOpenChange(false);
     } catch (e: any) {
       toast.error(e.message || "Failed to save");
@@ -156,6 +239,45 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
               <Button size="sm" variant="outline" onClick={clearVisible} disabled={loading}>Clear visible</Button>
             </div>
           </div>
+
+          {/* Year-label chips */}
+          {selected.size > 0 && (
+            <div className="border rounded-md p-2.5 bg-muted/30 space-y-1.5">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                Apply to years (matched by label across picked courses)
+              </p>
+              {availableLabels.length === 0 ? (
+                <p className="text-[11px] text-muted-foreground italic">
+                  None of the picked courses have year labels yet — product will show in "All years".
+                </p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {availableLabels.map(({ key, label }) => {
+                    const on = chosenLabels.has(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleLabel(key, !on)}
+                        className={`px-2.5 py-1 rounded-full text-[11px] border transition-colors ${
+                          on
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background border-border hover:border-primary/50"
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                  {chosenLabels.size === 0 && (
+                    <span className="text-[11px] text-muted-foreground italic self-center">
+                      = visible in all years
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="flex-1 overflow-y-auto border rounded-md divide-y">
             {loading ? (
