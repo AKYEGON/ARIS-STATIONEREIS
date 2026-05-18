@@ -297,10 +297,10 @@ export const FacultyManager = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 pb-4">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 space-y-0 pb-4">
         <div className="min-w-0 flex-1">
-          <CardTitle className="text-base flex items-center gap-2 flex-wrap">
-            <GraduationCap className="h-4 w-4" />
+          <CardTitle className="text-sm sm:text-base flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <GraduationCap className="h-4 w-4 shrink-0" />
             <button
               onClick={() => { setView("faculties"); setActiveFaculty(null); setActiveCourse(null); }}
               className={view === "faculties" ? "" : "text-muted-foreground hover:text-primary"}
@@ -312,7 +312,7 @@ export const FacultyManager = () => {
                 <ChevronRight className="h-3 w-3 text-muted-foreground" />
                 <button
                   onClick={() => { setView("courses"); setActiveCourse(null); }}
-                  className={`truncate ${view === "courses" ? "" : "text-muted-foreground hover:text-primary"}`}
+                  className={`truncate max-w-[140px] sm:max-w-none ${view === "courses" ? "" : "text-muted-foreground hover:text-primary"}`}
                 >
                   {activeFaculty.name}
                 </button>
@@ -321,23 +321,23 @@ export const FacultyManager = () => {
             {activeCourse && (
               <>
                 <ChevronRight className="h-3 w-3 text-muted-foreground" />
-                <span className="truncate">{activeCourse.name}</span>
+                <span className="truncate max-w-[140px] sm:max-w-none">{activeCourse.name}</span>
               </>
             )}
           </CardTitle>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-[11px] sm:text-xs text-muted-foreground mt-1">
             {view === "faculties" && "Add faculties (e.g. Engineering, Business, Medicine)"}
             {view === "courses" && "Add courses under this faculty"}
             {view === "products" && "Tick the stationery this course needs"}
           </p>
         </div>
         {view === "faculties" && (
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={openAddFaculty}>
+          <Button size="sm" className="bg-primary hover:bg-primary/90 self-start sm:self-auto shrink-0" onClick={openAddFaculty}>
             <Plus className="h-4 w-4 mr-1" /> Faculty
           </Button>
         )}
         {view === "courses" && (
-          <Button size="sm" className="bg-primary hover:bg-primary/90" onClick={openAddCourse}>
+          <Button size="sm" className="bg-primary hover:bg-primary/90 self-start sm:self-auto shrink-0" onClick={openAddCourse}>
             <Plus className="h-4 w-4 mr-1" /> Course
           </Button>
         )}
@@ -365,7 +365,7 @@ export const FacultyManager = () => {
               {faculties.map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
                 >
                   <button
                     className="flex items-center gap-3 flex-1 min-w-0 text-left"
@@ -381,7 +381,7 @@ export const FacultyManager = () => {
                       </Badge>
                     </div>
                   </button>
-                  <div className="flex gap-1 shrink-0">
+                  <div className="flex gap-1 shrink-0 flex-wrap justify-end">
                     <Button
                       size="sm"
                       variant="outline"
@@ -419,7 +419,7 @@ export const FacultyManager = () => {
             {courses.map((c) => (
               <div
                 key={c.id}
-                className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
               >
                 <button
                   className="flex items-center gap-3 flex-1 min-w-0 text-left"
@@ -536,7 +536,7 @@ export const FacultyManager = () => {
 
       {/* Faculty Dialog */}
       <Dialog open={facDialogOpen} onOpenChange={setFacDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingFaculty ? "Edit Faculty" : "Add Faculty"}</DialogTitle>
           </DialogHeader>
@@ -583,7 +583,7 @@ export const FacultyManager = () => {
 
       {/* Course Dialog */}
       <Dialog open={courseDialogOpen} onOpenChange={setCourseDialogOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-sm w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingCourse ? "Edit Course" : "Add Course"}</DialogTitle>
           </DialogHeader>
