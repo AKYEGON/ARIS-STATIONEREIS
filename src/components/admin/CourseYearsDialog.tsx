@@ -69,21 +69,21 @@ export const CourseYearsDialog = ({ open, onOpenChange, courseId, courseName }: 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Layers className="h-4 w-4" /> Years · {courseName}
+          <DialogTitle className="flex items-center gap-2 text-base">
+            <Layers className="h-4 w-4" /> Years · <span className="truncate">{courseName}</span>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="e.g. Year 1, Clinical Year"
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && add()}
             />
-            <Button onClick={add} size="sm" className="shrink-0">
+            <Button onClick={add} size="sm" className="shrink-0 sm:w-auto">
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
           </div>
@@ -96,14 +96,14 @@ export const CourseYearsDialog = ({ open, onOpenChange, courseId, courseName }: 
           ) : (
             <div className="space-y-2">
               {years.map((y) => (
-                <div key={y.id} className="flex items-center gap-2 p-2 border rounded-md">
+                <div key={y.id} className="flex flex-wrap items-center gap-2 p-2 border rounded-md">
                   <Input
                     value={y.label}
                     onChange={(e) =>
                       setYears((prev) => prev.map((p) => (p.id === y.id ? { ...p, label: e.target.value } : p)))
                     }
                     onBlur={(e) => update(y.id, { label: e.target.value.trim() })}
-                    className="h-8"
+                    className="h-8 flex-1 min-w-[140px]"
                   />
                   <Input
                     type="number"
@@ -114,14 +114,14 @@ export const CourseYearsDialog = ({ open, onOpenChange, courseId, courseName }: 
                       )
                     }
                     onBlur={(e) => update(y.id, { display_order: parseInt(e.target.value) || 0 })}
-                    className="h-8 w-16"
+                    className="h-8 w-14 shrink-0"
                     title="Order"
                   />
                   <Switch
                     checked={y.is_active}
                     onCheckedChange={(c) => update(y.id, { is_active: c })}
                   />
-                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => remove(y)}>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive shrink-0" onClick={() => remove(y)}>
                     <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </div>
