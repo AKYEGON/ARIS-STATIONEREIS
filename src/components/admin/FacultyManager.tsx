@@ -365,7 +365,7 @@ export const FacultyManager = () => {
               {faculties.map((f) => (
                 <div
                   key={f.id}
-                  className="flex items-center justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border rounded-lg hover:border-primary/40 transition"
                 >
                   <button
                     className="flex items-center gap-3 flex-1 min-w-0 text-left"
@@ -381,7 +381,7 @@ export const FacultyManager = () => {
                       </Badge>
                     </div>
                   </button>
-                  <div className="flex gap-1 shrink-0">
+                  <div className="flex gap-1 shrink-0 flex-wrap justify-end">
                     <Button
                       size="sm"
                       variant="outline"
