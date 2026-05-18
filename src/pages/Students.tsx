@@ -14,6 +14,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Product, ProductVariant } from "@/types/product";
 import { Bundle } from "@/types/bundle";
 import ProductCard from "@/components/products/ProductCard";
+import { smartMatch as sharedSmartMatch } from "@/lib/smart-search";
 
 interface Faculty {
   id: string;
