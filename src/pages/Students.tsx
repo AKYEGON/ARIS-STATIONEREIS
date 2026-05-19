@@ -180,10 +180,16 @@ const Students = () => {
           description: p.description || "",
           price: Number(p.price),
           originalPrice: p.original_price ? Number(p.original_price) : undefined,
+          costPrice: p.cost_price ? Number(p.cost_price) : undefined,
           image: p.image,
           category: p.category,
           stock: p.stock ?? 0,
           is_featured: p.is_featured,
+          slug: p.slug,
+          media: (p.media || []).sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+          variants: (p.variants || [])
+            .filter((v: any) => v.is_active !== false)
+            .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
         });
         py[p.id] = new Set(yearsByCp[row.id] || []);
       });
