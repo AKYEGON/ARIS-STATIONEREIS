@@ -433,12 +433,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/a5-artistic-notebook-51ba21</loc>
-    <lastmod>2026-04-13</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://arisstationaries.co.ke/product/architectural-scale-ruler-df6596</loc>
     <lastmod>2026-04-17</lastmod>
     <changefreq>weekly</changefreq>
@@ -477,6 +471,12 @@
   <url>
     <loc>https://arisstationaries.co.ke/product/damasa-hb-pencil-83fe8b</loc>
     <lastmod>2025-11-28</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arisstationaries.co.ke/product/a5-artistic-notebook-51ba21</loc>
+    <lastmod>2026-04-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -595,12 +595,6 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/pvc-t-square-60cm-6f9cdc</loc>
-    <lastmod>2026-04-10</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://arisstationaries.co.ke/product/nataral-sharperner-adfff6</loc>
     <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
@@ -614,6 +608,12 @@
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/product/fine-bic-pen-fa784d</loc>
+    <lastmod>2026-04-10</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arisstationaries.co.ke/product/pvc-t-square-60cm-6f9cdc</loc>
     <lastmod>2026-04-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
