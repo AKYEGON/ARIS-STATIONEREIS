@@ -235,3 +235,105 @@ export const BundlesTab = ({
     </Card>
   );
 };
+
+// ------- 3-mode image picker -------
+interface BundleImagePickerProps {
+  imagePreview: string;
+  bundleImageUrl: string;
+  selectedProductIds: string[];
+  products: Product[];
+  onUpload: (file: File | null) => void;
+  onSelectProductImage: (url: string) => void;
+  onAutoCollage: () => void;
+}
+
+const BundleImagePicker = ({
+  imagePreview,
+  bundleImageUrl,
+  selectedProductIds,
+  products,
+  onUpload,
+  onSelectProductImage,
+  onAutoCollage,
+}: BundleImagePickerProps) => {
+  // Detect initial mode based on existing data
+  const hasUploaded = !!imagePreview && imagePreview.startsWith("blob:");
+  const isUrlFromProduct = !!bundleImageUrl && products.some(p => p.image === bundleImageUrl);
+  const initialMode: "upload" | "pick" | "auto" = hasUploaded
+    ? "upload"
+    : isUrlFromProduct
+      ? "pick"
+      : bundleImageUrl
+        ? "upload"
+        : "auto";
+
+  const [mode, setMode] = useState<"upload" | "pick" | "auto">(initialMode);
+  const selectedProducts = products.filter(p => selectedProductIds.includes(p.id));
+  const displayUrl = imagePreview || bundleImageUrl;
+
+  return (
+    <div className="space-y-2">
+      <RadioGroup
+        value={mode}
+        onValueChange={(v) => {
+          const m = v as typeof mode;
+          setMode(m);
+          if (m === "auto") onAutoCollage();
+        }}
+        className="flex flex-wrap gap-3 text-sm"
+      >
+        <div className="flex items-center gap-1.5">
+          <RadioGroupItem value="auto" id="bimg-auto" />
+          <Label htmlFor="bimg-auto" className="cursor-pointer font-normal">Auto-collage from products</Label>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <RadioGroupItem value="pick" id="bimg-pick" />
+          <Label htmlFor="bimg-pick" className="cursor-pointer font-normal">Pick a product image</Label>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <RadioGroupItem value="upload" id="bimg-upload" />
+          <Label htmlFor="bimg-upload" className="cursor-pointer font-normal">Upload custom</Label>
+        </div>
+      </RadioGroup>
+
+      {mode === "upload" && (
+        <>
+          <Input type="file" accept="image/*" onChange={(e) => onUpload(e.target.files?.[0] || null)} />
+          {displayUrl && (
+            <img src={displayUrl} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded border" />
+          )}
+        </>
+      )}
+
+      {mode === "pick" && (
+        <>
+          {selectedProducts.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Add products to the bundle first, then pick one image.</p>
+          ) : (
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {selectedProducts.map(p => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onSelectProductImage(p.image)}
+                  className={`border-2 rounded overflow-hidden aspect-square bg-white transition ${
+                    bundleImageUrl === p.image ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/50"
+                  }`}
+                  title={p.name}
+                >
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1" />
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {mode === "auto" && (
+        <p className="text-xs text-muted-foreground">
+          A 2×2 collage of the included products' images will be shown automatically. No upload needed.
+        </p>
+      )}
+    </div>
+  );
+};
