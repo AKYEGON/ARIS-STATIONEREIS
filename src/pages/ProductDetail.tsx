@@ -324,25 +324,31 @@ const ProductDetail = () => {
                     )}
                   </p>
                   <div className="flex flex-wrap gap-2">
-                    {variants.map((v) => (
-                      <button
-                        key={v.id}
-                        type="button"
-                        onClick={() =>
-                          setSelectedVariant(selectedVariant?.id === v.id ? undefined : v)
-                        }
-                        className={`text-sm px-3 py-2 rounded-md border transition-all ${
-                          selectedVariant?.id === v.id
-                            ? "border-primary bg-primary/10 text-primary font-semibold"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                      >
-                        {v.variant_value}
-                        <span className="ml-1.5 opacity-70 text-xs">
-                          KSh {v.price.toFixed(0)}
-                        </span>
-                      </button>
-                    ))}
+                    {variants.map((v) => {
+                      const outOfStock = v.stock <= 0;
+                      return (
+                        <button
+                          key={v.id}
+                          type="button"
+                          disabled={outOfStock}
+                          onClick={() =>
+                            !outOfStock && setSelectedVariant(selectedVariant?.id === v.id ? undefined : v)
+                          }
+                          className={`text-sm px-3 py-2 rounded-md border transition-all ${
+                            outOfStock
+                              ? "border-border/40 bg-muted/30 text-muted-foreground/50 cursor-not-allowed line-through"
+                              : selectedVariant?.id === v.id
+                                ? "border-primary bg-primary/10 text-primary font-semibold"
+                                : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          {v.variant_value}
+                          <span className="ml-1.5 opacity-70 text-xs">
+                            {outOfStock ? "Out of Stock" : `KSh ${v.price.toFixed(0)}`}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               ))}
