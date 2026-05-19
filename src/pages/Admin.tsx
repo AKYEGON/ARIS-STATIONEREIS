@@ -2724,13 +2724,14 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-costPrice">Cost Price (KSh) *</Label>
+                <Label htmlFor="edit-costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
                 <Input
                   id="edit-costPrice"
                   type="number"
-                  value={formData.costPrice}
+                  value={productVariants.length > 0 ? Math.min(...productVariants.map(v => Number(v.cost_price) || 0)).toString() : formData.costPrice}
                   onChange={(e) => setFormData({...formData, costPrice: e.target.value})}
                   placeholder="0.00"
+                  disabled={productVariants.length > 0}
                 />
               </div>
               <div>
