@@ -866,9 +866,9 @@ const Admin = () => {
       const productData = {
         name: formData.name,
         description: formData.description,
-        price: parseFloat(formData.price),
+        price: effectivePrice,
         original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-        cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
+        cost_price: effectiveCost,
         stock: formData.stock ? parseInt(formData.stock) : 0,
         category: primaryCatName,
         image: imageUrl,
