@@ -830,10 +830,17 @@ const Admin = () => {
   };
 
   const handleAddProduct = async () => {
-    if (!formData.name || !formData.price) {
+    const hasVariants = productVariants.length > 0;
+    if (!formData.name || (!hasVariants && !formData.price)) {
       toast.error("Please fill in required fields");
       return;
     }
+    const effectivePrice = hasVariants
+      ? Math.min(...productVariants.map(v => Number(v.price) || 0))
+      : parseFloat(formData.price);
+    const effectiveCost = hasVariants
+      ? Math.min(...productVariants.map(v => Number(v.cost_price) || 0))
+      : (formData.costPrice ? parseFloat(formData.costPrice) : 0);
 
     setUploadingImage(true);
     try {
