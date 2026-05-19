@@ -173,7 +173,9 @@ const Admin = () => {
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
-    display_order: "0"
+    display_order: "0",
+    saleStartsAt: "",
+    saleEndsAt: ""
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -798,7 +800,9 @@ const Admin = () => {
       category: "",
       image: "/placeholder.svg",
       is_featured: false,
-      display_order: "0"
+      display_order: "0",
+      saleStartsAt: "",
+      saleEndsAt: ""
     });
     setSelectedCategoryIds([]);
     setSelectedImageFile(null);
@@ -875,7 +879,9 @@ const Admin = () => {
         category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
-        display_order: parseInt(formData.display_order) || 0
+        display_order: parseInt(formData.display_order) || 0,
+        sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
+        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
       };
 
       console.log("Inserting product data:", productData);
