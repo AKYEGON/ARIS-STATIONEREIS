@@ -233,7 +233,10 @@ const ProductDetail = () => {
           </Link>
           <ChevronRight className="h-3 w-3" />
           <Link
-            to={`/?category=${encodeURIComponent(product.category)}`}
+            to={`/category/${product.category
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "")}`}
             className="hover:text-primary truncate max-w-[160px]"
           >
             {product.category}
