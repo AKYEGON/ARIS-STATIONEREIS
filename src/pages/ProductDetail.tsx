@@ -216,7 +216,7 @@ const ProductDetail = () => {
         structuredData={productSchema}
         breadcrumbs={[
           { name: "Home", url: "/" },
-          { name: product.category, url: `/?category=${encodeURIComponent(product.category)}` },
+          { name: product.category, url: `/category/${product.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}` },
           { name: product.name, url: productUrl },
         ]}
       />
