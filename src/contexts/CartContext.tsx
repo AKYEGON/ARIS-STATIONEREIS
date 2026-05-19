@@ -57,6 +57,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   }, [bundleItems]);
 
   const addToCart = (product: Product, selectedVariant?: ProductVariant) => {
+    // Guard: prevent adding out-of-stock variants
+    if (selectedVariant && selectedVariant.stock <= 0) {
+      toast.error(`${selectedVariant.variant_value} is out of stock`);
+      return;
+    }
+    // Guard: prevent adding out-of-stock base products
+    if (!selectedVariant && (product.stock !== undefined && product.stock <= 0)) {
+      toast.error(`${product.name} is out of stock`);
+      return;
+    }
+
     setCartItems((prevItems) => {
       // Unique key: product id + variant id (if any)
       const cartKey = selectedVariant ? `${product.id}_${selectedVariant.id}` : product.id;
@@ -66,13 +77,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       });
       
       const effectivePrice = selectedVariant ? selectedVariant.price : product.price;
+      const availableStock = selectedVariant ? selectedVariant.stock : (product.stock ?? Infinity);
       
       if (existingItem) {
+        const newQty = existingItem.quantity + 1;
+        if (newQty > availableStock) {
+          toast.error(`Only ${availableStock} units available`);
+          return prevItems;
+        }
         toast.success("Quantity updated in cart");
         return prevItems.map((item) => {
           const itemKey = item.selectedVariant ? `${item.id}_${item.selectedVariant.id}` : item.id;
           return itemKey === cartKey
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: newQty }
             : item;
         });
       }
