@@ -7,9 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Plus, Pencil, Trash2, Minus } from "lucide-react";
 import { Bundle } from "@/types/bundle";
 import { Product } from "@/types/product";
+import { useState } from "react";
 
 interface BundlesTabProps {
   bundles: Bundle[];
@@ -146,12 +148,21 @@ export const BundlesTab = ({
               </div>
               <div>
                 <Label>Bundle Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => onImageChange(e.target.files?.[0] || null)}
+                <BundleImagePicker
+                  imagePreview={imagePreview}
+                  bundleImageUrl={formData.image}
+                  selectedProductIds={selectedProducts.map(sp => sp.product_id)}
+                  products={products}
+                  onUpload={onImageChange}
+                  onSelectProductImage={(url) => {
+                    onImageChange(null);
+                    onFormChange("image", url);
+                  }}
+                  onAutoCollage={() => {
+                    onImageChange(null);
+                    onFormChange("image", "");
+                  }}
                 />
-                {imagePreview && <img src={imagePreview} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />}
               </div>
               <div>
                 <Label>Select Products</Label>
