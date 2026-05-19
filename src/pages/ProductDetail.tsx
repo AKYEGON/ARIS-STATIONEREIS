@@ -232,7 +232,12 @@ const ProductDetail = () => {
             Home
           </Link>
           <ChevronRight className="h-3 w-3" />
-          <span>{product.category}</span>
+          <Link
+            to={`/?category=${encodeURIComponent(product.category)}`}
+            className="hover:text-primary truncate max-w-[160px]"
+          >
+            {product.category}
+          </Link>
           <ChevronRight className="h-3 w-3" />
           <span className="text-foreground font-medium truncate max-w-[200px]">
             {product.name}
