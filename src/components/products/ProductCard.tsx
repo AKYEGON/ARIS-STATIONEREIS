@@ -169,6 +169,9 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}
                 </p>
+                {product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
+                  <CountdownTimer endsAt={product.saleEndsAt} compact className="mt-0.5" />
+                )}
               </div>
             ) : (
               <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
