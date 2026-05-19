@@ -1780,7 +1780,7 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="originalPrice">Original Price (KSh)</Label>
+                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
                       <Input
                         id="originalPrice"
                         type="number"
@@ -1788,6 +1788,22 @@ const Admin = () => {
                         onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                         placeholder="Leave empty if no discount"
                       />
+                    </div>
+                    <div className="md:col-span-2 grid grid-cols-2 gap-3 p-3 rounded border border-dashed border-amber-400/40 bg-amber-50/40 dark:bg-amber-900/10">
+                      <div className="col-span-2">
+                        <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400">⚡ Flash Sale Window (optional)</Label>
+                        <p className="text-[10px] text-muted-foreground">Discount is only active in this time range. Leave empty for always-on discount.</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="saleStartsAt" className="text-xs">Starts</Label>
+                        <Input id="saleStartsAt" type="datetime-local" value={formData.saleStartsAt}
+                          onChange={(e) => setFormData({...formData, saleStartsAt: e.target.value})} />
+                      </div>
+                      <div>
+                        <Label htmlFor="saleEndsAt" className="text-xs">Ends</Label>
+                        <Input id="saleEndsAt" type="datetime-local" value={formData.saleEndsAt}
+                          onChange={(e) => setFormData({...formData, saleEndsAt: e.target.value})} />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
@@ -2726,7 +2742,7 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-originalPrice">Original Price (KSh)</Label>
+                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
                 <Input
                   id="edit-originalPrice"
                   type="number"
@@ -2734,6 +2750,22 @@ const Admin = () => {
                   onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                   placeholder="Leave empty if no discount"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-3 p-3 rounded border border-dashed border-amber-400/40 bg-amber-50/40 dark:bg-amber-900/10">
+                <div className="col-span-2">
+                  <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400">⚡ Flash Sale Window (optional)</Label>
+                  <p className="text-[10px] text-muted-foreground">Discount is only active in this time range. Leave empty for always-on discount.</p>
+                </div>
+                <div>
+                  <Label htmlFor="edit-saleStartsAt" className="text-xs">Starts</Label>
+                  <Input id="edit-saleStartsAt" type="datetime-local" value={formData.saleStartsAt}
+                    onChange={(e) => setFormData({...formData, saleStartsAt: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit-saleEndsAt" className="text-xs">Ends</Label>
+                  <Input id="edit-saleEndsAt" type="datetime-local" value={formData.saleEndsAt}
+                    onChange={(e) => setFormData({...formData, saleEndsAt: e.target.value})} />
+                </div>
               </div>
               <div>
                 <Label htmlFor="edit-costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
