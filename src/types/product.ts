@@ -34,6 +34,8 @@ export interface Product {
   is_featured?: boolean;
   display_order?: number;
   slug?: string;
+  saleStartsAt?: string | null;
+  saleEndsAt?: string | null;
   media?: ProductMedia[];
   variants?: ProductVariant[];
 }

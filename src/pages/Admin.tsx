@@ -173,7 +173,9 @@ const Admin = () => {
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
-    display_order: "0"
+    display_order: "0",
+    saleStartsAt: "",
+    saleEndsAt: ""
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -277,6 +279,8 @@ const Admin = () => {
         description: p.description || "",
         price: Number(p.price),
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        saleStartsAt: (p as any).sale_starts_at || null,
+        saleEndsAt: (p as any).sale_ends_at || null,
         costPrice: p.cost_price ? Number(p.cost_price) : 0,
         stock: p.stock || 0,
         category: p.category,
@@ -796,7 +800,9 @@ const Admin = () => {
       category: "",
       image: "/placeholder.svg",
       is_featured: false,
-      display_order: "0"
+      display_order: "0",
+      saleStartsAt: "",
+      saleEndsAt: ""
     });
     setSelectedCategoryIds([]);
     setSelectedImageFile(null);
@@ -873,7 +879,9 @@ const Admin = () => {
         category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
-        display_order: parseInt(formData.display_order) || 0
+        display_order: parseInt(formData.display_order) || 0,
+        sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
+        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
       };
 
       console.log("Inserting product data:", productData);
@@ -996,7 +1004,9 @@ const Admin = () => {
             : "",
           image: imageUrl,
           is_featured: formData.is_featured,
-          display_order: parseInt(formData.display_order) || 0
+          display_order: parseInt(formData.display_order) || 0,
+          sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
+          sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
         })
         .eq("id", editingProduct.id);
 
@@ -1104,7 +1114,9 @@ const Admin = () => {
       category: product.category,
       image: product.image,
       is_featured: product.is_featured || false,
-      display_order: (product.display_order || 0).toString()
+      display_order: (product.display_order || 0).toString(),
+      saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
+      saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
     });
     setSelectedImageFile(null);
     setImageUrl(product.image);
@@ -1768,7 +1780,7 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="originalPrice">Original Price (KSh)</Label>
+                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
                       <Input
                         id="originalPrice"
                         type="number"
@@ -1776,6 +1788,22 @@ const Admin = () => {
                         onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                         placeholder="Leave empty if no discount"
                       />
+                    </div>
+                    <div className="md:col-span-2 grid grid-cols-2 gap-3 p-3 rounded border border-dashed border-amber-400/40 bg-amber-50/40 dark:bg-amber-900/10">
+                      <div className="col-span-2">
+                        <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400">⚡ Flash Sale Window (optional)</Label>
+                        <p className="text-[10px] text-muted-foreground">Discount is only active in this time range. Leave empty for always-on discount.</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="saleStartsAt" className="text-xs">Starts</Label>
+                        <Input id="saleStartsAt" type="datetime-local" value={formData.saleStartsAt}
+                          onChange={(e) => setFormData({...formData, saleStartsAt: e.target.value})} />
+                      </div>
+                      <div>
+                        <Label htmlFor="saleEndsAt" className="text-xs">Ends</Label>
+                        <Input id="saleEndsAt" type="datetime-local" value={formData.saleEndsAt}
+                          onChange={(e) => setFormData({...formData, saleEndsAt: e.target.value})} />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
@@ -2714,7 +2742,7 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-originalPrice">Original Price (KSh)</Label>
+                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
                 <Input
                   id="edit-originalPrice"
                   type="number"
@@ -2722,6 +2750,22 @@ const Admin = () => {
                   onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                   placeholder="Leave empty if no discount"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-3 p-3 rounded border border-dashed border-amber-400/40 bg-amber-50/40 dark:bg-amber-900/10">
+                <div className="col-span-2">
+                  <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400">⚡ Flash Sale Window (optional)</Label>
+                  <p className="text-[10px] text-muted-foreground">Discount is only active in this time range. Leave empty for always-on discount.</p>
+                </div>
+                <div>
+                  <Label htmlFor="edit-saleStartsAt" className="text-xs">Starts</Label>
+                  <Input id="edit-saleStartsAt" type="datetime-local" value={formData.saleStartsAt}
+                    onChange={(e) => setFormData({...formData, saleStartsAt: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit-saleEndsAt" className="text-xs">Ends</Label>
+                  <Input id="edit-saleEndsAt" type="datetime-local" value={formData.saleEndsAt}
+                    onChange={(e) => setFormData({...formData, saleEndsAt: e.target.value})} />
+                </div>
               </div>
               <div>
                 <Label htmlFor="edit-costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>

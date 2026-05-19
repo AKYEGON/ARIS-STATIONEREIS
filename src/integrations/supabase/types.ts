@@ -67,6 +67,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bogo_offers: {
+        Row: {
+          buy_quantity: number
+          created_at: string
+          display_order: number
+          ends_at: string | null
+          free_product_id: string | null
+          get_quantity: number
+          id: string
+          is_active: boolean
+          name: string
+          product_id: string
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          buy_quantity?: number
+          created_at?: string
+          display_order?: number
+          ends_at?: string | null
+          free_product_id?: string | null
+          get_quantity?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          product_id: string
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buy_quantity?: number
+          created_at?: string
+          display_order?: number
+          ends_at?: string | null
+          free_product_id?: string | null
+          get_quantity?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          product_id?: string
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bundle_items: {
         Row: {
           bundle_id: string
@@ -886,6 +931,8 @@ export type Database = {
           name: string
           original_price: number | null
           price: number
+          sale_ends_at: string | null
+          sale_starts_at: string | null
           slug: string
           stock: number | null
           updated_at: string
@@ -902,6 +949,8 @@ export type Database = {
           name: string
           original_price?: number | null
           price: number
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
           slug: string
           stock?: number | null
           updated_at?: string
@@ -918,6 +967,8 @@ export type Database = {
           name?: string
           original_price?: number | null
           price?: number
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
           slug?: string
           stock?: number | null
           updated_at?: string

@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bundle } from "@/types/bundle";
 import { ShoppingCart } from "lucide-react";
+import BundleCollage from "./BundleCollage";
 
 interface BundleCardProps {
   bundle: Bundle;
@@ -21,11 +22,15 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
           <Badge className="absolute top-1 right-1 z-10 bg-primary text-[9px] px-1.5 py-0">
             -{savingsPercentage}%
           </Badge>
-          <img
-            src={bundle.image}
-            alt={bundle.name}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          {bundle.image ? (
+            <img
+              src={bundle.image}
+              alt={bundle.name}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <BundleCollage bundle={bundle} />
+          )}
         </div>
         <CardContent className="p-2 flex flex-col flex-1">
           <h3 className="font-semibold text-[11px] sm:text-xs mb-0.5 line-clamp-1">{bundle.name}</h3>
@@ -56,11 +61,15 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
         <Badge className="absolute top-1.5 right-1.5 xs:top-2 xs:right-2 z-10 bg-primary text-[10px] xs:text-xs px-1.5 xs:px-2">
           Save {savingsPercentage}%
         </Badge>
-        <img
-          src={bundle.image}
-          alt={bundle.name}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-        />
+        {bundle.image ? (
+          <img
+            src={bundle.image}
+            alt={bundle.name}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          />
+        ) : (
+          <BundleCollage bundle={bundle} />
+        )}
       </div>
       <CardContent className="p-2.5 xs:p-3 sm:p-4 flex flex-col flex-1">
         <h3 className="font-bold text-sm xs:text-base sm:text-lg mb-1 xs:mb-2 line-clamp-2">{bundle.name}</h3>
