@@ -1757,13 +1757,14 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="price">Current Price (KSh) *</Label>
+                      <Label htmlFor="price">Current Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
                       <Input
                         id="price"
                         type="number"
-                        value={formData.price}
+                        value={productVariants.length > 0 ? Math.min(...productVariants.map(v => Number(v.price) || 0)).toString() : formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
                         placeholder="0.00"
+                        disabled={productVariants.length > 0}
                       />
                     </div>
                     <div>
