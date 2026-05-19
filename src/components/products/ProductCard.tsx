@@ -5,6 +5,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
 import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
+import SaleBadge, { isOnSale } from "./SaleBadge";
+import CountdownTimer from "./CountdownTimer";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
