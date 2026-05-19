@@ -60,13 +60,27 @@ const ProductDetail = () => {
         .eq("slug", slug)
         .maybeSingle();
 
+      let row = data;
+      if (!row) {
+        // Fallback: legacy/internal links that use the product id
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+        if (isUuid) {
+          const { data: byId } = await supabase
+            .from("products")
+            .select(`*, media:product_media(*), variants:product_variants(*)`)
+            .eq("id", slug)
+            .maybeSingle();
+          row = byId || null;
+        }
+      }
+
       if (error) throw error;
-      if (!data) {
+      if (!row) {
         setNotFound(true);
         setProduct(null);
         return;
       }
-      const p = formatProduct(data);
+      const p = formatProduct(row);
       setProduct(p);
       setSelectedVariant(undefined);
       setActiveMediaIndex(0);
