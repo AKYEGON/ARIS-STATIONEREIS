@@ -26,6 +26,8 @@ const formatProduct = (p: any): Product & { slug?: string } => ({
   description: p.description || "",
   price: Number(p.price),
   originalPrice: p.original_price ? Number(p.original_price) : undefined,
+  saleStartsAt: p.sale_starts_at || null,
+  saleEndsAt: p.sale_ends_at || null,
   category: p.category,
   image: p.image,
   is_featured: p.is_featured,

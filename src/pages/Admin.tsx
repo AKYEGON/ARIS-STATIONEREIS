@@ -277,6 +277,8 @@ const Admin = () => {
         description: p.description || "",
         price: Number(p.price),
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        saleStartsAt: (p as any).sale_starts_at || null,
+        saleEndsAt: (p as any).sale_ends_at || null,
         costPrice: p.cost_price ? Number(p.cost_price) : 0,
         stock: p.stock || 0,
         category: p.category,

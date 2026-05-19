@@ -180,6 +180,8 @@ const Students = () => {
           description: p.description || "",
           price: Number(p.price),
           originalPrice: p.original_price ? Number(p.original_price) : undefined,
+          saleStartsAt: p.sale_starts_at || null,
+          saleEndsAt: p.sale_ends_at || null,
           costPrice: p.cost_price ? Number(p.cost_price) : undefined,
           image: p.image,
           category: p.category,
