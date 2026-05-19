@@ -987,9 +987,9 @@ const Admin = () => {
         .update({
           name: formData.name,
           description: formData.description,
-          price: parseFloat(formData.price),
+          price: effectivePrice,
           original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-          cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
+          cost_price: effectiveCost,
           stock: formData.stock ? parseInt(formData.stock) : 0,
           category: selectedCategoryIds.length > 0
             ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
