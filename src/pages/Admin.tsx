@@ -830,10 +830,17 @@ const Admin = () => {
   };
 
   const handleAddProduct = async () => {
-    if (!formData.name || !formData.price) {
+    const hasVariants = productVariants.length > 0;
+    if (!formData.name || (!hasVariants && !formData.price)) {
       toast.error("Please fill in required fields");
       return;
     }
+    const effectivePrice = hasVariants
+      ? Math.min(...productVariants.map(v => Number(v.price) || 0))
+      : parseFloat(formData.price);
+    const effectiveCost = hasVariants
+      ? Math.min(...productVariants.map(v => Number(v.cost_price) || 0))
+      : (formData.costPrice ? parseFloat(formData.costPrice) : 0);
 
     setUploadingImage(true);
     try {
@@ -859,9 +866,9 @@ const Admin = () => {
       const productData = {
         name: formData.name,
         description: formData.description,
-        price: parseFloat(formData.price),
+        price: effectivePrice,
         original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-        cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
+        cost_price: effectiveCost,
         stock: formData.stock ? parseInt(formData.stock) : 0,
         category: primaryCatName,
         image: imageUrl,
@@ -953,10 +960,17 @@ const Admin = () => {
   };
 
   const handleEditProduct = async () => {
-    if (!editingProduct || !formData.name || !formData.price) {
+    const hasVariants = productVariants.length > 0;
+    if (!editingProduct || !formData.name || (!hasVariants && !formData.price)) {
       toast.error("Please fill in required fields");
       return;
     }
+    const effectivePrice = hasVariants
+      ? Math.min(...productVariants.map(v => Number(v.price) || 0))
+      : parseFloat(formData.price);
+    const effectiveCost = hasVariants
+      ? Math.min(...productVariants.map(v => Number(v.cost_price) || 0))
+      : (formData.costPrice ? parseFloat(formData.costPrice) : 0);
 
     setUploadingImage(true);
     try {
@@ -973,9 +987,9 @@ const Admin = () => {
         .update({
           name: formData.name,
           description: formData.description,
-          price: parseFloat(formData.price),
+          price: effectivePrice,
           original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
-          cost_price: formData.costPrice ? parseFloat(formData.costPrice) : 0,
+          cost_price: effectiveCost,
           stock: formData.stock ? parseInt(formData.stock) : 0,
           category: selectedCategoryIds.length > 0
             ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
@@ -1743,13 +1757,14 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="price">Current Price (KSh) *</Label>
+                      <Label htmlFor="price">Current Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
                       <Input
                         id="price"
                         type="number"
-                        value={formData.price}
+                        value={productVariants.length > 0 ? Math.min(...productVariants.map(v => Number(v.price) || 0)).toString() : formData.price}
                         onChange={(e) => setFormData({...formData, price: e.target.value})}
                         placeholder="0.00"
+                        disabled={productVariants.length > 0}
                       />
                     </div>
                     <div>
@@ -1763,13 +1778,14 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="costPrice">Cost Price (KSh) *</Label>
+                      <Label htmlFor="costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
                       <Input
                         id="costPrice"
                         type="number"
-                        value={formData.costPrice}
+                        value={productVariants.length > 0 ? Math.min(...productVariants.map(v => Number(v.cost_price) || 0)).toString() : formData.costPrice}
                         onChange={(e) => setFormData({...formData, costPrice: e.target.value})}
                         placeholder="0.00"
+                        disabled={productVariants.length > 0}
                       />
                     </div>
                     <div>
@@ -2687,13 +2703,14 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-price">Current Price (KSh) *</Label>
+                <Label htmlFor="edit-price">Current Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
                 <Input
                   id="edit-price"
                   type="number"
-                  value={formData.price}
+                  value={productVariants.length > 0 ? Math.min(...productVariants.map(v => Number(v.price) || 0)).toString() : formData.price}
                   onChange={(e) => setFormData({...formData, price: e.target.value})}
                   placeholder="0.00"
+                  disabled={productVariants.length > 0}
                 />
               </div>
               <div>
@@ -2707,13 +2724,14 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-costPrice">Cost Price (KSh) *</Label>
+                <Label htmlFor="edit-costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
                 <Input
                   id="edit-costPrice"
                   type="number"
-                  value={formData.costPrice}
+                  value={productVariants.length > 0 ? Math.min(...productVariants.map(v => Number(v.cost_price) || 0)).toString() : formData.costPrice}
                   onChange={(e) => setFormData({...formData, costPrice: e.target.value})}
                   placeholder="0.00"
+                  disabled={productVariants.length > 0}
                 />
               </div>
               <div>
