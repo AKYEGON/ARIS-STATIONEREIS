@@ -116,7 +116,7 @@ const Students = () => {
       const [{ data: cpRows }, { data: yearRows }, { data: bundleRows }] = await Promise.all([
         supabase
           .from("course_products")
-          .select("id, display_order, product:products(*)")
+          .select("id, display_order, product:products(*, media:product_media(*), variants:product_variants(*))")
           .eq("course_id", courseId)
           .order("display_order", { ascending: true }),
         supabase
