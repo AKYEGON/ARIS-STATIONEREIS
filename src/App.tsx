@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Students from "./pages/Students";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
+import Deals from "./pages/Deals";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryLanding from "./pages/CategoryLanding";
@@ -40,7 +41,8 @@ const App = () => {
                 <Route path="/brochure" element={<Students />} />
                 <Route path="/testimonials" element={<Testimonials />} />
                 <Route path="/happy-customers" element={<Testimonials />} />
-                <Route path="/offers" element={<Offers />} />
+                <Route path="/offers" element={<Deals />} />
+                <Route path="/deals" element={<Deals />} />
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
                 <Route path="*" element={<NotFound />} />

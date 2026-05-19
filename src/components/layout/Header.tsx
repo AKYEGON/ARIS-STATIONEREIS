@@ -1,4 +1,4 @@
-import { ShoppingCart, GraduationCap, Users, Tag, Store } from "lucide-react";
+import { ShoppingCart, GraduationCap, Users, Flame, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,7 +10,7 @@ interface HeaderProps {
 
 const bottomTabs = [
   { to: "/", label: "Shop", icon: Store },
-  { to: "/offers", label: "Offers", icon: Tag },
+  { to: "/deals", label: "Deals", icon: Flame },
   { to: "/testimonials", label: "Customers", icon: Users },
   { to: "/students", label: "Courses", icon: GraduationCap },
   { to: "/cart", label: "Cart", icon: ShoppingCart },
@@ -35,10 +35,10 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           
           {/* Desktop nav links */}
           <div className="hidden md:flex items-center gap-2 sm:gap-4">
-            <Link to="/offers">
+            <Link to="/deals">
               <Button variant="outline" size="sm">
-                <Tag className="h-4 w-4 mr-2" />
-                <span className="hidden lg:inline">Offers</span>
+                <Flame className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Deals</span>
               </Button>
             </Link>
             
