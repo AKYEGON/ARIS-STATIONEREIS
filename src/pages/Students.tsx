@@ -116,7 +116,7 @@ const Students = () => {
       const [{ data: cpRows }, { data: yearRows }, { data: bundleRows }] = await Promise.all([
         supabase
           .from("course_products")
-          .select("id, display_order, product:products(*)")
+          .select("id, display_order, product:products(*, media:product_media(*), variants:product_variants(*))")
           .eq("course_id", courseId)
           .order("display_order", { ascending: true }),
         supabase
@@ -180,10 +180,16 @@ const Students = () => {
           description: p.description || "",
           price: Number(p.price),
           originalPrice: p.original_price ? Number(p.original_price) : undefined,
+          costPrice: p.cost_price ? Number(p.cost_price) : undefined,
           image: p.image,
           category: p.category,
           stock: p.stock ?? 0,
           is_featured: p.is_featured,
+          slug: p.slug,
+          media: (p.media || []).sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+          variants: (p.variants || [])
+            .filter((v: any) => v.is_active !== false)
+            .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
         });
         py[p.id] = new Set(yearsByCp[row.id] || []);
       });
