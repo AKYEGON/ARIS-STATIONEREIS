@@ -97,6 +97,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             }`}
           />
 
+          {/* Sale badge (top-left) */}
+          <SaleBadge
+            price={product.price}
+            originalPrice={product.originalPrice}
+            saleStartsAt={product.saleStartsAt}
+            saleEndsAt={product.saleEndsAt}
+          />
+
           {/* Gallery indicator badge */}
           {hasMultipleMedia && (
             <button
