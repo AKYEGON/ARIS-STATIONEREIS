@@ -173,6 +173,7 @@ const Admin = () => {
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
+    is_common: false,
     display_order: "0",
     saleStartsAt: "",
     saleEndsAt: ""
@@ -800,6 +801,7 @@ const Admin = () => {
       category: "",
       image: "/placeholder.svg",
       is_featured: false,
+      is_common: false,
       display_order: "0",
       saleStartsAt: "",
       saleEndsAt: ""
@@ -879,6 +881,7 @@ const Admin = () => {
         category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
+        is_common: formData.is_common,
         display_order: parseInt(formData.display_order) || 0,
         sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
         sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
@@ -1004,6 +1007,7 @@ const Admin = () => {
             : "",
           image: imageUrl,
           is_featured: formData.is_featured,
+          is_common: formData.is_common,
           display_order: parseInt(formData.display_order) || 0,
           sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
           sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
@@ -1114,6 +1118,7 @@ const Admin = () => {
       category: product.category,
       image: product.image,
       is_featured: product.is_featured || false,
+      is_common: (product as any).is_common || false,
       display_order: (product.display_order || 0).toString(),
       saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
       saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
