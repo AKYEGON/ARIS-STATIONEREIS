@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, ChevronRight, GraduationCap, BookOpen, Package, Search, Layers } from "lucide-react";
+import { ArrowLeft, ChevronRight, GraduationCap, BookOpen, Package, Search, Layers, Sparkles, ChevronDown } from "lucide-react";
 import { icons } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/contexts/CartContext";
@@ -72,6 +72,7 @@ const Students = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [showCommon, setShowCommon] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -215,13 +216,20 @@ const Students = () => {
   );
 
   const filteredProducts = useMemo(() => {
-    if (activeYearId === "all") return products;
-    return products.filter((p) => {
-      const tags = productYears[p.id];
-      if (!tags || tags.size === 0) return true; // untagged = all years
-      return tags.has(activeYearId);
-    });
+    const base = activeYearId === "all"
+      ? products
+      : products.filter((p) => {
+          const tags = productYears[p.id];
+          if (!tags || tags.size === 0) return true; // untagged = all years
+          return tags.has(activeYearId);
+        });
+    return base.filter((p) => !p.is_common);
   }, [products, productYears, activeYearId]);
+
+  const commonProducts = useMemo(
+    () => products.filter((p) => p.is_common),
+    [products]
+  );
 
   const filteredBundles = useMemo(() => {
     if (activeYearId === "all") return courseBundles;
