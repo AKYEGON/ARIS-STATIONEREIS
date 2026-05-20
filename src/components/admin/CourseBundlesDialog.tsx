@@ -260,8 +260,12 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
           </div>
           <div>
-            <Label>Image URL *</Label>
-            <Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." />
+            <Label className="flex items-center gap-1.5"><Images className="h-3.5 w-3.5" /> Bundle Image</Label>
+            <CourseBundleImagePicker
+              imageUrl={form.image}
+              selectedProducts={products.filter((p) => items.some((it) => it.product_id === p.id))}
+              onChange={(url) => setForm({ ...form, image: url })}
+            />
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
