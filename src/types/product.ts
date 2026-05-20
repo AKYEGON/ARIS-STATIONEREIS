@@ -32,6 +32,7 @@ export interface Product {
   category: string;
   categories?: string[];
   is_featured?: boolean;
+  is_common?: boolean;
   display_order?: number;
   slug?: string;
   saleStartsAt?: string | null;

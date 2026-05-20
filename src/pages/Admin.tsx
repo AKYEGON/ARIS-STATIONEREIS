@@ -173,6 +173,7 @@ const Admin = () => {
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
+    is_common: false,
     display_order: "0",
     saleStartsAt: "",
     saleEndsAt: ""
@@ -286,6 +287,7 @@ const Admin = () => {
         category: p.category,
         image: p.image,
         is_featured: p.is_featured,
+        is_common: (p as any).is_common || false,
         display_order: p.display_order,
         media: (p.product_media || []).map((m: any) => ({
           ...m,
@@ -800,6 +802,7 @@ const Admin = () => {
       category: "",
       image: "/placeholder.svg",
       is_featured: false,
+      is_common: false,
       display_order: "0",
       saleStartsAt: "",
       saleEndsAt: ""
@@ -879,6 +882,7 @@ const Admin = () => {
         category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
+        is_common: formData.is_common,
         display_order: parseInt(formData.display_order) || 0,
         sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
         sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
@@ -1004,6 +1008,7 @@ const Admin = () => {
             : "",
           image: imageUrl,
           is_featured: formData.is_featured,
+          is_common: formData.is_common,
           display_order: parseInt(formData.display_order) || 0,
           sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
           sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
@@ -1114,6 +1119,7 @@ const Admin = () => {
       category: product.category,
       image: product.image,
       is_featured: product.is_featured || false,
+      is_common: (product as any).is_common || false,
       display_order: (product.display_order || 0).toString(),
       saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
       saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
@@ -1858,6 +1864,17 @@ const Admin = () => {
                         id="is_featured"
                         checked={formData.is_featured}
                         onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
+                      <div>
+                        <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
+                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                      </div>
+                      <Switch
+                        id="is_common"
+                        checked={formData.is_common}
+                        onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                       />
                     </div>
                     <div>
@@ -2820,6 +2837,17 @@ const Admin = () => {
                   id="edit-is_featured"
                   checked={formData.is_featured}
                   onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
+                <div>
+                  <Label htmlFor="edit-is_common" className="font-medium">Common stationery</Label>
+                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                </div>
+                <Switch
+                  id="edit-is_common"
+                  checked={formData.is_common}
+                  onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                 />
               </div>
               <div>
