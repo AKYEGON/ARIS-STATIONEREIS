@@ -287,6 +287,7 @@ const Admin = () => {
         category: p.category,
         image: p.image,
         is_featured: p.is_featured,
+        is_common: (p as any).is_common || false,
         display_order: p.display_order,
         media: (p.product_media || []).map((m: any) => ({
           ...m,
@@ -1865,6 +1866,17 @@ const Admin = () => {
                         onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
                       />
                     </div>
+                    <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
+                      <div>
+                        <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
+                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                      </div>
+                      <Switch
+                        id="is_common"
+                        checked={formData.is_common}
+                        onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
+                      />
+                    </div>
                     <div>
                       <Label htmlFor="display_order">Display Order (Position out of {products.length} products)</Label>
                       <Input
@@ -2825,6 +2837,17 @@ const Admin = () => {
                   id="edit-is_featured"
                   checked={formData.is_featured}
                   onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
+                <div>
+                  <Label htmlFor="edit-is_common" className="font-medium">Common stationery</Label>
+                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                </div>
+                <Switch
+                  id="edit-is_common"
+                  checked={formData.is_common}
+                  onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                 />
               </div>
               <div>

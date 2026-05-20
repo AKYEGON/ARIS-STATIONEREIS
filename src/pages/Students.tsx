@@ -187,6 +187,7 @@ const Students = () => {
           category: p.category,
           stock: p.stock ?? 0,
           is_featured: p.is_featured,
+          is_common: p.is_common || false,
           slug: p.slug,
           media: (p.media || []).sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
           variants: (p.variants || [])
