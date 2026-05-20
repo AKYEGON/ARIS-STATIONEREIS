@@ -538,7 +538,37 @@ const Students = () => {
                       return (
                         <Card key={b.id} className="overflow-hidden border-2 hover:border-primary/40 transition-all">
                           <div className="aspect-video bg-muted relative">
-                            <img src={b.image} alt={b.name} className="w-full h-full object-cover" />
+                            {b.image ? (
+                              <img src={b.image} alt={b.name} className="w-full h-full object-cover" />
+                            ) : (
+                              (() => {
+                                const imgs = (b.items || [])
+                                  .map((it) => products.find((p) => p.id === it.product_id)?.image)
+                                  .filter(Boolean)
+                                  .slice(0, 4) as string[];
+                                if (imgs.length === 0) {
+                                  return (
+                                    <div className="w-full h-full flex items-center justify-center text-xs text-muted-foreground">
+                                      Bundle
+                                    </div>
+                                  );
+                                }
+                                return (
+                                  <div className="grid grid-cols-2 gap-0.5 w-full h-full bg-white">
+                                    {imgs.map((src, i) => (
+                                      <div
+                                        key={i}
+                                        className={`bg-white flex items-center justify-center overflow-hidden ${
+                                          imgs.length === 3 && i === 0 ? "row-span-2" : ""
+                                        }`}
+                                      >
+                                        <img src={src} alt="" className="w-full h-full object-contain p-1" />
+                                      </div>
+                                    ))}
+                                  </div>
+                                );
+                              })()
+                            )}
                             {yearLabel && (
                               <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground uppercase text-[10px]">
                                 {yearLabel}

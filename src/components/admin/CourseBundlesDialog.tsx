@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Pencil, Trash2, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Images } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -113,7 +114,7 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
   const save = async () => {
     if (!form.name.trim()) return toast.error("Name required");
     if (!form.course_year_id) return toast.error("Pick a year first (add years on the course)");
-    if (!form.image.trim()) return toast.error("Image URL required");
+    // image is optional — empty means auto-collage from included products
     if (items.length === 0) return toast.error("Add at least one product to the bundle");
 
     const payload = {
@@ -259,8 +260,12 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
           </div>
           <div>
-            <Label>Image URL *</Label>
-            <Input value={form.image} onChange={(e) => setForm({ ...form, image: e.target.value })} placeholder="https://..." />
+            <Label className="flex items-center gap-1.5"><Images className="h-3.5 w-3.5" /> Bundle Image</Label>
+            <CourseBundleImagePicker
+              imageUrl={form.image}
+              selectedProducts={products.filter((p) => items.some((it) => it.product_id === p.id))}
+              onChange={(url) => setForm({ ...form, image: url })}
+            />
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div>
@@ -313,5 +318,116 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
         </div>
       </DialogContent>
     </Dialog>
+  );
+};
+
+// ---- Course bundle image picker (auto-collage / pick from products / paste URL) ----
+const CourseBundleImagePicker = ({
+  imageUrl,
+  selectedProducts,
+  onChange,
+}: {
+  imageUrl: string;
+  selectedProducts: ProductLite[];
+  onChange: (url: string) => void;
+}) => {
+  const isFromProduct = !!imageUrl && selectedProducts.some((p) => p.image === imageUrl);
+  const initialMode: "auto" | "pick" | "url" = !imageUrl
+    ? "auto"
+    : isFromProduct
+      ? "pick"
+      : "url";
+  const [mode, setMode] = useState<"auto" | "pick" | "url">(initialMode);
+
+  const collageImgs = selectedProducts.map((p) => p.image).filter(Boolean).slice(0, 4);
+
+  return (
+    <div className="space-y-2">
+      <RadioGroup
+        value={mode}
+        onValueChange={(v) => {
+          const m = v as typeof mode;
+          setMode(m);
+          if (m === "auto") onChange("");
+        }}
+        className="flex flex-wrap gap-3 text-xs"
+      >
+        <div className="flex items-center gap-1.5">
+          <RadioGroupItem value="auto" id="cb-auto" />
+          <Label htmlFor="cb-auto" className="cursor-pointer font-normal">Auto-collage from products</Label>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <RadioGroupItem value="pick" id="cb-pick" />
+          <Label htmlFor="cb-pick" className="cursor-pointer font-normal">Pick a product image</Label>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <RadioGroupItem value="url" id="cb-url" />
+          <Label htmlFor="cb-url" className="cursor-pointer font-normal">Paste URL</Label>
+        </div>
+      </RadioGroup>
+
+      {mode === "auto" && (
+        <div>
+          <p className="text-xs text-muted-foreground mb-1.5">
+            A 2×2 collage of the included products' images will be shown automatically.
+          </p>
+          {collageImgs.length === 0 ? (
+            <p className="text-[11px] text-amber-600">Add products below first to preview the collage.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-0.5 w-32 h-32 bg-white border rounded overflow-hidden">
+              {collageImgs.map((src, i) => (
+                <div
+                  key={i}
+                  className={`bg-white flex items-center justify-center overflow-hidden ${
+                    collageImgs.length === 3 && i === 0 ? "row-span-2" : ""
+                  }`}
+                >
+                  <img src={src} alt="" className="w-full h-full object-contain p-0.5" />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {mode === "pick" && (
+        <>
+          {selectedProducts.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Add products below first, then pick one image.</p>
+          ) : (
+            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+              {selectedProducts.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onChange(p.image)}
+                  className={`border-2 rounded overflow-hidden aspect-square bg-white transition ${
+                    imageUrl === p.image
+                      ? "border-primary ring-2 ring-primary/30"
+                      : "border-border hover:border-primary/50"
+                  }`}
+                  title={p.name}
+                >
+                  <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1" />
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {mode === "url" && (
+        <>
+          <Input
+            value={imageUrl}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="https://..."
+          />
+          {imageUrl && (
+            <img src={imageUrl} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded border" />
+          )}
+        </>
+      )}
+    </div>
   );
 };
