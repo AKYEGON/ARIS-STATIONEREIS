@@ -625,6 +625,40 @@ const Students = () => {
                   ))}
                 </div>
               )}
+
+              {/* Common stationery — collapsed by default */}
+              {commonProducts.length > 0 && (
+                <div className="mt-10 pt-6 border-t-2 border-dashed border-border">
+                  <button
+                    onClick={() => setShowCommon((v) => !v)}
+                    className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-primary/5 hover:bg-primary/10 border-2 border-primary/20 hover:border-primary/40 transition-all group"
+                  >
+                    <div className="flex items-center gap-3 text-left">
+                      <div className="bg-primary/10 text-primary p-2.5 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <Sparkles className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight">
+                          Common Stationery
+                        </h3>
+                        <p className="text-xs text-muted-foreground">
+                          {showCommon ? "Hide" : "Show"} pens, books & essentials used across all courses · {commonProducts.length} item{commonProducts.length === 1 ? "" : "s"}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronDown
+                      className={`h-5 w-5 text-primary shrink-0 transition-transform ${showCommon ? "rotate-180" : ""}`}
+                    />
+                  </button>
+                  {showCommon && (
+                    <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                      {commonProducts.map((p) => (
+                        <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
