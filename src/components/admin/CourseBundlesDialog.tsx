@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Pencil, Trash2, Package } from "lucide-react";
+import { Plus, Pencil, Trash2, Package, Images } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -113,7 +114,7 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
   const save = async () => {
     if (!form.name.trim()) return toast.error("Name required");
     if (!form.course_year_id) return toast.error("Pick a year first (add years on the course)");
-    if (!form.image.trim()) return toast.error("Image URL required");
+    // image is optional — empty means auto-collage from included products
     if (items.length === 0) return toast.error("Add at least one product to the bundle");
 
     const payload = {
