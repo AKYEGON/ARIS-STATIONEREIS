@@ -927,6 +927,7 @@ export type Database = {
           display_order: number
           id: string
           image: string
+          is_common: boolean
           is_featured: boolean
           name: string
           original_price: number | null
@@ -945,6 +946,7 @@ export type Database = {
           display_order?: number
           id?: string
           image: string
+          is_common?: boolean
           is_featured?: boolean
           name: string
           original_price?: number | null
@@ -963,6 +965,7 @@ export type Database = {
           display_order?: number
           id?: string
           image?: string
+          is_common?: boolean
           is_featured?: boolean
           name?: string
           original_price?: number | null
