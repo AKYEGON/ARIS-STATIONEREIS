@@ -111,6 +111,7 @@ const Students = () => {
       setCourseBundles([]);
       setProductYears({});
       setActiveYearId("all");
+      setShowCommon(false);
       return;
     }
     const loadCourseData = async () => {
