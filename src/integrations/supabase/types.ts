@@ -247,7 +247,22 @@ export type Database = {
           product_id?: string
           quantity?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "course_bundle_items_course_bundle_id_fkey"
+            columns: ["course_bundle_id"]
+            isOneToOne: false
+            referencedRelation: "course_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_bundle_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_bundles: {
         Row: {
@@ -292,7 +307,22 @@ export type Database = {
           original_total_price?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "course_bundles_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_bundles_course_year_id_fkey"
+            columns: ["course_year_id"]
+            isOneToOne: false
+            referencedRelation: "course_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_product_years: {
         Row: {

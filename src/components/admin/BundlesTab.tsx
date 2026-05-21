@@ -65,6 +65,23 @@ export const BundlesTab = ({
     return original - bundlePrice;
   };
 
+  const calculateCostTotal = () => {
+    return selectedProducts.reduce((total, sp) => {
+      const product = products.find(p => p.id === sp.product_id);
+      return total + (product ? (Number(product.costPrice) || 0) * sp.quantity : 0);
+    }, 0);
+  };
+
+  const calculateProfit = () => {
+    const bundlePrice = parseFloat(formData.bundle_price) || 0;
+    return bundlePrice - calculateCostTotal();
+  };
+
+  const calculateMargin = () => {
+    const bundlePrice = parseFloat(formData.bundle_price) || 0;
+    return bundlePrice > 0 ? (calculateProfit() / bundlePrice) * 100 : 0;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -220,9 +237,15 @@ export const BundlesTab = ({
                 <Label>Active</Label>
               </div>
               {selectedProducts.length > 0 && (
-                <div className="p-4 bg-muted rounded">
-                  <p>Original Total: KSh {calculateOriginalTotal().toFixed(2)}</p>
-                  <p className="text-green-600 font-bold">Savings: KSh {calculateSavings().toFixed(2)}</p>
+                <div className="p-4 bg-muted rounded text-sm space-y-1">
+                  <div className="flex justify-between"><span>Original Total</span><span>KSh {calculateOriginalTotal().toFixed(0)}</span></div>
+                  <div className="flex justify-between"><span>Bundle Price</span><span>KSh {(parseFloat(formData.bundle_price) || 0).toFixed(0)}</span></div>
+                  <div className="flex justify-between text-green-600"><span>Customer Savings</span><span>KSh {calculateSavings().toFixed(0)}</span></div>
+                  <div className="flex justify-between"><span>Total Cost</span><span>KSh {calculateCostTotal().toFixed(0)}</span></div>
+                  <div className={`flex justify-between font-bold ${calculateProfit() >= 0 ? "text-green-700" : "text-destructive"}`}>
+                    <span>Profit / Margin</span>
+                    <span>KSh {calculateProfit().toFixed(0)} · {calculateMargin().toFixed(1)}%</span>
+                  </div>
                 </div>
               )}
               <Button onClick={onSave} className="w-full">
