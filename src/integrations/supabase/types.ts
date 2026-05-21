@@ -1241,6 +1241,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      adjust_variant_stock: {
+        Args: {
+          p_change: number
+          p_notes?: string
+          p_reason: string
+          p_variant_id: string
+        }
+        Returns: undefined
+      }
       calculate_product_profit: {
         Args: { product_id: string }
         Returns: number
