@@ -36,6 +36,7 @@ interface ProductLite {
   name: string;
   image: string;
   price: number;
+  cost_price: number;
 }
 
 interface BundleItem {
@@ -75,7 +76,7 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
     const [{ data: yrs }, { data: bs }, { data: ps }] = await Promise.all([
       supabase.from("course_years").select("id, label").eq("course_id", courseId).order("display_order"),
       supabase.from("course_bundles").select("*").eq("course_id", courseId).order("display_order"),
-      supabase.from("products").select("id, name, image, price").order("name"),
+      supabase.from("products").select("id, name, image, price, cost_price").order("name"),
     ]);
     setYears((yrs as Year[]) || []);
     setBundles((bs as CourseBundle[]) || []);
