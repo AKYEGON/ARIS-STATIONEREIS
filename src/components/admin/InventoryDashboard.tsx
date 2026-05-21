@@ -126,7 +126,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
 
     try {
       const { error } = selectedVariant
-        ? await supabase.rpc("adjust_variant_stock" as any, {
+        ? await supabase.rpc("adjust_variant_stock", {
             p_variant_id: selectedVariant.id,
             p_change: quantity,
             p_reason: adjustmentForm.reason,
