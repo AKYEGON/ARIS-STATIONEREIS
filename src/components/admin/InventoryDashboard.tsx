@@ -7,10 +7,21 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Minus, Package, AlertTriangle, Search } from "lucide-react";
+import { Plus, Minus, Package, AlertTriangle, Search, ChevronDown, ChevronRight, Layers } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { smartMatch } from "@/lib/smart-search";
+
+interface Variant {
+  id: string;
+  product_id: string;
+  variant_type: string;
+  variant_value: string;
+  price: number;
+  cost_price: number;
+  stock: number;
+  is_active: boolean;
+}
 
 interface Product {
   id: string;
@@ -20,6 +31,7 @@ interface Product {
   cost_price: number;
   stock: number;
   category: string;
+  variants?: Variant[];
 }
 
 interface StockMovement {
@@ -39,9 +51,11 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [adjustmentForm, setAdjustmentForm] = useState({
     quantity: "",
     reason: "purchase" as "purchase" | "damage" | "sale" | "correction" | "return",
@@ -69,11 +83,15 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
     try {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("*, variants:product_variants(*)")
         .order("name");
 
       if (error) throw error;
-      setProducts(data || []);
+      const shaped = (data || []).map((p: any) => ({
+        ...p,
+        variants: (p.variants || []).filter((v: any) => v.is_active),
+      }));
+      setProducts(shaped);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("Failed to load inventory");
@@ -107,29 +125,38 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
     }
 
     try {
-      const { error } = await supabase.rpc("adjust_stock", {
-        p_product_id: selectedProduct.id,
-        p_change: quantity,
-        p_reason: adjustmentForm.reason,
-        p_notes: adjustmentForm.notes || null
-      });
+      const { error } = selectedVariant
+        ? await supabase.rpc("adjust_variant_stock", {
+            p_variant_id: selectedVariant.id,
+            p_change: quantity,
+            p_reason: adjustmentForm.reason,
+            p_notes: adjustmentForm.notes || null,
+          })
+        : await supabase.rpc("adjust_stock", {
+            p_product_id: selectedProduct.id,
+            p_change: quantity,
+            p_reason: adjustmentForm.reason,
+            p_notes: adjustmentForm.notes || null,
+          });
 
       if (error) throw error;
 
       toast.success("Stock adjusted successfully");
       setIsAdjustDialogOpen(false);
       setAdjustmentForm({ quantity: "", reason: "purchase", notes: "" });
+      setSelectedVariant(null);
       fetchProducts();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adjusting stock:", error);
-      toast.error("Failed to adjust stock");
+      toast.error(error?.message || "Failed to adjust stock");
     }
   };
 
-  const openAdjustDialog = (product: Product, isIncrease: boolean) => {
+  const openAdjustDialog = (product: Product, isIncrease: boolean, variant?: Variant) => {
     setSelectedProduct(product);
+    setSelectedVariant(variant || null);
     setAdjustmentForm({
-      quantity: isIncrease ? "" : "",
+      quantity: "",
       reason: isIncrease ? "purchase" : "damage",
       notes: ""
     });
@@ -138,25 +165,40 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
 
   const openHistoryDialog = (product: Product) => {
     setSelectedProduct(product);
+    setSelectedVariant(null);
     fetchStockMovements(product.id);
     setIsHistoryDialogOpen(true);
   };
 
-  const calculateProfit = (price: number, costPrice: number) => {
-    return price - costPrice;
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
-  const getTotalInventoryValue = () => {
-    return products.reduce((sum, p) => sum + (p.cost_price * p.stock), 0);
-  };
+  const effectiveStock = (p: Product) =>
+    p.variants && p.variants.length > 0
+      ? p.variants.reduce((s, v) => s + (v.stock || 0), 0)
+      : p.stock;
 
-  const getProjectedRevenue = () => {
-    return products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-  };
+  const effectiveCostValue = (p: Product) =>
+    p.variants && p.variants.length > 0
+      ? p.variants.reduce((s, v) => s + (v.cost_price || 0) * (v.stock || 0), 0)
+      : (p.cost_price || 0) * p.stock;
 
-  const getProjectedProfit = () => {
-    return products.reduce((sum, p) => sum + ((p.price - (p.cost_price || 0)) * p.stock), 0);
-  };
+  const effectiveRevenueValue = (p: Product) =>
+    p.variants && p.variants.length > 0
+      ? p.variants.reduce((s, v) => s + (v.price || 0) * (v.stock || 0), 0)
+      : p.price * p.stock;
+
+  const calculateProfit = (price: number, costPrice: number) => price - costPrice;
+
+  const getTotalInventoryValue = () => products.reduce((s, p) => s + effectiveCostValue(p), 0);
+  const getProjectedRevenue = () => products.reduce((s, p) => s + effectiveRevenueValue(p), 0);
+  const getProjectedProfit = () => products.reduce((s, p) => s + (effectiveRevenueValue(p) - effectiveCostValue(p)), 0);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -177,7 +219,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-lg sm:text-2xl font-bold">
-              {products.reduce((sum, p) => sum + p.stock, 0)}
+              {products.reduce((sum, p) => sum + effectiveStock(p), 0)}
             </div>
           </CardContent>
         </Card>
@@ -243,31 +285,54 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => {
+                  const hasVariants = (product.variants?.length || 0) > 0;
+                  const totalStock = effectiveStock(product);
+                  const lowStock = totalStock <= 5;
                   const profit = calculateProfit(product.price, product.cost_price);
                   const marginPct = product.price > 0 ? (profit / product.price) * 100 : 0;
+                  const isExpanded = expanded.has(product.id);
                   return (
+                    <>
                     <TableRow key={product.id}>
                       <TableCell className="p-2 sm:p-4">
                         <div className="flex items-center gap-2 sm:gap-3">
-                          <img 
-                            src={product.image} 
+                          {hasVariants ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpand(product.id)}
+                              className="p-0.5 -ml-1 rounded hover:bg-muted"
+                              aria-label="Toggle variants"
+                            >
+                              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            </button>
+                          ) : (
+                            <span className="w-4" />
+                          )}
+                          <img
+                            src={product.image}
                             alt={product.name}
                             className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded"
                           />
                           <div>
                             <div className="font-medium text-xs sm:text-sm line-clamp-1">{product.name}</div>
-                            <div className="text-[10px] sm:text-sm text-muted-foreground hidden xs:block">{product.category}</div>
+                            <div className="text-[10px] sm:text-sm text-muted-foreground hidden xs:flex items-center gap-1">
+                              {product.category}
+                              {hasVariants && (
+                                <Badge variant="secondary" className="text-[9px] py-0 h-4 gap-0.5">
+                                  <Layers className="h-2.5 w-2.5" />
+                                  {product.variants!.length} options
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="p-2 sm:p-4">
                         <div className="flex items-center gap-1">
-                          <span className={`text-xs sm:text-sm ${product.stock <= 5 ? "text-destructive font-bold" : ""}`}>
-                            {product.stock}
+                          <span className={`text-xs sm:text-sm ${lowStock ? "text-destructive font-bold" : ""}`}>
+                            {totalStock}
                           </span>
-                          {product.stock <= 5 && (
-                            <AlertTriangle className="h-3 w-3 text-destructive" />
-                          )}
+                          {lowStock && <AlertTriangle className="h-3 w-3 text-destructive" />}
                         </div>
                       </TableCell>
                       {userRole === 'admin' && (
@@ -288,7 +353,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                       )}
                       <TableCell className="text-right p-2 sm:p-4">
                         <div className="flex justify-end gap-1 sm:gap-2">
-                          {(userRole === 'admin' || userRole === 'manager') && (
+                          {(userRole === 'admin' || userRole === 'manager') && !hasVariants && (
                             <>
                               <Button
                                 size="icon"
@@ -308,6 +373,16 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                               </Button>
                             </>
                           )}
+                          {(userRole === 'admin' || userRole === 'manager') && hasVariants && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleExpand(product.id)}
+                              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2"
+                            >
+                              {isExpanded ? "Hide" : "Variants"}
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
@@ -319,6 +394,54 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                         </div>
                       </TableCell>
                     </TableRow>
+                    {hasVariants && isExpanded && product.variants!.map((v) => {
+                      const vLow = v.stock <= 5;
+                      const vProfit = (v.price || 0) - (v.cost_price || 0);
+                      const vMargin = v.price > 0 ? (vProfit / v.price) * 100 : 0;
+                      return (
+                        <TableRow key={v.id} className="bg-muted/30">
+                          <TableCell className="p-2 sm:p-4 pl-8 sm:pl-12">
+                            <div className="text-[11px] sm:text-xs">
+                              <span className="text-muted-foreground">{v.variant_type}:</span>{" "}
+                              <span className="font-medium">{v.variant_value}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-2 sm:p-4">
+                            <div className="flex items-center gap-1">
+                              <span className={`text-xs ${vLow ? "text-destructive font-bold" : ""}`}>{v.stock}</span>
+                              {vLow && <AlertTriangle className="h-3 w-3 text-destructive" />}
+                            </div>
+                          </TableCell>
+                          {userRole === 'admin' && (
+                            <TableCell className="hidden sm:table-cell text-xs">KSh {(v.cost_price || 0).toFixed(0)}</TableCell>
+                          )}
+                          <TableCell className="hidden md:table-cell text-xs">KSh {(v.price || 0).toFixed(0)}</TableCell>
+                          {userRole === 'admin' && (
+                            <TableCell className="p-2 sm:p-4">
+                              <div className="flex flex-col leading-tight">
+                                <span className={`text-xs font-medium ${vProfit > 0 ? "text-green-600" : "text-red-600"}`}>
+                                  KSh {vProfit.toFixed(0)}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">{vMargin.toFixed(0)}%</span>
+                              </div>
+                            </TableCell>
+                          )}
+                          <TableCell className="text-right p-2 sm:p-4">
+                            {(userRole === 'admin' || userRole === 'manager') && (
+                              <div className="flex justify-end gap-1">
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => openAdjustDialog(product, true, v)}>
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => openAdjustDialog(product, false, v)}>
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    </>
                   );
                 })}
               </TableBody>
@@ -328,14 +451,23 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
       </Card>
 
       {/* Stock Adjustment Dialog */}
-      <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
+      <Dialog open={isAdjustDialogOpen} onOpenChange={(o) => { setIsAdjustDialogOpen(o); if (!o) setSelectedVariant(null); }}>
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-sm sm:text-base">Adjust Stock - {selectedProduct?.name}</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">
+              Adjust Stock — {selectedProduct?.name}
+              {selectedVariant && (
+                <span className="block text-xs font-normal text-muted-foreground mt-0.5">
+                  {selectedVariant.variant_type}: {selectedVariant.variant_value}
+                </span>
+              )}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label className="text-xs sm:text-sm">Current Stock: {selectedProduct?.stock}</Label>
+              <Label className="text-xs sm:text-sm">
+                Current Stock: {selectedVariant ? selectedVariant.stock : selectedProduct?.stock}
+              </Label>
             </div>
             <div>
               <Label htmlFor="quantity" className="text-xs sm:text-sm">Quantity Change (+ or -)</Label>

@@ -40,6 +40,7 @@ import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
+import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 
 interface OrderItem {
   product_name: string;
@@ -68,12 +69,12 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "offers", "team", "settings"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "offers", "team", "settings"];
     case 'manager':
       return ["orders", "inventory", "sales", "settings"];
     case 'employee':
@@ -1649,6 +1650,13 @@ const Admin = () => {
                   <span className="xs:hidden">Bndl</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("offers") && (
+                <TabsTrigger value="offers" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Offers</span>
+                  <span className="xs:hidden">Off</span>
+                </TabsTrigger>
+              )}
               {visibleTabs.includes("inventory") && (
                 <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                   <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -2204,6 +2212,13 @@ const Admin = () => {
               onDelete={handleDeleteBundle}
             />
           </TabsContent>
+
+          {/* Offers (BOGO) Tab */}
+          <TabsContent value="offers">
+            <BogoOffersTab />
+          </TabsContent>
+
+
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">

@@ -19,26 +19,36 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
 
   return (
     <Card className="overflow-hidden h-full flex flex-col group hover:shadow-lg transition-all">
-      <div className="relative aspect-square bg-white flex items-center justify-center p-2 overflow-hidden">
-        <Badge className="absolute top-1.5 left-1.5 z-10 bg-purple-600 text-[10px] flex items-center gap-1">
+      <div className="relative aspect-square bg-white flex items-center justify-center overflow-hidden">
+        <Badge className="absolute top-1.5 left-1.5 z-20 bg-purple-600 text-[10px] flex items-center gap-1 shadow">
           <Gift className="h-3 w-3" />
           BOGO
         </Badge>
         {sameProduct ? (
-          <img
-            src={p.image}
-            alt={p.name}
-            loading="lazy"
-            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-          />
+          <>
+            <img
+              src={p.image}
+              alt={p.name}
+              loading="lazy"
+              className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
+            />
+            <span className="absolute bottom-1.5 right-1.5 z-20 text-[10px] font-extrabold text-white bg-emerald-600 rounded-full px-2 py-0.5 shadow">
+              +{offer.get_quantity} FREE
+            </span>
+          </>
         ) : (
-          <div className="grid grid-cols-2 gap-1 w-full h-full">
-            <div className="bg-white flex items-center justify-center overflow-hidden">
-              <img src={p.image} alt={p.name} className="w-full h-full object-contain p-1" />
+          <div className="grid grid-cols-2 gap-0.5 w-full h-full">
+            <div className="bg-white flex items-center justify-center overflow-hidden p-1.5 relative">
+              <span className="absolute top-1 left-1 text-[9px] font-bold text-white bg-slate-700 rounded px-1 py-0.5">
+                BUY ×{offer.buy_quantity}
+              </span>
+              <img src={p.image} alt={p.name} className="w-full h-full object-contain" />
             </div>
-            <div className="bg-emerald-50 flex items-center justify-center overflow-hidden relative">
-              <span className="absolute top-1 right-1 text-[8px] font-bold text-emerald-700 bg-emerald-200 rounded px-1">FREE</span>
-              <img src={freeP?.image} alt={freeP?.name} className="w-full h-full object-contain p-1" />
+            <div className="bg-emerald-50 flex items-center justify-center overflow-hidden p-1.5 relative">
+              <span className="absolute top-1 left-1 text-[9px] font-extrabold text-white bg-emerald-600 rounded px-1.5 py-0.5 shadow">
+                FREE ×{offer.get_quantity}
+              </span>
+              <img src={freeP?.image} alt={freeP?.name} className="w-full h-full object-contain" />
             </div>
           </div>
         )}
