@@ -285,31 +285,54 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
               </TableHeader>
               <TableBody>
                 {filteredProducts.map((product) => {
+                  const hasVariants = (product.variants?.length || 0) > 0;
+                  const totalStock = effectiveStock(product);
+                  const lowStock = totalStock <= 5;
                   const profit = calculateProfit(product.price, product.cost_price);
                   const marginPct = product.price > 0 ? (profit / product.price) * 100 : 0;
+                  const isExpanded = expanded.has(product.id);
                   return (
+                    <>
                     <TableRow key={product.id}>
                       <TableCell className="p-2 sm:p-4">
                         <div className="flex items-center gap-2 sm:gap-3">
-                          <img 
-                            src={product.image} 
+                          {hasVariants ? (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpand(product.id)}
+                              className="p-0.5 -ml-1 rounded hover:bg-muted"
+                              aria-label="Toggle variants"
+                            >
+                              {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                            </button>
+                          ) : (
+                            <span className="w-4" />
+                          )}
+                          <img
+                            src={product.image}
                             alt={product.name}
                             className="w-8 h-8 sm:w-10 sm:h-10 object-cover rounded"
                           />
                           <div>
                             <div className="font-medium text-xs sm:text-sm line-clamp-1">{product.name}</div>
-                            <div className="text-[10px] sm:text-sm text-muted-foreground hidden xs:block">{product.category}</div>
+                            <div className="text-[10px] sm:text-sm text-muted-foreground hidden xs:flex items-center gap-1">
+                              {product.category}
+                              {hasVariants && (
+                                <Badge variant="secondary" className="text-[9px] py-0 h-4 gap-0.5">
+                                  <Layers className="h-2.5 w-2.5" />
+                                  {product.variants!.length} options
+                                </Badge>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="p-2 sm:p-4">
                         <div className="flex items-center gap-1">
-                          <span className={`text-xs sm:text-sm ${product.stock <= 5 ? "text-destructive font-bold" : ""}`}>
-                            {product.stock}
+                          <span className={`text-xs sm:text-sm ${lowStock ? "text-destructive font-bold" : ""}`}>
+                            {totalStock}
                           </span>
-                          {product.stock <= 5 && (
-                            <AlertTriangle className="h-3 w-3 text-destructive" />
-                          )}
+                          {lowStock && <AlertTriangle className="h-3 w-3 text-destructive" />}
                         </div>
                       </TableCell>
                       {userRole === 'admin' && (
@@ -330,7 +353,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                       )}
                       <TableCell className="text-right p-2 sm:p-4">
                         <div className="flex justify-end gap-1 sm:gap-2">
-                          {(userRole === 'admin' || userRole === 'manager') && (
+                          {(userRole === 'admin' || userRole === 'manager') && !hasVariants && (
                             <>
                               <Button
                                 size="icon"
@@ -350,6 +373,16 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                               </Button>
                             </>
                           )}
+                          {(userRole === 'admin' || userRole === 'manager') && hasVariants && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => toggleExpand(product.id)}
+                              className="h-7 sm:h-8 text-[10px] sm:text-xs px-2"
+                            >
+                              {isExpanded ? "Hide" : "Variants"}
+                            </Button>
+                          )}
                           <Button
                             size="sm"
                             variant="outline"
@@ -361,6 +394,54 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                         </div>
                       </TableCell>
                     </TableRow>
+                    {hasVariants && isExpanded && product.variants!.map((v) => {
+                      const vLow = v.stock <= 5;
+                      const vProfit = (v.price || 0) - (v.cost_price || 0);
+                      const vMargin = v.price > 0 ? (vProfit / v.price) * 100 : 0;
+                      return (
+                        <TableRow key={v.id} className="bg-muted/30">
+                          <TableCell className="p-2 sm:p-4 pl-8 sm:pl-12">
+                            <div className="text-[11px] sm:text-xs">
+                              <span className="text-muted-foreground">{v.variant_type}:</span>{" "}
+                              <span className="font-medium">{v.variant_value}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="p-2 sm:p-4">
+                            <div className="flex items-center gap-1">
+                              <span className={`text-xs ${vLow ? "text-destructive font-bold" : ""}`}>{v.stock}</span>
+                              {vLow && <AlertTriangle className="h-3 w-3 text-destructive" />}
+                            </div>
+                          </TableCell>
+                          {userRole === 'admin' && (
+                            <TableCell className="hidden sm:table-cell text-xs">KSh {(v.cost_price || 0).toFixed(0)}</TableCell>
+                          )}
+                          <TableCell className="hidden md:table-cell text-xs">KSh {(v.price || 0).toFixed(0)}</TableCell>
+                          {userRole === 'admin' && (
+                            <TableCell className="p-2 sm:p-4">
+                              <div className="flex flex-col leading-tight">
+                                <span className={`text-xs font-medium ${vProfit > 0 ? "text-green-600" : "text-red-600"}`}>
+                                  KSh {vProfit.toFixed(0)}
+                                </span>
+                                <span className="text-[10px] text-muted-foreground">{vMargin.toFixed(0)}%</span>
+                              </div>
+                            </TableCell>
+                          )}
+                          <TableCell className="text-right p-2 sm:p-4">
+                            {(userRole === 'admin' || userRole === 'manager') && (
+                              <div className="flex justify-end gap-1">
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => openAdjustDialog(product, true, v)}>
+                                  <Plus className="h-3 w-3" />
+                                </Button>
+                                <Button size="icon" variant="outline" className="h-7 w-7" onClick={() => openAdjustDialog(product, false, v)}>
+                                  <Minus className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                    </>
                   );
                 })}
               </TableBody>
