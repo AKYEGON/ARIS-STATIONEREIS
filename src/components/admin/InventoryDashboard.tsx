@@ -219,7 +219,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
           </CardHeader>
           <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
             <div className="text-lg sm:text-2xl font-bold">
-              {products.reduce((sum, p) => sum + p.stock, 0)}
+              {products.reduce((sum, p) => sum + effectiveStock(p), 0)}
             </div>
           </CardContent>
         </Card>
