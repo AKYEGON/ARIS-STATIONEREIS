@@ -454,11 +454,20 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
       <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-sm sm:text-base">Adjust Stock - {selectedProduct?.name}</DialogTitle>
+            <DialogTitle className="text-sm sm:text-base">
+              Adjust Stock — {selectedProduct?.name}
+              {selectedVariant && (
+                <span className="block text-xs font-normal text-muted-foreground mt-0.5">
+                  {selectedVariant.variant_type}: {selectedVariant.variant_value}
+                </span>
+              )}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-3 sm:space-y-4">
             <div>
-              <Label className="text-xs sm:text-sm">Current Stock: {selectedProduct?.stock}</Label>
+              <Label className="text-xs sm:text-sm">
+                Current Stock: {selectedVariant ? selectedVariant.stock : selectedProduct?.stock}
+              </Label>
             </div>
             <div>
               <Label htmlFor="quantity" className="text-xs sm:text-sm">Quantity Change (+ or -)</Label>
