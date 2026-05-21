@@ -2213,6 +2213,13 @@ const Admin = () => {
             />
           </TabsContent>
 
+          {/* Offers (BOGO) Tab */}
+          <TabsContent value="offers">
+            <BogoOffersTab />
+          </TabsContent>
+
+
+
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
             <PullToRefresh onRefresh={handleRefreshOrders} className="space-y-6">
