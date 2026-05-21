@@ -40,6 +40,7 @@ import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
+import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 
 interface OrderItem {
   product_name: string;
