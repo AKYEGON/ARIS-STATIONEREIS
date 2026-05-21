@@ -312,6 +312,33 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
             </ScrollArea>
           </div>
 
+          {items.length > 0 && (() => {
+            const originalTotal = items.reduce((s, it) => {
+              const p = products.find((pp) => pp.id === it.product_id);
+              return s + (p ? Number(p.price) * it.quantity : 0);
+            }, 0);
+            const costTotal = items.reduce((s, it) => {
+              const p = products.find((pp) => pp.id === it.product_id);
+              return s + (p ? Number(p.cost_price || 0) * it.quantity : 0);
+            }, 0);
+            const price = Number(form.bundle_price) || 0;
+            const savings = originalTotal - price;
+            const profit = price - costTotal;
+            const margin = price > 0 ? (profit / price) * 100 : 0;
+            return (
+              <div className="p-3 bg-muted rounded text-xs space-y-1">
+                <div className="flex justify-between"><span>Original total</span><span>KSh {originalTotal.toFixed(0)}</span></div>
+                <div className="flex justify-between"><span>Bundle price</span><span>KSh {price.toFixed(0)}</span></div>
+                <div className="flex justify-between text-green-600"><span>Customer savings</span><span>KSh {savings.toFixed(0)}</span></div>
+                <div className="flex justify-between"><span>Cost</span><span>KSh {costTotal.toFixed(0)}</span></div>
+                <div className={`flex justify-between font-semibold ${profit >= 0 ? "text-green-700" : "text-destructive"}`}>
+                  <span>Profit / Margin</span>
+                  <span>KSh {profit.toFixed(0)} · {margin.toFixed(1)}%</span>
+                </div>
+              </div>
+            );
+          })()}
+
           <div className="flex gap-2 pt-2">
             <Button variant="outline" onClick={() => setEditor(null)} className="flex-1">Back</Button>
             <Button onClick={save} className="flex-1">{editor.bundle ? "Save" : "Create"}</Button>
