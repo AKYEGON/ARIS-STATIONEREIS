@@ -83,11 +83,15 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
     try {
       const { data, error } = await supabase
         .from("products")
-        .select("*")
+        .select("*, variants:product_variants(*)")
         .order("name");
 
       if (error) throw error;
-      setProducts(data || []);
+      const shaped = (data || []).map((p: any) => ({
+        ...p,
+        variants: (p.variants || []).filter((v: any) => v.is_active),
+      }));
+      setProducts(shaped);
     } catch (error) {
       console.error("Error fetching products:", error);
       toast.error("Failed to load inventory");
@@ -121,29 +125,38 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
     }
 
     try {
-      const { error } = await supabase.rpc("adjust_stock", {
-        p_product_id: selectedProduct.id,
-        p_change: quantity,
-        p_reason: adjustmentForm.reason,
-        p_notes: adjustmentForm.notes || null
-      });
+      const { error } = selectedVariant
+        ? await supabase.rpc("adjust_variant_stock" as any, {
+            p_variant_id: selectedVariant.id,
+            p_change: quantity,
+            p_reason: adjustmentForm.reason,
+            p_notes: adjustmentForm.notes || null,
+          })
+        : await supabase.rpc("adjust_stock", {
+            p_product_id: selectedProduct.id,
+            p_change: quantity,
+            p_reason: adjustmentForm.reason,
+            p_notes: adjustmentForm.notes || null,
+          });
 
       if (error) throw error;
 
       toast.success("Stock adjusted successfully");
       setIsAdjustDialogOpen(false);
       setAdjustmentForm({ quantity: "", reason: "purchase", notes: "" });
+      setSelectedVariant(null);
       fetchProducts();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adjusting stock:", error);
-      toast.error("Failed to adjust stock");
+      toast.error(error?.message || "Failed to adjust stock");
     }
   };
 
-  const openAdjustDialog = (product: Product, isIncrease: boolean) => {
+  const openAdjustDialog = (product: Product, isIncrease: boolean, variant?: Variant) => {
     setSelectedProduct(product);
+    setSelectedVariant(variant || null);
     setAdjustmentForm({
-      quantity: isIncrease ? "" : "",
+      quantity: "",
       reason: isIncrease ? "purchase" : "damage",
       notes: ""
     });
@@ -152,25 +165,40 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
 
   const openHistoryDialog = (product: Product) => {
     setSelectedProduct(product);
+    setSelectedVariant(null);
     fetchStockMovements(product.id);
     setIsHistoryDialogOpen(true);
   };
 
-  const calculateProfit = (price: number, costPrice: number) => {
-    return price - costPrice;
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
-  const getTotalInventoryValue = () => {
-    return products.reduce((sum, p) => sum + (p.cost_price * p.stock), 0);
-  };
+  const effectiveStock = (p: Product) =>
+    p.variants && p.variants.length > 0
+      ? p.variants.reduce((s, v) => s + (v.stock || 0), 0)
+      : p.stock;
 
-  const getProjectedRevenue = () => {
-    return products.reduce((sum, p) => sum + (p.price * p.stock), 0);
-  };
+  const effectiveCostValue = (p: Product) =>
+    p.variants && p.variants.length > 0
+      ? p.variants.reduce((s, v) => s + (v.cost_price || 0) * (v.stock || 0), 0)
+      : (p.cost_price || 0) * p.stock;
 
-  const getProjectedProfit = () => {
-    return products.reduce((sum, p) => sum + ((p.price - (p.cost_price || 0)) * p.stock), 0);
-  };
+  const effectiveRevenueValue = (p: Product) =>
+    p.variants && p.variants.length > 0
+      ? p.variants.reduce((s, v) => s + (v.price || 0) * (v.stock || 0), 0)
+      : p.price * p.stock;
+
+  const calculateProfit = (price: number, costPrice: number) => price - costPrice;
+
+  const getTotalInventoryValue = () => products.reduce((s, p) => s + effectiveCostValue(p), 0);
+  const getProjectedRevenue = () => products.reduce((s, p) => s + effectiveRevenueValue(p), 0);
+  const getProjectedProfit = () => products.reduce((s, p) => s + (effectiveRevenueValue(p) - effectiveCostValue(p)), 0);
 
   return (
     <div className="space-y-4 sm:space-y-6">
