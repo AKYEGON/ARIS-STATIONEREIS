@@ -12,6 +12,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { smartMatch } from "@/lib/smart-search";
 
+interface Variant {
+  id: string;
+  product_id: string;
+  variant_type: string;
+  variant_value: string;
+  price: number;
+  cost_price: number;
+  stock: number;
+  is_active: boolean;
+}
+
 interface Product {
   id: string;
   name: string;
@@ -20,6 +31,7 @@ interface Product {
   cost_price: number;
   stock: number;
   category: string;
+  variants?: Variant[];
 }
 
 interface StockMovement {
@@ -39,9 +51,11 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<Variant | null>(null);
   const [isAdjustDialogOpen, setIsAdjustDialogOpen] = useState(false);
   const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
   const [stockMovements, setStockMovements] = useState<StockMovement[]>([]);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [adjustmentForm, setAdjustmentForm] = useState({
     quantity: "",
     reason: "purchase" as "purchase" | "damage" | "sale" | "correction" | "return",
