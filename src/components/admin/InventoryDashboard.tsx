@@ -451,7 +451,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
       </Card>
 
       {/* Stock Adjustment Dialog */}
-      <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
+      <Dialog open={isAdjustDialogOpen} onOpenChange={(o) => { setIsAdjustDialogOpen(o); if (!o) setSelectedVariant(null); }}>
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-base">
