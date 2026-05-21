@@ -40,6 +40,7 @@ import { CategoryManager } from "@/components/admin/CategoryManager";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
+import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 
 interface OrderItem {
   product_name: string;
@@ -68,12 +69,12 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "bundles", "offers", "team", "settings"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "team", "settings"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "bundles", "offers", "team", "settings"];
     case 'manager':
       return ["orders", "inventory", "sales", "settings"];
     case 'employee':
@@ -173,7 +174,10 @@ const Admin = () => {
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
-    display_order: "0"
+    is_common: false,
+    display_order: "0",
+    saleStartsAt: "",
+    saleEndsAt: ""
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -277,11 +281,14 @@ const Admin = () => {
         description: p.description || "",
         price: Number(p.price),
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        saleStartsAt: (p as any).sale_starts_at || null,
+        saleEndsAt: (p as any).sale_ends_at || null,
         costPrice: p.cost_price ? Number(p.cost_price) : 0,
         stock: p.stock || 0,
         category: p.category,
         image: p.image,
         is_featured: p.is_featured,
+        is_common: (p as any).is_common || false,
         display_order: p.display_order,
         media: (p.product_media || []).map((m: any) => ({
           ...m,
@@ -796,7 +803,10 @@ const Admin = () => {
       category: "",
       image: "/placeholder.svg",
       is_featured: false,
-      display_order: "0"
+      is_common: false,
+      display_order: "0",
+      saleStartsAt: "",
+      saleEndsAt: ""
     });
     setSelectedCategoryIds([]);
     setSelectedImageFile(null);
@@ -873,7 +883,10 @@ const Admin = () => {
         category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
-        display_order: parseInt(formData.display_order) || 0
+        is_common: formData.is_common,
+        display_order: parseInt(formData.display_order) || 0,
+        sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
+        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
       };
 
       console.log("Inserting product data:", productData);
@@ -996,7 +1009,10 @@ const Admin = () => {
             : "",
           image: imageUrl,
           is_featured: formData.is_featured,
-          display_order: parseInt(formData.display_order) || 0
+          is_common: formData.is_common,
+          display_order: parseInt(formData.display_order) || 0,
+          sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
+          sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
         })
         .eq("id", editingProduct.id);
 
@@ -1104,7 +1120,10 @@ const Admin = () => {
       category: product.category,
       image: product.image,
       is_featured: product.is_featured || false,
-      display_order: (product.display_order || 0).toString()
+      is_common: (product as any).is_common || false,
+      display_order: (product.display_order || 0).toString(),
+      saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
+      saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
     });
     setSelectedImageFile(null);
     setImageUrl(product.image);
@@ -1631,6 +1650,13 @@ const Admin = () => {
                   <span className="xs:hidden">Bndl</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("offers") && (
+                <TabsTrigger value="offers" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Offers</span>
+                  <span className="xs:hidden">Off</span>
+                </TabsTrigger>
+              )}
               {visibleTabs.includes("inventory") && (
                 <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                   <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -1768,7 +1794,7 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="originalPrice">Original Price (KSh)</Label>
+                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
                       <Input
                         id="originalPrice"
                         type="number"
@@ -1776,6 +1802,22 @@ const Admin = () => {
                         onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                         placeholder="Leave empty if no discount"
                       />
+                    </div>
+                    <div className="md:col-span-2 grid grid-cols-2 gap-3 p-3 rounded border border-dashed border-amber-400/40 bg-amber-50/40 dark:bg-amber-900/10">
+                      <div className="col-span-2">
+                        <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400">⚡ Flash Sale Window (optional)</Label>
+                        <p className="text-[10px] text-muted-foreground">Discount is only active in this time range. Leave empty for always-on discount.</p>
+                      </div>
+                      <div>
+                        <Label htmlFor="saleStartsAt" className="text-xs">Starts</Label>
+                        <Input id="saleStartsAt" type="datetime-local" value={formData.saleStartsAt}
+                          onChange={(e) => setFormData({...formData, saleStartsAt: e.target.value})} />
+                      </div>
+                      <div>
+                        <Label htmlFor="saleEndsAt" className="text-xs">Ends</Label>
+                        <Input id="saleEndsAt" type="datetime-local" value={formData.saleEndsAt}
+                          onChange={(e) => setFormData({...formData, saleEndsAt: e.target.value})} />
+                      </div>
                     </div>
                     <div>
                       <Label htmlFor="costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
@@ -1830,6 +1872,17 @@ const Admin = () => {
                         id="is_featured"
                         checked={formData.is_featured}
                         onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
+                      <div>
+                        <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
+                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                      </div>
+                      <Switch
+                        id="is_common"
+                        checked={formData.is_common}
+                        onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                       />
                     </div>
                     <div>
@@ -2159,6 +2212,13 @@ const Admin = () => {
               onDelete={handleDeleteBundle}
             />
           </TabsContent>
+
+          {/* Offers (BOGO) Tab */}
+          <TabsContent value="offers">
+            <BogoOffersTab />
+          </TabsContent>
+
+
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
@@ -2714,7 +2774,7 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-originalPrice">Original Price (KSh)</Label>
+                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
                 <Input
                   id="edit-originalPrice"
                   type="number"
@@ -2722,6 +2782,22 @@ const Admin = () => {
                   onChange={(e) => setFormData({...formData, originalPrice: e.target.value})}
                   placeholder="Leave empty if no discount"
                 />
+              </div>
+              <div className="grid grid-cols-2 gap-3 p-3 rounded border border-dashed border-amber-400/40 bg-amber-50/40 dark:bg-amber-900/10">
+                <div className="col-span-2">
+                  <Label className="text-xs font-semibold text-amber-700 dark:text-amber-400">⚡ Flash Sale Window (optional)</Label>
+                  <p className="text-[10px] text-muted-foreground">Discount is only active in this time range. Leave empty for always-on discount.</p>
+                </div>
+                <div>
+                  <Label htmlFor="edit-saleStartsAt" className="text-xs">Starts</Label>
+                  <Input id="edit-saleStartsAt" type="datetime-local" value={formData.saleStartsAt}
+                    onChange={(e) => setFormData({...formData, saleStartsAt: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit-saleEndsAt" className="text-xs">Ends</Label>
+                  <Input id="edit-saleEndsAt" type="datetime-local" value={formData.saleEndsAt}
+                    onChange={(e) => setFormData({...formData, saleEndsAt: e.target.value})} />
+                </div>
               </div>
               <div>
                 <Label htmlFor="edit-costPrice">Cost Price (KSh) {productVariants.length > 0 ? "(from variants)" : "*"}</Label>
@@ -2776,6 +2852,17 @@ const Admin = () => {
                   id="edit-is_featured"
                   checked={formData.is_featured}
                   onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
+                />
+              </div>
+              <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
+                <div>
+                  <Label htmlFor="edit-is_common" className="font-medium">Common stationery</Label>
+                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                </div>
+                <Switch
+                  id="edit-is_common"
+                  checked={formData.is_common}
+                  onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                 />
               </div>
               <div>

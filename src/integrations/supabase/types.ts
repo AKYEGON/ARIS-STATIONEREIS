@@ -67,6 +67,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bogo_offers: {
+        Row: {
+          buy_quantity: number
+          created_at: string
+          display_order: number
+          ends_at: string | null
+          free_product_id: string | null
+          get_quantity: number
+          id: string
+          is_active: boolean
+          name: string
+          product_id: string
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          buy_quantity?: number
+          created_at?: string
+          display_order?: number
+          ends_at?: string | null
+          free_product_id?: string | null
+          get_quantity?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          product_id: string
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          buy_quantity?: number
+          created_at?: string
+          display_order?: number
+          ends_at?: string | null
+          free_product_id?: string | null
+          get_quantity?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          product_id?: string
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bundle_items: {
         Row: {
           bundle_id: string
@@ -202,7 +247,22 @@ export type Database = {
           product_id?: string
           quantity?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "course_bundle_items_course_bundle_id_fkey"
+            columns: ["course_bundle_id"]
+            isOneToOne: false
+            referencedRelation: "course_bundles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_bundle_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_bundles: {
         Row: {
@@ -247,7 +307,22 @@ export type Database = {
           original_total_price?: number
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "course_bundles_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "course_bundles_course_year_id_fkey"
+            columns: ["course_year_id"]
+            isOneToOne: false
+            referencedRelation: "course_years"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       course_product_years: {
         Row: {
@@ -882,10 +957,13 @@ export type Database = {
           display_order: number
           id: string
           image: string
+          is_common: boolean
           is_featured: boolean
           name: string
           original_price: number | null
           price: number
+          sale_ends_at: string | null
+          sale_starts_at: string | null
           slug: string
           stock: number | null
           updated_at: string
@@ -898,10 +976,13 @@ export type Database = {
           display_order?: number
           id?: string
           image: string
+          is_common?: boolean
           is_featured?: boolean
           name: string
           original_price?: number | null
           price: number
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
           slug: string
           stock?: number | null
           updated_at?: string
@@ -914,10 +995,13 @@ export type Database = {
           display_order?: number
           id?: string
           image?: string
+          is_common?: boolean
           is_featured?: boolean
           name?: string
           original_price?: number | null
           price?: number
+          sale_ends_at?: string | null
+          sale_starts_at?: string | null
           slug?: string
           stock?: number | null
           updated_at?: string
@@ -1154,6 +1238,15 @@ export type Database = {
           p_notes?: string
           p_product_id: string
           p_reason: string
+        }
+        Returns: undefined
+      }
+      adjust_variant_stock: {
+        Args: {
+          p_change: number
+          p_notes?: string
+          p_reason: string
+          p_variant_id: string
         }
         Returns: undefined
       }

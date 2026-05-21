@@ -5,6 +5,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
 import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
+import SaleBadge, { isOnSale } from "./SaleBadge";
+import CountdownTimer from "./CountdownTimer";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -95,6 +97,14 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             }`}
           />
 
+          {/* Sale badge (top-left) */}
+          <SaleBadge
+            price={product.price}
+            originalPrice={product.originalPrice}
+            saleStartsAt={product.saleStartsAt}
+            saleEndsAt={product.saleEndsAt}
+          />
+
           {/* Gallery indicator badge */}
           {hasMultipleMedia && (
             <button
@@ -159,6 +169,9 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}
                 </p>
+                {product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
+                  <CountdownTimer endsAt={product.saleEndsAt} compact className="mt-0.5" />
+                )}
               </div>
             ) : (
               <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
