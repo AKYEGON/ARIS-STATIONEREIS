@@ -7,6 +7,8 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEO from "@/components/common/SEO";
 import ProductImageGallery from "@/components/cart/ProductImageGallery";
+import BogoFreebiesBanner from "@/components/cart/BogoFreebiesBanner";
+import { useEarnedBogos } from "@/hooks/use-bogo";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -52,6 +54,7 @@ const Cart = () => {
   const navigate = useNavigate();
   const [showCheckoutDialog, setShowCheckoutDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { earned: earnedBogos } = useEarnedBogos(cartItems);
 
   // Dynamic checkout options from database
   const [universities, setUniversities] = useState<{id: string; name: string}[]>([]);
