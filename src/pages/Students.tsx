@@ -14,6 +14,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Product, ProductVariant } from "@/types/product";
 import { Bundle } from "@/types/bundle";
 import ProductCard from "@/components/products/ProductCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { smartMatch as sharedSmartMatch } from "@/lib/smart-search";
 
 interface Faculty {
@@ -71,6 +72,7 @@ const Students = () => {
   const [activeYearId, setActiveYearId] = useState<string>("all");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [courseLoading, setCourseLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCommon, setShowCommon] = useState(false);
 
@@ -115,6 +117,7 @@ const Students = () => {
       return;
     }
     const loadCourseData = async () => {
+      setCourseLoading(true);
       const [{ data: cpRows }, { data: yearRows }, { data: bundleRows }] = await Promise.all([
         supabase
           .from("course_products")
@@ -203,6 +206,7 @@ const Students = () => {
       setYears((yearRows as CourseYear[]) || []);
       setCourseBundles(bundlesWithItems);
       setActiveYearId("all");
+      setCourseLoading(false);
     };
     loadCourseData();
   }, [courseId]);
@@ -498,6 +502,24 @@ const Students = () => {
                 </div>
               );
             })()
+          ) : courseLoading ? (
+            <div className="space-y-6">
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-20 rounded-full" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-56 rounded-lg" />
+                ))}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <Skeleton key={i} className="h-64 rounded-lg" />
+                ))}
+              </div>
+            </div>
           ) : (
             // Products + Bundles for selected course
             <>
