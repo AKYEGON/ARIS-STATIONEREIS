@@ -71,6 +71,7 @@ const Students = () => {
   const [activeYearId, setActiveYearId] = useState<string>("all");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [courseLoading, setCourseLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [showCommon, setShowCommon] = useState(false);
 
@@ -115,6 +116,7 @@ const Students = () => {
       return;
     }
     const loadCourseData = async () => {
+      setCourseLoading(true);
       const [{ data: cpRows }, { data: yearRows }, { data: bundleRows }] = await Promise.all([
         supabase
           .from("course_products")
@@ -203,6 +205,7 @@ const Students = () => {
       setYears((yearRows as CourseYear[]) || []);
       setCourseBundles(bundlesWithItems);
       setActiveYearId("all");
+      setCourseLoading(false);
     };
     loadCourseData();
   }, [courseId]);
