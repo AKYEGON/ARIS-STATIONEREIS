@@ -41,6 +41,7 @@ import { ProductVariantManager, ProductVariant } from "@/components/admin/Produc
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
 import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
+import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
 
 interface OrderItem {
   product_name: string;
@@ -2215,7 +2216,18 @@ const Admin = () => {
 
           {/* Offers (BOGO) Tab */}
           <TabsContent value="offers">
-            <BogoOffersTab />
+            <Tabs defaultValue="flash" className="space-y-4">
+              <TabsList className="w-full sm:w-auto justify-start overflow-x-auto">
+                <TabsTrigger value="flash" className="text-xs sm:text-sm">Flash Sales</TabsTrigger>
+                <TabsTrigger value="bogo" className="text-xs sm:text-sm">Buy X Get Y</TabsTrigger>
+              </TabsList>
+              <TabsContent value="flash">
+                <FlashSalesTab />
+              </TabsContent>
+              <TabsContent value="bogo">
+                <BogoOffersTab />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
 
