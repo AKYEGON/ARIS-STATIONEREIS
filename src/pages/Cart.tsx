@@ -228,6 +228,12 @@ const Cart = () => {
       message += `*ORDER ITEMS* (${totalItems} item${totalItems !== 1 ? 's' : ''})\n`;
       message += `────────────────────\n`;
       message += `${orderDetails}\n`;
+      if (earnedBogos.length > 0) {
+        message += `\n*FREE ITEMS UNLOCKED (BOGO)*\n`;
+        earnedBogos.forEach((e, i) => {
+          message += `${i + 1}. ${e.freeProduct.name} × ${e.freeQty}  —  FREE  (${e.offer.name})\n`;
+        });
+      }
       message += `────────────────────\n`;
       message += `*TOTAL: KSh ${serverTotal.toFixed(2)}*\n\n`;
       
@@ -494,6 +500,9 @@ const Cart = () => {
             </div>
             
             <div>
+              <div className="mb-2 sm:mb-3">
+                <BogoFreebiesBanner earned={earnedBogos} />
+              </div>
               <Card className="sticky top-16 sm:top-20 md:top-24 transition-all duration-300">
                 <CardContent className="p-2.5 sm:p-3 md:p-4 lg:p-6">
                   <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold mb-2 sm:mb-2.5 md:mb-3 lg:mb-4 text-primary">Order Summary</h2>
