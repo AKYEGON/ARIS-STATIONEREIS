@@ -1644,13 +1644,6 @@ const Admin = () => {
                   <span className="xs:hidden">Prod</span>
                 </TabsTrigger>
               )}
-              {visibleTabs.includes("bundles") && (
-                <TabsTrigger value="bundles" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Bundles</span>
-                  <span className="xs:hidden">Bndl</span>
-                </TabsTrigger>
-              )}
               {visibleTabs.includes("offers") && (
                 <TabsTrigger value="offers" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                   <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
