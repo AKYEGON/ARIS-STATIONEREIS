@@ -2163,59 +2163,59 @@ const Admin = () => {
           </TabsContent>
 
           {/* Bundles Tab */}
-          <TabsContent value="bundles">
-            <BundlesTab
-              bundles={bundlesList}
-              products={productList}
-              isDialogOpen={isBundleDialogOpen}
-              editingBundle={editingBundle}
-              formData={bundleFormData}
-              imagePreview={bundleImagePreview}
-              selectedProducts={selectedBundleProducts}
-              onOpenDialog={() => setIsBundleDialogOpen(true)}
-              onCloseDialog={() => {
-                setIsBundleDialogOpen(false);
-                setBundleFormData({ name: "", description: "", bundle_price: "", image: "", is_active: true, display_order: 0 });
-                setBundleImageFile(null);
-                setBundleImagePreview("");
-                setSelectedBundleProducts([]);
-                setEditingBundle(null);
-              }}
-              onFormChange={(field, value) => setBundleFormData({ ...bundleFormData, [field]: value })}
-              onImageChange={(file) => {
-                setBundleImageFile(file);
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => setBundleImagePreview(reader.result as string);
-                  reader.readAsDataURL(file);
-                }
-              }}
-              onProductAdd={(productId) => setSelectedBundleProducts([...selectedBundleProducts, { product_id: productId, quantity: 1 }])}
-              onProductRemove={(productId) => setSelectedBundleProducts(selectedBundleProducts.filter(sp => sp.product_id !== productId))}
-              onProductQuantityChange={(productId, quantity) => {
-                if (quantity <= 0) {
-                  setSelectedBundleProducts(selectedBundleProducts.filter(sp => sp.product_id !== productId));
-                } else {
-                  setSelectedBundleProducts(selectedBundleProducts.map(sp => 
-                    sp.product_id === productId ? { ...sp, quantity } : sp
-                  ));
-                }
-              }}
-              onSave={editingBundle ? handleUpdateBundle : handleAddBundle}
-              onEdit={openBundleEditDialog}
-              onDelete={handleDeleteBundle}
-            />
-          </TabsContent>
-
-          {/* Offers (BOGO) Tab */}
+          {/* Unified Offers Tab — Flash Sales, Bundles, BOGO in one place */}
           <TabsContent value="offers">
             <Tabs defaultValue="flash" className="space-y-4">
               <TabsList className="w-full sm:w-auto justify-start overflow-x-auto">
                 <TabsTrigger value="flash" className="text-xs sm:text-sm">Flash Sales</TabsTrigger>
+                <TabsTrigger value="bundles" className="text-xs sm:text-sm">Bundles</TabsTrigger>
                 <TabsTrigger value="bogo" className="text-xs sm:text-sm">Buy X Get Y</TabsTrigger>
               </TabsList>
               <TabsContent value="flash">
                 <FlashSalesTab />
+              </TabsContent>
+              <TabsContent value="bundles">
+                <BundlesTab
+                  bundles={bundlesList}
+                  products={productList}
+                  isDialogOpen={isBundleDialogOpen}
+                  editingBundle={editingBundle}
+                  formData={bundleFormData}
+                  imagePreview={bundleImagePreview}
+                  selectedProducts={selectedBundleProducts}
+                  onOpenDialog={() => setIsBundleDialogOpen(true)}
+                  onCloseDialog={() => {
+                    setIsBundleDialogOpen(false);
+                    setBundleFormData({ name: "", description: "", bundle_price: "", image: "", is_active: true, display_order: 0 });
+                    setBundleImageFile(null);
+                    setBundleImagePreview("");
+                    setSelectedBundleProducts([]);
+                    setEditingBundle(null);
+                  }}
+                  onFormChange={(field, value) => setBundleFormData({ ...bundleFormData, [field]: value })}
+                  onImageChange={(file) => {
+                    setBundleImageFile(file);
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => setBundleImagePreview(reader.result as string);
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  onProductAdd={(productId) => setSelectedBundleProducts([...selectedBundleProducts, { product_id: productId, quantity: 1 }])}
+                  onProductRemove={(productId) => setSelectedBundleProducts(selectedBundleProducts.filter(sp => sp.product_id !== productId))}
+                  onProductQuantityChange={(productId, quantity) => {
+                    if (quantity <= 0) {
+                      setSelectedBundleProducts(selectedBundleProducts.filter(sp => sp.product_id !== productId));
+                    } else {
+                      setSelectedBundleProducts(selectedBundleProducts.map(sp =>
+                        sp.product_id === productId ? { ...sp, quantity } : sp
+                      ));
+                    }
+                  }}
+                  onSave={editingBundle ? handleUpdateBundle : handleAddBundle}
+                  onEdit={openBundleEditDialog}
+                  onDelete={handleDeleteBundle}
+                />
               </TabsContent>
               <TabsContent value="bogo">
                 <BogoOffersTab />
