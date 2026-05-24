@@ -120,7 +120,6 @@ const Students = () => {
       return;
     }
     const loadCourseData = async () => {
-      setCourseLoading(true);
       const [{ data: cpRows }, { data: yearRows }, { data: bundleRows }] = await Promise.all([
         supabase
           .from("course_products")
