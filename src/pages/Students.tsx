@@ -72,7 +72,10 @@ const Students = () => {
   const [activeYearId, setActiveYearId] = useState<string>("all");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
-  const [courseLoading, setCourseLoading] = useState(false);
+  const [loadedCourseId, setLoadedCourseId] = useState<string | null>(null);
+  // True whenever the URL course doesn't yet match the loaded dataset — prevents
+  // a flash of the "No stationery" empty state on the first render after clicking a course.
+  const courseLoading = !!courseId && loadedCourseId !== courseId;
   const [search, setSearch] = useState("");
   const [showCommon, setShowCommon] = useState(false);
 
