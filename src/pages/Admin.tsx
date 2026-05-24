@@ -211,7 +211,7 @@ const Admin = () => {
       if (activeTab === "testimonials") {
         fetchTestimonials();
       }
-      if (activeTab === "bundles") {
+      if (activeTab === "offers") {
         fetchBundles();
       }
     }
