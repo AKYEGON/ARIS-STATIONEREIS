@@ -208,7 +208,7 @@ const Students = () => {
       setYears((yearRows as CourseYear[]) || []);
       setCourseBundles(bundlesWithItems);
       setActiveYearId("all");
-      setCourseLoading(false);
+      setLoadedCourseId(courseId);
     };
     loadCourseData();
   }, [courseId]);
