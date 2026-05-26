@@ -1,27 +1,34 @@
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Gift } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Gift, ShoppingCart } from "lucide-react";
 import { BogoOffer } from "@/types/bogo";
 import { Product } from "@/types/product";
 
 interface BogoCardProps {
   offer: BogoOffer;
-  onAddToCart?: (product: Product) => void;
+  onAddToCart: (product: Product) => void;
 }
 
 /**
  * Compact BOGO tile. The whole card links to the qualifying product's detail
- * page so customers can read terms and add to cart from there — no inline
- * "Add" button needed, which also removes the empty whitespace below the image.
+ * page; the inline Add button stops propagation so customers can also add to
+ * cart directly without leaving the listing.
  */
-const BogoCard = ({ offer }: BogoCardProps) => {
+const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
   const p = offer.product;
   const freeP = offer.free_product || offer.product;
   if (!p) return null;
 
   const sameProduct = !offer.free_product_id || offer.free_product_id === offer.product_id;
   const href = p.slug ? `/product/${p.slug}` : `/product/${p.id}`;
+
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToCart(p);
+  };
 
   return (
     <Link to={href} className="block h-full group">
@@ -66,6 +73,14 @@ const BogoCard = ({ offer }: BogoCardProps) => {
             Buy {offer.buy_quantity}, get {offer.get_quantity} {sameProduct ? "free" : `× ${freeP?.name} free`}
           </p>
           <p className="text-sm font-bold text-primary">KSh {p.price.toFixed(0)}</p>
+          <Button
+            size="sm"
+            className="w-full h-8 text-[11px] xs:text-xs mt-1.5 gap-1.5"
+            onClick={handleAdd}
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            Add {offer.buy_quantity} to cart
+          </Button>
         </div>
       </Card>
     </Link>
