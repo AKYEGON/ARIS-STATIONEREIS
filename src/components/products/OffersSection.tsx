@@ -86,11 +86,10 @@ const OffersSection = () => {
             .order("sale_ends_at", { ascending: true }),
           supabase
             .from("bogo_offers")
-            .select(
-              `*, product:products!bogo_offers_product_id_fkey(*), free_product:products!bogo_offers_free_product_id_fkey(*)`,
-            )
+            .select("*")
             .eq("is_active", true)
             .order("display_order", { ascending: false }),
+
         ]);
 
         const collected: OfferItem[] = [];
