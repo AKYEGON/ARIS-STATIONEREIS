@@ -120,9 +120,31 @@ const OffersSection = () => {
           }),
         );
 
-        // Stable interleave so the row visually mixes offer types instead of clumping.
-        collected.sort((a, b) => b.sort - a.sort);
-        setItems(collected.slice(0, 12));
+        // Group by kind, sort each group by display_order desc, then round-robin
+        // interleave so every offer type is represented near the start of the row.
+        const groups: Record<OfferItem["kind"], OfferItem[]> = {
+          flash: [],
+          bundle: [],
+          bogo: [],
+        };
+        collected.forEach((it) => groups[it.kind].push(it));
+        (Object.keys(groups) as OfferItem["kind"][]).forEach((k) =>
+          groups[k].sort((a, b) => b.sort - a.sort),
+        );
+        const interleaved: OfferItem[] = [];
+        const order: OfferItem["kind"][] = ["flash", "bundle", "bogo"];
+        let added = true;
+        while (added) {
+          added = false;
+          for (const k of order) {
+            const next = groups[k].shift();
+            if (next) {
+              interleaved.push(next);
+              added = true;
+            }
+          }
+        }
+        setItems(interleaved);
       } catch (e) {
         console.error("Error fetching offers:", e);
       } finally {
