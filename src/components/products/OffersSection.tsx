@@ -86,11 +86,10 @@ const OffersSection = () => {
             .order("sale_ends_at", { ascending: true }),
           supabase
             .from("bogo_offers")
-            .select(
-              `*, product:products!bogo_offers_product_id_fkey(*), free_product:products!bogo_offers_free_product_id_fkey(*)`,
-            )
+            .select("*")
             .eq("is_active", true)
             .order("display_order", { ascending: false }),
+
         ]);
 
         const collected: OfferItem[] = [];
@@ -107,18 +106,38 @@ const OffersSection = () => {
           .forEach((p) =>
             collected.push({ kind: "flash", id: `f-${p.id}`, sort: p.display_order ?? 0, product: p }),
           );
-        (bogoRes.data || []).forEach((o: any) =>
+        // Hydrate BOGO products via a separate query (bogo_offers has no FK
+        // constraints, so a PostgREST embed silently drops the rows).
+        const bogoRows: any[] = bogoRes.data || [];
+        const bogoProductIds = new Set<string>();
+        bogoRows.forEach((b) => {
+          if (b.product_id) bogoProductIds.add(b.product_id);
+          if (b.free_product_id) bogoProductIds.add(b.free_product_id);
+        });
+        let productById = new Map<string, Product>();
+        if (bogoProductIds.size > 0) {
+          const { data: bogoProducts } = await supabase
+            .from("products")
+            .select("*, media:product_media(*), variants:product_variants(*)")
+            .in("id", Array.from(bogoProductIds));
+          productById = new Map(
+            (bogoProducts || []).map((p: any) => [p.id, formatProduct(p)]),
+          );
+        }
+        bogoRows.forEach((o: any) => {
+          const product = productById.get(o.product_id);
+          if (!product) return;
+          const free_product = o.free_product_id
+            ? productById.get(o.free_product_id) || null
+            : null;
           collected.push({
             kind: "bogo",
             id: `g-${o.id}`,
             sort: o.display_order ?? 0,
-            offer: {
-              ...o,
-              product: o.product ? formatProduct(o.product) : undefined,
-              free_product: o.free_product ? formatProduct(o.free_product) : null,
-            },
-          }),
-        );
+            offer: { ...o, product, free_product },
+          });
+        });
+
 
         // Group by kind, sort each group by display_order desc, then round-robin
         // interleave so every offer type is represented near the start of the row.
