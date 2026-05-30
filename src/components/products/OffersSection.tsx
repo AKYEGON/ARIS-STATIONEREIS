@@ -200,7 +200,7 @@ const OffersSection = () => {
           onTouchEnd={() => setIsPaused(false)}
         >
           <div
-            className="flex gap-2 md:gap-4 w-max will-change-transform"
+            className="flex items-start gap-2 md:gap-4 w-max will-change-transform"
             style={{
               animation: `horizontal-marquee ${Math.max(items.length * 5, 20)}s linear infinite`,
               animationPlayState: isPaused ? "paused" : "running",
