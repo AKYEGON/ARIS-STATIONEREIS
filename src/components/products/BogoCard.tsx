@@ -79,17 +79,13 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
       </Link>
 
       <CardContent className="p-2 xs:p-3 sm:p-4 flex flex-1 flex-col">
-        <Link to={href} className="block hover:text-primary transition-colors">
-          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-1">
-            {compactTitle}
-          </h3>
-        </Link>
-
         <Collapsible open={showDetails} onOpenChange={setShowDetails} className="mb-1.5 xs:mb-2">
-          <div className="flex items-start justify-between gap-2">
-            <p className="min-h-[1rem] min-w-0 text-[10px] xs:text-xs text-muted-foreground font-medium line-clamp-1">
-              Buy {offer.buy_quantity}, get {offer.get_quantity} free
-            </p>
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <Link to={href} className="block min-w-0 flex-1 hover:text-primary transition-colors">
+              <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight line-clamp-1">
+                {compactTitle}
+              </h3>
+            </Link>
             <CollapsibleTrigger asChild>
               <button
                 type="button"
