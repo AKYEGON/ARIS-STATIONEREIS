@@ -76,22 +76,23 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
 
       <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
         <Link to={href} className="block hover:text-primary transition-colors">
-          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
+          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-1">
             {offer.name}
           </h3>
         </Link>
-        <p className="text-[10px] xs:text-xs text-emerald-700 font-medium mb-1.5 xs:mb-2 line-clamp-2">
-          Buy {offer.buy_quantity}, get {offer.get_quantity} {sameProduct ? "free" : `× ${freeP?.name} free`}
+        <p className="text-[10px] xs:text-xs text-emerald-700 font-medium mb-1.5 xs:mb-2 line-clamp-1">
+          Buy {offer.buy_quantity}, get {offer.get_quantity} free
         </p>
-        <div className="flex flex-col gap-0">
-          <p className="text-[10px] xs:text-xs text-muted-foreground leading-tight">
-            ~KSh {effectivePerUnit.toFixed(0)} each
-          </p>
-          <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-[10px] xs:text-xs text-muted-foreground line-through">
+            KSh {(p.price * totalQty).toFixed(0)}
+          </span>
+          <span className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
             KSh {(p.price * offer.buy_quantity).toFixed(0)}
-          </p>
+          </span>
         </div>
       </CardContent>
+
 
       <CardFooter className="p-2 xs:p-3 sm:p-4 pt-0">
         <Button
