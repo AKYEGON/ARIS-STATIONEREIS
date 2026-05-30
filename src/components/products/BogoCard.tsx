@@ -28,6 +28,7 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
   const href = `/product/${p.slug || p.id}`;
   const totalQty = offer.buy_quantity + offer.get_quantity;
   const savingsAmount = (freeP?.price ?? p.price) * offer.get_quantity;
+  const compactTitle = p.name;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -79,8 +80,8 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
 
       <CardContent className="p-2 xs:p-3 sm:p-4 flex flex-1 flex-col">
         <Link to={href} className="block hover:text-primary transition-colors">
-          <h3 className="min-h-[2.1rem] font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
-            {offer.name}
+          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-1">
+            {compactTitle}
           </h3>
         </Link>
 
@@ -102,6 +103,7 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
 
           <CollapsibleContent className="mt-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-[10px] xs:text-xs text-muted-foreground">
             <div className="space-y-1 leading-relaxed">
+              <p className="font-medium text-foreground">{offer.name}</p>
               <p>Pay for {offer.buy_quantity} × {p.name}</p>
               <p>Free item: {offer.get_quantity} × {freeP?.name || p.name}</p>
               <p>Approx. savings: KSh {savingsAmount.toFixed(0)}</p>
