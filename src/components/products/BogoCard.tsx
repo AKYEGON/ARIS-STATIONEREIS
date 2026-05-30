@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Gift, ShoppingCart } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown, Gift, ShoppingCart } from "lucide-react";
 import { BogoOffer } from "@/types/bogo";
 import { Product } from "@/types/product";
 
@@ -19,12 +21,13 @@ interface BogoCardProps {
 const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
   const p = offer.product;
   const freeP = offer.free_product || offer.product;
+  const [showDetails, setShowDetails] = useState(false);
   if (!p) return null;
 
   const sameProduct = !offer.free_product_id || offer.free_product_id === offer.product_id;
   const href = `/product/${p.slug || p.id}`;
   const totalQty = offer.buy_quantity + offer.get_quantity;
-  const effectivePerUnit = p.price * offer.buy_quantity / totalQty;
+  const savingsAmount = (freeP?.price ?? p.price) * offer.get_quantity;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -74,15 +77,38 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
         )}
       </Link>
 
-      <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
+      <CardContent className="p-2 xs:p-3 sm:p-4 flex flex-1 flex-col">
         <Link to={href} className="block hover:text-primary transition-colors">
-          <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-1">
+          <h3 className="min-h-[2.1rem] font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
             {offer.name}
           </h3>
         </Link>
-        <p className="text-[10px] xs:text-xs text-emerald-700 font-medium mb-1.5 xs:mb-2 line-clamp-1">
-          Buy {offer.buy_quantity}, get {offer.get_quantity} free
-        </p>
+
+        <Collapsible open={showDetails} onOpenChange={setShowDetails} className="mb-1.5 xs:mb-2">
+          <div className="flex items-start justify-between gap-2">
+            <p className="min-h-[1rem] min-w-0 text-[10px] xs:text-xs text-muted-foreground font-medium line-clamp-1">
+              Buy {offer.buy_quantity}, get {offer.get_quantity} free
+            </p>
+            <CollapsibleTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex shrink-0 items-center justify-center rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-primary"
+                aria-label={showDetails ? "Hide offer details" : "Show offer details"}
+              >
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showDetails ? "rotate-180" : ""}`} />
+              </button>
+            </CollapsibleTrigger>
+          </div>
+
+          <CollapsibleContent className="mt-2 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-[10px] xs:text-xs text-muted-foreground">
+            <div className="space-y-1 leading-relaxed">
+              <p>Pay for {offer.buy_quantity} × {p.name}</p>
+              <p>Free item: {offer.get_quantity} × {freeP?.name || p.name}</p>
+              <p>Approx. savings: KSh {savingsAmount.toFixed(0)}</p>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
+
         <div className="flex items-baseline gap-1.5">
           <span className="text-[10px] xs:text-xs text-muted-foreground line-through">
             KSh {(p.price * totalQty).toFixed(0)}
@@ -100,8 +126,8 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
           onClick={handleAdd}
         >
           <ShoppingCart className="mr-1.5 h-3.5 w-3.5 xs:h-4 xs:w-4" />
-          <span className="hidden xs:inline">Add {offer.buy_quantity} to Cart</span>
-          <span className="xs:hidden">Add {offer.buy_quantity}</span>
+          <span className="hidden xs:inline">Add to Cart</span>
+          <span className="xs:hidden">Add</span>
         </Button>
       </CardFooter>
     </Card>
