@@ -13,9 +13,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product, selectedVariant?: ProductVariant) => void;
+  compact?: boolean;
 }
 
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
@@ -118,18 +119,20 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </button>
           )}
         </Link>
-        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
+        <CardContent className={compact ? "p-2 xs:p-3 sm:p-4 flex flex-1 flex-col gap-1.5 min-h-0" : "p-2 xs:p-3 sm:p-4 flex-1"}>
           <Link to={`/product/${(product as any).slug || product.id}`} className="block hover:text-primary transition-colors">
-            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
+            <h3 className={`font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight ${compact ? "line-clamp-1" : "mb-1 line-clamp-2"}`}>
               {product.name}
             </h3>
           </Link>
-          <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
-            {product.description}
-          </p>
+          {!compact && (
+            <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
+              {product.description}
+            </p>
+          )}
 
           {/* Variant Selection */}
-          {hasVariants && Object.entries(variantGroups).map(([type, variants]) => (
+          {!compact && hasVariants && Object.entries(variantGroups).map(([type, variants]) => (
             <div key={type} className="mb-1.5">
               <p className="text-[9px] xs:text-[10px] text-muted-foreground font-medium mb-0.5">{type}</p>
               <div className="flex flex-wrap gap-1">
@@ -160,7 +163,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </div>
           ))}
 
-          <div>
+          <div className={compact ? "mt-auto" : ""}>
             {!selectedVariant && product.originalPrice && product.originalPrice > product.price ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
@@ -169,7 +172,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}
                 </p>
-                {product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
+                {!compact && product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
                   <CountdownTimer endsAt={product.saleEndsAt} compact className="mt-0.5" />
                 )}
               </div>

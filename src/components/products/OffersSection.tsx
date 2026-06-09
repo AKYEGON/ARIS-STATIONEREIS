@@ -211,13 +211,13 @@ const OffersSection = () => {
             {marquee.map((item, index) => (
               <div
                 key={`${item.id}-${index}`}
-                className="w-[150px] sm:w-[180px] md:w-[220px] lg:w-[240px] flex-shrink-0"
+                className="w-[150px] sm:w-[180px] md:w-[220px] lg:w-[240px] h-[260px] sm:h-[316px] md:h-[352px] lg:h-[372px] flex-shrink-0"
               >
                 {item.kind === "bundle" && (
                   <BundleCard bundle={item.bundle} onAddToCart={addBundleToCart} compact />
                 )}
                 {item.kind === "flash" && (
-                  <ProductCard product={item.product} onAddToCart={handleAddProduct} />
+                  <ProductCard product={item.product} onAddToCart={handleAddProduct} compact />
                 )}
                 {item.kind === "bogo" && (
                   <BogoCard offer={item.offer} onAddToCart={handleAddProduct} />
