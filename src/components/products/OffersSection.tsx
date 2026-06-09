@@ -217,7 +217,7 @@ const OffersSection = () => {
                   <BundleCard bundle={item.bundle} onAddToCart={addBundleToCart} compact />
                 )}
                 {item.kind === "flash" && (
-                  <ProductCard product={item.product} onAddToCart={handleAddProduct} />
+                  <ProductCard product={item.product} onAddToCart={handleAddProduct} compact />
                 )}
                 {item.kind === "bogo" && (
                   <BogoCard offer={item.offer} onAddToCart={handleAddProduct} />
