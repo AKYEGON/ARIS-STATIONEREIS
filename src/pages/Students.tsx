@@ -268,10 +268,16 @@ const Students = () => {
     return base.filter((p) => !p.is_common);
   }, [products, productYears, activeYearId]);
 
-  const commonProducts = useMemo(
-    () => products.filter((p) => p.is_common),
-    [products]
-  );
+  const filteredProducts = useMemo(() => {
+    const base = activeYearId === "all"
+      ? products
+      : products.filter((p) => {
+          const tags = productYears[p.id];
+          if (!tags || tags.size === 0) return true;
+          return tags.has(activeYearId);
+        });
+    return base.filter((p) => !p.is_common);
+  }, [products, productYears, activeYearId]);
 
   const filteredBundles = useMemo(() => {
     if (activeYearId === "all") return courseBundles;
