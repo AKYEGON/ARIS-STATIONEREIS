@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Bundle } from "@/types/bundle";
-import { ShoppingCart } from "lucide-react";
+import { Info, ShoppingCart } from "lucide-react";
 import BundleCollage from "./BundleCollage";
 
 interface BundleCardProps {
@@ -16,9 +17,11 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
   const savingsPercentage = Math.round((savings / bundle.original_total_price) * 100);
 
   if (compact) {
+    const itemCount = bundle.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
     return (
-      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col">
-        <div className="relative overflow-hidden aspect-[4/3]">
+      <Card className="group overflow-hidden transition-all duration-300 hover:shadow-md h-full flex flex-col shadow-sm">
+        <div className="relative overflow-hidden aspect-square bg-white">
           <Badge className="absolute top-1 right-1 z-10 bg-primary text-[9px] px-1.5 py-0">
             -{savingsPercentage}%
           </Badge>
@@ -26,29 +29,62 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
             <img
               src={bundle.image}
               alt={bundle.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="w-full h-full object-contain p-2 transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
             <BundleCollage bundle={bundle} />
           )}
         </div>
-        <CardContent className="p-2 flex flex-col flex-1">
-          <h3 className="font-semibold text-[11px] sm:text-xs mb-0.5 line-clamp-1">{bundle.name}</h3>
-          <div className="flex items-baseline gap-1 mb-1 mt-auto">
+        <CardContent className="p-2 xs:p-3 sm:p-4 flex flex-1 flex-col gap-1.5 min-h-0">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight line-clamp-1 min-w-0 flex-1">
+              {bundle.name}
+            </h3>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex shrink-0 items-center justify-center rounded-sm p-0.5 text-muted-foreground transition-colors hover:text-primary"
+                  aria-label="View bundle details"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-64 p-3 text-[11px] xs:text-xs">
+                <div className="space-y-1.5 leading-relaxed">
+                  <p className="font-medium text-foreground">{bundle.name}</p>
+                  {bundle.description && <p>{bundle.description}</p>}
+                  <p>{itemCount} item{itemCount === 1 ? "" : "s"} included</p>
+                  {bundle.items && bundle.items.length > 0 && (
+                    <p>
+                      Contains: {bundle.items.map((item) => `${item.product?.name || "Product"}${item.quantity > 1 ? ` ×${item.quantity}` : ""}`).join(", ")}
+                    </p>
+                  )}
+                  <p>Save KSh {savings.toFixed(0)}</p>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <p className="text-[10px] xs:text-xs text-muted-foreground line-clamp-1">
+            {itemCount} item{itemCount === 1 ? "" : "s"} included
+          </p>
+
+          <div className="mt-auto flex items-baseline gap-1">
             <span className="text-[9px] text-muted-foreground line-through">
               KSh {bundle.original_total_price.toFixed(0)}
             </span>
-            <span className="text-xs sm:text-sm font-bold text-primary">
+            <span className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
               KSh {bundle.bundle_price.toFixed(0)}
             </span>
           </div>
           <Button
             onClick={() => onAddToCart(bundle)}
-            size="sm"
-            className="w-full h-6 text-[10px] gap-1"
+            className="w-full h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm gap-1.5"
           >
-            <ShoppingCart className="h-3 w-3" />
-            Add
+            <ShoppingCart className="h-3.5 w-3.5 xs:h-4 xs:w-4" />
+            <span className="hidden xs:inline">Add to Cart</span>
+            <span className="xs:hidden">Add</span>
           </Button>
         </CardContent>
       </Card>
