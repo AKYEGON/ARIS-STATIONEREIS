@@ -109,6 +109,41 @@ const Students = () => {
   const smartMatch = (text: string, query: string) =>
     sharedSmartMatch(query, [text], { fuzzy: true });
 
+  const [commonProducts, setCommonProducts] = useState<Product[]>([]);
+
+  // Load common stationery once — independent of any specific course allocation
+  useEffect(() => {
+    const loadCommon = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("*, media:product_media(*), variants:product_variants(*)")
+        .eq("is_common", true)
+        .order("name", { ascending: true });
+      const mapped: Product[] = (data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || "",
+        price: Number(p.price),
+        originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        saleStartsAt: p.sale_starts_at || null,
+        saleEndsAt: p.sale_ends_at || null,
+        costPrice: p.cost_price ? Number(p.cost_price) : undefined,
+        image: p.image,
+        category: p.category,
+        stock: p.stock ?? 0,
+        is_featured: p.is_featured,
+        is_common: true,
+        slug: p.slug,
+        media: (p.media || []).sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+        variants: (p.variants || [])
+          .filter((v: any) => v.is_active !== false)
+          .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+      }));
+      setCommonProducts(mapped);
+    };
+    loadCommon();
+  }, []);
+
   useEffect(() => {
     if (!courseId) {
       setProducts([]);
