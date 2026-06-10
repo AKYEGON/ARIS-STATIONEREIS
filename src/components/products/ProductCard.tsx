@@ -133,7 +133,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
           )}
 
           {/* Variant Selection — compact dropdown keeps card height consistent */}
-          {!compact && hasVariants && Object.entries(variantGroups).map(([type, variants]) => {
+          {hasVariants && Object.entries(variantGroups).map(([type, variants]) => {
             const allOut = variants.every((v) => v.stock <= 0);
             return (
               <div key={type} className="mb-1.5">
