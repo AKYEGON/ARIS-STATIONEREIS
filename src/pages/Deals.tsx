@@ -198,8 +198,8 @@ const Deals = () => {
           {flashSales.length > 0 && (
             <section>
               <SectionHeader icon={Flame} title="Flash Sales" subtitle="Limited time — ending soon" color="bg-red-600" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-                {flashSales.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAdd} />)}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
+                {flashSales.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAdd} compact />)}
               </div>
             </section>
           )}
@@ -212,9 +212,9 @@ const Deals = () => {
                 subtitle="Everything you need for your course, in one pack"
                 color="bg-blue-600"
               />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {courseBundles.map(b => (
-                  <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} />
+                  <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />
                 ))}
               </div>
             </section>
@@ -223,8 +223,8 @@ const Deals = () => {
           {bundles.length > 0 && (
             <section>
               <SectionHeader icon={Package} title="Bundle Deals" subtitle="Save when you buy together" color="bg-primary" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-                {bundles.map(b => <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} />)}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
+                {bundles.map(b => <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />)}
               </div>
             </section>
           )}
@@ -232,7 +232,7 @@ const Deals = () => {
           {bogo.length > 0 && (
             <section>
               <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Auto-applied at checkout" color="bg-purple-600" />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bogo.map(o => <BogoCard key={o.id} offer={o} onAddToCart={handleAdd} />)}
               </div>
             </section>
