@@ -682,38 +682,54 @@ const Students = () => {
                 </div>
               )}
 
-              {/* Common stationery — collapsed by default */}
+              {/* Common stationery — clearly separated, collapsed by default */}
               {commonProducts.length > 0 && (
-                <div className="mt-10 pt-6 border-t-2 border-dashed border-border">
+                <section className="mt-12" aria-labelledby="common-stationery-heading">
+                  <div className="relative flex items-center mb-5">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="px-3 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+                      Also Available
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+
                   <button
                     onClick={() => setShowCommon((v) => !v)}
-                    className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-primary/5 hover:bg-primary/10 border-2 border-primary/20 hover:border-primary/40 transition-all group"
+                    aria-expanded={showCommon}
+                    aria-controls="common-stationery-grid"
+                    className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 rounded-lg bg-secondary/60 hover:bg-secondary border border-border hover:border-primary/40 transition-all text-left"
                   >
-                    <div className="flex items-center gap-3 text-left">
-                      <div className="bg-primary/10 text-primary p-2.5 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight">
-                          Common Stationery
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {showCommon ? "Hide" : "Show"} pens, books & essentials used across all courses · {commonProducts.length} item{commonProducts.length === 1 ? "" : "s"}
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <h3 id="common-stationery-heading" className="font-bold text-sm sm:text-base uppercase tracking-tight truncate">
+                        Common Stationery
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                        Pens, books & essentials used across all courses
+                      </p>
                     </div>
-                    <ChevronDown
-                      className={`h-5 w-5 text-primary shrink-0 transition-transform ${showCommon ? "rotate-180" : ""}`}
-                    />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="secondary" className="text-[10px] tabular-nums">
+                        {commonProducts.length}
+                      </Badge>
+                      <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-primary">
+                        {showCommon ? "Hide" : "Show"}
+                      </span>
+                    </div>
                   </button>
+
                   {showCommon && (
-                    <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-                      {commonProducts.map((p) => (
-                        <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
-                      ))}
+                    <div
+                      id="common-stationery-grid"
+                      className="mt-5 p-3 sm:p-4 rounded-lg bg-muted/30 border border-dashed border-border"
+                    >
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                        {commonProducts.map((p) => (
+                          <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
+                        ))}
+                      </div>
                     </div>
                   )}
-                </div>
+                </section>
               )}
             </>
           )}
