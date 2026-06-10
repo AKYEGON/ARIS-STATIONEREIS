@@ -132,37 +132,48 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             </p>
           )}
 
-          {/* Variant Selection */}
-          {!compact && hasVariants && Object.entries(variantGroups).map(([type, variants]) => (
-            <div key={type} className="mb-1.5">
-              <p className="text-[9px] xs:text-[10px] text-muted-foreground font-medium mb-0.5">{type}</p>
-              <div className="flex flex-wrap gap-1">
-                {variants.map((v) => {
-                  const outOfStock = v.stock <= 0;
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      disabled={outOfStock}
-                      onClick={() => !outOfStock && setSelectedVariant(selectedVariant?.id === v.id ? undefined : v)}
-                      className={`text-[9px] xs:text-[10px] px-1.5 py-0.5 rounded border transition-all ${
-                        outOfStock
-                          ? 'border-border/40 bg-muted/30 text-muted-foreground/50 cursor-not-allowed line-through'
-                          : selectedVariant?.id === v.id
-                            ? 'border-primary bg-primary/10 text-primary font-semibold'
-                            : 'border-border text-muted-foreground hover:border-primary/50'
-                      }`}
-                    >
-                      {v.variant_value}
-                      <span className="ml-0.5 opacity-70">
-                        {outOfStock ? 'Out of Stock' : `KSh ${v.price.toFixed(0)}`}
-                      </span>
-                    </button>
-                  );
-                })}
+          {/* Variant Selection — compact dropdown keeps card height consistent */}
+          {!compact && hasVariants && Object.entries(variantGroups).map(([type, variants]) => {
+            const allOut = variants.every((v) => v.stock <= 0);
+            return (
+              <div key={type} className="mb-1.5">
+                <Select
+                  value={selectedVariant && variants.some((v) => v.id === selectedVariant.id) ? selectedVariant.id : undefined}
+                  onValueChange={(val) => {
+                    const v = variants.find((x) => x.id === val);
+                    if (v && v.stock > 0) setSelectedVariant(v);
+                  }}
+                  disabled={allOut}
+                >
+                  <SelectTrigger className="h-7 xs:h-8 text-[10px] xs:text-xs px-2 py-0 bg-background">
+                    <SelectValue placeholder={allOut ? `${type} — Out of stock` : `Select ${type}`} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {variants.map((v) => {
+                      const outOfStock = v.stock <= 0;
+                      return (
+                        <SelectItem
+                          key={v.id}
+                          value={v.id}
+                          disabled={outOfStock}
+                          className="text-xs"
+                        >
+                          <span className="flex items-center justify-between gap-3 w-full">
+                            <span className={outOfStock ? "line-through text-muted-foreground" : "font-medium"}>
+                              {v.variant_value}
+                            </span>
+                            <span className="text-muted-foreground tabular-nums">
+                              {outOfStock ? "Out of stock" : `KSh ${v.price.toFixed(0)}`}
+                            </span>
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           <div className={compact ? "mt-auto" : ""}>
             {!selectedVariant && product.originalPrice && product.originalPrice > product.price ? (
