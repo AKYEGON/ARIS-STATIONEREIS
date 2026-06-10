@@ -7,6 +7,7 @@ import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
 import SaleBadge, { isOnSale } from "./SaleBadge";
 import CountdownTimer from "./CountdownTimer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
