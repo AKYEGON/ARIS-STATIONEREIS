@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
 import CategoryRotator from "@/components/products/CategoryRotator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { smartMatch } from "@/lib/smart-search";
 
 const PRODUCTS_PER_PAGE = 8;
@@ -363,8 +364,15 @@ const Index = () => {
       {/* Products Section */}
       <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
         {isLoading ? (
-          <div className="text-center py-12 sm:py-16">
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">Loading products...</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="aspect-square w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-1/2" />
+                <Skeleton className="h-8 w-full rounded-md" />
+              </div>
+            ))}
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-12 sm:py-16">

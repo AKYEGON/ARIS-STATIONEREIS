@@ -7,15 +7,17 @@ import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
 import SaleBadge, { isOnSale } from "./SaleBadge";
 import CountdownTimer from "./CountdownTimer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ProductCardProps {
   product: Product;
   onAddToCart: (product: Product, selectedVariant?: ProductVariant) => void;
+  compact?: boolean;
 }
 
-const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
+const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
@@ -118,49 +120,62 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
             </button>
           )}
         </Link>
-        <CardContent className="p-2 xs:p-3 sm:p-4 flex-1">
+        <CardContent className={compact ? "p-2 xs:p-3 sm:p-4 flex flex-1 flex-col gap-1.5 min-h-0" : "p-2 xs:p-3 sm:p-4 flex-1"}>
           <Link to={`/product/${(product as any).slug || product.id}`} className="block hover:text-primary transition-colors">
-            <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight mb-1 line-clamp-2">
+            <h3 className={`font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight ${compact ? "line-clamp-1" : "mb-1 line-clamp-2"}`}>
               {product.name}
             </h3>
           </Link>
-          <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
-            {product.description}
-          </p>
+          {!compact && (
+            <p className="text-[10px] xs:text-xs text-muted-foreground mb-1.5 xs:mb-2 line-clamp-1">
+              {product.description}
+            </p>
+          )}
 
-          {/* Variant Selection */}
-          {hasVariants && Object.entries(variantGroups).map(([type, variants]) => (
-            <div key={type} className="mb-1.5">
-              <p className="text-[9px] xs:text-[10px] text-muted-foreground font-medium mb-0.5">{type}</p>
-              <div className="flex flex-wrap gap-1">
-                {variants.map((v) => {
-                  const outOfStock = v.stock <= 0;
-                  return (
-                    <button
-                      key={v.id}
-                      type="button"
-                      disabled={outOfStock}
-                      onClick={() => !outOfStock && setSelectedVariant(selectedVariant?.id === v.id ? undefined : v)}
-                      className={`text-[9px] xs:text-[10px] px-1.5 py-0.5 rounded border transition-all ${
-                        outOfStock
-                          ? 'border-border/40 bg-muted/30 text-muted-foreground/50 cursor-not-allowed line-through'
-                          : selectedVariant?.id === v.id
-                            ? 'border-primary bg-primary/10 text-primary font-semibold'
-                            : 'border-border text-muted-foreground hover:border-primary/50'
-                      }`}
-                    >
-                      {v.variant_value}
-                      <span className="ml-0.5 opacity-70">
-                        {outOfStock ? 'Out of Stock' : `KSh ${v.price.toFixed(0)}`}
-                      </span>
-                    </button>
-                  );
-                })}
+          {/* Variant Selection — compact dropdown keeps card height consistent */}
+          {hasVariants && Object.entries(variantGroups).map(([type, variants]) => {
+            const allOut = variants.every((v) => v.stock <= 0);
+            return (
+              <div key={type} className="mb-1.5">
+                <Select
+                  value={selectedVariant && variants.some((v) => v.id === selectedVariant.id) ? selectedVariant.id : undefined}
+                  onValueChange={(val) => {
+                    const v = variants.find((x) => x.id === val);
+                    if (v && v.stock > 0) setSelectedVariant(v);
+                  }}
+                  disabled={allOut}
+                >
+                  <SelectTrigger className="h-7 xs:h-8 text-[10px] xs:text-xs px-2 py-0 bg-background">
+                    <SelectValue placeholder={allOut ? `${type} — Out of stock` : `Select ${type}`} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-60">
+                    {variants.map((v) => {
+                      const outOfStock = v.stock <= 0;
+                      return (
+                        <SelectItem
+                          key={v.id}
+                          value={v.id}
+                          disabled={outOfStock}
+                          className="text-xs"
+                        >
+                          <span className="flex items-center justify-between gap-3 w-full">
+                            <span className={outOfStock ? "line-through text-muted-foreground" : "font-medium"}>
+                              {v.variant_value}
+                            </span>
+                            <span className="text-muted-foreground tabular-nums">
+                              {outOfStock ? "Out of stock" : `KSh ${v.price.toFixed(0)}`}
+                            </span>
+                          </span>
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          <div>
+          <div className={compact ? "mt-auto" : ""}>
             {!selectedVariant && product.originalPrice && product.originalPrice > product.price ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
@@ -169,7 +184,7 @@ const ProductCard = ({ product, onAddToCart }: ProductCardProps) => {
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}
                 </p>
-                {product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
+                {!compact && product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
                   <CountdownTimer endsAt={product.saleEndsAt} compact className="mt-0.5" />
                 )}
               </div>

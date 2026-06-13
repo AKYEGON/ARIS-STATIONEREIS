@@ -14,6 +14,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Product, ProductVariant } from "@/types/product";
 import { Bundle } from "@/types/bundle";
 import ProductCard from "@/components/products/ProductCard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { smartMatch as sharedSmartMatch } from "@/lib/smart-search";
 
 interface Faculty {
@@ -71,6 +72,10 @@ const Students = () => {
   const [activeYearId, setActiveYearId] = useState<string>("all");
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
+  const [loadedCourseId, setLoadedCourseId] = useState<string | null>(null);
+  // True whenever the URL course doesn't yet match the loaded dataset — prevents
+  // a flash of the "No stationery" empty state on the first render after clicking a course.
+  const courseLoading = !!courseId && loadedCourseId !== courseId;
   const [search, setSearch] = useState("");
   const [showCommon, setShowCommon] = useState(false);
 
@@ -103,6 +108,41 @@ const Students = () => {
 
   const smartMatch = (text: string, query: string) =>
     sharedSmartMatch(query, [text], { fuzzy: true });
+
+  const [commonProducts, setCommonProducts] = useState<Product[]>([]);
+
+  // Load common stationery once — independent of any specific course allocation
+  useEffect(() => {
+    const loadCommon = async () => {
+      const { data } = await supabase
+        .from("products")
+        .select("*, media:product_media(*), variants:product_variants(*)")
+        .eq("is_common", true)
+        .order("name", { ascending: true });
+      const mapped: Product[] = (data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || "",
+        price: Number(p.price),
+        originalPrice: p.original_price ? Number(p.original_price) : undefined,
+        saleStartsAt: p.sale_starts_at || null,
+        saleEndsAt: p.sale_ends_at || null,
+        costPrice: p.cost_price ? Number(p.cost_price) : undefined,
+        image: p.image,
+        category: p.category,
+        stock: p.stock ?? 0,
+        is_featured: p.is_featured,
+        is_common: true,
+        slug: p.slug,
+        media: (p.media || []).sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+        variants: (p.variants || [])
+          .filter((v: any) => v.is_active !== false)
+          .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+      }));
+      setCommonProducts(mapped);
+    };
+    loadCommon();
+  }, []);
 
   useEffect(() => {
     if (!courseId) {
@@ -203,6 +243,7 @@ const Students = () => {
       setYears((yearRows as CourseYear[]) || []);
       setCourseBundles(bundlesWithItems);
       setActiveYearId("all");
+      setLoadedCourseId(courseId);
     };
     loadCourseData();
   }, [courseId]);
@@ -227,10 +268,6 @@ const Students = () => {
     return base.filter((p) => !p.is_common);
   }, [products, productYears, activeYearId]);
 
-  const commonProducts = useMemo(
-    () => products.filter((p) => p.is_common),
-    [products]
-  );
 
   const filteredBundles = useMemo(() => {
     if (activeYearId === "all") return courseBundles;
@@ -498,6 +535,24 @@ const Students = () => {
                 </div>
               );
             })()
+          ) : courseLoading ? (
+            <div className="space-y-6">
+              <div className="flex gap-2">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-8 w-20 rounded-full" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-56 rounded-lg" />
+                ))}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <Skeleton key={i} className="h-64 rounded-lg" />
+                ))}
+              </div>
+            </div>
           ) : (
             // Products + Bundles for selected course
             <>
@@ -627,38 +682,54 @@ const Students = () => {
                 </div>
               )}
 
-              {/* Common stationery — collapsed by default */}
+              {/* Common stationery — clearly separated, collapsed by default */}
               {commonProducts.length > 0 && (
-                <div className="mt-10 pt-6 border-t-2 border-dashed border-border">
+                <section className="mt-12" aria-labelledby="common-stationery-heading">
+                  <div className="relative flex items-center mb-5">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="px-3 text-[10px] sm:text-xs uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+                      Also Available
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+
                   <button
                     onClick={() => setShowCommon((v) => !v)}
-                    className="w-full flex items-center justify-between gap-3 p-4 rounded-xl bg-primary/5 hover:bg-primary/10 border-2 border-primary/20 hover:border-primary/40 transition-all group"
+                    aria-expanded={showCommon}
+                    aria-controls="common-stationery-grid"
+                    className="w-full flex items-center justify-between gap-3 px-4 sm:px-5 py-3 rounded-lg bg-secondary/60 hover:bg-secondary border border-border hover:border-primary/40 transition-all text-left"
                   >
-                    <div className="flex items-center gap-3 text-left">
-                      <div className="bg-primary/10 text-primary p-2.5 rounded-lg group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        <Sparkles className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-sm sm:text-base uppercase tracking-tight">
-                          Common Stationery
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {showCommon ? "Hide" : "Show"} pens, books & essentials used across all courses · {commonProducts.length} item{commonProducts.length === 1 ? "" : "s"}
-                        </p>
-                      </div>
+                    <div className="min-w-0">
+                      <h3 id="common-stationery-heading" className="font-bold text-sm sm:text-base uppercase tracking-tight truncate">
+                        Common Stationery
+                      </h3>
+                      <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
+                        Pens, books & essentials used across all courses
+                      </p>
                     </div>
-                    <ChevronDown
-                      className={`h-5 w-5 text-primary shrink-0 transition-transform ${showCommon ? "rotate-180" : ""}`}
-                    />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="secondary" className="text-[10px] tabular-nums">
+                        {commonProducts.length}
+                      </Badge>
+                      <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-primary">
+                        {showCommon ? "Hide" : "Show"}
+                      </span>
+                    </div>
                   </button>
+
                   {showCommon && (
-                    <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
-                      {commonProducts.map((p) => (
-                        <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
-                      ))}
+                    <div
+                      id="common-stationery-grid"
+                      className="mt-5 p-3 sm:p-4 rounded-lg bg-muted/30 border border-dashed border-border"
+                    >
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
+                        {commonProducts.map((p) => (
+                          <ProductCard key={p.id} product={p} onAddToCart={handleAddToCart} />
+                        ))}
+                      </div>
                     </div>
                   )}
-                </div>
+                </section>
               )}
             </>
           )}
