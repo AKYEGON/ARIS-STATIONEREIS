@@ -176,13 +176,18 @@ const ProductDetail = () => {
   const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS Stationeries`.slice(0, 70);
   const seoDescription = `Buy ${product.name} in Kenya at ARIS Stationeries Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
 
+  const fallbackDescription = `${product.name} available in Kenya at ARIS Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description,
+    description: product.description && product.description.trim().length > 20
+      ? product.description
+      : fallbackDescription,
     image: fullImage,
     sku: product.id,
+    mpn: product.id,
     category: product.category,
     brand: { "@type": "Brand", name: "ARIS Stationeries" },
     offers: {
@@ -191,10 +196,46 @@ const ProductDetail = () => {
       priceCurrency: "KES",
       price: displayPrice,
       availability: "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: "ARIS Stationeries" },
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "KES",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "KE",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "KE",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
     },
   };
 
