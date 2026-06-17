@@ -32,6 +32,7 @@ import { BundlesTab } from "@/components/admin/BundlesTab";
 import { ProductCoursesDialog } from "@/components/admin/ProductCoursesDialog";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
+import { SendReviewRequestsModal } from "@/components/admin/SendReviewRequestsModal";
 import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
