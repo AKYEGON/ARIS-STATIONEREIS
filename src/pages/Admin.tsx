@@ -43,6 +43,8 @@ import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
 import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
+import { ReviewRequestFunnel } from "@/components/admin/ReviewRequestFunnel";
+import { ShieldCheck } from "lucide-react";
 
 interface OrderItem {
   product_name: string;
@@ -149,6 +151,8 @@ const Admin = () => {
   const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
   const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
+  const [testimonialProductFilter, setTestimonialProductFilter] = useState<string>("all");
+  const [testimonialVerifiedOnly, setTestimonialVerifiedOnly] = useState(false);
   
   // Bundles state
   const [bundlesList, setBundlesList] = useState<Bundle[]>([]);
