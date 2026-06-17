@@ -481,6 +481,8 @@ const ProductDetail = () => {
           </div>
         </div>
 
+        <ProductReviews productId={product.id} onLoaded={setReviewStats} />
+
         {related.length > 0 && (
           <section className="pt-6 border-t">
             <h2 className="text-lg sm:text-xl font-bold mb-4">You may also like</h2>
