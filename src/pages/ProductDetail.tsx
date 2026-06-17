@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import SEO from "@/components/common/SEO";
 import ProductCard from "@/components/products/ProductCard";
 import ProductMediaViewer from "@/components/products/ProductMediaViewer";
+import ProductReviews from "@/components/products/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "lucide-react";
