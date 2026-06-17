@@ -1370,6 +1370,17 @@ export type Database = {
         Returns: undefined
       }
       slugify: { Args: { input: string }; Returns: string }
+      submit_review_by_token: {
+        Args: {
+          p_customer_name: string
+          p_customer_photo?: string
+          p_rating: number
+          p_review_text: string
+          p_token: string
+          p_video_url?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "admin" | "user" | "employee" | "manager" | "agent"
