@@ -185,7 +185,7 @@ const ProductDetail = () => {
 
   const fallbackDescription = `${product.name} available in Kenya at ARIS Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
 
-  const productSchema = {
+  const productSchema: any = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
@@ -245,6 +245,31 @@ const ProductDetail = () => {
       },
     },
   };
+
+  // Google requires both aggregateRating AND review for rich snippet eligibility.
+  // Threshold: 3+ approved reviews with valid ratings.
+  const ratedReviews = reviewStats.reviews.filter((r: any) => r.rating && r.rating > 0);
+  if (ratedReviews.length >= 3) {
+    productSchema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: reviewStats.average.toFixed(1),
+      reviewCount: ratedReviews.length,
+      bestRating: 5,
+      worstRating: 1,
+    };
+    productSchema.review = ratedReviews.slice(0, 10).map((r: any) => ({
+      "@type": "Review",
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      author: { "@type": "Person", name: r.customer_name || "Verified Customer" },
+      datePublished: r.created_at,
+      reviewBody: r.review_text || "",
+    }));
+  }
 
   const handleAddToCart = () => {
     if (hasVariants && !selectedVariant) {
