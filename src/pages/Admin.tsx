@@ -128,6 +128,7 @@ const Admin = () => {
   // Order status modal state
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; newStatus: string } | null>(null);
+  const [reviewRequestOrderId, setReviewRequestOrderId] = useState<string | null>(null);
   
   // Testimonials state
   const [testimonialsList, setTestimonialsList] = useState<CustomerTestimonial[]>([]);
@@ -3218,6 +3219,16 @@ const Admin = () => {
                     <span className="font-bold">Total</span>
                     <span className="font-bold text-primary text-lg">KSh {selectedOrder.total.toFixed(2)}</span>
                   </div>
+                  {['delivered', 'picked up', 'picked-up', 'pickedup'].includes(selectedOrder.status.toLowerCase()) && (
+                    <Button
+                      variant="outline"
+                      className="w-full mt-3 border-green-600 text-green-700 hover:bg-green-50"
+                      onClick={() => setReviewRequestOrderId(selectedOrder.id)}
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Send Review Requests
+                    </Button>
+                  )}
                 </div>
 
                 <div>
@@ -3364,6 +3375,23 @@ const Admin = () => {
               await updateOrderStatus(pendingStatusChange.orderId, pendingStatusChange.newStatus);
               setIsStatusModalOpen(false);
               setPendingStatusChange(null);
+            }}
+          />
+        );
+      })()}
+
+      {reviewRequestOrderId && (() => {
+        const o = ordersList.find(x => x.id === reviewRequestOrderId);
+        if (!o) return null;
+        return (
+          <SendReviewRequestsModal
+            isOpen={!!reviewRequestOrderId}
+            onClose={() => setReviewRequestOrderId(null)}
+            order={{
+              id: o.id,
+              customer_name: o.customer_name,
+              customer_phone: o.customer_phone,
+              order_items: o.order_items,
             }}
           />
         );
