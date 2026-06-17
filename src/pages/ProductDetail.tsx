@@ -83,6 +83,11 @@ const ProductDetail = () => {
         return;
       }
       const p = formatProduct(row);
+      // SEO: if user landed via UUID or stale slug, redirect to the canonical slug URL
+      if (p.slug && p.slug !== slug) {
+        navigate(`/product/${p.slug}`, { replace: true });
+        return;
+      }
       setProduct(p);
       setSelectedVariant(undefined);
       setActiveMediaIndex(0);
@@ -100,7 +105,7 @@ const ProductDetail = () => {
     } finally {
       setLoading(false);
     }
-  }, [slug]);
+  }, [slug, navigate]);
 
   useEffect(() => {
     fetchProduct();
