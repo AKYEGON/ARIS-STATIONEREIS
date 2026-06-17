@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Star, Loader2, Camera, Video, Upload, X, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import CameraCapture from "@/components/testimonials/CameraCapture";
-import { SEO } from "@/components/common/SEO";
+import SEO from "@/components/common/SEO";
 
 interface RequestData {
   id: string;
