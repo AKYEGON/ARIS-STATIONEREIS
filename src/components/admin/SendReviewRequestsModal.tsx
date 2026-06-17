@@ -4,8 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, MessageCircle, Copy, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { formatPhoneForWhatsApp } from "@/types/communication";
+import {
+  prepareReviewRequests,
+  buildReviewMessage,
+  markReviewRequestsSent,
+  type ReviewRequestRow,
+} from "@/lib/review-requests";
 
 interface Props {
   isOpen: boolean;
@@ -18,134 +23,48 @@ interface Props {
   };
 }
 
-interface RequestRow {
-  product_id: string;
-  product_name: string;
-  token: string;
-  status: string;
-}
-
-const SITE = "https://arisstationaries.co.ke";
-
 export function SendReviewRequestsModal({ isOpen, onClose, order }: Props) {
   const [loading, setLoading] = useState(false);
-  const [rows, setRows] = useState<RequestRow[]>([]);
+  const [rows, setRows] = useState<ReviewRequestRow[]>([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
-    void prepare();
+    let cancelled = false;
+    setLoading(true);
+    prepareReviewRequests(order)
+      .then((r) => {
+        if (cancelled) return;
+        if (r.length === 0) {
+          toast.error("This order has no products to review.");
+        }
+        setRows(r);
+        setMessage(buildReviewMessage(order.customer_name, r));
+      })
+      .catch((err: any) => {
+        console.error(err);
+        toast.error(err?.message || "Failed to prepare review requests");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, order.id]);
-
-  const prepare = async () => {
-    setLoading(true);
-    try {
-      // 1. Unique product names from this order
-      const names = Array.from(
-        new Set((order.order_items || []).map((i) => i.product_name).filter(Boolean))
-      );
-      if (names.length === 0) {
-        toast.error("This order has no products to review.");
-        setRows([]);
-        return;
-      }
-
-      // 2. Match to product IDs
-      const { data: products, error: prodErr } = await supabase
-        .from("products")
-        .select("id, name")
-        .in("name", names);
-      if (prodErr) throw prodErr;
-
-      const productMap = new Map((products || []).map((p) => [p.name, p.id]));
-      const missing = names.filter((n) => !productMap.has(n));
-      if (missing.length) {
-        console.warn("Products not matched:", missing);
-      }
-
-      // 3. Ensure a review_request row exists for each (order, product)
-      const existing = await supabase
-        .from("review_requests")
-        .select("product_id, token, status")
-        .eq("order_id", order.id);
-      if (existing.error) throw existing.error;
-
-      const existingByProduct = new Map(
-        (existing.data || []).map((r) => [r.product_id, r])
-      );
-
-      const toCreate: { order_id: string; product_id: string; customer_name: string; customer_phone: string }[] = [];
-      for (const name of names) {
-        const pid = productMap.get(name);
-        if (!pid) continue;
-        if (!existingByProduct.has(pid)) {
-          toCreate.push({
-            order_id: order.id,
-            product_id: pid,
-            customer_name: order.customer_name,
-            customer_phone: order.customer_phone,
-          });
-        }
-      }
-
-      if (toCreate.length) {
-        const { error: insErr } = await supabase.from("review_requests").insert(toCreate);
-        if (insErr) throw insErr;
-      }
-
-      // 4. Re-read final set
-      const { data: finalRows, error: finalErr } = await supabase
-        .from("review_requests")
-        .select("product_id, token, status")
-        .eq("order_id", order.id);
-      if (finalErr) throw finalErr;
-
-      const enriched: RequestRow[] = (finalRows || []).map((r) => {
-        const name = [...productMap.entries()].find(([, id]) => id === r.product_id)?.[0] || "Product";
-        return { product_id: r.product_id, product_name: name, token: r.token, status: r.status };
-      });
-
-      setRows(enriched);
-      setMessage(buildMessage(order.customer_name, enriched));
-    } catch (err: any) {
-      console.error(err);
-      toast.error(err?.message || "Failed to prepare review requests");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const buildMessage = (name: string, items: RequestRow[]) => {
-    const intro = `Hello ${name},\n\nThank you for shopping with ARIS STATIONERIES.\n\nWe'd love your honest feedback on the items from your recent order:\n`;
-    const list = items
-      .map((r, i) => `\n${i + 1}. ${r.product_name}\n${SITE}/review/${r.token}`)
-      .join("");
-    const outro = `\n\nReview any or all — even a quick rating helps fellow students choose with confidence.\n\nARIS STATIONERIES`;
-    return intro + list + outro;
-  };
-
-  const markAsSent = async (channel: "whatsapp" | "sms") => {
-    const pendingIds = rows.filter((r) => r.status !== "submitted").map((r) => r.product_id);
-    if (pendingIds.length === 0) return;
-    await supabase
-      .from("review_requests")
-      .update({ status: "sent", sent_at: new Date().toISOString(), sent_via: channel })
-      .eq("order_id", order.id)
-      .in("product_id", pendingIds);
-  };
 
   const handleWhatsApp = async () => {
     const phone = formatPhoneForWhatsApp(order.customer_phone);
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank");
-    await markAsSent("whatsapp");
+    await markReviewRequestsSent(order.id, "whatsapp");
     toast.success("Marked as sent via WhatsApp");
     onClose();
   };
 
   const handleCopySMS = async () => {
     await navigator.clipboard.writeText(message);
-    await markAsSent("sms");
+    await markReviewRequestsSent(order.id, "sms");
     toast.success("Message copied. Paste it into your SMS app.");
   };
 
@@ -153,7 +72,11 @@ export function SendReviewRequestsModal({ isOpen, onClose, order }: Props) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Send Review Requests</DialogTitle>
+          <DialogTitle>Resend Review Requests</DialogTitle>
+          <p className="text-xs text-muted-foreground pt-1">
+            Use this if the original Delivered / Picked Up message didn't go through, or for orders
+            completed before the unified flow was in place.
+          </p>
         </DialogHeader>
 
         {loading ? (
@@ -173,9 +96,7 @@ export function SendReviewRequestsModal({ isOpen, onClose, order }: Props) {
             {rows.length > 0 && (
               <>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium">Message preview (editable)</label>
-                  </div>
+                  <label className="text-sm font-medium">Message preview (editable)</label>
                   <Textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
