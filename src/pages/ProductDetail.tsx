@@ -173,8 +173,8 @@ const ProductDetail = () => {
     ? product.image
     : `https://arisstationaries.co.ke${product.image}`;
 
-  const seoTitle = `Buy ${product.name} in Kenya — KSh ${displayPrice.toFixed(0)} | Aris Stationeries`.slice(0, 70);
-  const seoDescription = `${product.name} at Aris Stationeries Kenya for KSh ${displayPrice.toFixed(0)}. ${product.description || "Affordable quality stationery"} — delivered to your university or doorstep nationwide.`.slice(0, 160);
+  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS Stationeries`.slice(0, 70);
+  const seoDescription = `Buy ${product.name} in Kenya at ARIS Stationeries Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
 
   const productSchema = {
     "@context": "https://schema.org",
@@ -184,14 +184,14 @@ const ProductDetail = () => {
     image: fullImage,
     sku: product.id,
     category: product.category,
-    brand: { "@type": "Brand", name: "ARIS STATIONERIES" },
+    brand: { "@type": "Brand", name: "ARIS Stationeries" },
     offers: {
       "@type": "Offer",
       url: fullUrl,
       priceCurrency: "KES",
       price: displayPrice,
       availability: "https://schema.org/InStock",
-      seller: { "@type": "Organization", name: "ARIS STATIONERIES" },
+      seller: { "@type": "Organization", name: "ARIS Stationeries" },
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
