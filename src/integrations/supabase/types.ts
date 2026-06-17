@@ -465,10 +465,14 @@ export type Database = {
           id: string
           is_featured: boolean | null
           is_published: boolean | null
+          is_verified_purchase: boolean
           last_viewed_at: string | null
+          order_id: string | null
+          product_id: string | null
           product_name: string | null
           rating: number
           review_text: string
+          review_token: string | null
           video_url: string | null
           views: number | null
         }
@@ -484,10 +488,14 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
+          is_verified_purchase?: boolean
           last_viewed_at?: string | null
+          order_id?: string | null
+          product_id?: string | null
           product_name?: string | null
           rating: number
           review_text: string
+          review_token?: string | null
           video_url?: string | null
           views?: number | null
         }
@@ -503,14 +511,33 @@ export type Database = {
           id?: string
           is_featured?: boolean | null
           is_published?: boolean | null
+          is_verified_purchase?: boolean
           last_viewed_at?: string | null
+          order_id?: string | null
+          product_id?: string | null
           product_name?: string | null
           rating?: number
           review_text?: string
+          review_token?: string | null
           video_url?: string | null
           views?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customer_testimonials_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_testimonials_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       employee_profiles: {
         Row: {
@@ -1007,6 +1034,83 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      review_requests: {
+        Row: {
+          created_at: string
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          order_id: string
+          product_id: string
+          sent_at: string | null
+          sent_via: string | null
+          status: string
+          submitted_at: string | null
+          testimonial_id: string | null
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          order_id: string
+          product_id: string
+          sent_at?: string | null
+          sent_via?: string | null
+          status?: string
+          submitted_at?: string | null
+          testimonial_id?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          order_id?: string
+          product_id?: string
+          sent_at?: string | null
+          sent_via?: string | null
+          status?: string
+          submitted_at?: string | null
+          testimonial_id?: string | null
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_requests_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "customer_testimonials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_requests_testimonial_id_fkey"
+            columns: ["testimonial_id"]
+            isOneToOne: false
+            referencedRelation: "testimonial_performance"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock_movements: {
         Row: {
