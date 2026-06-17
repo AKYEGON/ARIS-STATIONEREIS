@@ -17,6 +17,7 @@ import Deals from "./pages/Deals";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryLanding from "./pages/CategoryLanding";
+import ReviewSubmit from "./pages/ReviewSubmit";
 import ScrollToTop from "./components/common/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => {
                 <Route path="/offers" element={<Navigate to="/deals" replace />} />
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
+                <Route path="/review/:token" element={<ReviewSubmit />} />
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>
