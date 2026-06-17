@@ -3368,7 +3368,8 @@ const Admin = () => {
               customer_phone: orderForModal.customer_phone,
               total: orderForModal.total,
               delivery_address: orderForModal.delivery_address,
-              status: orderForModal.status
+              status: orderForModal.status,
+              order_items: orderForModal.order_items
             }}
             newStatus={pendingStatusChange.newStatus}
             onConfirm={async (sendMessage) => {
