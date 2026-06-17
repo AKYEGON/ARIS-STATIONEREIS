@@ -51,6 +51,7 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [reviewStats, setReviewStats] = useState<{ count: number; average: number; reviews: any[] }>({ count: 0, average: 0, reviews: [] });
 
   const fetchProduct = useCallback(async () => {
     if (!slug) return;
