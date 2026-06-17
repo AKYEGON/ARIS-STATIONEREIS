@@ -2686,6 +2686,16 @@ const Admin = () => {
                                   {new Date(testimonial.created_at).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell className="p-2 sm:p-4">
+                                  {testimonial.is_verified_purchase ? (
+                                    <Badge className="bg-green-600 hover:bg-green-700 text-[10px] xs:text-xs gap-1">
+                                      <ShieldCheck className="h-3 w-3" />
+                                      <span className="hidden xs:inline">Verified</span>
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                  )}
+                                </TableCell>
+                                <TableCell className="p-2 sm:p-4">
                                   <div className="flex flex-col xs:flex-row gap-1">
                                     {testimonial.is_published ? (
                                       <Badge className="bg-green-500 hover:bg-green-600 text-[10px] xs:text-xs">Pub</Badge>
