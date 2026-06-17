@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import SEO from "@/components/common/SEO";
 import ProductCard from "@/components/products/ProductCard";
 import ProductMediaViewer from "@/components/products/ProductMediaViewer";
+import ProductReviews from "@/components/products/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "lucide-react";
@@ -50,6 +51,7 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [reviewStats, setReviewStats] = useState<{ count: number; average: number; reviews: any[] }>({ count: 0, average: 0, reviews: [] });
 
   const fetchProduct = useCallback(async () => {
     if (!slug) return;
@@ -183,7 +185,7 @@ const ProductDetail = () => {
 
   const fallbackDescription = `${product.name} available in Kenya at ARIS Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
 
-  const productSchema = {
+  const productSchema: any = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
@@ -243,6 +245,31 @@ const ProductDetail = () => {
       },
     },
   };
+
+  // Google requires both aggregateRating AND review for rich snippet eligibility.
+  // Threshold: 3+ approved reviews with valid ratings.
+  const ratedReviews = reviewStats.reviews.filter((r: any) => r.rating && r.rating > 0);
+  if (ratedReviews.length >= 3) {
+    productSchema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: reviewStats.average.toFixed(1),
+      reviewCount: ratedReviews.length,
+      bestRating: 5,
+      worstRating: 1,
+    };
+    productSchema.review = ratedReviews.slice(0, 10).map((r: any) => ({
+      "@type": "Review",
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      author: { "@type": "Person", name: r.customer_name || "Verified Customer" },
+      datePublished: r.created_at,
+      reviewBody: r.review_text || "",
+    }));
+  }
 
   const handleAddToCart = () => {
     if (hasVariants && !selectedVariant) {
@@ -453,6 +480,8 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        <ProductReviews productId={product.id} onLoaded={setReviewStats} />
 
         {related.length > 0 && (
           <section className="pt-6 border-t">
