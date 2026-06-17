@@ -32,6 +32,7 @@ import { BundlesTab } from "@/components/admin/BundlesTab";
 import { ProductCoursesDialog } from "@/components/admin/ProductCoursesDialog";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
+import { SendReviewRequestsModal } from "@/components/admin/SendReviewRequestsModal";
 import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
@@ -42,6 +43,8 @@ import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
 import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
+import { ReviewRequestFunnel } from "@/components/admin/ReviewRequestFunnel";
+import { ShieldCheck } from "lucide-react";
 
 interface OrderItem {
   product_name: string;
@@ -127,6 +130,7 @@ const Admin = () => {
   // Order status modal state
   const [isStatusModalOpen, setIsStatusModalOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<{ orderId: string; newStatus: string } | null>(null);
+  const [reviewRequestOrderId, setReviewRequestOrderId] = useState<string | null>(null);
   
   // Testimonials state
   const [testimonialsList, setTestimonialsList] = useState<CustomerTestimonial[]>([]);
@@ -147,6 +151,8 @@ const Admin = () => {
   const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
   const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
+  const [testimonialProductFilter, setTestimonialProductFilter] = useState<string>("all");
+  const [testimonialVerifiedOnly, setTestimonialVerifiedOnly] = useState(false);
   
   // Bundles state
   const [bundlesList, setBundlesList] = useState<Bundle[]>([]);
@@ -2575,23 +2581,58 @@ const Admin = () => {
               </Dialog>
             </div>
 
+            <ReviewRequestFunnel />
+
             <Card>
               <CardHeader>
                 <CardTitle>Testimonials Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="mb-4">
+                <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:flex-wrap">
                   <Input
                     placeholder="Search testimonials by name or product..."
                     value={testimonialSearchQuery}
                     onChange={(e) => setTestimonialSearchQuery(e.target.value)}
                     className="max-w-md"
                   />
+                  <Select value={testimonialProductFilter} onValueChange={setTestimonialProductFilter}>
+                    <SelectTrigger className="w-full sm:w-[220px]">
+                      <SelectValue placeholder="Filter by product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All products</SelectItem>
+                      {Array.from(
+                        new Map(
+                          testimonialsList
+                            .filter((t) => t.product_id && t.product_name)
+                            .map((t) => [t.product_id as string, t.product_name as string])
+                        ).entries()
+                      )
+                        .sort((a, b) => a[1].localeCompare(b[1]))
+                        .map(([pid, pname]) => (
+                          <SelectItem key={pid} value={pid}>
+                            {pname}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Switch
+                      checked={testimonialVerifiedOnly}
+                      onCheckedChange={setTestimonialVerifiedOnly}
+                    />
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
+                      Verified purchase only
+                    </span>
+                  </label>
                 </div>
                 <div className="overflow-x-auto">
                   {testimonialsList.filter(t => {
                     if (testimonialFilter === "pending" && t.is_published) return false;
                     if (testimonialFilter === "published" && !t.is_published) return false;
+                    if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
+                    if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                     return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
                   }).length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
@@ -2605,6 +2646,7 @@ const Admin = () => {
                           <TableHead className="min-w-[80px]">Customer</TableHead>
                           <TableHead className="hidden sm:table-cell">Product</TableHead>
                           <TableHead className="hidden md:table-cell">Submitted</TableHead>
+                          <TableHead>Verified</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -2614,6 +2656,8 @@ const Admin = () => {
                           .filter(t => {
                             if (testimonialFilter === "pending" && t.is_published) return false;
                             if (testimonialFilter === "published" && !t.is_published) return false;
+                            if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
+                            if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                             return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
                           })
                           .map((testimonial, index) => {
@@ -2640,6 +2684,16 @@ const Admin = () => {
                                 <TableCell className="hidden sm:table-cell text-xs sm:text-sm">{testimonial.product_name || "-"}</TableCell>
                                 <TableCell className="hidden md:table-cell text-xs sm:text-sm text-muted-foreground">
                                   {new Date(testimonial.created_at).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell className="p-2 sm:p-4">
+                                  {testimonial.is_verified_purchase ? (
+                                    <Badge className="bg-green-600 hover:bg-green-700 text-[10px] xs:text-xs gap-1">
+                                      <ShieldCheck className="h-3 w-3" />
+                                      <span className="hidden xs:inline">Verified</span>
+                                    </Badge>
+                                  ) : (
+                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                  )}
                                 </TableCell>
                                 <TableCell className="p-2 sm:p-4">
                                   <div className="flex flex-col xs:flex-row gap-1">
@@ -3217,6 +3271,16 @@ const Admin = () => {
                     <span className="font-bold">Total</span>
                     <span className="font-bold text-primary text-lg">KSh {selectedOrder.total.toFixed(2)}</span>
                   </div>
+                  {['delivered', 'picked up', 'picked-up', 'pickedup'].includes(selectedOrder.status.toLowerCase()) && (
+                    <Button
+                      variant="outline"
+                      className="w-full mt-3 border-green-600 text-green-700 hover:bg-green-50"
+                      onClick={() => setReviewRequestOrderId(selectedOrder.id)}
+                    >
+                      <Star className="h-4 w-4 mr-2" />
+                      Resend Review Requests
+                    </Button>
+                  )}
                 </div>
 
                 <div>
@@ -3356,13 +3420,31 @@ const Admin = () => {
               customer_phone: orderForModal.customer_phone,
               total: orderForModal.total,
               delivery_address: orderForModal.delivery_address,
-              status: orderForModal.status
+              status: orderForModal.status,
+              order_items: orderForModal.order_items
             }}
             newStatus={pendingStatusChange.newStatus}
             onConfirm={async (sendMessage) => {
               await updateOrderStatus(pendingStatusChange.orderId, pendingStatusChange.newStatus);
               setIsStatusModalOpen(false);
               setPendingStatusChange(null);
+            }}
+          />
+        );
+      })()}
+
+      {reviewRequestOrderId && (() => {
+        const o = ordersList.find(x => x.id === reviewRequestOrderId);
+        if (!o) return null;
+        return (
+          <SendReviewRequestsModal
+            isOpen={!!reviewRequestOrderId}
+            onClose={() => setReviewRequestOrderId(null)}
+            order={{
+              id: o.id,
+              customer_name: o.customer_name,
+              customer_phone: o.customer_phone,
+              order_items: o.order_items,
             }}
           />
         );

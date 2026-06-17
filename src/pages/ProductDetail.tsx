@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import SEO from "@/components/common/SEO";
 import ProductCard from "@/components/products/ProductCard";
 import ProductMediaViewer from "@/components/products/ProductMediaViewer";
+import ProductReviews from "@/components/products/ProductReviews";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "lucide-react";
@@ -50,6 +51,7 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [reviewStats, setReviewStats] = useState<{ count: number; average: number; reviews: any[] }>({ count: 0, average: 0, reviews: [] });
 
   const fetchProduct = useCallback(async () => {
     if (!slug) return;
@@ -83,6 +85,11 @@ const ProductDetail = () => {
         return;
       }
       const p = formatProduct(row);
+      // SEO: if user landed via UUID or stale slug, redirect to the canonical slug URL
+      if (p.slug && p.slug !== slug) {
+        navigate(`/product/${p.slug}`, { replace: true });
+        return;
+      }
       setProduct(p);
       setSelectedVariant(undefined);
       setActiveMediaIndex(0);
@@ -100,7 +107,7 @@ const ProductDetail = () => {
     } finally {
       setLoading(false);
     }
-  }, [slug]);
+  }, [slug, navigate]);
 
   useEffect(() => {
     fetchProduct();
@@ -173,30 +180,96 @@ const ProductDetail = () => {
     ? product.image
     : `https://arisstationaries.co.ke${product.image}`;
 
-  const seoTitle = `Buy ${product.name} in Kenya — KSh ${displayPrice.toFixed(0)} | Aris Stationeries`.slice(0, 70);
-  const seoDescription = `${product.name} at Aris Stationeries Kenya for KSh ${displayPrice.toFixed(0)}. ${product.description || "Affordable quality stationery"} — delivered to your university or doorstep nationwide.`.slice(0, 160);
+  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS Stationeries`.slice(0, 70);
+  const seoDescription = `Buy ${product.name} in Kenya at ARIS Stationeries Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
 
-  const productSchema = {
+  const fallbackDescription = `${product.name} available in Kenya at ARIS Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
+
+  const productSchema: any = {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
-    description: product.description,
+    description: product.description && product.description.trim().length > 20
+      ? product.description
+      : fallbackDescription,
     image: fullImage,
     sku: product.id,
+    mpn: product.id,
     category: product.category,
-    brand: { "@type": "Brand", name: "ARIS STATIONERIES" },
+    brand: { "@type": "Brand", name: "ARIS Stationeries" },
     offers: {
       "@type": "Offer",
       url: fullUrl,
       priceCurrency: "KES",
       price: displayPrice,
       availability: "https://schema.org/InStock",
-      seller: { "@type": "Organization", name: "ARIS STATIONERIES" },
+      itemCondition: "https://schema.org/NewCondition",
+      seller: { "@type": "Organization", name: "ARIS Stationeries" },
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "KES",
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "KE",
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY",
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 3,
+            unitCode: "DAY",
+          },
+        },
+      },
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "KE",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 7,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn",
+      },
     },
   };
+
+  // Google requires both aggregateRating AND review for rich snippet eligibility.
+  // Threshold: 3+ approved reviews with valid ratings.
+  const ratedReviews = reviewStats.reviews.filter((r: any) => r.rating && r.rating > 0);
+  if (ratedReviews.length >= 3) {
+    productSchema.aggregateRating = {
+      "@type": "AggregateRating",
+      ratingValue: reviewStats.average.toFixed(1),
+      reviewCount: ratedReviews.length,
+      bestRating: 5,
+      worstRating: 1,
+    };
+    productSchema.review = ratedReviews.slice(0, 10).map((r: any) => ({
+      "@type": "Review",
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: r.rating,
+        bestRating: 5,
+        worstRating: 1,
+      },
+      author: { "@type": "Person", name: r.customer_name || "Verified Customer" },
+      datePublished: r.created_at,
+      reviewBody: r.review_text || "",
+    }));
+  }
 
   const handleAddToCart = () => {
     if (hasVariants && !selectedVariant) {
@@ -407,6 +480,8 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
+
+        <ProductReviews productId={product.id} onLoaded={setReviewStats} />
 
         {related.length > 0 && (
           <section className="pt-6 border-t">

@@ -309,11 +309,23 @@ const Students = () => {
     ...(activeCourse ? [{ name: activeCourse.name, url: `/students?faculty=${facultyId}&course=${activeCourse.id}` }] : []),
   ];
 
+  const seoTitle = activeCourse
+    ? `${activeCourse.name} Stationery List — Nairobi Universities | ARIS Stationeries`
+    : activeFaculty
+    ? `${activeFaculty.name} Stationery — Course Lists | ARIS Stationeries Nairobi`
+    : "Shop Stationery by Course — UoN, KU, Strathmore, JKUAT | ARIS Stationeries";
+
+  const seoDescription = activeCourse
+    ? `The exact stationery list for ${activeCourse.name} students in Kenya — drawing sets, calculators, notebooks and more. Same-day Nairobi pickup, countrywide delivery from ARIS Stationeries.`
+    : activeFaculty
+    ? `Browse ${activeFaculty.name} stationery by course at ARIS Stationeries Nairobi. Curated lists for UoN, KU, Strathmore, USIU and JKUAT students.`
+    : "Find the exact stationery you need for your course at ARIS Stationeries. Faculty-by-faculty, course-by-course lists for Nairobi universities — UoN, KU, Strathmore, USIU, JKUAT.";
+
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Shop Stationery by Course | Aris Stationeries Kenya"
-        description="Find the exact stationery you need for your course. Browse by faculty, course and academic year."
+        title={seoTitle}
+        description={seoDescription}
         canonicalUrl="/students"
         breadcrumbs={breadcrumbs}
       />

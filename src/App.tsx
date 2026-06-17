@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
@@ -17,6 +17,7 @@ import Deals from "./pages/Deals";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryLanding from "./pages/CategoryLanding";
+import ReviewSubmit from "./pages/ReviewSubmit";
 import ScrollToTop from "./components/common/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -38,13 +39,14 @@ const App = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/admin" element={<Admin />} />
                 <Route path="/students" element={<Students />} />
-                <Route path="/brochure" element={<Students />} />
+                <Route path="/brochure" element={<Navigate to="/students" replace />} />
                 <Route path="/testimonials" element={<Testimonials />} />
-                <Route path="/happy-customers" element={<Testimonials />} />
-                <Route path="/offers" element={<Deals />} />
+                <Route path="/happy-customers" element={<Navigate to="/testimonials" replace />} />
                 <Route path="/deals" element={<Deals />} />
+                <Route path="/offers" element={<Navigate to="/deals" replace />} />
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
+                <Route path="/review/:token" element={<ReviewSubmit />} />
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>
