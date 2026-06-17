@@ -1,11 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { MessageCircle, Phone, MessageSquare, Send, SkipForward } from 'lucide-react';
+import { MessageCircle, Phone, MessageSquare, Send, SkipForward, Loader2, Star } from 'lucide-react';
 import { useOrderCommunication } from '@/hooks/use-order-communication';
 import { cn } from '@/lib/utils';
+import {
+  isReviewTriggerStatus,
+  prepareReviewRequests,
+  buildStatusReviewMessage,
+  markReviewRequestsSent,
+  type ReviewRequestRow,
+} from '@/lib/review-requests';
+import { toast } from 'sonner';
 
 interface OrderStatusModalProps {
   isOpen: boolean;
@@ -17,6 +25,7 @@ interface OrderStatusModalProps {
     total: number;
     delivery_address: string;
     status: string;
+    order_items?: { product_name: string }[];
   };
   newStatus: string;
   onConfirm: (sendMessage: boolean) => void;
@@ -24,11 +33,42 @@ interface OrderStatusModalProps {
 
 export function OrderStatusModal({ isOpen, onClose, order, newStatus, onConfirm }: OrderStatusModalProps) {
   const { getMessageForStatus, openWhatsApp, openSMS, openCall, logCommunication, isLogging } = useOrderCommunication();
-  const [message, setMessage] = useState(() => getMessageForStatus(newStatus, order));
+  const reviewTrigger = isReviewTriggerStatus(newStatus);
+  const [message, setMessage] = useState(() =>
+    reviewTrigger ? '' : getMessageForStatus(newStatus, order)
+  );
   const [selectedChannel, setSelectedChannel] = useState<'whatsapp' | 'sms' | 'call'>('whatsapp');
+  const [reviewRows, setReviewRows] = useState<ReviewRequestRow[]>([]);
+  const [prepLoading, setPrepLoading] = useState(false);
+
+  // Build the unified review message when status is Delivered / Picked Up
+  useEffect(() => {
+    if (!isOpen || !reviewTrigger) return;
+    let cancelled = false;
+    setPrepLoading(true);
+    prepareReviewRequests(order)
+      .then((rows) => {
+        if (cancelled) return;
+        setReviewRows(rows);
+        setMessage(buildStatusReviewMessage(reviewTrigger, order, rows));
+      })
+      .catch((err) => {
+        console.error(err);
+        if (!cancelled) {
+          toast.error('Could not prepare review links — falling back to a plain message.');
+          setMessage(getMessageForStatus(newStatus, order));
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setPrepLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, reviewTrigger, order.id]);
 
   const handleSendAndUpdate = async () => {
-    // Log the communication
     await logCommunication({
       orderId: order.id,
       channel: selectedChannel,
@@ -36,13 +76,20 @@ export function OrderStatusModal({ isOpen, onClose, order, newStatus, onConfirm 
       statusAtTime: newStatus
     });
 
-    // Open the communication channel
     if (selectedChannel === 'whatsapp') {
       openWhatsApp(order.customer_phone, message);
     } else if (selectedChannel === 'sms') {
       openSMS(order.customer_phone, message);
     } else {
       openCall(order.customer_phone);
+    }
+
+    if (reviewTrigger && selectedChannel !== 'call' && reviewRows.length > 0) {
+      try {
+        await markReviewRequestsSent(order.id, selectedChannel);
+      } catch (e) {
+        console.error('Failed to mark review requests as sent', e);
+      }
     }
 
     onConfirm(true);
@@ -64,13 +111,18 @@ export function OrderStatusModal({ isOpen, onClose, order, newStatus, onConfirm 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 flex-wrap">
             <span>Update Order Status</span>
             <span className={cn("px-2 py-1 rounded-full text-xs font-medium border", statusColors[newStatus] || 'bg-gray-100')}>
               {newStatus}
             </span>
+            {reviewTrigger && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-medium border border-green-200 bg-green-50 text-green-700">
+                <Star className="h-3 w-3" /> Review request included
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
 
@@ -120,15 +172,24 @@ export function OrderStatusModal({ isOpen, onClose, order, newStatus, onConfirm 
           {selectedChannel !== 'call' && (
             <div className="space-y-2">
               <Label htmlFor="message">Message Preview</Label>
-              <Textarea
-                id="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={4}
-                className="text-sm"
-              />
+              {prepLoading ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground py-6 justify-center border rounded">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Preparing review links…
+                </div>
+              ) : (
+                <Textarea
+                  id="message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  rows={reviewTrigger ? 10 : 4}
+                  className="text-sm"
+                />
+              )}
               <p className="text-xs text-muted-foreground">
-                You can edit the message before sending.
+                {reviewTrigger
+                  ? 'Each product has its own one-time review link. You can edit before sending.'
+                  : 'You can edit the message before sending.'}
               </p>
             </div>
           )}
@@ -145,7 +206,7 @@ export function OrderStatusModal({ isOpen, onClose, order, newStatus, onConfirm 
           </Button>
           <Button
             onClick={handleSendAndUpdate}
-            disabled={isLogging}
+            disabled={isLogging || prepLoading}
             className="flex-1"
           >
             <Send className="h-4 w-4 mr-1" />

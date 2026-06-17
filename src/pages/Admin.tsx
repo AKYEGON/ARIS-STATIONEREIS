@@ -3226,7 +3226,7 @@ const Admin = () => {
                       onClick={() => setReviewRequestOrderId(selectedOrder.id)}
                     >
                       <Star className="h-4 w-4 mr-2" />
-                      Send Review Requests
+                      Resend Review Requests
                     </Button>
                   )}
                 </div>
@@ -3368,7 +3368,8 @@ const Admin = () => {
               customer_phone: orderForModal.customer_phone,
               total: orderForModal.total,
               delivery_address: orderForModal.delivery_address,
-              status: orderForModal.status
+              status: orderForModal.status,
+              order_items: orderForModal.order_items
             }}
             newStatus={pendingStatusChange.newStatus}
             onConfirm={async (sendMessage) => {
