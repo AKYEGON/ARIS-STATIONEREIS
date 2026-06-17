@@ -2581,23 +2581,58 @@ const Admin = () => {
               </Dialog>
             </div>
 
+            <ReviewRequestFunnel />
+
             <Card>
               <CardHeader>
                 <CardTitle>Testimonials Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="mb-4">
+                <div className="mb-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:flex-wrap">
                   <Input
                     placeholder="Search testimonials by name or product..."
                     value={testimonialSearchQuery}
                     onChange={(e) => setTestimonialSearchQuery(e.target.value)}
                     className="max-w-md"
                   />
+                  <Select value={testimonialProductFilter} onValueChange={setTestimonialProductFilter}>
+                    <SelectTrigger className="w-full sm:w-[220px]">
+                      <SelectValue placeholder="Filter by product" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All products</SelectItem>
+                      {Array.from(
+                        new Map(
+                          testimonialsList
+                            .filter((t) => t.product_id && t.product_name)
+                            .map((t) => [t.product_id as string, t.product_name as string])
+                        ).entries()
+                      )
+                        .sort((a, b) => a[1].localeCompare(b[1]))
+                        .map(([pid, pname]) => (
+                          <SelectItem key={pid} value={pid}>
+                            {pname}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer">
+                    <Switch
+                      checked={testimonialVerifiedOnly}
+                      onCheckedChange={setTestimonialVerifiedOnly}
+                    />
+                    <span className="flex items-center gap-1">
+                      <ShieldCheck className="h-3.5 w-3.5 text-green-600" />
+                      Verified purchase only
+                    </span>
+                  </label>
                 </div>
                 <div className="overflow-x-auto">
                   {testimonialsList.filter(t => {
                     if (testimonialFilter === "pending" && t.is_published) return false;
                     if (testimonialFilter === "published" && !t.is_published) return false;
+                    if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
+                    if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                     return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
                   }).length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
@@ -2611,6 +2646,7 @@ const Admin = () => {
                           <TableHead className="min-w-[80px]">Customer</TableHead>
                           <TableHead className="hidden sm:table-cell">Product</TableHead>
                           <TableHead className="hidden md:table-cell">Submitted</TableHead>
+                          <TableHead>Verified</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -2620,6 +2656,8 @@ const Admin = () => {
                           .filter(t => {
                             if (testimonialFilter === "pending" && t.is_published) return false;
                             if (testimonialFilter === "published" && !t.is_published) return false;
+                            if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
+                            if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                             return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
                           })
                           .map((testimonial, index) => {
