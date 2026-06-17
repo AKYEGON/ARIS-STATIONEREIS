@@ -227,13 +227,15 @@ const CategoryLanding = () => {
   };
 
   const fallback = {
-    title: `${category.name} in Kenya`,
-    desc: `Shop ${category.name.toLowerCase()} at Aris Stationeries — fair prices, in stock, fast Nairobi delivery.`,
-    intro: `Shop ${category.name.toLowerCase()} at Aris Stationeries — in stock and ready to ship. Same-day pickup in Nairobi, delivery countrywide. WhatsApp +254 119 774470 to order or ask for a bulk quote.`,
+    title: `${category.name} in Kenya — Buy Online | ARIS Stationeries`,
+    desc: `Shop ${category.name.toLowerCase()} at ARIS Stationeries Nairobi — fair prices, in stock, same-day pickup, countrywide delivery.`,
+    intro: `Shop ${category.name.toLowerCase()} at ARIS Stationeries — in stock and ready to ship. Same-day pickup in Nairobi, delivery countrywide. WhatsApp +254 119 774470 to order or ask for a bulk quote.`,
   };
 
   const copy = COPY[category.slug] || fallback;
-  const title = copy.title;
+  const title = copy.title.includes("ARIS") || copy.title.includes("Aris")
+    ? copy.title
+    : `${copy.title} — Buy Online | ARIS Stationeries`;
   const description = copy.desc;
   const intro = copy.intro;
 
