@@ -73,14 +73,14 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings"];
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "books", "team", "settings"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "books", "team", "settings"];
     case 'manager':
-      return ["orders", "inventory", "sales", "settings"];
+      return ["orders", "inventory", "sales", "books", "settings"];
     case 'employee':
       return ["orders"];
     case 'agent':
