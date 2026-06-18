@@ -2237,7 +2237,10 @@ const Admin = () => {
             </Tabs>
           </TabsContent>
 
-
+          {/* Books Tab */}
+          <TabsContent value="books" className="space-y-6">
+            <BooksAdminTab />
+          </TabsContent>
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">
