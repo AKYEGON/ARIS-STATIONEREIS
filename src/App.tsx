@@ -18,6 +18,9 @@ import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryLanding from "./pages/CategoryLanding";
 import ReviewSubmit from "./pages/ReviewSubmit";
+import Books from "./pages/Books";
+import BookDetail from "./pages/BookDetail";
+import MyReservations from "./pages/MyReservations";
 import ScrollToTop from "./components/common/ScrollToTop";
 
 const queryClient = new QueryClient();
@@ -47,6 +50,9 @@ const App = () => {
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
                 <Route path="/review/:token" element={<ReviewSubmit />} />
+                <Route path="/books" element={<Books />} />
+                <Route path="/books/my-reservations" element={<MyReservations />} />
+                <Route path="/books/:slug" element={<BookDetail />} />
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>

@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 import { Product, ProductMedia, ProductCategory } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star, GraduationCap } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star, GraduationCap, BookOpen } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -29,6 +29,7 @@ import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
+import { BooksAdminTab } from "@/components/admin/BooksAdminTab";
 import { ProductCoursesDialog } from "@/components/admin/ProductCoursesDialog";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
@@ -73,14 +74,14 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings"];
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "books", "team", "settings"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "books", "team", "settings"];
     case 'manager':
-      return ["orders", "inventory", "sales", "settings"];
+      return ["orders", "inventory", "sales", "books", "settings"];
     case 'employee':
       return ["orders"];
     case 'agent':
@@ -1685,6 +1686,13 @@ const Admin = () => {
                   <span className="xs:hidden">Rev</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("books") && (
+                <TabsTrigger value="books" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Books</span>
+                  <span className="xs:hidden">Book</span>
+                </TabsTrigger>
+              )}
               {visibleTabs.includes("team") && (
                 <TabsTrigger value="team" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                   <UsersRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -2229,7 +2237,10 @@ const Admin = () => {
             </Tabs>
           </TabsContent>
 
-
+          {/* Books Tab */}
+          <TabsContent value="books" className="space-y-6">
+            <BooksAdminTab />
+          </TabsContent>
 
           {/* Orders Tab */}
           <TabsContent value="orders" className="space-y-6">

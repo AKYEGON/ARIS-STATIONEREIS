@@ -1,4 +1,4 @@
-import { ShoppingCart, GraduationCap, Users, Flame, Store } from "lucide-react";
+import { ShoppingCart, GraduationCap, Users, Flame, Store, BookOpen } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,7 @@ interface HeaderProps {
 const bottomTabs = [
   { to: "/", label: "Shop", icon: Store },
   { to: "/deals", label: "Deals", icon: Flame },
-  { to: "/testimonials", label: "Customers", icon: Users },
+  { to: "/books", label: "Books", icon: BookOpen },
   { to: "/students", label: "Courses", icon: GraduationCap },
   { to: "/cart", label: "Cart", icon: ShoppingCart },
 ] as const;
@@ -41,7 +41,14 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                 <span className="hidden lg:inline">Deals</span>
               </Button>
             </Link>
-            
+
+            <Link to="/books">
+              <Button variant="outline" size="sm">
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Books</span>
+              </Button>
+            </Link>
+
             <Link to="/testimonials">
               <Button variant="outline" size="sm">
                 <Users className="h-4 w-4 mr-2" />

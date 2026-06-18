@@ -1,98 +1,118 @@
-# Review Collection System
+# Book of the Week — Phase 1
 
-## Existing System Audit (what's already built — don't break it)
+## Rules captured from your answers
+- **Multiple reservations per phone allowed** (same book or different books).
+- **Genres**: dropdown sourced from a `book_genres` table, fully admin-managed (add/edit/delete).
+- **Delivery**: reuses existing checkout (pickup outlets + universities).
+- **Store credit**: usable on any product, not books-only.
+- **Weekly cycle**: new books go live **Thursday** (handover day for previous week) and close **Wednesday 23:59**. Pickup/delivery the following Thursday.
+- **Payment**: customer can pay **deposit only** OR **full price upfront** at reservation. Either way via M-Pesa STK Push.
+- **Fulfilment**: just-in-time (order from supplier on Thursday based on confirmed slots).
 
-| Asset | Current behavior | Plan's impact |
-|---|---|---|
-| `customer_testimonials` table | Sitewide brand reviews, no product_id/order_id; columns: name, photo, product_name (text), review_text, rating, video_url, is_published, views… | **Extend additively** — add product_id, order_id, review_request_id, is_verified_purchase, phone. Existing rows unaffected (all nullable). |
-| RLS | Anon can INSERT only when `is_published=false`; public SELECT only when `is_published=true` | **Keep as-is.** Token submissions go through edge fn (service role) so RLS for anon stays restrictive. |
-| `/testimonials` page | Public, IG-style stories carousel; submission form with `?review=true&name=&phone=&product=` prefill | **Keep unchanged.** Stays the sitewide brand-trust page. |
-| `ReviewSubmissionForm` | Star rating, photo, video (camera capture), prefill via URL params | **Reuse as-is.** New `/review/:token` route resolves token then renders this same form with extra hidden product_id/order_id/token. |
-| `use-order-communication.ts` | Admin "Send Review Request" builds `?review=true&name=&phone=` WhatsApp link, sent manually from order panel | **Upgrade in place** — same button, same WhatsApp UX, but link becomes `/review/{token}` and SMS is sent in parallel. |
-| StoriesCarousel / StoryCircles / FeaturedTestimonial | Reads `customer_testimonials` where `is_published=true` | **Keep showing all** (sitewide social proof). No product filter. |
-| Admin Testimonials tab | Filter all/pending/published, photo/video upload | **Extend** — add per-product filter, verified-purchase badge column, review-request funnel view. |
-| Existing 4 approved testimonials | Sitewide, no product link | **Stay sitewide.** Per-product schema activates only once product reviews accumulate. |
+---
 
-## Architecture
+## Lifecycle
 
 ```
-order.status flips → delivered | picked_up
-        ↓
-Trigger: enqueue_review_dispatch (pg_net → edge fn, once per order)
-        ↓
-Edge fn: dispatch-review-requests
-  • For each distinct product in order_items → INSERT review_requests row
-  • Build /review/{token} URL (30-day expiry)
-        ↓
-  ┌─── WhatsApp link (wa.me, admin clicks Send) ───┐
-  └─── SMS via Africa's Talking (auto-send) ───────┘
-        ↓
-Customer taps → /review/:token → token resolver loads context
-        ↓
-  Renders existing ReviewSubmissionForm + hidden product_id/order_id/token
-        ↓
-Edge fn: submit-review (validates token, inserts testimonial with
-         is_verified_purchase=true, is_published=false, marks token used)
-        ↓
-Admin moderates in existing Testimonials tab → is_published=true
-        ↓
-ProductDetail injects aggregateRating + review schema when ≥3 approved
+THU 00:00 → new week opens. Books visible, slots open.
+THU–WED → customers reserve (deposit or full). Slot decrements atomically.
+WED 23:59 → reservations close. Admin sees final tally.
+THU       → handover day. Deposit-holders pay balance via STK Push,
+            collect at outlet or get delivery. New week opens same day.
+SAT (auto) → any unclaimed deposit-only reservation → released,
+             deposit converted to store credit.
 ```
 
-## Phase 1 — Schema migration
+If a book misses its `min_threshold` by Wed midnight → auto-cancelled, deposits refunded to store credit, customers notified.
 
-**Extend `order_items`:** add `product_id uuid REFERENCES products(id)`. Backfill via name match (best-effort).
+---
 
-**Extend `customer_testimonials`:** add `product_id`, `order_id`, `review_request_id`, `is_verified_purchase boolean DEFAULT false`, `customer_phone text`. Unique partial index on `(order_id, product_id) WHERE order_id IS NOT NULL`.
+## Data model (5 new tables)
 
-**New table `review_requests`:** token (text unique, 32-char nanoid), order_id, product_id, order_item_id, customer_name, customer_phone, channels_sent text[], sent_at, used_at, expires_at (default now() + 30d). RLS: anon SELECT by token only (single row); service_role full.
+**`book_genres`** — admin-managed dropdown source
+- name, slug, display_order, is_active
 
-**New trigger** on `orders`: after UPDATE, if status changes to `delivered`/`picked_up` (case-insensitive) AND no existing requests for this order → pg_net call to `dispatch-review-requests`.
+**`books`** — one row per book offering
+- title, author, genre_id, cover_url, synopsis, isbn (optional), slug
+- full_price, deposit_amount
+- slots_total, slots_reserved (atomic counter), min_threshold
+- week_starts_at (Thu 00:00), week_ends_at (Wed 23:59), pickup_date (Thu)
+- status: `draft | open | closed | fulfilled | cancelled`
 
-## Phase 2 — Edge functions
+**`book_reservations`** — one row per slot
+- book_id, customer_name, customer_phone, customer_email (optional)
+- payment_type: `deposit | full`
+- amount_paid, balance_due (0 if full), mpesa_reference
+- delivery_method, delivery_address (mirrors checkout shape)
+- status: `pending_payment | reserved | balance_paid | collected | delivered | released | refunded`
+- store_credit_issued (bool), created_at
 
-| Function | Auth | Purpose |
-|---|---|---|
-| `dispatch-review-requests` | service-role (called by trigger) | Create review_requests rows, send SMS via Africa's Talking, return WhatsApp links |
-| `resolve-review-token` | public | GET token → returns name, phone, product info (no PII leak — token-gated) |
-| `submit-review` | public | POST {token, rating, text, photo} → validates, inserts, marks used. Length limits + photo MIME check |
+**`store_credit_ledger`** — universal store credit (usable on any product)
+- customer_phone, amount (+ credit / − debit), source (`book_refund | order_use | manual_adjust`), reference_id, balance_after
+- View `customer_store_credit` aggregates current balance per phone
 
-## Phase 3 — Customer-facing route
+**`book_payments`** — M-Pesa transaction log
+- reservation_id, type (`deposit | balance | full`), amount, mpesa_checkout_id, mpesa_receipt, status, raw_callback (jsonb)
 
-**`/review/:token`** — new lightweight page:
-- Calls `resolve-review-token` → shows product card + "How was your {productName}?"
-- Renders `ReviewSubmissionForm` (existing component) with `prefillData` + hidden `productId`/`orderId`/`token`
-- Submit calls `submit-review` edge fn (not direct insert)
-- States: valid / expired / already-used / invalid
+---
 
-## Phase 4 — ProductDetail integration (the SEO payoff)
+## Atomic slot reservation
+DB function `reserve_book_slot(book_id, phone, payment_type, …)` — locks book row, checks `slots_reserved < slots_total` AND `status = 'open'` AND `now() < week_ends_at`, increments counter, inserts reservation, returns row. Prevents overselling under concurrency.
 
-- Fetch `customer_testimonials WHERE product_id = X AND is_published=true ORDER BY created_at DESC LIMIT 20`
-- New "Customer Reviews" section: avg-star header, individual cards with verified-purchase badge
-- Inject schema **only when count ≥ 3**:
-  - `aggregateRating { ratingValue, reviewCount }`
-  - `review[]` (up to 5 most recent: author, rating, text, datePublished)
+---
 
-## Phase 5 — Admin enhancements
+## M-Pesa STK Push
+Two edge functions:
+- `mpesa-stk-push` — initiate payment, returns `CheckoutRequestID`.
+- `mpesa-callback` — webhook from Safaricom, marks payment success/fail, updates reservation status.
 
-- Testimonials tab: add per-product filter dropdown, "verified purchase only" toggle, badge column
-- New section "Review request funnel": sent → opened → completed counts, list of unanswered requests with "Resend after 7 days" action
-- Order panel: existing "Send Review Request" button now reads from `review_requests` table (links per product item instead of one generic link)
+Requires Safaricom Daraja credentials (Consumer Key, Consumer Secret, Passkey, Shortcode). I'll request these via `add_secret` when we reach that step.
 
-## Phase 6 — SMS provider setup (one-time)
+---
 
-**Africa's Talking** chosen — Kenya-native, cheapest for KE numbers (~KSh 0.80/SMS), supports sender ID. User signs up at africastalking.com, gets username + API key, I store as `AFRICASTALKING_USERNAME` + `AFRICASTALKING_API_KEY` secrets. Sandbox mode for testing.
+## Cron jobs (pg_cron + pg_net)
+- **Wed 23:59 EAT** — close current week: flip open→closed, evaluate min_threshold, cancel + refund books that missed it.
+- **Sat 00:00 EAT** — release stale deposit-only reservations not collected by Friday, convert deposit → store credit.
+- **Thu 00:00 EAT** — auto-publish books whose `week_starts_at` arrived (status draft→open).
 
-## Decisions confirmed
-- ✅ Triggers: `delivered` AND `picked_up`
-- ✅ Channels: WhatsApp (manual send, existing UX) + SMS (auto)
-- ✅ No incentives — pure ask. (Can layer 5% coupon later without schema change.)
+---
 
-## Out of scope
-- Email channel (no emails captured)
-- Quick Sales/walk-ins without phone — no auto-request
-- Review reply/dispute flow, helpfulness voting, AI photo moderation
-- WhatsApp Business API auto-send (admin click stays for now)
+## Customer-facing routes
+- **`/books`** — current week landing: book cards with cover, title, author, genre badge, full price, deposit, "X/100 slots left", countdown to Wed 23:59.
+- **`/books/:slug`** — book detail: synopsis, reserve CTA, choice of "Pay deposit (KSh X)" or "Pay full (KSh Y)", phone + name, delivery selector (reuses checkout component), STK push trigger.
+- **`/books/my-reservations?phone=…`** — customer self-service: status, pay balance button (STK push), store credit balance.
 
-## One remaining question
-**Confirm SMS provider:** Africa's Talking (recommended, Kenya-native) — yes/no? If yes, you'll need an account before Phase 6 can ship.
+Nav: add **Books** to mobile bottom bar + desktop header.
+
+---
+
+## Admin (new Admin tab "Books")
+- **Books manager**: CRUD books, set week dates, slots, prices, min_threshold, cover upload, genre dropdown.
+- **Genres manager**: CRUD genres.
+- **Reservations dashboard per book**: list reservations, payment status, mark collected/delivered, send WhatsApp follow-ups (reusing existing comm system templates).
+- **Store credit ledger viewer**: search by phone, manual adjustments.
+
+---
+
+## Integration with existing systems
+- **Cart / checkout** — at checkout, look up store credit by phone, offer "Apply KSh X store credit" → records debit in `store_credit_ledger`.
+- **WhatsApp templates** — new templates: reservation confirmed, balance reminder (Thu), ready for pickup, deposit refunded as credit. Reuses `message_templates` + `OrderStatusModal` pattern.
+- **SEO** — `/books`, `/books/:slug` get title/meta/JSON-LD Book schema; sitemap generator extended.
+- **Toast positions, navigation, footer hide on stories** — all existing project rules respected.
+
+---
+
+## Build order (so you can validate each step)
+1. Migration: tables + RLS + GRANTs + atomic reservation function + cron jobs (paused) + store_credit_ledger.
+2. Admin: Genres manager → Books manager → Reservations dashboard.
+3. Customer routes `/books` + `/books/:slug` (without payment — "reserve" creates pending row).
+4. M-Pesa STK Push edge functions + secrets + wire to reserve flow.
+5. `/books/my-reservations` + balance payment flow.
+6. Store credit application at checkout.
+7. WhatsApp templates + admin comm buttons.
+8. Activate cron jobs + SEO + sitemap.
+
+---
+
+## Open question before I start
+**M-Pesa Daraja**: do you already have a Safaricom Daraja Paybill/Till + API credentials, or do we need to plan around using sandbox first while you apply for production? This affects whether step 4 ships live or in test mode.
