@@ -1686,6 +1686,13 @@ const Admin = () => {
                   <span className="xs:hidden">Rev</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("books") && (
+                <TabsTrigger value="books" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <BookOpen className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">Books</span>
+                  <span className="xs:hidden">Book</span>
+                </TabsTrigger>
+              )}
               {visibleTabs.includes("team") && (
                 <TabsTrigger value="team" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                   <UsersRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
