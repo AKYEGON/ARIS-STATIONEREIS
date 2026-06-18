@@ -41,7 +41,14 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                 <span className="hidden lg:inline">Deals</span>
               </Button>
             </Link>
-            
+
+            <Link to="/books">
+              <Button variant="outline" size="sm">
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span className="hidden lg:inline">Books</span>
+              </Button>
+            </Link>
+
             <Link to="/testimonials">
               <Button variant="outline" size="sm">
                 <Users className="h-4 w-4 mr-2" />
