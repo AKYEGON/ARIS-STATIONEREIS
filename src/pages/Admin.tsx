@@ -29,6 +29,7 @@ import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
+import { BooksAdminTab } from "@/components/admin/BooksAdminTab";
 import { ProductCoursesDialog } from "@/components/admin/ProductCoursesDialog";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
