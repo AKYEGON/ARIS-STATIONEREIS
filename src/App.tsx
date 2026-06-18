@@ -18,6 +18,9 @@ import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryLanding from "./pages/CategoryLanding";
 import ReviewSubmit from "./pages/ReviewSubmit";
+import Books from "./pages/Books";
+import BookDetail from "./pages/BookDetail";
+import MyReservations from "./pages/MyReservations";
 import ScrollToTop from "./components/common/ScrollToTop";
 
 const queryClient = new QueryClient();
