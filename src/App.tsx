@@ -50,6 +50,9 @@ const App = () => {
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
                 <Route path="/review/:token" element={<ReviewSubmit />} />
+                <Route path="/books" element={<Books />} />
+                <Route path="/books/my-reservations" element={<MyReservations />} />
+                <Route path="/books/:slug" element={<BookDetail />} />
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>
