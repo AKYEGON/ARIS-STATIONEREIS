@@ -69,14 +69,14 @@ const Books = () => {
             <div className="flex items-center gap-2">
               <span className="h-px w-8 bg-primary" />
               <span className="text-primary font-bold text-[11px] uppercase tracking-[0.2em]">
-                Aris Literati Selection
+                This Week's Read
               </span>
             </div>
             <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 leading-[1.05]">
               Book of the Week
             </h1>
-            <p className="text-stone-500 text-sm max-w-md leading-relaxed">
-              A curated pick every Thursday. Reserve with a deposit, collect on handover day.
+            <p className="text-stone-600 text-sm max-w-md leading-relaxed">
+              A new book every Thursday. Pay a small deposit to hold your copy, then pick it up or have it delivered.
             </p>
           </div>
           {featured && (
