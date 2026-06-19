@@ -197,3 +197,7 @@ All colors MUST be HSL.
 body.stories-open [data-bottom-nav] {
   display: none !important;
 }
+
+/* Hide horizontal scrollbar on snap rails */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
