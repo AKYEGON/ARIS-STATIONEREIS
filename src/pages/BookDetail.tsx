@@ -67,6 +67,9 @@ const BookDetail = () => {
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+
 
   useEffect(() => {
     (async () => {
