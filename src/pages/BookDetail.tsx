@@ -55,12 +55,13 @@ const BookDetail = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university" | "agent">("pickup");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
   const [pickupOutlet, setPickupOutlet] = useState("");
   const [university, setUniversity] = useState("");
   const [campusBranch, setCampusBranch] = useState("");
   const [agentZone, setAgentZone] = useState("");
-  const [agentAddress, setAgentAddress] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
