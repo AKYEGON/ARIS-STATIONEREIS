@@ -110,6 +110,10 @@ export const BooksAdminTab = () => {
   // reservation filter
   const [resFilterBook, setResFilterBook] = useState<string>("all");
 
+  // whatsapp modal
+  const [waOpen, setWaOpen] = useState(false);
+  const [waReservation, setWaReservation] = useState<Reservation | null>(null);
+
   const loadAll = async () => {
     setLoading(true);
     const [g, b, r] = await Promise.all([
