@@ -77,15 +77,17 @@ const BookDetail = () => {
       setBook((data as any) || null);
       setLoading(false);
 
-      const [o, u] = await Promise.all([
+      const [o, u, z] = await Promise.all([
         supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
         supabase
           .from("universities")
           .select("id, name, campus_branches(id, name, is_active, display_order)")
           .eq("is_active", true)
           .order("display_order"),
+        supabase.from("agent_zones").select("id, name").eq("is_active", true).order("display_order"),
       ]);
       if (o.data) setOutlets(o.data);
+      if (z.data) setAgentZones(z.data);
       if (u.data) {
         setUniversities(
           (u.data as any[]).map((uni) => ({
@@ -98,6 +100,7 @@ const BookDetail = () => {
           })),
         );
       }
+
     })();
   }, [slug]);
 
