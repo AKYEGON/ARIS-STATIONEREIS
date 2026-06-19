@@ -1,30 +1,15 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import {
-  ArrowLeft,
-  ArrowRight,
-  BookOpen,
-  CheckCircle2,
-  Clock,
-  Users,
-  MapPin,
-  Calendar,
-  Bike,
-  ChevronDown,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, BookOpen, Clock, Users, Calendar, ChevronDown } from "lucide-react";
 import CountdownTimer from "@/components/products/CountdownTimer";
 import SEO from "@/components/common/SEO";
-import { toast } from "@/hooks/use-toast";
-
+import BookReservationPanel from "@/components/books/BookReservationPanel";
 
 type Book = {
   id: string;
@@ -45,35 +30,16 @@ type Book = {
 
 const BookDetail = () => {
   const { slug } = useParams();
-  const navigate = useNavigate();
   const { getCartItemCount } = useCart();
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
-  const [outlets, setOutlets] = useState<{ id: string; name: string; location: string | null }[]>([]);
-  const [universities, setUniversities] = useState<{ id: string; name: string; branches: { id: string; name: string }[] }[]>([]);
-  const [agentZones, setAgentZones] = useState<{ id: string; name: string }[]>([]);
-
-  const [paymentType, setPaymentType] = useState<"deposit" | "full">("deposit");
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
-  const [pickupOutlet, setPickupOutlet] = useState("");
-  const [university, setUniversity] = useState("");
-  const [campusBranch, setCampusBranch] = useState("");
-  const [agentZone, setAgentZone] = useState("");
-  const [deliveryAddress, setDeliveryAddress] = useState("");
-
-
-  const [submitting, setSubmitting] = useState(false);
-  const [success, setSuccess] = useState<string | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [synopsisExpanded, setSynopsisExpanded] = useState(false);
 
-
   useEffect(() => {
     (async () => {
-      const isUuid = !!slug && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      const isUuid =
+        !!slug && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
       const filter = isUuid ? `slug.eq.${slug},id.eq.${slug}` : `slug.eq.${slug}`;
       const { data } = await supabase
         .from("books")
@@ -82,88 +48,17 @@ const BookDetail = () => {
         .maybeSingle();
       setBook((data as any) || null);
       setLoading(false);
-
-      const [o, u, z] = await Promise.all([
-        supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
-        supabase
-          .from("universities")
-          .select("id, name, campus_branches(id, name, is_active, display_order)")
-          .eq("is_active", true)
-          .order("display_order"),
-        supabase.from("agent_zones").select("id, name").eq("is_active", true).order("display_order"),
-      ]);
-      if (o.data) setOutlets(o.data);
-      if (z.data) setAgentZones(z.data);
-      if (u.data) {
-        setUniversities(
-          (u.data as any[]).map((uni) => ({
-            id: uni.id,
-            name: uni.name,
-            branches: (uni.campus_branches || [])
-              .filter((b: any) => b.is_active)
-              .sort((a: any, b: any) => a.display_order - b.display_order)
-              .map((b: any) => ({ id: b.id, name: b.name })),
-          })),
-        );
-      }
-
     })();
   }, [slug]);
-
-  const reserve = async () => {
-    if (!book) return;
-    if (!name.trim() || !phone.trim()) {
-      return toast({ title: "Name and phone are required", variant: "destructive" });
-    }
-    if (!university) {
-      return toast({ title: "Select a university/location", variant: "destructive" });
-    }
-    const selectedUni = universities.find((u) => u.name === university);
-    if (selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
-      return toast({ title: "Select a campus branch", variant: "destructive" });
-    }
-    if (deliveryMethod === "pickup" && !pickupOutlet) {
-      return toast({ title: "Select a pickup outlet", variant: "destructive" });
-    }
-    if (deliveryMethod === "delivery" && !deliveryAddress.trim()) {
-      return toast({ title: "Enter your delivery address", variant: "destructive" });
-    }
-    if (deliveryMethod === "delivery" && agentZones.length > 0 && !agentZone) {
-      return toast({ title: "Select an agent zone", variant: "destructive" });
-    }
-
-    setSubmitting(true);
-    const delivery_details =
-      deliveryMethod === "pickup"
-        ? { outlet: pickupOutlet, university, branch: campusBranch || null }
-        : { address: deliveryAddress.trim(), university, branch: campusBranch || null, zone: agentZone || null };
-
-
-    const { data, error } = await supabase.rpc("reserve_book_slot", {
-      p_book_id: book.id,
-      p_customer_name: name.trim(),
-      p_customer_phone: phone.trim(),
-      p_customer_email: email.trim() || null,
-      p_payment_type: paymentType,
-      p_delivery_method: deliveryMethod,
-      p_delivery_details: delivery_details,
-    });
-    setSubmitting(false);
-
-    if (error) {
-      return toast({ title: "Reservation failed", description: error.message, variant: "destructive" });
-    }
-    const reservationId = (data as any)?.id;
-    setSuccess(reservationId);
-    toast({ title: "Slot reserved", description: "We will contact you on WhatsApp to confirm payment." });
-  };
 
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col bg-[#fafaf9]">
         <Header cartItemCount={getCartItemCount()} />
         <main className="flex-1 container mx-auto px-4 py-12 grid lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-5"><Skeleton className="aspect-[3/4] rounded-lg" /></div>
+          <div className="lg:col-span-5">
+            <Skeleton className="aspect-[3/4] rounded-lg" />
+          </div>
           <div className="lg:col-span-7 space-y-4">
             <Skeleton className="h-6 w-24" />
             <Skeleton className="h-12 w-3/4" />
@@ -194,9 +89,9 @@ const BookDetail = () => {
   const left = book.slots_total - book.slots_reserved;
   const soldOut = left <= 0;
   const closed = book.status !== "open";
-  const amount = paymentType === "deposit" ? book.deposit_amount : book.full_price;
-  const balance = paymentType === "deposit" ? book.full_price - book.deposit_amount : 0;
   const pct = Math.min(100, (book.slots_reserved / book.slots_total) * 100);
+  const canReserve = !closed && !soldOut;
+  const synopsisIsLong = (book.synopsis?.length || 0) > 180;
 
   return (
     <div className="min-h-screen flex flex-col bg-[#fafaf9]">
@@ -209,15 +104,103 @@ const BookDetail = () => {
       />
       <Header cartItemCount={getCartItemCount()} />
 
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-10 pb-20">
+      <main className="flex-1 container mx-auto px-4 py-5 md:py-10 pb-[calc(64px+env(safe-area-inset-bottom)+72px)] md:pb-20">
         <Link
           to="/books"
-          className="inline-flex items-center text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-primary mb-6 md:mb-10 transition-colors"
+          className="inline-flex items-center text-[11px] md:text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-primary mb-4 md:mb-10 transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5 mr-2" /> The Shelf
         </Link>
 
-        <article className="grid lg:grid-cols-12 gap-8 md:gap-12">
+        {/* ─── MOBILE COMPACT HERO ─── */}
+        <section className="md:hidden animate-fade-in">
+          <div className="flex gap-4">
+            <div className="relative shrink-0 w-[44vw] max-w-[180px]">
+              <div className="absolute -inset-2 bg-primary/5 rounded-xl rotate-1" />
+              <div className="relative aspect-[3/4] bg-stone-200 rounded-md overflow-hidden shadow-xl">
+                {book.cover_url ? (
+                  <img
+                    src={book.cover_url}
+                    alt={`${book.title} cover`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <BookOpen className="h-10 w-10 text-stone-400" />
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 flex flex-col justify-center space-y-2">
+              {book.book_genres?.name && (
+                <span className="inline-block self-start px-2 py-0.5 bg-stone-100 text-stone-600 rounded-full text-[10px] font-bold uppercase tracking-wider italic">
+                  {book.book_genres.name}
+                </span>
+              )}
+              <h1 className="font-serif text-xl font-bold text-stone-900 leading-tight line-clamp-3">
+                {book.title}
+              </h1>
+              <p className="text-sm text-stone-500 italic font-serif line-clamp-1">by {book.author}</p>
+              <div className="flex items-center gap-1.5 text-[11px] text-stone-600 pt-1">
+                <Clock className="w-3 h-3" />
+                <CountdownTimer endsAt={book.week_ends_at} compact />
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] text-stone-600">
+                <Users className="w-3 h-3" />
+                <span>
+                  <strong>{left}</strong> of {book.slots_total} left
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Slim slot bar */}
+          <div className="mt-4 h-1 bg-stone-100 rounded-full overflow-hidden">
+            <div
+              className={`h-full transition-all duration-700 ${
+                left <= 5 && !soldOut ? "bg-red-500 animate-pulse" : "bg-primary"
+              }`}
+              style={{ width: `${pct}%` }}
+            />
+          </div>
+
+          {/* Synopsis — collapsible */}
+          {book.synopsis && (
+            <div className="mt-5 border-l-2 border-primary pl-4">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">
+                The Synopsis
+              </p>
+              <p
+                className={`text-stone-700 leading-relaxed text-sm whitespace-pre-line ${
+                  !synopsisExpanded && synopsisIsLong ? "line-clamp-4" : ""
+                }`}
+              >
+                {book.synopsis}
+              </p>
+              {synopsisIsLong && (
+                <button
+                  onClick={() => setSynopsisExpanded((v) => !v)}
+                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary uppercase tracking-wider"
+                >
+                  {synopsisExpanded ? "Show less" : "Read more"}
+                  <ChevronDown
+                    className={`w-3 h-3 transition-transform ${synopsisExpanded ? "rotate-180" : ""}`}
+                  />
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Inline-only success / closed state for mobile */}
+          {(closed || soldOut) && (
+            <div className="mt-6">
+              <BookReservationPanel book={book} compact />
+            </div>
+          )}
+        </section>
+
+        {/* ─── DESKTOP/TABLET LAYOUT ─── */}
+        <article className="hidden md:grid lg:grid-cols-12 gap-8 md:gap-12">
           {/* Cover */}
           <div className="lg:col-span-5">
             <div className="relative group lg:sticky lg:top-24">
@@ -267,7 +250,6 @@ const BookDetail = () => {
               <p className="text-xl text-stone-500 italic font-serif">by {book.author}</p>
             </header>
 
-            {/* Synopsis — editorial pull */}
             {book.synopsis && (
               <section className="border-l-2 border-primary pl-5 md:pl-6">
                 <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-3">
@@ -279,7 +261,6 @@ const BookDetail = () => {
               </section>
             )}
 
-            {/* Logistics strip */}
             <section className="grid grid-cols-3 gap-4 py-5 border-y border-stone-200">
               <div>
                 <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 flex items-center gap-1">
@@ -314,310 +295,61 @@ const BookDetail = () => {
               </div>
             </section>
 
-            {/* Reservation */}
-            {success ? (
-              <section className="bg-white border border-primary/30 rounded-2xl p-6 md:p-8 space-y-3">
-                <div className="flex items-center gap-2 text-primary">
-                  <CheckCircle2 className="h-6 w-6" />
-                  <p className="font-serif text-xl font-bold">Slot reserved</p>
-                </div>
-                <p className="text-sm text-stone-600">
-                  Reservation ID: <code className="text-xs bg-stone-100 px-2 py-0.5 rounded">{success.slice(0, 8)}</code>
-                </p>
-                <p className="text-sm text-stone-600">
-                  We will send an M-Pesa prompt to <strong className="text-stone-900">{phone}</strong> for KSh{" "}
-                  {amount.toLocaleString()}.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3 pt-3">
-                  <Link
-                    to={`/books/my-reservations?phone=${encodeURIComponent(phone)}`}
-                    className="flex-1"
-                  >
-                    <button className="w-full border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-bold py-3 rounded-xl text-xs uppercase tracking-[0.2em] transition-colors">
-                      My Reservations
-                    </button>
-                  </Link>
-                  <Link to="/books" className="flex-1">
-                    <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-xl text-xs uppercase tracking-[0.2em]">
-                      Back to the Shelf
-                    </button>
-                  </Link>
-                </div>
-              </section>
-            ) : closed || soldOut ? (
-              <section className="bg-white border border-stone-200 rounded-2xl p-8 text-center">
-                <p className="font-serif text-xl font-bold text-stone-900 mb-1">
-                  {soldOut ? "All slots taken" : "Reservations closed"}
-                </p>
-                <p className="text-sm text-stone-500">
-                  New picks every week. Pop back then for fresh reading.
-                </p>
-              </section>
-            ) : (
-              <section className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
-                {/* Payment choice */}
-                <div className="p-6 md:p-8 bg-stone-50 border-b border-stone-200">
-                  <h3 className="text-xs font-bold text-stone-900 uppercase tracking-widest mb-5">
-                    Choose Your Reservation
-                  </h3>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setPaymentType("deposit")}
-                      className={`text-left relative flex flex-col p-5 border-2 rounded-xl transition-all ${
-                        paymentType === "deposit"
-                          ? "border-primary bg-primary/5"
-                          : "border-stone-200 hover:border-primary/30"
-                      }`}
-                    >
-                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">
-                        Secure Deposit
-                      </span>
-                      <span className="text-2xl font-bold text-stone-900">
-                        KSh {book.deposit_amount.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-stone-500 mt-1">
-                        Balance KSh {(book.full_price - book.deposit_amount).toLocaleString()} on handover
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPaymentType("full")}
-                      className={`text-left relative flex flex-col p-5 border-2 rounded-xl transition-all ${
-                        paymentType === "full"
-                          ? "border-primary bg-primary/5"
-                          : "border-stone-200 hover:border-primary/30"
-                      }`}
-                    >
-                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">
-                        Full Purchase
-                      </span>
-                      <span className="text-2xl font-bold text-stone-900">
-                        KSh {book.full_price.toLocaleString()}
-                      </span>
-                      <span className="text-[10px] text-stone-500 mt-1">Priority handover</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Customer details */}
-                <div className="p-6 md:p-8 space-y-5">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        Your Name
-                      </Label>
-                      <Input
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder="Jane Wanjiku"
-                        className="bg-stone-50 border-stone-200"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        Phone (M-Pesa)
-                      </Label>
-                      <Input
-                        type="tel"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        placeholder="07XX XXX XXX"
-                        className="bg-stone-50 border-stone-200"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                      Email (optional)
-                    </Label>
-                    <Input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="bg-stone-50 border-stone-200"
-                    />
-                  </div>
-
-                  {/* University + branch (always required, like store checkout) */}
-                  <div className="space-y-3">
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        University / Location
-                      </Label>
-                      <Select
-                        value={university}
-                        onValueChange={(v) => {
-                          setUniversity(v);
-                          setCampusBranch("");
-                        }}
-                      >
-                        <SelectTrigger className="bg-stone-50 border-stone-200">
-                          <SelectValue placeholder="Select university/location" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {universities.map((u) => (
-                            <SelectItem key={u.id} value={u.name}>
-                              {u.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    {(() => {
-                      const selected = universities.find((u) => u.name === university);
-                      if (!selected || selected.branches.length === 0) return null;
-                      return (
-                        <div className="space-y-1.5">
-                          <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                            Campus Branch
-                          </Label>
-                          <Select value={campusBranch} onValueChange={setCampusBranch}>
-                            <SelectTrigger className="bg-stone-50 border-stone-200">
-                              <SelectValue placeholder="Choose branch" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {selected.branches.map((b) => (
-                                <SelectItem key={b.id} value={b.name}>
-                                  {b.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* Delivery method */}
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                      Handover Method
-                    </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryMethod("pickup")}
-                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
-                          deliveryMethod === "pickup"
-                            ? "border-primary bg-primary/5 text-primary"
-                            : "border-stone-200 text-stone-600 hover:border-primary/30"
-                        }`}
-                      >
-                        <MapPin className="w-4 h-4" /> Pickup
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryMethod("delivery")}
-                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
-                          deliveryMethod === "delivery"
-                            ? "border-primary bg-primary/5 text-primary"
-                            : "border-stone-200 text-stone-600 hover:border-primary/30"
-                        }`}
-                      >
-                        <Bike className="w-4 h-4" /> Delivery
-                      </button>
-                    </div>
-                  </div>
-
-                  {deliveryMethod === "pickup" && (
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        Pickup Outlet
-                      </Label>
-                      <Select value={pickupOutlet} onValueChange={setPickupOutlet}>
-                        <SelectTrigger className="bg-stone-50 border-stone-200">
-                          <SelectValue placeholder="Choose outlet" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {outlets.map((o) => (
-                            <SelectItem key={o.id} value={o.name}>
-                              {o.name}
-                              {o.location ? ` — ${o.location}` : ""}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
-                  {deliveryMethod === "delivery" && (
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                          Delivery Address
-                        </Label>
-                        <Input
-                          value={deliveryAddress}
-                          onChange={(e) => setDeliveryAddress(e.target.value)}
-                          placeholder="Building, room number, landmarks…"
-                          className="bg-stone-50 border-stone-200"
-                        />
-                      </div>
-                      {agentZones.length > 0 && (
-                        <div className="space-y-1.5">
-                          <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                            Agent Zone
-                          </Label>
-                          <Select value={agentZone} onValueChange={setAgentZone}>
-                            <SelectTrigger className="bg-stone-50 border-stone-200">
-                              <SelectValue placeholder="Choose your zone" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {agentZones.map((z) => (
-                                <SelectItem key={z.id} value={z.name}>
-                                  {z.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-
-
-
-                  {/* Total summary */}
-                  <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-1.5">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">
-                        You pay now
-                      </span>
-                      <span className="text-2xl font-bold text-primary">
-                        KSh {amount.toLocaleString()}
-                      </span>
-                    </div>
-                    {balance > 0 && (
-                      <div className="flex justify-between text-xs text-stone-500">
-                        <span>Balance on handover day</span>
-                        <span className="font-semibold">KSh {balance.toLocaleString()}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={reserve}
-                    disabled={submitting}
-                    className="w-full bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/20 uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2"
-                  >
-                    {submitting ? "Reserving…" : `Confirm Reservation`}
-                    {!submitting && <ArrowRight className="w-4 h-4" />}
-                  </button>
-
-                  <p className="text-center text-[10px] text-stone-400 font-medium leading-relaxed">
-                    By reserving, you agree that an unclaimed deposit becomes store credit usable on any product.
-                  </p>
-                </div>
-              </section>
-            )}
+            <BookReservationPanel book={book} />
           </div>
         </article>
       </main>
+
+      {/* ─── MOBILE STICKY RESERVE BAR ─── */}
+      {canReserve && (
+        <div
+          className="md:hidden fixed left-0 right-0 z-[90] bg-white border-t border-stone-200 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] animate-fade-in"
+          style={{
+            bottom: "calc(env(safe-area-inset-bottom, 0px) + clamp(52px, 8vh, 64px))",
+          }}
+        >
+          <div className="px-4 py-3 flex items-center gap-3">
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none">
+                Deposit from
+              </p>
+              <p className="text-lg font-bold text-stone-900 leading-tight">
+                KSh {book.deposit_amount.toLocaleString()}
+              </p>
+            </div>
+            <button
+              onClick={() => setSheetOpen(true)}
+              className="flex-1 bg-primary hover:bg-primary/90 active:scale-[0.98] text-primary-foreground font-bold py-3 rounded-xl transition-all shadow-md shadow-primary/20 uppercase tracking-[0.15em] text-[11px] flex items-center justify-center gap-1.5"
+            >
+              Reserve <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ─── MOBILE BOTTOM-SHEET DRAWER ─── */}
+      <Drawer open={sheetOpen} onOpenChange={setSheetOpen}>
+        <DrawerContent className="max-h-[92vh]">
+          <DrawerHeader className="px-4 pt-2 pb-3 text-left">
+            <DrawerTitle className="font-serif text-xl font-bold text-stone-900">
+              Reserve your copy
+            </DrawerTitle>
+            <p className="text-xs text-stone-500 line-clamp-1">
+              {book.title} · by {book.author}
+            </p>
+          </DrawerHeader>
+          <div className="overflow-y-auto px-4 pb-6">
+            <BookReservationPanel
+              book={book}
+              compact
+              onReserved={() => {
+                // Keep open so the user sees the success state, then auto-close after a beat
+                setTimeout(() => setSheetOpen(false), 3500);
+              }}
+            />
+          </div>
+        </DrawerContent>
+      </Drawer>
 
       <Footer />
     </div>
