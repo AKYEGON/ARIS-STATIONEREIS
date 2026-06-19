@@ -49,15 +49,19 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(true);
   const [outlets, setOutlets] = useState<{ id: string; name: string; location: string | null }[]>([]);
   const [universities, setUniversities] = useState<{ id: string; name: string; branches: { id: string; name: string }[] }[]>([]);
+  const [agentZones, setAgentZones] = useState<{ id: string; name: string }[]>([]);
 
   const [paymentType, setPaymentType] = useState<"deposit" | "full">("deposit");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university">("pickup");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university" | "agent">("pickup");
   const [pickupOutlet, setPickupOutlet] = useState("");
   const [university, setUniversity] = useState("");
   const [campusBranch, setCampusBranch] = useState("");
+  const [agentZone, setAgentZone] = useState("");
+  const [agentAddress, setAgentAddress] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
 
