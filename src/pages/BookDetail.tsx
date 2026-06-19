@@ -55,12 +55,13 @@ const BookDetail = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university" | "agent">("pickup");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "delivery">("pickup");
   const [pickupOutlet, setPickupOutlet] = useState("");
   const [university, setUniversity] = useState("");
   const [campusBranch, setCampusBranch] = useState("");
   const [agentZone, setAgentZone] = useState("");
-  const [agentAddress, setAgentAddress] = useState("");
+  const [deliveryAddress, setDeliveryAddress] = useState("");
+
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
@@ -109,27 +110,29 @@ const BookDetail = () => {
     if (!name.trim() || !phone.trim()) {
       return toast({ title: "Name and phone are required", variant: "destructive" });
     }
+    if (!university) {
+      return toast({ title: "Select a university/location", variant: "destructive" });
+    }
+    const selectedUni = universities.find((u) => u.name === university);
+    if (selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
+      return toast({ title: "Select a campus branch", variant: "destructive" });
+    }
     if (deliveryMethod === "pickup" && !pickupOutlet) {
       return toast({ title: "Select a pickup outlet", variant: "destructive" });
     }
-    if (deliveryMethod === "university" && !university) {
-      return toast({ title: "Select a university", variant: "destructive" });
+    if (deliveryMethod === "delivery" && !deliveryAddress.trim()) {
+      return toast({ title: "Enter your delivery address", variant: "destructive" });
     }
-    const selectedUni = universities.find((u) => u.name === university);
-    if (deliveryMethod === "university" && selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
-      return toast({ title: "Select a campus branch", variant: "destructive" });
-    }
-    if (deliveryMethod === "agent" && !agentZone) {
-      return toast({ title: "Select a delivery zone", variant: "destructive" });
+    if (deliveryMethod === "delivery" && agentZones.length > 0 && !agentZone) {
+      return toast({ title: "Select an agent zone", variant: "destructive" });
     }
 
     setSubmitting(true);
     const delivery_details =
       deliveryMethod === "pickup"
-        ? { outlet: pickupOutlet }
-        : deliveryMethod === "university"
-        ? { university, branch: campusBranch || null }
-        : { zone: agentZone, address: agentAddress.trim() || null };
+        ? { outlet: pickupOutlet, university, branch: campusBranch || null }
+        : { address: deliveryAddress.trim(), university, branch: campusBranch || null, zone: agentZone || null };
+
 
     const { data, error } = await supabase.rpc("reserve_book_slot", {
       p_book_id: book.id,
@@ -433,44 +436,84 @@ const BookDetail = () => {
                     />
                   </div>
 
-                  {/* Delivery */}
+                  {/* University + branch (always required, like store checkout) */}
+                  <div className="space-y-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                        University / Location
+                      </Label>
+                      <Select
+                        value={university}
+                        onValueChange={(v) => {
+                          setUniversity(v);
+                          setCampusBranch("");
+                        }}
+                      >
+                        <SelectTrigger className="bg-stone-50 border-stone-200">
+                          <SelectValue placeholder="Select university/location" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {universities.map((u) => (
+                            <SelectItem key={u.id} value={u.name}>
+                              {u.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {(() => {
+                      const selected = universities.find((u) => u.name === university);
+                      if (!selected || selected.branches.length === 0) return null;
+                      return (
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                            Campus Branch
+                          </Label>
+                          <Select value={campusBranch} onValueChange={setCampusBranch}>
+                            <SelectTrigger className="bg-stone-50 border-stone-200">
+                              <SelectValue placeholder="Choose branch" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {selected.branches.map((b) => (
+                                <SelectItem key={b.id} value={b.name}>
+                                  {b.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Delivery method */}
                   <div className="space-y-2">
                     <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                       Handover Method
                     </Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-3">
                       <button
                         type="button"
                         onClick={() => setDeliveryMethod("pickup")}
-                        className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all ${
+                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
                           deliveryMethod === "pickup"
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-stone-200 text-stone-600 hover:border-primary/30"
                         }`}
                       >
-                        <MapPin className="w-4 h-4" /> Outlet
+                        <MapPin className="w-4 h-4" /> Pickup
                       </button>
                       <button
                         type="button"
-                        onClick={() => setDeliveryMethod("university")}
-                        className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all ${
-                          deliveryMethod === "university"
+                        onClick={() => setDeliveryMethod("delivery")}
+                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                          deliveryMethod === "delivery"
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-stone-200 text-stone-600 hover:border-primary/30"
                         }`}
                       >
-                        <BookOpen className="w-4 h-4" /> University
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setDeliveryMethod("agent")}
-                        className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all ${
-                          deliveryMethod === "agent"
-                            ? "border-primary bg-primary/5 text-primary"
-                            : "border-stone-200 text-stone-600 hover:border-primary/30"
-                        }`}
-                      >
-                        <Bike className="w-4 h-4" /> Agent
+                        <Bike className="w-4 h-4" /> Delivery
                       </button>
                     </div>
                   </div>
@@ -478,7 +521,7 @@ const BookDetail = () => {
                   {deliveryMethod === "pickup" && (
                     <div className="space-y-1.5">
                       <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        Collection Point
+                        Pickup Outlet
                       </Label>
                       <Select value={pickupOutlet} onValueChange={setPickupOutlet}>
                         <SelectTrigger className="bg-stone-50 border-stone-200">
@@ -496,105 +539,42 @@ const BookDetail = () => {
                     </div>
                   )}
 
-                  {deliveryMethod === "university" && (
+                  {deliveryMethod === "delivery" && (
                     <div className="space-y-3">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                          University
-                        </Label>
-                        <Select
-                          value={university}
-                          onValueChange={(v) => {
-                            setUniversity(v);
-                            setCampusBranch("");
-                          }}
-                        >
-                          <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Choose university" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {universities.map((u) => (
-                              <SelectItem key={u.id} value={u.name}>
-                                {u.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {(() => {
-                        const selected = universities.find((u) => u.name === university);
-                        if (!selected) return null;
-                        if (selected.branches.length === 0) {
-                          return (
-                            <p className="text-[11px] text-stone-500 italic">
-                              We'll coordinate the handover point with you on WhatsApp.
-                            </p>
-                          );
-                        }
-                        return (
-                          <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                              Campus Branch
-                            </Label>
-                            <Select value={campusBranch} onValueChange={setCampusBranch}>
-                              <SelectTrigger className="bg-stone-50 border-stone-200">
-                                <SelectValue placeholder="Choose branch" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {selected.branches.map((b) => (
-                                  <SelectItem key={b.id} value={b.name}>
-                                    {b.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  )}
-
-                  {deliveryMethod === "agent" && (
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                          Delivery Zone
-                        </Label>
-                        <Select value={agentZone} onValueChange={setAgentZone}>
-                          <SelectTrigger className="bg-stone-50 border-stone-200">
-                            <SelectValue placeholder="Choose your zone" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {agentZones.map((z) => (
-                              <SelectItem key={z.id} value={z.name}>
-                                {z.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        {agentZones.length === 0 && (
-                          <p className="text-[11px] text-stone-500 italic">
-                            No agent zones available yet — try pickup or university.
-                          </p>
-                        )}
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                          Drop-off Details (optional)
+                          Delivery Address
                         </Label>
                         <Input
-                          value={agentAddress}
-                          onChange={(e) => setAgentAddress(e.target.value)}
-                          placeholder="Estate, building, landmark…"
+                          value={deliveryAddress}
+                          onChange={(e) => setDeliveryAddress(e.target.value)}
+                          placeholder="Building, room number, landmarks…"
                           className="bg-stone-50 border-stone-200"
                         />
-                        <p className="text-[11px] text-stone-500 italic">
-                          Our agent will WhatsApp you to confirm the exact drop-off point.
-                        </p>
                       </div>
+                      {agentZones.length > 0 && (
+                        <div className="space-y-1.5">
+                          <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                            Agent Zone
+                          </Label>
+                          <Select value={agentZone} onValueChange={setAgentZone}>
+                            <SelectTrigger className="bg-stone-50 border-stone-200">
+                              <SelectValue placeholder="Choose your zone" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {agentZones.map((z) => (
+                                <SelectItem key={z.id} value={z.name}>
+                                  {z.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
                     </div>
                   )}
+
+
 
 
                   {/* Total summary */}
