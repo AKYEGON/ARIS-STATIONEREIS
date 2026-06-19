@@ -390,8 +390,22 @@ const Index = () => {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12 sm:py-16">
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">No products found</p>
+          <div className="text-center py-12 sm:py-16 space-y-4">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
+              No products found{searchQuery ? <> for "<span className="font-medium text-foreground">{searchQuery}</span>"</> : null}
+            </p>
+            {(searchQuery || selectedCategory !== "all") && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("all");
+                  try { sessionStorage.removeItem(SEARCH_STORAGE_KEY); } catch {}
+                }}
+              >
+                Show all products
+              </Button>
+            )}
           </div>
         ) : (
           <>
