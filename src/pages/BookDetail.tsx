@@ -110,27 +110,29 @@ const BookDetail = () => {
     if (!name.trim() || !phone.trim()) {
       return toast({ title: "Name and phone are required", variant: "destructive" });
     }
+    if (!university) {
+      return toast({ title: "Select a university/location", variant: "destructive" });
+    }
+    const selectedUni = universities.find((u) => u.name === university);
+    if (selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
+      return toast({ title: "Select a campus branch", variant: "destructive" });
+    }
     if (deliveryMethod === "pickup" && !pickupOutlet) {
       return toast({ title: "Select a pickup outlet", variant: "destructive" });
     }
-    if (deliveryMethod === "university" && !university) {
-      return toast({ title: "Select a university", variant: "destructive" });
+    if (deliveryMethod === "delivery" && !deliveryAddress.trim()) {
+      return toast({ title: "Enter your delivery address", variant: "destructive" });
     }
-    const selectedUni = universities.find((u) => u.name === university);
-    if (deliveryMethod === "university" && selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
-      return toast({ title: "Select a campus branch", variant: "destructive" });
-    }
-    if (deliveryMethod === "agent" && !agentZone) {
-      return toast({ title: "Select a delivery zone", variant: "destructive" });
+    if (deliveryMethod === "delivery" && agentZones.length > 0 && !agentZone) {
+      return toast({ title: "Select an agent zone", variant: "destructive" });
     }
 
     setSubmitting(true);
     const delivery_details =
       deliveryMethod === "pickup"
-        ? { outlet: pickupOutlet }
-        : deliveryMethod === "university"
-        ? { university, branch: campusBranch || null }
-        : { zone: agentZone, address: agentAddress.trim() || null };
+        ? { outlet: pickupOutlet, university, branch: campusBranch || null }
+        : { address: deliveryAddress.trim(), university, branch: campusBranch || null, zone: agentZone || null };
+
 
     const { data, error } = await supabase.rpc("reserve_book_slot", {
       p_book_id: book.id,
