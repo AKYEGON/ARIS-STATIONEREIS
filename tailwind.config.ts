@@ -22,6 +22,9 @@ export default {
         'xs': '375px',
         '3xl': '1600px',
       },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
