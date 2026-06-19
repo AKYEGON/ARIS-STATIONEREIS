@@ -17,6 +17,8 @@ import {
   Users,
   MapPin,
   Calendar,
+  Bike,
+
 } from "lucide-react";
 import CountdownTimer from "@/components/products/CountdownTimer";
 import SEO from "@/components/common/SEO";
@@ -47,15 +49,19 @@ const BookDetail = () => {
   const [loading, setLoading] = useState(true);
   const [outlets, setOutlets] = useState<{ id: string; name: string; location: string | null }[]>([]);
   const [universities, setUniversities] = useState<{ id: string; name: string; branches: { id: string; name: string }[] }[]>([]);
+  const [agentZones, setAgentZones] = useState<{ id: string; name: string }[]>([]);
 
   const [paymentType, setPaymentType] = useState<"deposit" | "full">("deposit");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university">("pickup");
+  const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university" | "agent">("pickup");
   const [pickupOutlet, setPickupOutlet] = useState("");
   const [university, setUniversity] = useState("");
   const [campusBranch, setCampusBranch] = useState("");
+  const [agentZone, setAgentZone] = useState("");
+  const [agentAddress, setAgentAddress] = useState("");
+
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -71,15 +77,17 @@ const BookDetail = () => {
       setBook((data as any) || null);
       setLoading(false);
 
-      const [o, u] = await Promise.all([
+      const [o, u, z] = await Promise.all([
         supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
         supabase
           .from("universities")
           .select("id, name, campus_branches(id, name, is_active, display_order)")
           .eq("is_active", true)
           .order("display_order"),
+        supabase.from("agent_zones").select("id, name").eq("is_active", true).order("display_order"),
       ]);
       if (o.data) setOutlets(o.data);
+      if (z.data) setAgentZones(z.data);
       if (u.data) {
         setUniversities(
           (u.data as any[]).map((uni) => ({
@@ -92,6 +100,7 @@ const BookDetail = () => {
           })),
         );
       }
+
     })();
   }, [slug]);
 
@@ -110,12 +119,18 @@ const BookDetail = () => {
     if (deliveryMethod === "university" && selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
       return toast({ title: "Select a campus branch", variant: "destructive" });
     }
+    if (deliveryMethod === "agent" && !agentZone) {
+      return toast({ title: "Select a delivery zone", variant: "destructive" });
+    }
 
     setSubmitting(true);
     const delivery_details =
       deliveryMethod === "pickup"
         ? { outlet: pickupOutlet }
-        : { university, branch: campusBranch || null };
+        : deliveryMethod === "university"
+        ? { university, branch: campusBranch || null }
+        : { zone: agentZone, address: agentAddress.trim() || null };
+
     const { data, error } = await supabase.rpc("reserve_book_slot", {
       p_book_id: book.id,
       p_customer_name: name.trim(),
@@ -423,11 +438,11 @@ const BookDetail = () => {
                     <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                       Handover Method
                     </Label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         type="button"
                         onClick={() => setDeliveryMethod("pickup")}
-                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                        className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all ${
                           deliveryMethod === "pickup"
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-stone-200 text-stone-600 hover:border-primary/30"
@@ -438,7 +453,7 @@ const BookDetail = () => {
                       <button
                         type="button"
                         onClick={() => setDeliveryMethod("university")}
-                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                        className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all ${
                           deliveryMethod === "university"
                             ? "border-primary bg-primary/5 text-primary"
                             : "border-stone-200 text-stone-600 hover:border-primary/30"
@@ -446,10 +461,21 @@ const BookDetail = () => {
                       >
                         <BookOpen className="w-4 h-4" /> University
                       </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryMethod("agent")}
+                        className={`flex flex-col items-center justify-center gap-1 p-3 rounded-xl border-2 text-xs font-semibold transition-all ${
+                          deliveryMethod === "agent"
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-stone-200 text-stone-600 hover:border-primary/30"
+                        }`}
+                      >
+                        <Bike className="w-4 h-4" /> Agent
+                      </button>
                     </div>
                   </div>
 
-                  {deliveryMethod === "pickup" ? (
+                  {deliveryMethod === "pickup" && (
                     <div className="space-y-1.5">
                       <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
                         Collection Point
@@ -468,7 +494,9 @@ const BookDetail = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                  ) : (
+                  )}
+
+                  {deliveryMethod === "university" && (
                     <div className="space-y-3">
                       <div className="space-y-1.5">
                         <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
@@ -526,6 +554,48 @@ const BookDetail = () => {
                       })()}
                     </div>
                   )}
+
+                  {deliveryMethod === "agent" && (
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                          Delivery Zone
+                        </Label>
+                        <Select value={agentZone} onValueChange={setAgentZone}>
+                          <SelectTrigger className="bg-stone-50 border-stone-200">
+                            <SelectValue placeholder="Choose your zone" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {agentZones.map((z) => (
+                              <SelectItem key={z.id} value={z.name}>
+                                {z.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {agentZones.length === 0 && (
+                          <p className="text-[11px] text-stone-500 italic">
+                            No agent zones available yet — try pickup or university.
+                          </p>
+                        )}
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                          Drop-off Details (optional)
+                        </Label>
+                        <Input
+                          value={agentAddress}
+                          onChange={(e) => setAgentAddress(e.target.value)}
+                          placeholder="Estate, building, landmark…"
+                          className="bg-stone-50 border-stone-200"
+                        />
+                        <p className="text-[11px] text-stone-500 italic">
+                          Our agent will WhatsApp you to confirm the exact drop-off point.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
 
                   {/* Total summary */}
                   <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-1.5">
