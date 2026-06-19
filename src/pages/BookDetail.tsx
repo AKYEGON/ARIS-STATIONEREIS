@@ -4,14 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, BookOpen, Clock, Users, CheckCircle2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CheckCircle2,
+  Clock,
+  Users,
+  MapPin,
+  Calendar,
+} from "lucide-react";
 import CountdownTimer from "@/components/products/CountdownTimer";
 import SEO from "@/components/common/SEO";
 import { toast } from "@/hooks/use-toast";
@@ -42,7 +48,6 @@ const BookDetail = () => {
   const [outlets, setOutlets] = useState<{ id: string; name: string; location: string | null }[]>([]);
   const [universities, setUniversities] = useState<{ id: string; name: string }[]>([]);
 
-  // form
   const [paymentType, setPaymentType] = useState<"deposit" | "full">("deposit");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -86,9 +91,7 @@ const BookDetail = () => {
 
     setSubmitting(true);
     const delivery_details =
-      deliveryMethod === "pickup"
-        ? { outlet: pickupOutlet }
-        : { university };
+      deliveryMethod === "pickup" ? { outlet: pickupOutlet } : { university };
     const { data, error } = await supabase.rpc("reserve_book_slot", {
       p_book_id: book.id,
       p_customer_name: name.trim(),
@@ -105,14 +108,22 @@ const BookDetail = () => {
     }
     const reservationId = (data as any)?.id;
     setSuccess(reservationId);
-    toast({ title: "Slot reserved!", description: "We'll contact you on WhatsApp to confirm payment." });
+    toast({ title: "Slot reserved", description: "We will contact you on WhatsApp to confirm payment." });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-[#fafaf9]">
         <Header cartItemCount={getCartItemCount()} />
-        <main className="flex-1 container py-12 text-center text-muted-foreground">Loading…</main>
+        <main className="flex-1 container mx-auto px-4 py-12 grid lg:grid-cols-12 gap-12">
+          <div className="lg:col-span-5"><Skeleton className="aspect-[3/4] rounded-lg" /></div>
+          <div className="lg:col-span-7 space-y-4">
+            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-12 w-3/4" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-64 w-full rounded-2xl" />
+          </div>
+        </main>
         <Footer />
       </div>
     );
@@ -120,11 +131,13 @@ const BookDetail = () => {
 
   if (!book) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-[#fafaf9]">
         <Header cartItemCount={getCartItemCount()} />
-        <main className="flex-1 container py-12 text-center">
-          <p className="text-lg font-semibold mb-2">Book not found</p>
-          <Link to="/books"><Button>Back to Books</Button></Link>
+        <main className="flex-1 container mx-auto px-4 py-20 text-center">
+          <p className="font-serif text-2xl font-bold mb-3">Book not found</p>
+          <Link to="/books" className="text-primary font-semibold inline-flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" /> Back to the shelf
+          </Link>
         </main>
         <Footer />
       </div>
@@ -136,163 +149,356 @@ const BookDetail = () => {
   const closed = book.status !== "open";
   const amount = paymentType === "deposit" ? book.deposit_amount : book.full_price;
   const balance = paymentType === "deposit" ? book.full_price - book.deposit_amount : 0;
+  const pct = Math.min(100, (book.slots_reserved / book.slots_total) * 100);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-screen flex flex-col bg-[#fafaf9]">
       <SEO
         title={`${book.title} by ${book.author} | Book of the Week | ARIS STATIONERIES`}
-        description={book.synopsis || `Reserve ${book.title} from ARIS Book of the Week. Pay KSh ${book.deposit_amount} deposit to lock your slot.`}
+        description={
+          book.synopsis ||
+          `Reserve ${book.title} from ARIS Book of the Week. Pay KSh ${book.deposit_amount} deposit to lock your slot.`
+        }
       />
       <Header cartItemCount={getCartItemCount()} />
 
-      <main className="flex-1 container mx-auto px-4 py-6 pb-20">
-        <Link to="/books" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-4">
-          <ArrowLeft className="h-4 w-4 mr-1" /> All books
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-10 pb-20">
+        <Link
+          to="/books"
+          className="inline-flex items-center text-xs font-bold uppercase tracking-widest text-stone-500 hover:text-primary mb-6 md:mb-10 transition-colors"
+        >
+          <ArrowLeft className="h-3.5 w-3.5 mr-2" /> The Shelf
         </Link>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <article className="grid lg:grid-cols-12 gap-8 md:gap-12">
           {/* Cover */}
-          <div>
-            <div className="aspect-[3/4] bg-muted rounded-lg overflow-hidden max-w-sm mx-auto">
-              {book.cover_url ? (
-                <img src={book.cover_url} alt={`${book.title} cover`} className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex items-center justify-center h-full"><BookOpen className="h-16 w-16 text-muted-foreground" /></div>
-              )}
+          <div className="lg:col-span-5">
+            <div className="relative group lg:sticky lg:top-24">
+              <div className="absolute -inset-3 md:-inset-4 bg-primary/5 rounded-2xl rotate-1 group-hover:rotate-0 transition-transform duration-700" />
+              <div className="relative aspect-[3/4] bg-stone-200 rounded-lg overflow-hidden shadow-2xl max-w-sm mx-auto lg:max-w-none">
+                {book.cover_url ? (
+                  <img
+                    src={book.cover_url}
+                    alt={`${book.title} cover`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <BookOpen className="h-16 w-16 text-stone-400" />
+                  </div>
+                )}
+                <div className="absolute bottom-5 left-5 bg-stone-900/90 backdrop-blur px-4 py-2 text-white text-[10px] font-bold tracking-widest uppercase">
+                  This Week's Pick
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Info + reserve */}
-          <div className="space-y-4">
-            <div>
-              {book.book_genres?.name && <Badge className="mb-2">{book.book_genres.name}</Badge>}
-              <h1 className="text-2xl font-bold">{book.title}</h1>
-              <p className="text-muted-foreground">by {book.author}</p>
-            </div>
+          {/* Editorial + reserve */}
+          <div className="lg:col-span-7 space-y-8">
+            <header className="space-y-4">
+              <div className="flex flex-wrap items-center gap-2">
+                {book.book_genres?.name && (
+                  <span className="inline-block px-3 py-1 bg-stone-100 text-stone-600 rounded-full text-[11px] font-bold uppercase tracking-wider italic">
+                    {book.book_genres.name}
+                  </span>
+                )}
+                {!closed && !soldOut && left <= 10 && (
+                  <span className="inline-block px-3 py-1 bg-red-50 text-red-700 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                    Only {left} left
+                  </span>
+                )}
+                {soldOut && (
+                  <span className="inline-block px-3 py-1 bg-stone-800 text-white rounded-full text-[11px] font-bold uppercase tracking-wider">
+                    Sold out
+                  </span>
+                )}
+              </div>
+              <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-stone-900 leading-tight">
+                {book.title}
+              </h1>
+              <p className="text-xl text-stone-500 italic font-serif">by {book.author}</p>
+            </header>
 
-            {book.synopsis && <p className="text-sm leading-relaxed">{book.synopsis}</p>}
+            {/* Synopsis — editorial pull */}
+            {book.synopsis && (
+              <section className="border-l-2 border-primary pl-5 md:pl-6">
+                <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-3">
+                  The Synopsis
+                </p>
+                <p className="text-stone-700 leading-relaxed text-base md:text-lg whitespace-pre-line">
+                  {book.synopsis}
+                </p>
+              </section>
+            )}
 
-            <Card>
-              <CardContent className="p-4 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Full price</span>
-                  <span className="font-bold">KSh {book.full_price}</span>
+            {/* Logistics strip */}
+            <section className="grid grid-cols-3 gap-4 py-5 border-y border-stone-200">
+              <div>
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Closes
+                </p>
+                <div className="text-sm font-semibold text-stone-800">
+                  <CountdownTimer endsAt={book.week_ends_at} compact />
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Reserve with deposit</span>
-                  <span className="font-bold text-primary">KSh {book.deposit_amount}</span>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                  <Calendar className="w-3 h-3" /> Handover
+                </p>
+                <p className="text-sm font-semibold text-stone-800">
+                  {new Date(book.pickup_date).toLocaleDateString("en-KE", {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1 flex items-center gap-1">
+                  <Users className="w-3 h-3" /> Slots
+                </p>
+                <p className="text-sm font-semibold text-stone-800">
+                  {book.slots_reserved}/{book.slots_total}
+                </p>
+                <div className="h-1 bg-stone-100 rounded-full overflow-hidden mt-1.5">
+                  <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
                 </div>
-                <div className="flex justify-between text-xs pt-2 border-t">
-                  <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {book.slots_reserved}/{book.slots_total} reserved</span>
-                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> <CountdownTimer endsAt={book.week_ends_at} compact /></span>
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  📅 Pickup / handover: <strong className="text-foreground">{new Date(book.pickup_date).toLocaleDateString("en-KE", { weekday: "long", month: "short", day: "numeric" })}</strong>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </section>
 
+            {/* Reservation */}
             {success ? (
-              <Card className="border-green-500 bg-green-50 dark:bg-green-950">
-                <CardContent className="p-4 space-y-2">
-                  <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-                    <CheckCircle2 className="h-5 w-5" />
-                    <p className="font-bold">Slot reserved!</p>
-                  </div>
-                  <p className="text-sm">Your reservation ID: <code className="text-xs">{success.slice(0, 8)}</code></p>
-                  <p className="text-sm">We'll send an M-Pesa STK push to <strong>{phone}</strong> to collect KSh {amount}. Watch for the prompt.</p>
-                  <div className="flex gap-2 pt-2">
-                    <Link to={`/books/my-reservations?phone=${encodeURIComponent(phone)}`} className="flex-1"><Button variant="outline" className="w-full">My reservations</Button></Link>
-                    <Link to="/books" className="flex-1"><Button className="w-full">Reserve another</Button></Link>
-                  </div>
-                </CardContent>
-              </Card>
+              <section className="bg-white border border-primary/30 rounded-2xl p-6 md:p-8 space-y-3">
+                <div className="flex items-center gap-2 text-primary">
+                  <CheckCircle2 className="h-6 w-6" />
+                  <p className="font-serif text-xl font-bold">Slot reserved</p>
+                </div>
+                <p className="text-sm text-stone-600">
+                  Reservation ID: <code className="text-xs bg-stone-100 px-2 py-0.5 rounded">{success.slice(0, 8)}</code>
+                </p>
+                <p className="text-sm text-stone-600">
+                  We will send an M-Pesa prompt to <strong className="text-stone-900">{phone}</strong> for KSh{" "}
+                  {amount.toLocaleString()}.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 pt-3">
+                  <Link
+                    to={`/books/my-reservations?phone=${encodeURIComponent(phone)}`}
+                    className="flex-1"
+                  >
+                    <button className="w-full border-2 border-stone-200 hover:border-stone-300 text-stone-700 font-bold py-3 rounded-xl text-xs uppercase tracking-[0.2em] transition-colors">
+                      My Reservations
+                    </button>
+                  </Link>
+                  <Link to="/books" className="flex-1">
+                    <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-xl text-xs uppercase tracking-[0.2em]">
+                      Back to the Shelf
+                    </button>
+                  </Link>
+                </div>
+              </section>
             ) : closed || soldOut ? (
-              <Card><CardContent className="p-4 text-center">
-                <p className="font-semibold">{soldOut ? "All slots taken" : "Reservations closed"}</p>
-                <p className="text-sm text-muted-foreground mt-1">Check back next Thursday for new picks.</p>
-              </CardContent></Card>
+              <section className="bg-white border border-stone-200 rounded-2xl p-8 text-center">
+                <p className="font-serif text-xl font-bold text-stone-900 mb-1">
+                  {soldOut ? "All slots taken" : "Reservations closed"}
+                </p>
+                <p className="text-sm text-stone-500">
+                  New picks every Thursday. Pop back then for fresh reading.
+                </p>
+              </section>
             ) : (
-              <Card>
-                <CardContent className="p-4 space-y-4">
-                  <h3 className="font-semibold">Reserve your slot</h3>
+              <section className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm">
+                {/* Payment choice */}
+                <div className="p-6 md:p-8 bg-stone-50 border-b border-stone-200">
+                  <h3 className="text-xs font-bold text-stone-900 uppercase tracking-widest mb-5">
+                    Choose Your Reservation
+                  </h3>
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentType("deposit")}
+                      className={`text-left relative flex flex-col p-5 border-2 rounded-xl transition-all ${
+                        paymentType === "deposit"
+                          ? "border-primary bg-primary/5"
+                          : "border-stone-200 hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">
+                        Secure Deposit
+                      </span>
+                      <span className="text-2xl font-bold text-stone-900">
+                        KSh {book.deposit_amount.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-stone-500 mt-1">
+                        Balance KSh {(book.full_price - book.deposit_amount).toLocaleString()} on handover
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentType("full")}
+                      className={`text-left relative flex flex-col p-5 border-2 rounded-xl transition-all ${
+                        paymentType === "full"
+                          ? "border-primary bg-primary/5"
+                          : "border-stone-200 hover:border-primary/30"
+                      }`}
+                    >
+                      <span className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">
+                        Full Purchase
+                      </span>
+                      <span className="text-2xl font-bold text-stone-900">
+                        KSh {book.full_price.toLocaleString()}
+                      </span>
+                      <span className="text-[10px] text-stone-500 mt-1">Priority handover</span>
+                    </button>
+                  </div>
+                </div>
 
-                  <div>
-                    <Label className="text-sm">Pay</Label>
-                    <RadioGroup value={paymentType} onValueChange={(v: any) => setPaymentType(v)} className="grid grid-cols-2 gap-2 mt-1">
-                      <label className={`flex flex-col gap-0.5 border rounded-md p-3 cursor-pointer ${paymentType === "deposit" ? "border-primary bg-primary/5" : ""}`}>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="deposit" id="dep" />
-                          <span className="font-semibold text-sm">Deposit</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground ml-6">KSh {book.deposit_amount} now · {book.full_price - book.deposit_amount} on Thu</span>
-                      </label>
-                      <label className={`flex flex-col gap-0.5 border rounded-md p-3 cursor-pointer ${paymentType === "full" ? "border-primary bg-primary/5" : ""}`}>
-                        <div className="flex items-center gap-2">
-                          <RadioGroupItem value="full" id="full" />
-                          <span className="font-semibold text-sm">Full</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground ml-6">KSh {book.full_price} now</span>
-                      </label>
-                    </RadioGroup>
+                {/* Customer details */}
+                <div className="p-6 md:p-8 space-y-5">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                        Your Name
+                      </Label>
+                      <Input
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Jane Wanjiku"
+                        className="bg-stone-50 border-stone-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                        Phone (M-Pesa)
+                      </Label>
+                      <Input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="07XX XXX XXX"
+                        className="bg-stone-50 border-stone-200"
+                      />
+                    </div>
                   </div>
 
-                  <div className="grid sm:grid-cols-2 gap-3">
-                    <div><Label className="text-sm">Your name *</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-                    <div><Label className="text-sm">Phone (M-Pesa) *</Label><Input type="tel" placeholder="07XX XXX XXX" value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                      Email (optional)
+                    </Label>
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="bg-stone-50 border-stone-200"
+                    />
                   </div>
-                  <div><Label className="text-sm">Email (optional)</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
 
-                  <div>
-                    <Label className="text-sm">Delivery method</Label>
-                    <RadioGroup value={deliveryMethod} onValueChange={(v: any) => setDeliveryMethod(v)} className="grid grid-cols-2 gap-2 mt-1">
-                      <label className={`flex items-center gap-2 border rounded-md p-2.5 cursor-pointer text-sm ${deliveryMethod === "pickup" ? "border-primary bg-primary/5" : ""}`}>
-                        <RadioGroupItem value="pickup" /> Pick up at outlet
-                      </label>
-                      <label className={`flex items-center gap-2 border rounded-md p-2.5 cursor-pointer text-sm ${deliveryMethod === "university" ? "border-primary bg-primary/5" : ""}`}>
-                        <RadioGroupItem value="university" /> University delivery
-                      </label>
-                    </RadioGroup>
+                  {/* Delivery */}
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                      Handover Method
+                    </Label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryMethod("pickup")}
+                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                          deliveryMethod === "pickup"
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-stone-200 text-stone-600 hover:border-primary/30"
+                        }`}
+                      >
+                        <MapPin className="w-4 h-4" /> Outlet
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeliveryMethod("university")}
+                        className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+                          deliveryMethod === "university"
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-stone-200 text-stone-600 hover:border-primary/30"
+                        }`}
+                      >
+                        <BookOpen className="w-4 h-4" /> University
+                      </button>
+                    </div>
                   </div>
 
                   {deliveryMethod === "pickup" ? (
-                    <div>
-                      <Label className="text-sm">Pickup outlet</Label>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                        Collection Point
+                      </Label>
                       <Select value={pickupOutlet} onValueChange={setPickupOutlet}>
-                        <SelectTrigger><SelectValue placeholder="Choose outlet" /></SelectTrigger>
+                        <SelectTrigger className="bg-stone-50 border-stone-200">
+                          <SelectValue placeholder="Choose outlet" />
+                        </SelectTrigger>
                         <SelectContent>
-                          {outlets.map((o) => <SelectItem key={o.id} value={o.name}>{o.name}{o.location ? ` — ${o.location}` : ""}</SelectItem>)}
+                          {outlets.map((o) => (
+                            <SelectItem key={o.id} value={o.name}>
+                              {o.name}
+                              {o.location ? ` — ${o.location}` : ""}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                   ) : (
-                    <div>
-                      <Label className="text-sm">University</Label>
+                    <div className="space-y-1.5">
+                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                        University
+                      </Label>
                       <Select value={university} onValueChange={setUniversity}>
-                        <SelectTrigger><SelectValue placeholder="Choose university" /></SelectTrigger>
+                        <SelectTrigger className="bg-stone-50 border-stone-200">
+                          <SelectValue placeholder="Choose university" />
+                        </SelectTrigger>
                         <SelectContent>
-                          {universities.map((u) => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)}
+                          {universities.map((u) => (
+                            <SelectItem key={u.id} value={u.name}>
+                              {u.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
                   )}
 
-                  <div className="bg-muted/50 rounded-md p-3 text-sm">
-                    <div className="flex justify-between"><span>You pay now</span><strong className="text-primary">KSh {amount}</strong></div>
-                    {balance > 0 && <div className="flex justify-between text-xs text-muted-foreground mt-1"><span>Balance on Thursday</span><span>KSh {balance}</span></div>}
+                  {/* Total summary */}
+                  <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-1.5">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-xs font-bold text-stone-500 uppercase tracking-wider">
+                        You pay now
+                      </span>
+                      <span className="text-2xl font-bold text-primary">
+                        KSh {amount.toLocaleString()}
+                      </span>
+                    </div>
+                    {balance > 0 && (
+                      <div className="flex justify-between text-xs text-stone-500">
+                        <span>Balance on handover day</span>
+                        <span className="font-semibold">KSh {balance.toLocaleString()}</span>
+                      </div>
+                    )}
                   </div>
 
-                  <Button className="w-full" disabled={submitting} onClick={reserve}>
-                    {submitting ? "Reserving…" : `Reserve slot · KSh ${amount}`}
-                  </Button>
-                  <p className="text-[10px] text-center text-muted-foreground">
+                  <button
+                    onClick={reserve}
+                    disabled={submitting}
+                    className="w-full bg-primary hover:bg-primary/90 disabled:opacity-60 text-primary-foreground font-bold py-4 rounded-xl transition-all shadow-lg shadow-primary/20 uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2"
+                  >
+                    {submitting ? "Reserving…" : `Confirm Reservation`}
+                    {!submitting && <ArrowRight className="w-4 h-4" />}
+                  </button>
+
+                  <p className="text-center text-[10px] text-stone-400 font-medium leading-relaxed">
                     By reserving, you agree that an unclaimed deposit becomes store credit usable on any product.
                   </p>
-                </CardContent>
-              </Card>
+                </div>
+              </section>
             )}
           </div>
-        </div>
+        </article>
       </main>
 
       <Footer />
