@@ -76,7 +76,7 @@ const Books = () => {
               Book of the Week
             </h1>
             <p className="text-stone-600 text-sm max-w-md leading-relaxed">
-              A new book every Thursday. Pay a small deposit to hold your copy, then pick it up or have it delivered.
+              A new book every week. Pay a small deposit to hold your copy, then pick it up or have it delivered.
             </p>
           </div>
           {featured && (
