@@ -17,6 +17,8 @@ import {
   Users,
   MapPin,
   Calendar,
+  Bike,
+
 } from "lucide-react";
 import CountdownTimer from "@/components/products/CountdownTimer";
 import SEO from "@/components/common/SEO";
