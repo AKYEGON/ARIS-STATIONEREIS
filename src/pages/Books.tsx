@@ -62,25 +62,25 @@ const Books = () => {
       />
       <Header cartItemCount={getCartItemCount()} />
 
-      <main className="flex-1 container mx-auto px-4 py-8 md:py-12 pb-20">
-        {/* Editorial Header */}
-        <div className="mb-10 md:mb-14 border-b border-stone-200 pb-6 md:pb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="space-y-3">
+      <main className="flex-1 container mx-auto px-4 py-5 md:py-12 pb-20">
+        {/* ─── EDITORIAL HEADER (compact on mobile) ─── */}
+        <div className="mb-5 md:mb-14 md:border-b md:border-stone-200 md:pb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 md:gap-6">
+          <div className="space-y-2 md:space-y-3">
             <div className="flex items-center gap-2">
-              <span className="h-px w-8 bg-primary" />
-              <span className="text-primary font-bold text-[11px] uppercase tracking-[0.2em]">
+              <span className="h-px w-6 md:w-8 bg-primary" />
+              <span className="text-primary font-bold text-[10px] md:text-[11px] uppercase tracking-[0.2em]">
                 This Week's Read
               </span>
             </div>
-            <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold text-stone-900 leading-[1.05]">
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold text-stone-900 leading-[1.05]">
               Book of the Week
             </h1>
-            <p className="text-stone-600 text-sm max-w-md leading-relaxed">
+            <p className="hidden md:block text-stone-600 text-sm max-w-md leading-relaxed">
               A new book every week. Pay a small deposit to hold your copy, then pick it up or have it delivered.
             </p>
           </div>
           {featured && (
-            <div className="bg-white px-5 py-4 rounded-xl border border-stone-100 shadow-sm flex items-center gap-5 self-start md:self-auto">
+            <div className="hidden md:flex bg-white px-5 py-4 rounded-xl border border-stone-100 shadow-sm items-center gap-5 self-start md:self-auto">
               <div className="text-center">
                 <p className="text-[10px] uppercase font-bold text-stone-400 tracking-widest mb-1">
                   Week Ends In
@@ -106,33 +106,74 @@ const Books = () => {
           <EmptyState />
         ) : (
           <>
-            {featured && <FeaturedBook book={featured} />}
+            {/* ─── MOBILE COMPACT HERO + RAILS ─── */}
+            <div className="md:hidden space-y-8">
+              {featured && <MobileFeaturedCard book={featured} />}
 
-            {comingNext.length > 0 && (
-              <section className="mt-16 md:mt-24">
-                <div className="flex items-center justify-between mb-6 md:mb-8">
-                  <h4 className="font-serif text-2xl md:text-3xl font-bold text-stone-900">
-                    {openBooks.length > 1 ? "Also This Week" : "Coming Next"}
-                  </h4>
-                  <div className="hidden md:flex gap-2">
-                    <button className="p-2 rounded-full border border-stone-200 hover:bg-stone-50 transition-colors">
-                      <ChevronLeft className="w-5 h-5 text-stone-600" />
-                    </button>
-                    <button className="p-2 rounded-full border border-stone-200 hover:bg-stone-50 transition-colors">
-                      <ChevronRight className="w-5 h-5 text-stone-600" />
-                    </button>
+              {openBooks.length > 1 && (
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-serif text-lg font-bold text-stone-900">Also This Week</h4>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                      Swipe →
+                    </span>
                   </div>
-                </div>
+                  <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory -mx-4 px-4 pb-2 scrollbar-hide">
+                    {openBooks.slice(1).map((b) => (
+                      <div key={b.id} className="snap-start shrink-0 w-[78vw] max-w-[320px]">
+                        <MobileFeaturedCard book={b} dense />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-                  {comingNext.map((b) => (
-                    <BookThumb key={b.id} book={b} />
-                  ))}
-                </div>
-              </section>
-            )}
+              {closedBooks.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-serif text-lg font-bold text-stone-900">Coming Up</h4>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto snap-x -mx-4 px-4 pb-2 scrollbar-hide">
+                    {closedBooks.map((b) => (
+                      <div key={b.id} className="snap-start shrink-0 w-[36vw] max-w-[160px]">
+                        <BookThumb book={b} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
 
-            <div className="mt-16 text-center">
+            {/* ─── DESKTOP/TABLET LAYOUT ─── */}
+            <div className="hidden md:block">
+              {featured && <FeaturedBook book={featured} />}
+
+              {comingNext.length > 0 && (
+                <section className="mt-16 md:mt-24">
+                  <div className="flex items-center justify-between mb-6 md:mb-8">
+                    <h4 className="font-serif text-2xl md:text-3xl font-bold text-stone-900">
+                      {openBooks.length > 1 ? "Also This Week" : "Coming Next"}
+                    </h4>
+                    <div className="hidden md:flex gap-2">
+                      <button className="p-2 rounded-full border border-stone-200 hover:bg-stone-50 transition-colors">
+                        <ChevronLeft className="w-5 h-5 text-stone-600" />
+                      </button>
+                      <button className="p-2 rounded-full border border-stone-200 hover:bg-stone-50 transition-colors">
+                        <ChevronRight className="w-5 h-5 text-stone-600" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+                    {comingNext.map((b) => (
+                      <BookThumb key={b.id} book={b} />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+
+            <div className="mt-10 md:mt-16 text-center">
               <Link
                 to="/books/my-reservations"
                 className="inline-flex items-center gap-2 text-sm font-semibold text-stone-700 hover:text-primary transition-colors"
@@ -149,6 +190,91 @@ const Books = () => {
     </div>
   );
 };
+
+/* ─── Mobile-only compact card: cover + meta + CTA in one tight row ─── */
+const MobileFeaturedCard = ({ book, dense = false }: { book: Book; dense?: boolean }) => {
+  const left = book.slots_total - book.slots_reserved;
+  const soldOut = left <= 0;
+  const closed = book.status !== "open";
+  const url = `/books/${book.slug || book.id}`;
+
+  return (
+    <article className="bg-white border border-stone-200 rounded-2xl overflow-hidden shadow-sm animate-fade-in">
+      <div className="flex gap-3 p-3">
+        <Link to={url} className="relative shrink-0 w-[110px]">
+          <div className="aspect-[3/4] bg-stone-100 rounded-md overflow-hidden shadow-md">
+            {book.cover_url ? (
+              <img
+                src={book.cover_url}
+                alt={`${book.title} cover`}
+                className="w-full h-full object-cover"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <BookOpen className="h-8 w-8 text-stone-400" />
+              </div>
+            )}
+          </div>
+          {!soldOut && !closed && left <= 10 && (
+            <span className="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+              {left} left
+            </span>
+          )}
+        </Link>
+        <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+          <div className="space-y-1">
+            {book.book_genres?.name && (
+              <span className="inline-block px-1.5 py-0.5 bg-stone-100 text-stone-600 rounded text-[9px] font-bold uppercase tracking-wider italic">
+                {book.book_genres.name}
+              </span>
+            )}
+            <Link to={url}>
+              <h3 className="font-serif text-base font-bold text-stone-900 leading-tight line-clamp-2">
+                {book.title}
+              </h3>
+            </Link>
+            <p className="text-xs text-stone-500 italic line-clamp-1">by {book.author}</p>
+          </div>
+          {!dense && (
+            <div className="flex items-center gap-2 text-[10px] text-stone-500 mt-1.5">
+              <Clock className="w-3 h-3" />
+              <CountdownTimer endsAt={book.week_ends_at} compact />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="px-3 pb-3">
+        <div className="h-1 bg-stone-100 rounded-full overflow-hidden mb-2.5">
+          <div
+            className={`h-full transition-all duration-700 ${
+              left <= 5 && !soldOut ? "bg-red-500 animate-pulse" : "bg-primary"
+            }`}
+            style={{
+              width: `${Math.min(100, (book.slots_reserved / book.slots_total) * 100)}%`,
+            }}
+          />
+        </div>
+        <Link to={url} className="block">
+          <button
+            disabled={soldOut || closed}
+            className="w-full bg-primary hover:bg-primary/90 active:scale-[0.98] disabled:bg-stone-300 text-primary-foreground font-bold py-2.5 rounded-lg transition-all shadow-sm shadow-primary/20 uppercase tracking-[0.15em] text-[11px] flex items-center justify-center gap-1.5"
+          >
+            {soldOut
+              ? "Sold Out"
+              : closed
+              ? "Handover pending"
+              : `Reserve · KSh ${book.deposit_amount.toLocaleString()}`}
+            {!soldOut && !closed && <ArrowRight className="w-3.5 h-3.5" />}
+          </button>
+        </Link>
+      </div>
+    </article>
+  );
+};
+
+
 
 const FeaturedBook = ({ book }: { book: Book }) => {
   const left = book.slots_total - book.slots_reserved;
