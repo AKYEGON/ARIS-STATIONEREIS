@@ -5,7 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BookOpen, Users, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { BookOpen, Users, ArrowRight, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import CountdownTimer from "@/components/products/CountdownTimer";
 import SEO from "@/components/common/SEO";
 
