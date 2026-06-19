@@ -58,7 +58,7 @@ const Books = () => {
     <div className="min-h-screen flex flex-col bg-[#fafaf9]">
       <SEO
         title="Book of the Week | ARIS STATIONERIES"
-        description="Reserve your slot for our weekly curated books. Pay a small deposit to lock your copy, collect or get delivery on Thursday."
+        description="Reserve your slot for our weekly curated books. Pay a small deposit to lock your copy, then pick it up or have it delivered."
       />
       <Header cartItemCount={getCartItemCount()} />
 
@@ -373,7 +373,7 @@ const EmptyState = () => (
       The shelf is being curated
     </h3>
     <p className="text-stone-500 text-sm">
-      Our next selection drops Thursday. Pop back then for fresh reading.
+      Our next selection drops soon. Pop back then for fresh reading.
     </p>
   </div>
 );
