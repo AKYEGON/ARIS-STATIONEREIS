@@ -33,6 +33,20 @@ const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
   const [searchQuery, setSearchQuery] = useState(() => {
     try {
+      // 1. URL ?q= wins (supports Google Sitelinks Searchbox deep-link)
+      const urlQ = new URLSearchParams(window.location.search).get("q");
+      if (urlQ !== null) return urlQ;
+      // 2. Only restore sessionStorage for INTERNAL navigation.
+      // If the user arrived from an external source (Google, social, direct),
+      // never preload a stale search that would show "No products found".
+      const ref = typeof document !== "undefined" ? document.referrer : "";
+      const sameOrigin = !!ref && (() => {
+        try { return new URL(ref).origin === window.location.origin; } catch { return false; }
+      })();
+      if (!sameOrigin) {
+        sessionStorage.removeItem(SEARCH_STORAGE_KEY);
+        return "";
+      }
       return sessionStorage.getItem(SEARCH_STORAGE_KEY) || "";
     } catch {
       return "";
@@ -376,8 +390,22 @@ const Index = () => {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="text-center py-12 sm:py-16">
-            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">No products found</p>
+          <div className="text-center py-12 sm:py-16 space-y-4">
+            <p className="text-base sm:text-lg md:text-xl text-muted-foreground">
+              No products found{searchQuery ? <> for "<span className="font-medium text-foreground">{searchQuery}</span>"</> : null}
+            </p>
+            {(searchQuery || selectedCategory !== "all") && (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("all");
+                  try { sessionStorage.removeItem(SEARCH_STORAGE_KEY); } catch {}
+                }}
+              >
+                Show all products
+              </Button>
+            )}
           </div>
         ) : (
           <>
