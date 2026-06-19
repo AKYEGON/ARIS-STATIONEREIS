@@ -305,7 +305,7 @@ const BookDetail = () => {
                   {soldOut ? "All slots taken" : "Reservations closed"}
                 </p>
                 <p className="text-sm text-stone-500">
-                  New picks every Thursday. Pop back then for fresh reading.
+                  New picks every week. Pop back then for fresh reading.
                 </p>
               </section>
             ) : (
