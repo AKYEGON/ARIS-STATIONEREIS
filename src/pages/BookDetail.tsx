@@ -60,10 +60,12 @@ const BookDetail = () => {
 
   useEffect(() => {
     (async () => {
+      const isUuid = !!slug && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      const filter = isUuid ? `slug.eq.${slug},id.eq.${slug}` : `slug.eq.${slug}`;
       const { data } = await supabase
         .from("books")
         .select("*, book_genres(name)")
-        .or(`slug.eq.${slug},id.eq.${slug}`)
+        .or(filter)
         .maybeSingle();
       setBook((data as any) || null);
       setLoading(false);
