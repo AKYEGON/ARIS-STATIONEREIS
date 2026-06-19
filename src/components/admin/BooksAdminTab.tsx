@@ -405,6 +405,14 @@ export const BooksAdminTab = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-green-700 border-green-600/40 hover:bg-green-50"
+                            onClick={() => { setWaReservation(r); setWaOpen(true); }}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5 mr-1" />WhatsApp
+                          </Button>
                           <Select value="" onValueChange={(v) => updateReservationStatus(r.id, v)}>
                             <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="Set status" /></SelectTrigger>
                             <SelectContent>
