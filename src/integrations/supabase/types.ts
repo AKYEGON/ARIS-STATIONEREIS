@@ -112,6 +112,228 @@ export type Database = {
         }
         Relationships: []
       }
+      book_genres: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      book_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["book_payment_kind"]
+          mpesa_checkout_id: string | null
+          mpesa_phone: string | null
+          mpesa_receipt: string | null
+          raw_callback: Json | null
+          reservation_id: string
+          status: Database["public"]["Enums"]["book_payment_status"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["book_payment_kind"]
+          mpesa_checkout_id?: string | null
+          mpesa_phone?: string | null
+          mpesa_receipt?: string | null
+          raw_callback?: Json | null
+          reservation_id: string
+          status?: Database["public"]["Enums"]["book_payment_status"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["book_payment_kind"]
+          mpesa_checkout_id?: string | null
+          mpesa_phone?: string | null
+          mpesa_receipt?: string | null
+          raw_callback?: Json | null
+          reservation_id?: string
+          status?: Database["public"]["Enums"]["book_payment_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_payments_reservation_id_fkey"
+            columns: ["reservation_id"]
+            isOneToOne: false
+            referencedRelation: "book_reservations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      book_reservations: {
+        Row: {
+          amount_paid: number
+          balance_due: number
+          book_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          delivery_details: Json | null
+          delivery_method: string | null
+          id: string
+          mpesa_reference: string | null
+          notes: string | null
+          payment_type: Database["public"]["Enums"]["book_payment_type"]
+          status: Database["public"]["Enums"]["book_reservation_status"]
+          store_credit_issued: boolean
+          updated_at: string
+        }
+        Insert: {
+          amount_paid?: number
+          balance_due?: number
+          book_id: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          delivery_details?: Json | null
+          delivery_method?: string | null
+          id?: string
+          mpesa_reference?: string | null
+          notes?: string | null
+          payment_type: Database["public"]["Enums"]["book_payment_type"]
+          status?: Database["public"]["Enums"]["book_reservation_status"]
+          store_credit_issued?: boolean
+          updated_at?: string
+        }
+        Update: {
+          amount_paid?: number
+          balance_due?: number
+          book_id?: string
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          delivery_details?: Json | null
+          delivery_method?: string | null
+          id?: string
+          mpesa_reference?: string | null
+          notes?: string | null
+          payment_type?: Database["public"]["Enums"]["book_payment_type"]
+          status?: Database["public"]["Enums"]["book_reservation_status"]
+          store_credit_issued?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_reservations_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          author: string
+          cover_url: string | null
+          created_at: string
+          deposit_amount: number
+          display_order: number
+          full_price: number
+          genre_id: string | null
+          id: string
+          isbn: string | null
+          min_threshold: number
+          pickup_date: string
+          slots_reserved: number
+          slots_total: number
+          slug: string | null
+          status: Database["public"]["Enums"]["book_status"]
+          synopsis: string | null
+          title: string
+          updated_at: string
+          week_ends_at: string
+          week_starts_at: string
+        }
+        Insert: {
+          author: string
+          cover_url?: string | null
+          created_at?: string
+          deposit_amount: number
+          display_order?: number
+          full_price: number
+          genre_id?: string | null
+          id?: string
+          isbn?: string | null
+          min_threshold?: number
+          pickup_date: string
+          slots_reserved?: number
+          slots_total: number
+          slug?: string | null
+          status?: Database["public"]["Enums"]["book_status"]
+          synopsis?: string | null
+          title: string
+          updated_at?: string
+          week_ends_at: string
+          week_starts_at: string
+        }
+        Update: {
+          author?: string
+          cover_url?: string | null
+          created_at?: string
+          deposit_amount?: number
+          display_order?: number
+          full_price?: number
+          genre_id?: string | null
+          id?: string
+          isbn?: string | null
+          min_threshold?: number
+          pickup_date?: string
+          slots_reserved?: number
+          slots_total?: number
+          slug?: string | null
+          status?: Database["public"]["Enums"]["book_status"]
+          synopsis?: string | null
+          title?: string
+          updated_at?: string
+          week_ends_at?: string
+          week_starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "books_genre_id_fkey"
+            columns: ["genre_id"]
+            isOneToOne: false
+            referencedRelation: "book_genres"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bundle_items: {
         Row: {
           bundle_id: string
@@ -1147,6 +1369,39 @@ export type Database = {
           },
         ]
       }
+      store_credit_ledger: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          customer_phone: string
+          id: string
+          notes: string | null
+          reference_id: string | null
+          source: Database["public"]["Enums"]["store_credit_source"]
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          customer_phone: string
+          id?: string
+          notes?: string | null
+          reference_id?: string | null
+          source: Database["public"]["Enums"]["store_credit_source"]
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          customer_phone?: string
+          id?: string
+          notes?: string | null
+          reference_id?: string | null
+          source?: Database["public"]["Enums"]["store_credit_source"]
+        }
+        Relationships: []
+      }
       story_views: {
         Row: {
           completed: boolean | null
@@ -1336,6 +1591,16 @@ export type Database = {
       }
     }
     Functions: {
+      add_store_credit: {
+        Args: {
+          p_amount: number
+          p_notes?: string
+          p_phone: string
+          p_reference_id?: string
+          p_source: Database["public"]["Enums"]["store_credit_source"]
+        }
+        Returns: string
+      }
       adjust_stock: {
         Args: {
           p_change: number
@@ -1358,6 +1623,23 @@ export type Database = {
         Args: { product_id: string }
         Returns: number
       }
+      get_reservations_by_phone: {
+        Args: { p_phone: string }
+        Returns: {
+          amount_paid: number
+          balance_due: number
+          book_cover: string
+          book_id: string
+          book_title: string
+          created_at: string
+          customer_name: string
+          id: string
+          payment_type: Database["public"]["Enums"]["book_payment_type"]
+          pickup_date: string
+          status: Database["public"]["Enums"]["book_reservation_status"]
+        }[]
+      }
+      get_store_credit_balance: { Args: { p_phone: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1368,6 +1650,45 @@ export type Database = {
       increment_testimonial_view: {
         Args: { is_completed?: boolean; testimonial_id: string }
         Returns: undefined
+      }
+      release_reservation: {
+        Args: { p_issue_credit?: boolean; p_reservation_id: string }
+        Returns: undefined
+      }
+      reserve_book_slot: {
+        Args: {
+          p_book_id: string
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_delivery_details: Json
+          p_delivery_method: string
+          p_payment_type: Database["public"]["Enums"]["book_payment_type"]
+        }
+        Returns: {
+          amount_paid: number
+          balance_due: number
+          book_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          delivery_details: Json | null
+          delivery_method: string | null
+          id: string
+          mpesa_reference: string | null
+          notes: string | null
+          payment_type: Database["public"]["Enums"]["book_payment_type"]
+          status: Database["public"]["Enums"]["book_reservation_status"]
+          store_credit_issued: boolean
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "book_reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       slugify: { Args: { input: string }; Returns: string }
       submit_review_by_token: {
@@ -1384,6 +1705,24 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "employee" | "manager" | "agent"
+      book_payment_kind: "deposit" | "balance" | "full"
+      book_payment_status: "pending" | "success" | "failed" | "cancelled"
+      book_payment_type: "deposit" | "full"
+      book_reservation_status:
+        | "pending_payment"
+        | "reserved"
+        | "balance_paid"
+        | "collected"
+        | "delivered"
+        | "released"
+        | "refunded"
+        | "cancelled"
+      book_status: "draft" | "open" | "closed" | "fulfilled" | "cancelled"
+      store_credit_source:
+        | "book_refund"
+        | "order_use"
+        | "manual_adjust"
+        | "book_release"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1512,6 +1851,26 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "employee", "manager", "agent"],
+      book_payment_kind: ["deposit", "balance", "full"],
+      book_payment_status: ["pending", "success", "failed", "cancelled"],
+      book_payment_type: ["deposit", "full"],
+      book_reservation_status: [
+        "pending_payment",
+        "reserved",
+        "balance_paid",
+        "collected",
+        "delivered",
+        "released",
+        "refunded",
+        "cancelled",
+      ],
+      book_status: ["draft", "open", "closed", "fulfilled", "cancelled"],
+      store_credit_source: [
+        "book_refund",
+        "order_use",
+        "manual_adjust",
+        "book_release",
+      ],
     },
   },
 } as const
