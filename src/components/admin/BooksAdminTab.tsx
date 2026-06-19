@@ -547,6 +547,13 @@ export const BooksAdminTab = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <BookWhatsAppModal
+        open={waOpen}
+        onOpenChange={setWaOpen}
+        reservation={waReservation}
+        book={waReservation ? (books.find((b) => b.id === waReservation.book_id) as any) : null}
+      />
     </Tabs>
   );
 };
