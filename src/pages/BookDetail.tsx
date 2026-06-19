@@ -119,12 +119,18 @@ const BookDetail = () => {
     if (deliveryMethod === "university" && selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
       return toast({ title: "Select a campus branch", variant: "destructive" });
     }
+    if (deliveryMethod === "agent" && !agentZone) {
+      return toast({ title: "Select a delivery zone", variant: "destructive" });
+    }
 
     setSubmitting(true);
     const delivery_details =
       deliveryMethod === "pickup"
         ? { outlet: pickupOutlet }
-        : { university, branch: campusBranch || null };
+        : deliveryMethod === "university"
+        ? { university, branch: campusBranch || null }
+        : { zone: agentZone, address: agentAddress.trim() || null };
+
     const { data, error } = await supabase.rpc("reserve_book_slot", {
       p_book_id: book.id,
       p_customer_name: name.trim(),
