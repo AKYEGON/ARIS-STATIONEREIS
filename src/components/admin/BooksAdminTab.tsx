@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, BookOpen, Users, Tag, Image as ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Users, Tag, Image as ImageIcon, MessageCircle } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { BookWhatsAppModal } from "./BookWhatsAppModal";
 
 type Genre = { id: string; name: string; slug: string; display_order: number; is_active: boolean };
 type Book = {
@@ -108,6 +109,10 @@ export const BooksAdminTab = () => {
 
   // reservation filter
   const [resFilterBook, setResFilterBook] = useState<string>("all");
+
+  // whatsapp modal
+  const [waOpen, setWaOpen] = useState(false);
+  const [waReservation, setWaReservation] = useState<Reservation | null>(null);
 
   const loadAll = async () => {
     setLoading(true);
@@ -400,6 +405,14 @@ export const BooksAdminTab = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-green-700 border-green-600/40 hover:bg-green-50"
+                            onClick={() => { setWaReservation(r); setWaOpen(true); }}
+                          >
+                            <MessageCircle className="h-3.5 w-3.5 mr-1" />WhatsApp
+                          </Button>
                           <Select value="" onValueChange={(v) => updateReservationStatus(r.id, v)}>
                             <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="Set status" /></SelectTrigger>
                             <SelectContent>
@@ -534,6 +547,13 @@ export const BooksAdminTab = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <BookWhatsAppModal
+        open={waOpen}
+        onOpenChange={setWaOpen}
+        reservation={waReservation}
+        book={waReservation ? (books.find((b) => b.id === waReservation.book_id) as any) : null}
+      />
     </Tabs>
   );
 };
