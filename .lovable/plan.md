@@ -1,118 +1,107 @@
-# Book of the Week — Phase 1
+## Goal
 
-## Rules captured from your answers
-- **Multiple reservations per phone allowed** (same book or different books).
-- **Genres**: dropdown sourced from a `book_genres` table, fully admin-managed (add/edit/delete).
-- **Delivery**: reuses existing checkout (pickup outlets + universities).
-- **Store credit**: usable on any product, not books-only.
-- **Weekly cycle**: new books go live **Thursday** (handover day for previous week) and close **Wednesday 23:59**. Pickup/delivery the following Thursday.
-- **Payment**: customer can pay **deposit only** OR **full price upfront** at reservation. Either way via M-Pesa STK Push.
-- **Fulfilment**: just-in-time (order from supplier on Thursday based on confirmed slots).
+Shrink the mobile Books experience so the hero "Book of the Week" + reserve action fit in roughly one screen, replace long vertical scrolling with horizontal swipes and a slide-up reservation sheet, and add focused micro-interactions. Desktop stays as-is.
 
----
+## Problems today (mobile, 390px)
 
-## Lifecycle
+- `/books` stacks editorial header → stats card → big cover → title → synopsis → reservation preview → "Coming Next" grid. Easily 4+ screens of scroll before any action.
+- `/books/:slug` is even longer: cover, synopsis pull-quote, logistics strip, payment toggle, name/phone/email, university/branch, pickup/delivery, address + zone, totals, CTA. The CTA only appears after ~5 screens of scroll.
+- "Also This Week" uses a 2-col grid that pushes everything else further down.
 
+## Mobile-first redesign
+
+### 1. `/books` — Hero card + horizontal shelf
+
+```text
+┌─────────────────────────┐
+│ This Week's Read        │  compact header (no big stats card on mobile)
+│ Book of the Week        │
+├─────────────────────────┤
+│ ┌──────┐ Genre chip     │  HERO CARD (fits in viewport)
+│ │      │ Title (serif)  │  - cover left, meta right
+│ │ COV  │ by Author      │  - countdown + slots inline
+│ │ ER   │ ⏱ 2d 4h · 12/30│
+│ │      │ [Reserve →]    │  primary CTA visible above fold
+│ └──────┘ swipe for more │
+├─────────────────────────┤
+│ ● ○ ○   (page dots)     │  swipeable carousel of open books
+├─────────────────────────┤
+│ Coming up                │  horizontal-scroll thumb rail
+│ [📕][📗][📘][📙] →       │  snap-scroll, no 2-col grid
+└─────────────────────────┘
 ```
-THU 00:00 → new week opens. Books visible, slots open.
-THU–WED → customers reserve (deposit or full). Slot decrements atomically.
-WED 23:59 → reservations close. Admin sees final tally.
-THU       → handover day. Deposit-holders pay balance via STK Push,
-            collect at outlet or get delivery. New week opens same day.
-SAT (auto) → any unclaimed deposit-only reservation → released,
-             deposit converted to store credit.
+
+- Replace the stacked hero with a single swipeable card carousel (one open book per slide). Native horizontal snap-scroll, page dots, optional drag with momentum.
+- Move countdown + slots into the hero card itself — kill the separate stats card on mobile.
+- Replace the "Also This Week" 2-col grid with a horizontal snap rail of cover thumbnails (similar to existing testimonials story rail). Tap a thumbnail to swap the hero, long-press or arrow opens detail.
+- Sticky bottom "My reservations" link folded into the existing mobile tab bar context; remove the trailing centered link.
+- Desktop layout untouched (`md:` breakpoints preserve current grid).
+
+### 2. `/books/:slug` — Sticky hero + bottom sheet reservation
+
+```text
+┌─────────────────────────┐
+│ ← The Shelf             │
+│ ┌─────────────────────┐ │  Compact hero (collapses on scroll)
+│ │   COVER (smaller)   │ │  - aspect 4:5 instead of 3:4
+│ │                     │ │  - title overlay on image
+│ └─────────────────────┘ │
+│ Genre · ⏱ 2d · 12 left  │  one-line meta strip
+│ Synopsis (3 lines,      │  expandable "Read more"
+│  tap to expand) …       │
+├─────────────────────────┤
+│ ┃ Sticky bottom bar:    │  always visible
+│ ┃ KSh 200 deposit       │
+│ ┃ [Reserve Your Copy →] │  opens bottom sheet
+└─────────────────────────┘
 ```
 
-If a book misses its `min_threshold` by Wed midnight → auto-cancelled, deposits refunded to store credit, customers notified.
+Bottom sheet (slides up, dismissible):
 
----
+- Step 1 — Plan: deposit vs full (2 large pills).
+- Step 2 — You: name, phone (autofocus, tel keypad), email optional.
+- Step 3 — Handover: pickup ↔ delivery segmented toggle; university + branch always; conditional outlet OR address+zone.
+- Step 4 — Review + Confirm: amount + balance summary, big confirm button.
 
-## Data model (5 new tables)
+Each step is a single short screen inside the sheet with a progress dot row at the top and a back chevron. Sheet height ~85vh so the cover peeks behind (context preserved). Swipe-down to dismiss.
 
-**`book_genres`** — admin-managed dropdown source
-- name, slug, display_order, is_active
+### 3. Micro-interactions
 
-**`books`** — one row per book offering
-- title, author, genre_id, cover_url, synopsis, isbn (optional), slug
-- full_price, deposit_amount
-- slots_total, slots_reserved (atomic counter), min_threshold
-- week_starts_at (Thu 00:00), week_ends_at (Wed 23:59), pickup_date (Thu)
-- status: `draft | open | closed | fulfilled | cancelled`
+- Framer-motion entrance: cover scales from 0.96 → 1 with a soft shadow lift on mount.
+- Carousel: spring snap, page dots morph with active index.
+- Slot bar: animated fill on first paint; pulses red when ≤5 left.
+- Countdown: last 60 minutes flips to red + subtle tick animation.
+- Reserve CTA: long-press shows a tooltip "Locks your copy for 24h".
+- Haptic-style feedback via `navigator.vibrate(10)` on step transitions in the sheet (mobile only).
+- Sheet open/close: spring 280ms with backdrop blur fade.
 
-**`book_reservations`** — one row per slot
-- book_id, customer_name, customer_phone, customer_email (optional)
-- payment_type: `deposit | full`
-- amount_paid, balance_due (0 if full), mpesa_reference
-- delivery_method, delivery_address (mirrors checkout shape)
-- status: `pending_payment | reserved | balance_paid | collected | delivered | released | refunded`
-- store_credit_issued (bool), created_at
+### 4. Responsive guardrails
 
-**`store_credit_ledger`** — universal store credit (usable on any product)
-- customer_phone, amount (+ credit / − debit), source (`book_refund | order_use | manual_adjust`), reference_id, balance_after
-- View `customer_store_credit` aggregates current balance per phone
+- All new layout wrapped in `md:hidden` / `hidden md:block` pairs so desktop keeps its current editorial grid.
+- Touch targets ≥44px, font scale ≥14px body / ≥12px meta.
+- Test viewports: 320, 360, 390, 414, 768. Header + bottom tab bar must not overlap sticky reserve bar (`pb-[env(safe-area-inset-bottom)]` + extra padding for tab bar).
+- `prefers-reduced-motion` disables carousel auto-snap easing and sheet spring.
 
-**`book_payments`** — M-Pesa transaction log
-- reservation_id, type (`deposit | balance | full`), amount, mpesa_checkout_id, mpesa_receipt, status, raw_callback (jsonb)
+## Technical notes
 
----
+- New components:
+  - `src/components/books/BookHeroCarousel.tsx` — horizontal snap carousel for `/books` (mobile only).
+  - `src/components/books/BookThumbRail.tsx` — horizontal snap rail replacing the grid on mobile.
+  - `src/components/books/ReserveSheet.tsx` — bottom sheet wrapper using shadcn `Drawer` (vaul) with internal step state.
+  - `src/components/books/StickyReserveBar.tsx` — fixed bottom bar on `/books/:slug` (mobile).
+- Existing `BookDetail.tsx` form logic stays; the form is moved into `ReserveSheet` step components without changing state, validation, or the `reserve_book_slot` RPC call.
+- `Books.tsx` keeps the desktop `FeaturedBook` + grid path; mobile branch renders the carousel + rail.
+- Use `framer-motion` (already installed via existing components) for spring/scale/fade.
+- Reuse design tokens; no new color classes.
 
-## Atomic slot reservation
-DB function `reserve_book_slot(book_id, phone, payment_type, …)` — locks book row, checks `slots_reserved < slots_total` AND `status = 'open'` AND `now() < week_ends_at`, increments counter, inserts reservation, returns row. Prevents overselling under concurrency.
+## Out of scope
 
----
+- No backend/schema changes.
+- No copy rewrites beyond what's needed for step labels in the sheet.
+- Desktop layout untouched.
 
-## M-Pesa STK Push
-Two edge functions:
-- `mpesa-stk-push` — initiate payment, returns `CheckoutRequestID`.
-- `mpesa-callback` — webhook from Safaricom, marks payment success/fail, updates reservation status.
+## Open questions before I build
 
-Requires Safaricom Daraja credentials (Consumer Key, Consumer Secret, Passkey, Shortcode). I'll request these via `add_secret` when we reach that step.
-
----
-
-## Cron jobs (pg_cron + pg_net)
-- **Wed 23:59 EAT** — close current week: flip open→closed, evaluate min_threshold, cancel + refund books that missed it.
-- **Sat 00:00 EAT** — release stale deposit-only reservations not collected by Friday, convert deposit → store credit.
-- **Thu 00:00 EAT** — auto-publish books whose `week_starts_at` arrived (status draft→open).
-
----
-
-## Customer-facing routes
-- **`/books`** — current week landing: book cards with cover, title, author, genre badge, full price, deposit, "X/100 slots left", countdown to Wed 23:59.
-- **`/books/:slug`** — book detail: synopsis, reserve CTA, choice of "Pay deposit (KSh X)" or "Pay full (KSh Y)", phone + name, delivery selector (reuses checkout component), STK push trigger.
-- **`/books/my-reservations?phone=…`** — customer self-service: status, pay balance button (STK push), store credit balance.
-
-Nav: add **Books** to mobile bottom bar + desktop header.
-
----
-
-## Admin (new Admin tab "Books")
-- **Books manager**: CRUD books, set week dates, slots, prices, min_threshold, cover upload, genre dropdown.
-- **Genres manager**: CRUD genres.
-- **Reservations dashboard per book**: list reservations, payment status, mark collected/delivered, send WhatsApp follow-ups (reusing existing comm system templates).
-- **Store credit ledger viewer**: search by phone, manual adjustments.
-
----
-
-## Integration with existing systems
-- **Cart / checkout** — at checkout, look up store credit by phone, offer "Apply KSh X store credit" → records debit in `store_credit_ledger`.
-- **WhatsApp templates** — new templates: reservation confirmed, balance reminder (Thu), ready for pickup, deposit refunded as credit. Reuses `message_templates` + `OrderStatusModal` pattern.
-- **SEO** — `/books`, `/books/:slug` get title/meta/JSON-LD Book schema; sitemap generator extended.
-- **Toast positions, navigation, footer hide on stories** — all existing project rules respected.
-
----
-
-## Build order (so you can validate each step)
-1. Migration: tables + RLS + GRANTs + atomic reservation function + cron jobs (paused) + store_credit_ledger.
-2. Admin: Genres manager → Books manager → Reservations dashboard.
-3. Customer routes `/books` + `/books/:slug` (without payment — "reserve" creates pending row).
-4. M-Pesa STK Push edge functions + secrets + wire to reserve flow.
-5. `/books/my-reservations` + balance payment flow.
-6. Store credit application at checkout.
-7. WhatsApp templates + admin comm buttons.
-8. Activate cron jobs + SEO + sitemap.
-
----
-
-## Open question before I start
-**M-Pesa Daraja**: do you already have a Safaricom Daraja Paybill/Till + API credentials, or do we need to plan around using sandbox first while you apply for production? This affects whether step 4 ships live or in test mode.
+1. On the mobile hero carousel, should the **first slide always be the newest open book**, or do you want the user to be able to pin a favourite?
+2. For the reservation **bottom sheet**, do you prefer the 4-step wizard (one screen at a time, very short) or a single scrollable sheet with all fields visible (faster for repeat users)?
+3. The "Coming up" rail — should **sold-out / handover-pending books still appear** there, or hide them on mobile to keep it short?
