@@ -46,7 +46,7 @@ const BookDetail = () => {
   const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [outlets, setOutlets] = useState<{ id: string; name: string; location: string | null }[]>([]);
-  const [universities, setUniversities] = useState<{ id: string; name: string }[]>([]);
+  const [universities, setUniversities] = useState<{ id: string; name: string; branches: { id: string; name: string }[] }[]>([]);
 
   const [paymentType, setPaymentType] = useState<"deposit" | "full">("deposit");
   const [name, setName] = useState("");
@@ -55,6 +55,7 @@ const BookDetail = () => {
   const [deliveryMethod, setDeliveryMethod] = useState<"pickup" | "university">("pickup");
   const [pickupOutlet, setPickupOutlet] = useState("");
   const [university, setUniversity] = useState("");
+  const [campusBranch, setCampusBranch] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -72,10 +73,25 @@ const BookDetail = () => {
 
       const [o, u] = await Promise.all([
         supabase.from("pickup_outlets").select("id, name, location").eq("is_active", true).order("display_order"),
-        supabase.from("universities").select("id, name").eq("is_active", true).order("display_order"),
+        supabase
+          .from("universities")
+          .select("id, name, campus_branches(id, name, is_active, display_order)")
+          .eq("is_active", true)
+          .order("display_order"),
       ]);
       if (o.data) setOutlets(o.data);
-      if (u.data) setUniversities(u.data);
+      if (u.data) {
+        setUniversities(
+          (u.data as any[]).map((uni) => ({
+            id: uni.id,
+            name: uni.name,
+            branches: (uni.campus_branches || [])
+              .filter((b: any) => b.is_active)
+              .sort((a: any, b: any) => a.display_order - b.display_order)
+              .map((b: any) => ({ id: b.id, name: b.name })),
+          })),
+        );
+      }
     })();
   }, [slug]);
 
@@ -90,10 +106,16 @@ const BookDetail = () => {
     if (deliveryMethod === "university" && !university) {
       return toast({ title: "Select a university", variant: "destructive" });
     }
+    const selectedUni = universities.find((u) => u.name === university);
+    if (deliveryMethod === "university" && selectedUni && selectedUni.branches.length > 0 && !campusBranch) {
+      return toast({ title: "Select a campus branch", variant: "destructive" });
+    }
 
     setSubmitting(true);
     const delivery_details =
-      deliveryMethod === "pickup" ? { outlet: pickupOutlet } : { university };
+      deliveryMethod === "pickup"
+        ? { outlet: pickupOutlet }
+        : { university, branch: campusBranch || null };
     const { data, error } = await supabase.rpc("reserve_book_slot", {
       p_book_id: book.id,
       p_customer_name: name.trim(),
@@ -447,22 +469,61 @@ const BookDetail = () => {
                       </Select>
                     </div>
                   ) : (
-                    <div className="space-y-1.5">
-                      <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
-                        University
-                      </Label>
-                      <Select value={university} onValueChange={setUniversity}>
-                        <SelectTrigger className="bg-stone-50 border-stone-200">
-                          <SelectValue placeholder="Choose university" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {universities.map((u) => (
-                            <SelectItem key={u.id} value={u.name}>
-                              {u.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                    <div className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                          University
+                        </Label>
+                        <Select
+                          value={university}
+                          onValueChange={(v) => {
+                            setUniversity(v);
+                            setCampusBranch("");
+                          }}
+                        >
+                          <SelectTrigger className="bg-stone-50 border-stone-200">
+                            <SelectValue placeholder="Choose university" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {universities.map((u) => (
+                              <SelectItem key={u.id} value={u.name}>
+                                {u.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {(() => {
+                        const selected = universities.find((u) => u.name === university);
+                        if (!selected) return null;
+                        if (selected.branches.length === 0) {
+                          return (
+                            <p className="text-[11px] text-stone-500 italic">
+                              We'll coordinate the handover point with you on WhatsApp.
+                            </p>
+                          );
+                        }
+                        return (
+                          <div className="space-y-1.5">
+                            <Label className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">
+                              Campus Branch
+                            </Label>
+                            <Select value={campusBranch} onValueChange={setCampusBranch}>
+                              <SelectTrigger className="bg-stone-50 border-stone-200">
+                                <SelectValue placeholder="Choose branch" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {selected.branches.map((b) => (
+                                  <SelectItem key={b.id} value={b.name}>
+                                    {b.name}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        );
+                      })()}
                     </div>
                   )}
 
