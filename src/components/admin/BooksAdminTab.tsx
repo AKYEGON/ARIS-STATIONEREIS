@@ -436,17 +436,35 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
               <TableBody>
                 {filteredReservations.map((r) => {
                   const book = books.find((b) => b.id === r.book_id);
+                  const full = Number(book?.full_price || 0);
+                  const deposit = Number(book?.deposit_amount || 0);
+                  const paid = Number(r.amount_paid || 0);
+                  const depositDue = Math.max(0, deposit - paid);
+                  const totalDue = Math.max(0, full - paid);
+                  const fullyPaid = paid >= full && full > 0;
                   return (
                     <TableRow key={r.id}>
                       <TableCell>
                         <div className="font-medium">{r.customer_name}</div>
                         <div className="text-xs text-muted-foreground">{r.customer_phone}</div>
                       </TableCell>
-                      <TableCell className="text-sm">{book?.title || "—"}</TableCell>
+                      <TableCell className="text-sm">
+                        <div>{book?.title || "—"}</div>
+                        {book && <div className="text-[10px] text-muted-foreground">KSh {full} • dep {deposit}</div>}
+                      </TableCell>
                       <TableCell><Badge variant="outline" className="capitalize">{r.payment_type}</Badge></TableCell>
-                      <TableCell className="text-xs">
-                        <div>Paid: <strong>KSh {r.amount_paid}</strong></div>
-                        {r.balance_due > 0 && <div className="text-orange-600">Due: KSh {r.balance_due}</div>}
+                      <TableCell className="text-xs space-y-0.5">
+                        <div>Paid: <strong className={paid > 0 ? "text-green-700" : ""}>KSh {paid}</strong></div>
+                        {depositDue > 0 ? (
+                          <div className="text-yellow-700">Deposit due: KSh {depositDue}</div>
+                        ) : (
+                          paid < full && <div className="text-muted-foreground">Deposit ✓</div>
+                        )}
+                        {totalDue > 0 ? (
+                          <div className="text-orange-600">Balance: KSh {totalDue}</div>
+                        ) : (
+                          <div className="text-green-700 font-medium">Fully paid</div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={`text-white ${RES_STATUS_COLORS[r.status] || "bg-gray-400"}`}>
@@ -458,24 +476,38 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="h-8 text-blue-700 border-blue-600/40 hover:bg-blue-50"
+                            onClick={() => openPaymentDialog(r)}
+                            disabled={fullyPaid && !['pending_payment','reserved','balance_paid'].includes(r.status)}
+                            title={fullyPaid ? "Record additional payment / refund" : "Record payment"}
+                          >
+                            <Wallet className="h-3.5 w-3.5 mr-1" />Pay
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="h-8 text-green-700 border-green-600/40 hover:bg-green-50"
                             onClick={() => { setWaReservation(r); setWaOpen(true); }}
                           >
                             <MessageCircle className="h-3.5 w-3.5 mr-1" />WhatsApp
                           </Button>
-                          <Select value="" onValueChange={(v) => updateReservationStatus(r.id, v)}>
-                            <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="Set status" /></SelectTrigger>
+                          <Select value={r.status} onValueChange={(v) => updateReservationStatus(r.id, v)}>
+                            <SelectTrigger className="h-8 w-[140px] text-xs capitalize"><SelectValue /></SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="pending_payment">Pending payment</SelectItem>
                               <SelectItem value="reserved">Reserved</SelectItem>
                               <SelectItem value="balance_paid">Balance paid</SelectItem>
                               <SelectItem value="collected">Collected</SelectItem>
                               <SelectItem value="delivered">Delivered</SelectItem>
                               <SelectItem value="cancelled">Cancelled</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
                             </SelectContent>
                           </Select>
-                          <Button size="sm" variant="ghost" className="text-orange-600 h-8" onClick={() => releaseReservation(r.id)}>
-                            Release
-                          </Button>
+                          {canManageBooks && (
+                            <Button size="sm" variant="ghost" className="text-orange-600 h-8" onClick={() => releaseReservation(r.id)}>
+                              Release
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
