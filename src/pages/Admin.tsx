@@ -2239,7 +2239,7 @@ const Admin = () => {
 
           {/* Books Tab */}
           <TabsContent value="books" className="space-y-6">
-            <BooksAdminTab />
+            <BooksAdminTab userRole={userRole} />
           </TabsContent>
 
           {/* Orders Tab */}
