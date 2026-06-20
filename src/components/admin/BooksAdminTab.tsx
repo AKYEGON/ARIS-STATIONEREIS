@@ -11,9 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, BookOpen, Users, Tag, Image as ImageIcon, MessageCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Users, Tag, Image as ImageIcon, MessageCircle, Wallet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { BookWhatsAppModal } from "./BookWhatsAppModal";
+
+type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
+interface BooksAdminTabProps { userRole?: UserRole }
 
 type Genre = { id: string; name: string; slug: string; display_order: number; is_active: boolean };
 type Book = {
