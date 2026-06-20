@@ -342,11 +342,11 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
     resFilterBook === "all" ? reservations : reservations.filter((r) => r.book_id === resFilterBook);
 
   return (
-    <Tabs defaultValue="books" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="books"><BookOpen className="h-4 w-4 mr-1.5" />Books</TabsTrigger>
+    <Tabs defaultValue={canManageBooks ? "books" : "reservations"} className="w-full">
+      <TabsList className={`grid w-full ${canManageBooks ? "grid-cols-3" : "grid-cols-1"}`}>
+        {canManageBooks && <TabsTrigger value="books"><BookOpen className="h-4 w-4 mr-1.5" />Books</TabsTrigger>}
         <TabsTrigger value="reservations"><Users className="h-4 w-4 mr-1.5" />Reservations</TabsTrigger>
-        <TabsTrigger value="genres"><Tag className="h-4 w-4 mr-1.5" />Genres</TabsTrigger>
+        {canManageBooks && <TabsTrigger value="genres"><Tag className="h-4 w-4 mr-1.5" />Genres</TabsTrigger>}
       </TabsList>
 
       {/* BOOKS */}
