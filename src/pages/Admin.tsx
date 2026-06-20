@@ -83,7 +83,7 @@ const getVisibleTabs = (role: UserRole) => {
     case 'manager':
       return ["orders", "inventory", "sales", "books", "settings"];
     case 'employee':
-      return ["orders"];
+      return ["orders", "books"];
     case 'agent':
       return ["orders"];
     default:
@@ -2239,7 +2239,7 @@ const Admin = () => {
 
           {/* Books Tab */}
           <TabsContent value="books" className="space-y-6">
-            <BooksAdminTab />
+            <BooksAdminTab userRole={userRole} />
           </TabsContent>
 
           {/* Orders Tab */}

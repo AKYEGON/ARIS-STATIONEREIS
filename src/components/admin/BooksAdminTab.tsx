@@ -11,9 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, BookOpen, Users, Tag, Image as ImageIcon, MessageCircle } from "lucide-react";
+import { Plus, Pencil, Trash2, BookOpen, Users, Tag, Image as ImageIcon, MessageCircle, Wallet } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { BookWhatsAppModal } from "./BookWhatsAppModal";
+
+type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
+interface BooksAdminTabProps { userRole?: UserRole }
 
 type Genre = { id: string; name: string; slug: string; display_order: number; is_active: boolean };
 type Book = {
@@ -75,7 +78,8 @@ const toLocalInput = (iso: string) => {
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
 };
 
-export const BooksAdminTab = () => {
+export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
+  const canManageBooks = userRole === 'admin';
   const [genres, setGenres] = useState<Genre[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -113,6 +117,13 @@ export const BooksAdminTab = () => {
   // whatsapp modal
   const [waOpen, setWaOpen] = useState(false);
   const [waReservation, setWaReservation] = useState<Reservation | null>(null);
+
+  // payment dialog
+  const [payOpen, setPayOpen] = useState(false);
+  const [payReservation, setPayReservation] = useState<Reservation | null>(null);
+  const [payForm, setPayForm] = useState({ kind: "deposit" as "deposit" | "balance" | "full", amount: "", mpesa_receipt: "", mpesa_phone: "", notes: "" });
+  const [paySaving, setPaySaving] = useState(false);
+
 
   const loadAll = async () => {
     setLoading(true);
@@ -274,7 +285,7 @@ export const BooksAdminTab = () => {
 
   // ===== Reservations =====
   const updateReservationStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("book_reservations").update({ status: status as any }).eq("id", id);
+    const { error } = await supabase.rpc("update_reservation_status", { p_reservation_id: id, p_status: status as any });
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
     toast({ title: "Status updated" });
     loadAll();
@@ -288,15 +299,54 @@ export const BooksAdminTab = () => {
     loadAll();
   };
 
+  const openPaymentDialog = (r: Reservation) => {
+    const book = books.find((b) => b.id === r.book_id);
+    const depositOutstanding = Math.max(0, (book?.deposit_amount || 0) - Number(r.amount_paid));
+    const defaultKind: "deposit" | "balance" | "full" =
+      depositOutstanding > 0 ? "deposit" : "balance";
+    const defaultAmount =
+      depositOutstanding > 0 ? depositOutstanding : Number(r.balance_due);
+    setPayReservation(r);
+    setPayForm({
+      kind: defaultKind,
+      amount: String(defaultAmount || ""),
+      mpesa_receipt: "",
+      mpesa_phone: r.customer_phone || "",
+      notes: "",
+    });
+    setPayOpen(true);
+  };
+
+  const recordPayment = async () => {
+    if (!payReservation) return;
+    const amt = Number(payForm.amount);
+    if (!amt || amt <= 0) return toast({ title: "Enter a valid amount", variant: "destructive" });
+    setPaySaving(true);
+    const { error } = await supabase.rpc("record_book_payment", {
+      p_reservation_id: payReservation.id,
+      p_kind: payForm.kind as any,
+      p_amount: amt,
+      p_mpesa_receipt: payForm.mpesa_receipt || null,
+      p_mpesa_phone: payForm.mpesa_phone || null,
+      p_notes: payForm.notes || null,
+    });
+    setPaySaving(false);
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    toast({ title: "Payment recorded" });
+    setPayOpen(false);
+    loadAll();
+  };
+
+
   const filteredReservations =
     resFilterBook === "all" ? reservations : reservations.filter((r) => r.book_id === resFilterBook);
 
   return (
-    <Tabs defaultValue="books" className="w-full">
-      <TabsList className="grid w-full grid-cols-3">
-        <TabsTrigger value="books"><BookOpen className="h-4 w-4 mr-1.5" />Books</TabsTrigger>
+    <Tabs defaultValue={canManageBooks ? "books" : "reservations"} className="w-full">
+      <TabsList className={`grid w-full ${canManageBooks ? "grid-cols-3" : "grid-cols-1"}`}>
+        {canManageBooks && <TabsTrigger value="books"><BookOpen className="h-4 w-4 mr-1.5" />Books</TabsTrigger>}
         <TabsTrigger value="reservations"><Users className="h-4 w-4 mr-1.5" />Reservations</TabsTrigger>
-        <TabsTrigger value="genres"><Tag className="h-4 w-4 mr-1.5" />Genres</TabsTrigger>
+        {canManageBooks && <TabsTrigger value="genres"><Tag className="h-4 w-4 mr-1.5" />Genres</TabsTrigger>}
       </TabsList>
 
       {/* BOOKS */}
@@ -386,17 +436,35 @@ export const BooksAdminTab = () => {
               <TableBody>
                 {filteredReservations.map((r) => {
                   const book = books.find((b) => b.id === r.book_id);
+                  const full = Number(book?.full_price || 0);
+                  const deposit = Number(book?.deposit_amount || 0);
+                  const paid = Number(r.amount_paid || 0);
+                  const depositDue = Math.max(0, deposit - paid);
+                  const totalDue = Math.max(0, full - paid);
+                  const fullyPaid = paid >= full && full > 0;
                   return (
                     <TableRow key={r.id}>
                       <TableCell>
                         <div className="font-medium">{r.customer_name}</div>
                         <div className="text-xs text-muted-foreground">{r.customer_phone}</div>
                       </TableCell>
-                      <TableCell className="text-sm">{book?.title || "—"}</TableCell>
+                      <TableCell className="text-sm">
+                        <div>{book?.title || "—"}</div>
+                        {book && <div className="text-[10px] text-muted-foreground">KSh {full} • dep {deposit}</div>}
+                      </TableCell>
                       <TableCell><Badge variant="outline" className="capitalize">{r.payment_type}</Badge></TableCell>
-                      <TableCell className="text-xs">
-                        <div>Paid: <strong>KSh {r.amount_paid}</strong></div>
-                        {r.balance_due > 0 && <div className="text-orange-600">Due: KSh {r.balance_due}</div>}
+                      <TableCell className="text-xs space-y-0.5">
+                        <div>Paid: <strong className={paid > 0 ? "text-green-700" : ""}>KSh {paid}</strong></div>
+                        {depositDue > 0 ? (
+                          <div className="text-yellow-700">Deposit due: KSh {depositDue}</div>
+                        ) : (
+                          paid < full && <div className="text-muted-foreground">Deposit ✓</div>
+                        )}
+                        {totalDue > 0 ? (
+                          <div className="text-orange-600">Balance: KSh {totalDue}</div>
+                        ) : (
+                          <div className="text-green-700 font-medium">Fully paid</div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge className={`text-white ${RES_STATUS_COLORS[r.status] || "bg-gray-400"}`}>
@@ -408,24 +476,38 @@ export const BooksAdminTab = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="h-8 text-blue-700 border-blue-600/40 hover:bg-blue-50"
+                            onClick={() => openPaymentDialog(r)}
+                            disabled={fullyPaid && !['pending_payment','reserved','balance_paid'].includes(r.status)}
+                            title={fullyPaid ? "Record additional payment / refund" : "Record payment"}
+                          >
+                            <Wallet className="h-3.5 w-3.5 mr-1" />Pay
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="h-8 text-green-700 border-green-600/40 hover:bg-green-50"
                             onClick={() => { setWaReservation(r); setWaOpen(true); }}
                           >
                             <MessageCircle className="h-3.5 w-3.5 mr-1" />WhatsApp
                           </Button>
-                          <Select value="" onValueChange={(v) => updateReservationStatus(r.id, v)}>
-                            <SelectTrigger className="h-8 w-[130px] text-xs"><SelectValue placeholder="Set status" /></SelectTrigger>
+                          <Select value={r.status} onValueChange={(v) => updateReservationStatus(r.id, v)}>
+                            <SelectTrigger className="h-8 w-[140px] text-xs capitalize"><SelectValue /></SelectTrigger>
                             <SelectContent>
+                              <SelectItem value="pending_payment">Pending payment</SelectItem>
                               <SelectItem value="reserved">Reserved</SelectItem>
                               <SelectItem value="balance_paid">Balance paid</SelectItem>
                               <SelectItem value="collected">Collected</SelectItem>
                               <SelectItem value="delivered">Delivered</SelectItem>
                               <SelectItem value="cancelled">Cancelled</SelectItem>
+                              <SelectItem value="refunded">Refunded</SelectItem>
                             </SelectContent>
                           </Select>
-                          <Button size="sm" variant="ghost" className="text-orange-600 h-8" onClick={() => releaseReservation(r.id)}>
-                            Release
-                          </Button>
+                          {canManageBooks && (
+                            <Button size="sm" variant="ghost" className="text-orange-600 h-8" onClick={() => releaseReservation(r.id)}>
+                              Release
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -545,6 +627,71 @@ export const BooksAdminTab = () => {
             <div className="flex items-center justify-between"><Label>Active</Label><Switch checked={genreForm.is_active} onCheckedChange={(v) => setGenreForm({ ...genreForm, is_active: v })} /></div>
             <div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setGenreDialogOpen(false)}>Cancel</Button><Button onClick={saveGenre}>Save</Button></div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* PAYMENT DIALOG */}
+      <Dialog open={payOpen} onOpenChange={setPayOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
+          {payReservation && (() => {
+            const book = books.find((b) => b.id === payReservation.book_id);
+            const full = Number(book?.full_price || 0);
+            const deposit = Number(book?.deposit_amount || 0);
+            const paid = Number(payReservation.amount_paid || 0);
+            const depositDue = Math.max(0, deposit - paid);
+            const totalDue = Math.max(0, full - paid);
+            return (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded p-3 text-xs space-y-1">
+                  <div className="font-medium text-sm">{payReservation.customer_name} — {book?.title}</div>
+                  <div>Full price: <strong>KSh {full}</strong> • Deposit: <strong>KSh {deposit}</strong></div>
+                  <div>Already paid: <strong className="text-green-700">KSh {paid}</strong></div>
+                  {depositDue > 0 && <div className="text-yellow-700">Deposit outstanding: KSh {depositDue}</div>}
+                  <div className="text-orange-600">Remaining balance: KSh {totalDue}</div>
+                </div>
+
+                <div>
+                  <Label>Payment type</Label>
+                  <Select value={payForm.kind} onValueChange={(v: any) => {
+                    const amt = v === "deposit" ? depositDue : v === "balance" ? Math.max(0, totalDue - depositDue) : v === "full" ? totalDue : 0;
+                    setPayForm({ ...payForm, kind: v, amount: amt > 0 ? String(amt) : payForm.amount });
+                  }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="deposit">Deposit payment</SelectItem>
+                      <SelectItem value="balance">Balance payment</SelectItem>
+                      <SelectItem value="full">Full settlement</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Amount (KSh) *</Label>
+                    <Input type="number" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>M-Pesa receipt</Label>
+                    <Input value={payForm.mpesa_receipt} onChange={(e) => setPayForm({ ...payForm, mpesa_receipt: e.target.value })} placeholder="e.g. SK1A2B3C" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Paying phone (optional)</Label>
+                  <Input value={payForm.mpesa_phone} onChange={(e) => setPayForm({ ...payForm, mpesa_phone: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Notes (optional)</Label>
+                  <Textarea rows={2} value={payForm.notes} onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })} />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => setPayOpen(false)}>Cancel</Button>
+                  <Button onClick={recordPayment} disabled={paySaving}>{paySaving ? "Saving…" : "Record Payment"}</Button>
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
