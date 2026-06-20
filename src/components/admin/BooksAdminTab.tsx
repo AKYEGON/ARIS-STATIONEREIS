@@ -285,7 +285,7 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
 
   // ===== Reservations =====
   const updateReservationStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("book_reservations").update({ status: status as any }).eq("id", id);
+    const { error } = await supabase.rpc("update_reservation_status", { p_reservation_id: id, p_status: status as any });
     if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
     toast({ title: "Status updated" });
     loadAll();
@@ -298,6 +298,45 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
     toast({ title: "Reservation released" });
     loadAll();
   };
+
+  const openPaymentDialog = (r: Reservation) => {
+    const book = books.find((b) => b.id === r.book_id);
+    const depositOutstanding = Math.max(0, (book?.deposit_amount || 0) - Number(r.amount_paid));
+    const defaultKind: "deposit" | "balance" | "full" =
+      depositOutstanding > 0 ? "deposit" : "balance";
+    const defaultAmount =
+      depositOutstanding > 0 ? depositOutstanding : Number(r.balance_due);
+    setPayReservation(r);
+    setPayForm({
+      kind: defaultKind,
+      amount: String(defaultAmount || ""),
+      mpesa_receipt: "",
+      mpesa_phone: r.customer_phone || "",
+      notes: "",
+    });
+    setPayOpen(true);
+  };
+
+  const recordPayment = async () => {
+    if (!payReservation) return;
+    const amt = Number(payForm.amount);
+    if (!amt || amt <= 0) return toast({ title: "Enter a valid amount", variant: "destructive" });
+    setPaySaving(true);
+    const { error } = await supabase.rpc("record_book_payment", {
+      p_reservation_id: payReservation.id,
+      p_kind: payForm.kind as any,
+      p_amount: amt,
+      p_mpesa_receipt: payForm.mpesa_receipt || null,
+      p_mpesa_phone: payForm.mpesa_phone || null,
+      p_notes: payForm.notes || null,
+    });
+    setPaySaving(false);
+    if (error) return toast({ title: "Failed", description: error.message, variant: "destructive" });
+    toast({ title: "Payment recorded" });
+    setPayOpen(false);
+    loadAll();
+  };
+
 
   const filteredReservations =
     resFilterBook === "all" ? reservations : reservations.filter((r) => r.book_id === resFilterBook);
