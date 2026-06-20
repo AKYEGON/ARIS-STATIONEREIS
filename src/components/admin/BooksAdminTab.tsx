@@ -630,6 +630,71 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
         </DialogContent>
       </Dialog>
 
+      {/* PAYMENT DIALOG */}
+      <Dialog open={payOpen} onOpenChange={setPayOpen}>
+        <DialogContent className="max-w-[95vw] sm:max-w-md">
+          <DialogHeader><DialogTitle>Record Payment</DialogTitle></DialogHeader>
+          {payReservation && (() => {
+            const book = books.find((b) => b.id === payReservation.book_id);
+            const full = Number(book?.full_price || 0);
+            const deposit = Number(book?.deposit_amount || 0);
+            const paid = Number(payReservation.amount_paid || 0);
+            const depositDue = Math.max(0, deposit - paid);
+            const totalDue = Math.max(0, full - paid);
+            return (
+              <div className="space-y-3">
+                <div className="bg-muted/50 rounded p-3 text-xs space-y-1">
+                  <div className="font-medium text-sm">{payReservation.customer_name} — {book?.title}</div>
+                  <div>Full price: <strong>KSh {full}</strong> • Deposit: <strong>KSh {deposit}</strong></div>
+                  <div>Already paid: <strong className="text-green-700">KSh {paid}</strong></div>
+                  {depositDue > 0 && <div className="text-yellow-700">Deposit outstanding: KSh {depositDue}</div>}
+                  <div className="text-orange-600">Remaining balance: KSh {totalDue}</div>
+                </div>
+
+                <div>
+                  <Label>Payment type</Label>
+                  <Select value={payForm.kind} onValueChange={(v: any) => {
+                    const amt = v === "deposit" ? depositDue : v === "balance" ? Math.max(0, totalDue - depositDue) : v === "full" ? totalDue : 0;
+                    setPayForm({ ...payForm, kind: v, amount: amt > 0 ? String(amt) : payForm.amount });
+                  }}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="deposit">Deposit payment</SelectItem>
+                      <SelectItem value="balance">Balance payment</SelectItem>
+                      <SelectItem value="full">Full settlement</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label>Amount (KSh) *</Label>
+                    <Input type="number" value={payForm.amount} onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })} />
+                  </div>
+                  <div>
+                    <Label>M-Pesa receipt</Label>
+                    <Input value={payForm.mpesa_receipt} onChange={(e) => setPayForm({ ...payForm, mpesa_receipt: e.target.value })} placeholder="e.g. SK1A2B3C" />
+                  </div>
+                </div>
+                <div>
+                  <Label>Paying phone (optional)</Label>
+                  <Input value={payForm.mpesa_phone} onChange={(e) => setPayForm({ ...payForm, mpesa_phone: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Notes (optional)</Label>
+                  <Textarea rows={2} value={payForm.notes} onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })} />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <Button variant="outline" onClick={() => setPayOpen(false)}>Cancel</Button>
+                  <Button onClick={recordPayment} disabled={paySaving}>{paySaving ? "Saving…" : "Record Payment"}</Button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
+
       <BookWhatsAppModal
         open={waOpen}
         onOpenChange={setWaOpen}
