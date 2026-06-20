@@ -118,6 +118,13 @@ export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
   const [waOpen, setWaOpen] = useState(false);
   const [waReservation, setWaReservation] = useState<Reservation | null>(null);
 
+  // payment dialog
+  const [payOpen, setPayOpen] = useState(false);
+  const [payReservation, setPayReservation] = useState<Reservation | null>(null);
+  const [payForm, setPayForm] = useState({ kind: "deposit" as "deposit" | "balance" | "full", amount: "", mpesa_receipt: "", mpesa_phone: "", notes: "" });
+  const [paySaving, setPaySaving] = useState(false);
+
+
   const loadAll = async () => {
     setLoading(true);
     const [g, b, r] = await Promise.all([
