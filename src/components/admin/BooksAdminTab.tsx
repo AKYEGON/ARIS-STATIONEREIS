@@ -78,7 +78,8 @@ const toLocalInput = (iso: string) => {
   return new Date(d.getTime() - off * 60000).toISOString().slice(0, 16);
 };
 
-export const BooksAdminTab = () => {
+export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
+  const canManageBooks = userRole === 'admin';
   const [genres, setGenres] = useState<Genre[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
