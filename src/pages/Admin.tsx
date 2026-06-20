@@ -83,7 +83,7 @@ const getVisibleTabs = (role: UserRole) => {
     case 'manager':
       return ["orders", "inventory", "sales", "books", "settings"];
     case 'employee':
-      return ["orders"];
+      return ["orders", "books"];
     case 'agent':
       return ["orders"];
     default:
