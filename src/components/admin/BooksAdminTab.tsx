@@ -79,7 +79,7 @@ const toLocalInput = (iso: string) => {
 };
 
 export const BooksAdminTab = ({ userRole = 'admin' }: BooksAdminTabProps) => {
-  const canManageBooks = userRole === 'admin';
+  const canManageBooks = userRole === 'admin' || userRole === 'manager';
   const [genres, setGenres] = useState<Genre[]>([]);
   const [books, setBooks] = useState<Book[]>([]);
   const [reservations, setReservations] = useState<Reservation[]>([]);
