@@ -15,7 +15,7 @@ interface OrderItem {
 
 interface OrderRequest {
   customer_name: string;
-  customer_email: string;
+  customer_email?: string | null;
   customer_phone: string;
   delivery_address: string;
   items: OrderItem[];
