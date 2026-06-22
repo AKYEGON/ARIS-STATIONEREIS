@@ -863,16 +863,11 @@ const Admin = () => {
     try {
       let imageUrl = formData.image;
 
-      console.log("Starting product add with form data:", formData);
-      console.log("Image input mode:", imageInputMode);
 
       if (imageInputMode === "file" && selectedImageFile) {
-        console.log("Uploading image file:", selectedImageFile.name);
         imageUrl = await handleImageUpload(selectedImageFile);
-        console.log("Image uploaded successfully:", imageUrl);
       } else if (imageInputMode === "url" && imageUrl.trim()) {
         imageUrl = imageUrl.trim();
-        console.log("Using image URL:", imageUrl);
       }
 
       // Use first selected category name for the legacy category column
@@ -896,14 +891,12 @@ const Admin = () => {
         sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
       };
 
-      console.log("Inserting product data:", productData);
 
       const { data, error } = await supabase
         .from("products")
         .insert(productData as any)
         .select();
 
-      console.log("Insert result:", { data, error });
 
       if (error) {
         console.error("Database error:", error);
@@ -964,7 +957,6 @@ const Admin = () => {
         }
       }
 
-      console.log("Product inserted successfully, fetching products...");
       await fetchProducts();
       toast.success("Product added successfully");
       setIsAddDialogOpen(false);

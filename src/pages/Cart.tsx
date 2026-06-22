@@ -113,7 +113,6 @@ const Cart = () => {
       return;
     }
 
-    console.log("Starting order submission...", { itemCount: cartItems.length });
 
     try {
       // Prepare order items for server-side validation
@@ -154,7 +153,6 @@ const Cart = () => {
         });
       });
 
-      console.log("Submitting order via edge function...", orderItems.length);
 
       // Use server-side edge function for validated order creation
       const { data: orderResult, error: orderError } = await supabase.functions.invoke("create-order", {
@@ -182,7 +180,6 @@ const Cart = () => {
 
       const orderId = orderResult.orderId;
       const serverTotal = orderResult.total;
-      console.log("Order created successfully:", orderId, "Total:", serverTotal);
 
       // Prepare WhatsApp message
       const productDetails = cartItems
@@ -263,16 +260,13 @@ const Cart = () => {
       // Small delay to ensure state cleanup completes and toast shows
       setTimeout(() => {
         try {
-          console.log("Attempting WhatsApp redirect...");
           // Try opening in new tab first (better UX, less likely to be blocked)
           const newWindow = window.open(whatsappUrl, '_blank');
           
           // If popup was blocked, fall back to same window
           if (!newWindow || newWindow.closed || typeof newWindow.closed === 'undefined') {
-            console.log("Popup blocked, using fallback redirect");
             window.location.href = whatsappUrl;
           } else {
-            console.log("WhatsApp opened in new tab");
           }
         } catch (error) {
           console.error("Redirect error:", error);

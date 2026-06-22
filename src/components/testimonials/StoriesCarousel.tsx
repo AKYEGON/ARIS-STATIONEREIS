@@ -84,7 +84,6 @@ const StoriesCarousel = ({ testimonials, initialIndex = 0, onClose }: StoriesCar
         }
       });
       
-      console.log('View tracked:', testimonial.customer_name, 'Completed:', completed);
     } catch (error) {
       console.error('Error tracking view:', error);
     }
