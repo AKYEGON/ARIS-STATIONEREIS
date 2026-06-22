@@ -118,9 +118,17 @@ Deno.serve(async (req) => {
     // Approve user - assign role and create employee profile
     if (action === "approve") {
       const { user_id, role, name, phone, zone_id } = body;
+      const ALLOWED_STAFF_ROLES = ["employee", "manager", "agent"];
 
       if (!user_id || !role || !name) {
         return new Response(JSON.stringify({ error: "user_id, role, and name are required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!ALLOWED_STAFF_ROLES.includes(role)) {
+        return new Response(JSON.stringify({ error: "Invalid role. Allowed: employee, manager, agent" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -202,9 +210,17 @@ Deno.serve(async (req) => {
 
     if (action === "update-role") {
       const { user_id, role } = body;
+      const ALLOWED_STAFF_ROLES = ["employee", "manager", "agent"];
 
       if (!user_id || !role) {
         return new Response(JSON.stringify({ error: "user_id and role are required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!ALLOWED_STAFF_ROLES.includes(role)) {
+        return new Response(JSON.stringify({ error: "Invalid role. Allowed: employee, manager, agent" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });

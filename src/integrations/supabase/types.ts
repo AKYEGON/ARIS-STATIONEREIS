@@ -1639,6 +1639,18 @@ export type Database = {
           status: Database["public"]["Enums"]["book_reservation_status"]
         }[]
       }
+      get_review_request_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          customer_name: string
+          id: string
+          order_id: string
+          product_id: string
+          product_image: string
+          product_name: string
+          status: string
+        }[]
+      }
       get_store_credit_balance: { Args: { p_phone: string }; Returns: number }
       has_role: {
         Args: {
@@ -1650,6 +1662,40 @@ export type Database = {
       increment_testimonial_view: {
         Args: { is_completed?: boolean; testimonial_id: string }
         Returns: undefined
+      }
+      record_book_payment: {
+        Args: {
+          p_amount: number
+          p_kind: Database["public"]["Enums"]["book_payment_kind"]
+          p_mpesa_phone?: string
+          p_mpesa_receipt?: string
+          p_notes?: string
+          p_reservation_id: string
+        }
+        Returns: {
+          amount_paid: number
+          balance_due: number
+          book_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          delivery_details: Json | null
+          delivery_method: string | null
+          id: string
+          mpesa_reference: string | null
+          notes: string | null
+          payment_type: Database["public"]["Enums"]["book_payment_type"]
+          status: Database["public"]["Enums"]["book_reservation_status"]
+          store_credit_issued: boolean
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "book_reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       release_reservation: {
         Args: { p_issue_credit?: boolean; p_reservation_id: string }
@@ -1701,6 +1747,37 @@ export type Database = {
           p_video_url?: string
         }
         Returns: string
+      }
+      update_reservation_status: {
+        Args: {
+          p_notes?: string
+          p_reservation_id: string
+          p_status: Database["public"]["Enums"]["book_reservation_status"]
+        }
+        Returns: {
+          amount_paid: number
+          balance_due: number
+          book_id: string
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          delivery_details: Json | null
+          delivery_method: string | null
+          id: string
+          mpesa_reference: string | null
+          notes: string | null
+          payment_type: Database["public"]["Enums"]["book_payment_type"]
+          status: Database["public"]["Enums"]["book_reservation_status"]
+          store_credit_issued: boolean
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "book_reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
