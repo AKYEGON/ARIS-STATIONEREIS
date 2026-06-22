@@ -46,22 +46,25 @@ export default function ReviewSubmit() {
     const load = async () => {
       if (!token) return;
       setLoading(true);
-      const { data, error } = await supabase
-        .from("review_requests")
-        .select(`
-          id, status, product_id, order_id, customer_name,
-          product:products ( name, image_url )
-        `)
-        .eq("token", token)
-        .maybeSingle();
+      const { data, error } = await supabase.rpc("get_review_request_by_token", {
+        p_token: token,
+      });
+      const row = Array.isArray(data) ? data[0] : data;
 
-      if (error || !data) {
+      if (error || !row) {
         setErrorMsg("This review link is invalid or has expired.");
-      } else if (data.status === "submitted") {
+      } else if (row.status === "submitted") {
         setErrorMsg("You've already submitted a review for this product. Thank you!");
       } else {
-        setRequest(data as unknown as RequestData);
-        setCustomerName(data.customer_name || "");
+        setRequest({
+          id: row.id,
+          status: row.status,
+          product_id: row.product_id,
+          order_id: row.order_id,
+          customer_name: row.customer_name,
+          product: { name: row.product_name, image_url: row.product_image },
+        } as unknown as RequestData);
+        setCustomerName(row.customer_name || "");
       }
       setLoading(false);
     };
