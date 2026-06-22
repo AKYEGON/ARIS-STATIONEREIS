@@ -15,7 +15,7 @@ interface OrderItem {
 
 interface OrderRequest {
   customer_name: string;
-  customer_email: string;
+  customer_email?: string | null;
   customer_phone: string;
   delivery_address: string;
   items: OrderItem[];
@@ -150,7 +150,7 @@ Deno.serve(async (req) => {
     const orderInsert: any = {
       id: orderId,
       customer_name: body.customer_name.trim(),
-      customer_email: body.customer_email.trim(),
+      customer_email: body.customer_email ? body.customer_email.trim() : null,
       customer_phone: body.customer_phone.trim(),
       delivery_address: body.delivery_address.trim(),
       total: calculatedTotal,
