@@ -138,18 +138,26 @@ const Cart = () => {
         });
       });
 
-      // Add bundle items (expand to individual products)
+      // Add bundle items (expand to individual products, weighted by retail price)
       bundleItems.forEach(bundle => {
-        bundle.items?.forEach(bundleItem => {
-          if (bundleItem.product) {
-            orderItems.push({
-              product_id: bundleItem.product.id,
-              product_name: `${bundle.name} - ${bundleItem.product.name}`,
-              product_image: bundleItem.product.image,
-              quantity: bundleItem.quantity * bundle.quantity,
-              price: bundle.bundle_price / (bundle.items?.length || 1) // Distribute bundle price
-            });
-          }
+        const items = bundle.items || [];
+        const retailTotal = items.reduce(
+          (sum, bi) => sum + (bi.product?.price || 0) * bi.quantity,
+          0
+        );
+        items.forEach(bundleItem => {
+          if (!bundleItem.product) return;
+          const lineRetail = bundleItem.product.price * bundleItem.quantity;
+          const weight = retailTotal > 0 ? lineRetail / retailTotal : 1 / items.length;
+          // Per-unit allocated price = (bundle price * weight) / unit quantity
+          const allocatedUnit = (bundle.bundle_price * weight) / bundleItem.quantity;
+          orderItems.push({
+            product_id: bundleItem.product.id,
+            product_name: `${bundle.name} - ${bundleItem.product.name}`,
+            product_image: bundleItem.product.image,
+            quantity: bundleItem.quantity * bundle.quantity,
+            price: Math.round(allocatedUnit * 100) / 100,
+          });
         });
       });
 
@@ -158,7 +166,6 @@ const Cart = () => {
       const { data: orderResult, error: orderError } = await supabase.functions.invoke("create-order", {
         body: {
           customer_name: data.name,
-          customer_email: data.phone + "@temp.com",
           customer_phone: data.phone,
           delivery_address: data.deliveryMethod === "delivery" 
             ? `${data.deliveryAddress} (${data.university} - ${data.branch})` 
