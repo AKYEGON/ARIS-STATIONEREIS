@@ -1639,6 +1639,18 @@ export type Database = {
           status: Database["public"]["Enums"]["book_reservation_status"]
         }[]
       }
+      get_review_request_by_token: {
+        Args: { p_token: string }
+        Returns: {
+          customer_name: string
+          id: string
+          order_id: string
+          product_id: string
+          product_image: string
+          product_name: string
+          status: string
+        }[]
+      }
       get_store_credit_balance: { Args: { p_phone: string }; Returns: number }
       has_role: {
         Args: {
