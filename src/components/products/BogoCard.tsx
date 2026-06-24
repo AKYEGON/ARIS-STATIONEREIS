@@ -74,7 +74,9 @@ const BogoCard = ({ offer, onAddToCart }: BogoCardProps) => {
             </div>
           </div>
         )}
+        <Watermark size="sm" />
       </Link>
+
 
       <CardContent className="p-2 xs:p-3 sm:p-4 flex flex-1 flex-col gap-1.5 min-h-0">
         <div className="flex items-start justify-between gap-2">

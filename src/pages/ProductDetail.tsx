@@ -338,6 +338,8 @@ const ProductDetail = () => {
               ) : (
                 <video src={activeMedia.url} className="max-h-full max-w-full" controls />
               )}
+              {activeMedia.type === "image" && <Watermark size="md" />}
+
               {allMedia.length > 1 && (
                 <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium">
                   <Images className="h-3 w-3" />

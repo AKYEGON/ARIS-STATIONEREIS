@@ -99,6 +99,9 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             }`}
           />
 
+          <Watermark size="sm" />
+
+
           {/* Sale badge (top-left) */}
           <SaleBadge
             price={product.price}
