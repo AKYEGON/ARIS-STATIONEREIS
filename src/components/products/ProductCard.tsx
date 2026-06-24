@@ -1,3 +1,4 @@
+import Watermark from "@/components/common/Watermark";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -98,6 +99,9 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
+
+          <Watermark size="sm" />
+
 
           {/* Sale badge (top-left) */}
           <SaleBadge

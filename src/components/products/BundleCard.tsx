@@ -1,3 +1,4 @@
+import Watermark from "@/components/common/Watermark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,7 +35,9 @@ const BundleCard = ({ bundle, onAddToCart, compact = false }: BundleCardProps) =
           ) : (
             <BundleCollage bundle={bundle} />
           )}
+          <Watermark size="sm" />
         </div>
+
         <CardContent className="p-2 xs:p-3 sm:p-4 flex flex-1 flex-col gap-1.5 min-h-0">
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-[11px] xs:text-xs sm:text-sm leading-tight line-clamp-1 min-w-0 flex-1">

@@ -1,3 +1,4 @@
+import Watermark from "@/components/common/Watermark";
 import { useState, useEffect } from "react";
 import { Product, ProductMedia } from "@/types/product";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -85,14 +86,16 @@ const ProductMediaViewer = ({ product, open, onClose }: ProductMediaViewerProps)
           {/* Main media display */}
           <div className="w-full h-full flex items-center justify-center p-4 md:p-8">
             {currentMedia.type === 'image' ? (
-              <div className="bg-white rounded-xl shadow-2xl p-3 md:p-6 max-w-[90%] md:max-w-[70%] max-h-[65vh] md:max-h-[75vh] flex items-center justify-center">
+              <div className="relative bg-white rounded-xl shadow-2xl p-3 md:p-6 max-w-[90%] md:max-w-[70%] max-h-[65vh] md:max-h-[75vh] flex items-center justify-center">
                 <img
                   src={currentMedia.url}
                   alt={`${product.name} - Media ${currentIndex + 1}`}
                   className="max-w-full max-h-full object-contain rounded-lg"
                   style={{ maxHeight: '55vh' }}
                 />
+                <Watermark size="lg" />
               </div>
+
             ) : (
               <video
                 src={currentMedia.url}
