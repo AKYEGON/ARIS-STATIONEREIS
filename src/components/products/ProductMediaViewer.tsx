@@ -1,3 +1,4 @@
+import Watermark from "@/components/common/Watermark";
 import { useState, useEffect } from "react";
 import { Product, ProductMedia } from "@/types/product";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";

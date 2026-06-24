@@ -1,3 +1,4 @@
+import Watermark from "@/components/common/Watermark";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";

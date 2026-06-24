@@ -1,3 +1,4 @@
+import Watermark from "@/components/common/Watermark";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
