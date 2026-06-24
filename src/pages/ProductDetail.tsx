@@ -180,10 +180,10 @@ const ProductDetail = () => {
     ? product.image
     : `https://arisstationaries.co.ke${product.image}`;
 
-  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS Stationeries`.slice(0, 70);
-  const seoDescription = `Buy ${product.name} in Kenya at ARIS Stationeries Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
+  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | Aris Stationeries`.slice(0, 70);
+  const seoDescription = `Buy ${product.name} in Kenya at Aris Stationeries Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
 
-  const fallbackDescription = `${product.name} available in Kenya at ARIS Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
+  const fallbackDescription = `${product.name} available in Kenya at Aris Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
 
   const productSchema: any = {
     "@context": "https://schema.org",
@@ -196,7 +196,7 @@ const ProductDetail = () => {
     sku: product.id,
     mpn: product.id,
     category: product.category,
-    brand: { "@type": "Brand", name: "ARIS Stationeries" },
+    brand: { "@type": "Brand", name: "Aris Stationeries" },
     offers: {
       "@type": "Offer",
       url: fullUrl,
@@ -204,7 +204,7 @@ const ProductDetail = () => {
       price: displayPrice,
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
-      seller: { "@type": "Organization", name: "ARIS Stationeries" },
+      seller: { "@type": "Organization", name: "Aris Stationeries" },
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
@@ -332,7 +332,7 @@ const ProductDetail = () => {
               {activeMedia.type === "image" ? (
                 <img
                   src={activeMedia.url}
-                  alt={`${product.name} - ${product.description} - Buy at ARIS STATIONERIES Kenya`}
+                  alt={`${product.name} - ${product.description} - Buy at Aris Stationeries Kenya`}
                   className="max-h-full max-w-full object-contain p-4"
                 />
               ) : (
