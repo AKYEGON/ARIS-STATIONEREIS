@@ -17,7 +17,7 @@ const BASE_URL = "https://arisstationaries.co.ke";
 const SEO = ({
   title,
   description,
-  keywords = "cheap stationery Kenya, affordable stationery Kenya, buy stationery online Kenya, university stationery Kenya, ARIS Stationeries",
+  keywords = "cheap stationery Kenya, affordable stationery Kenya, buy stationery online Kenya, university stationery Kenya, Aris Stationeries",
   canonicalUrl,
   ogImage = "/favicon.png",
   ogType = "website",

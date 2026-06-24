@@ -168,8 +168,8 @@ const Deals = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Stationery Deals in Kenya — Flash Sales & Bundles | ARIS Stationeries"
-        description="Live flash sales, course bundles and Buy-X-Get-Y offers on stationery in Kenya. Save on pens, notebooks, calculators and drawing sets at ARIS Stationeries Nairobi."
+        title="Stationery Deals in Kenya — Flash Sales & Bundles | Aris Stationeries"
+        description="Live flash sales, course bundles and Buy-X-Get-Y offers on stationery in Kenya. Save on pens, notebooks, calculators and drawing sets at Aris Stationeries Nairobi."
         canonicalUrl="/deals"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Deals", url: "/deals" }]}
       />

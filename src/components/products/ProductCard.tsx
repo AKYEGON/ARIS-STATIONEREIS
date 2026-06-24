@@ -54,7 +54,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
     "image": product.image.startsWith("http") ? product.image : `https://arisstationaries.co.ke${product.image}`,
     "brand": {
       "@type": "Brand",
-      "name": "ARIS STATIONERIES"
+      "name": "Aris Stationeries"
     },
     "offers": {
       "@type": "Offer",
@@ -64,7 +64,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
       "availability": "https://schema.org/InStock",
       "seller": {
         "@type": "Organization",
-        "name": "ARIS STATIONERIES"
+        "name": "Aris Stationeries"
       }
     },
     ...(product.originalPrice && product.originalPrice > product.price ? {
@@ -91,7 +91,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
           )}
           <img
             src={product.image}
-            alt={`${product.name} - ${product.description} - Buy at ARIS STATIONERIES Nairobi Kenya`}
+            alt={`${product.name} - ${product.description} - Buy at Aris Stationeries Nairobi Kenya`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
             className={`max-h-full max-w-full object-contain p-2 ${!isMobile ? 'transition-all duration-300 group-hover:scale-105' : ''} ${
