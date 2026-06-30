@@ -2,7 +2,8 @@ import { ShoppingCart, GraduationCap, Users, Flame, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import logo from "@/assets/logo.png";
+import wordmark from "@/assets/aris-wordmark.png.asset.json";
+import icon from "@/assets/aris-icon.png.asset.json";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -26,42 +27,63 @@ const Header = ({ cartItemCount }: HeaderProps) => {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-background md:bg-background/95 md:backdrop-blur md:supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 sm:h-16 items-center justify-between px-4">
-          <Link to="/" className="flex items-center space-x-2 sm:space-x-3 transition-transform duration-200 hover:scale-105">
-            <img src={logo} alt="ARIS STATIONERIES Logo" className="h-8 sm:h-10 md:h-12" />
-            <span className="text-lg sm:text-xl md:text-2xl font-bold text-primary">ARIS STATIONERIES</span>
+      <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="container flex h-16 sm:h-20 items-center justify-between gap-3 px-4">
+          {/* Brand: icon + wordmark + tagline */}
+          <Link
+            to="/"
+            className="flex items-center gap-2 sm:gap-3 transition-transform duration-200 hover:scale-[1.02] min-w-0"
+            aria-label="ARIS — Spend less. Study better."
+          >
+            <img
+              src={icon.url}
+              alt=""
+              aria-hidden="true"
+              className="h-9 sm:h-11 md:h-12 w-auto flex-shrink-0"
+            />
+            <div className="flex flex-col leading-none min-w-0">
+              <span className="font-display font-black uppercase tracking-tight text-primary text-xl sm:text-2xl md:text-[1.7rem]">
+                ARIS
+              </span>
+              <span className="hidden xs:block text-[9px] sm:text-[10px] md:text-[11px] font-medium text-muted-foreground tracking-[0.18em] uppercase mt-0.5 truncate">
+                Spend less. Study better.
+              </span>
+            </div>
           </Link>
-          
-          {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-2 sm:gap-4">
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex items-center gap-2">
             <Link to="/deals">
-              <Button variant="outline" size="sm">
+              <Button variant="ghost" size="sm" className="font-medium">
                 <Flame className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Deals</span>
               </Button>
             </Link>
-            
+
             <Link to="/testimonials">
-              <Button variant="outline" size="sm">
+              <Button variant="ghost" size="sm" className="font-medium">
                 <Users className="h-4 w-4 mr-2" />
-                <span className="hidden lg:inline">Happy Customers</span>
+                <span className="hidden lg:inline">Customers</span>
               </Button>
             </Link>
-            
+
             <Link to="/students">
-              <Button variant="outline" size="sm">
+              <Button variant="ghost" size="sm" className="font-medium">
                 <GraduationCap className="h-4 w-4 mr-2" />
                 <span className="hidden lg:inline">Shop by Course</span>
               </Button>
             </Link>
-            
+
             <Link to="/cart">
-              <Button variant="outline" size="icon" className="relative transition-all duration-200 hover:scale-110 active:scale-95">
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Button
+                variant="default"
+                size="icon"
+                className="relative transition-all duration-200 hover:scale-110 active:scale-95 ml-1"
+              >
+                <ShoppingCart className="h-5 w-5" />
                 {cartItemCount > 0 && (
-                  <Badge 
-                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-primary text-[10px] sm:text-xs transition-transform duration-200"
+                  <Badge
+                    className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-foreground text-background text-[10px]"
                     variant="default"
                   >
                     {cartItemCount}
@@ -72,8 +94,8 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </div>
         </div>
       </header>
-      
-      {/* Mobile Bottom Tab Bar */}
+
+      {/* Mobile bottom tab bar */}
       <nav
         data-bottom-nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-[100] bg-background border-t border-border shadow-[0_-4px_20px_rgba(0,0,0,0.15)]"
@@ -86,7 +108,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
               <Link
                 key={to}
                 to={to}
-                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 ${
+                className={`flex flex-col items-center justify-center flex-1 h-full gap-0.5 transition-colors ${
                   active ? "text-primary font-semibold" : "text-muted-foreground"
                 }`}
               >
