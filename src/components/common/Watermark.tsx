@@ -1,4 +1,4 @@
-import logo from "@/assets/logo.png";
+import logo from "@/assets/aris-icon.png.asset.json";
 
 interface WatermarkProps {
   /** Visual size preset. `sm` for cards, `md` for product detail, `lg` for fullscreen viewer. */
@@ -27,16 +27,16 @@ const Watermark = ({ size = "sm", opacity = 0.55 }: WatermarkProps) => {
       aria-hidden="true"
     >
       <img
-        src={logo}
+        src={logo.url}
         alt=""
         className={`${sizing.logo} w-auto drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]`}
         loading="lazy"
       />
       <span
-        className={`${sizing.text} font-semibold text-primary tracking-tight`}
+        className={`${sizing.text} font-display font-black uppercase tracking-tight text-primary`}
         style={{ textShadow: "0 1px 2px rgba(255,255,255,0.7)" }}
       >
-        Aris Stationeries
+        ARIS
       </span>
     </div>
   );

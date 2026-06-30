@@ -5,6 +5,29 @@ import { supabase } from "@/integrations/supabase/client";
 import lockup from "@/assets/aris-lockup.png.asset.json";
 
 const Footer = () => {
+  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("product_categories")
+      .select("name,slug,display_order")
+      .eq("is_active", true)
+      .order("display_order")
+      .limit(6)
+      .then(({ data }) => {
+        if (data) setCategories(data as any);
+      });
+  }, []);
+
+  return (
+    <footer className="relative mt-auto overflow-hidden">
+      <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background to-transparent -translate-y-full" />
+
+      <div className="bg-black relative">
+        <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+
+        <div className="container py-4 sm:py-6 px-4 relative z-10">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
             <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
               <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0">
                 <img src={lockup.url} alt="ARIS — Spend less. Study better." className="h-12 sm:h-20 w-auto" />
@@ -17,31 +40,24 @@ const Footer = () => {
                   Spend less. Study better.
                 </p>
                 <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
-                  Kenya's student-first platform for course kits, academic essentials and campus tech.
+                  Kenya's student-first platform — course kits, academic essentials and campus tech.
                 </p>
               </div>
             </div>
-            
-            {/* Quick Links - Compact on mobile */}
+
             <div>
               <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
                 <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
                 Links
               </h4>
               <div className="space-y-1.5 sm:space-y-3">
-                <Link to="/" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">
-                  Home
-                </Link>
-                <Link to="/offers" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">
-                  Offers
-                </Link>
-                <Link to="/testimonials" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">
-                  Reviews
-                </Link>
+                <Link to="/" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Home</Link>
+                <Link to="/deals" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Deals</Link>
+                <Link to="/students" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Shop by Course</Link>
+                <Link to="/testimonials" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Reviews</Link>
               </div>
             </div>
 
-            {/* Shop by Category - SEO internal links */}
             <div className="col-span-2 sm:col-span-2">
               <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
                 <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
@@ -60,16 +76,15 @@ const Footer = () => {
               </div>
             </div>
 
-            {/* Contact + Admin combined on mobile */}
             <div>
               <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
                 <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
                 Contact
               </h4>
               <div className="space-y-1.5 sm:space-y-3">
-                <a 
-                  href="https://wa.me/254119774470" 
-                  target="_blank" 
+                <a
+                  href="https://wa.me/254119774470"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70 hover:text-primary transition-all"
                 >
@@ -81,8 +96,8 @@ const Footer = () => {
                   <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                   <span>Nairobi</span>
                 </div>
-                <Link 
-                  to="/auth" 
+                <Link
+                  to="/auth"
                   className="flex items-center gap-1.5 text-xs sm:text-sm text-primary hover:text-primary/80 transition-all"
                 >
                   <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -90,13 +105,11 @@ const Footer = () => {
                 </Link>
               </div>
             </div>
-            
           </div>
-          
-          {/* Bottom bar - More compact on mobile */}
+
           <div className="mt-3 sm:mt-4 pt-3 border-t border-white/10">
             <div className="flex items-center justify-between text-xs sm:text-sm text-white/50">
-              <p>© {new Date().getFullYear()} ARIS STATIONERIES</p>
+              <p>© {new Date().getFullYear()} ARIS · Spend less. Study better.</p>
               <p className="flex items-center gap-1">
                 <Heart className="h-3 w-3 text-red-400 fill-red-400" /> Kenya
               </p>
