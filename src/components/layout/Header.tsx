@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import wordmark from "@/assets/aris-wordmark.png.asset.json";
-import icon from "@/assets/aris-icon.png.asset.json";
 
 interface HeaderProps {
   cartItemCount: number;
@@ -29,26 +28,17 @@ const Header = ({ cartItemCount }: HeaderProps) => {
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
         <div className="container flex h-16 sm:h-20 items-center justify-between gap-3 px-4">
-          {/* Brand: icon + wordmark + tagline */}
+          {/* Brand: wordmark (ARIS + tagline locked together) */}
           <Link
             to="/"
-            className="flex items-center gap-2 sm:gap-3 transition-transform duration-200 hover:scale-[1.02] min-w-0"
+            className="flex items-center transition-transform duration-200 hover:scale-[1.02] min-w-0"
             aria-label="ARIS — Spend less. Study better."
           >
             <img
-              src={icon.url}
-              alt=""
-              aria-hidden="true"
-              className="h-9 sm:h-11 md:h-12 w-auto flex-shrink-0"
+              src={wordmark.url}
+              alt="ARIS — Spend less. Study better."
+              className="h-12 sm:h-14 md:h-16 w-auto"
             />
-            <div className="flex flex-col leading-none min-w-0">
-              <span className="font-display font-black uppercase tracking-tight text-primary text-xl sm:text-2xl md:text-[1.7rem]">
-                ARIS
-              </span>
-              <span className="hidden xs:block text-[9px] sm:text-[10px] md:text-[11px] font-medium text-muted-foreground tracking-[0.18em] uppercase mt-0.5 truncate">
-                Spend less. Study better.
-              </span>
-            </div>
           </Link>
 
           {/* Desktop nav */}
