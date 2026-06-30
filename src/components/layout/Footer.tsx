@@ -2,50 +2,23 @@ import { Link } from "react-router-dom";
 import { Shield, Phone, MapPin, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import lockup from "@/assets/aris-lockup.png.asset.json";
 
 const Footer = () => {
-  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
-
-  useEffect(() => {
-    supabase
-      .from("product_categories")
-      .select("name,slug,display_order")
-      .eq("is_active", true)
-      .order("display_order")
-      .limit(6)
-      .then(({ data }) => {
-        if (data) setCategories(data as any);
-      });
-  }, []);
-
-  return (
-    <footer className="relative mt-auto overflow-hidden">
-      {/* Decorative top wave/curve */}
-      <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background to-transparent -translate-y-full" />
-      
-      {/* Main footer with black background */}
-      <div className="bg-black relative">
-        
-        {/* Green accent line at top */}
-        <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-        
-        <div className="container py-4 sm:py-6 px-4 relative z-10">
-          {/* Mobile: Compact 2-column layout */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
-            {/* Brand Section - Full width on mobile */}
             <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl p-2 sm:p-3 border border-white/10 flex-shrink-0">
-                <img src={logo} alt="ARIS STATIONERIES Logo" className="h-10 sm:h-16" />
+              <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0">
+                <img src={lockup.url} alt="ARIS — Spend less. Study better." className="h-12 sm:h-20 w-auto" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-bold text-sm sm:text-xl text-primary">
-                  ARIS STATIONERIES
+                <h3 className="font-display font-black uppercase tracking-tight text-sm sm:text-xl text-primary">
+                  ARIS
                 </h3>
-                <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
-                  THE HOME OF AFFORDABLE STATIONERIES. Your trusted partner for all stationery needs.
+                <p className="text-[10px] sm:text-xs text-primary/80 tracking-[0.15em] uppercase font-medium mb-1">
+                  Spend less. Study better.
                 </p>
-                <p className="text-xs text-white/70 sm:hidden">THE HOME OF AFFORDABLE STATIONERIES</p>
+                <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
+                  Kenya's student-first platform for course kits, academic essentials and campus tech.
+                </p>
               </div>
             </div>
             
