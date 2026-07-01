@@ -1,4 +1,4 @@
-# Aris Stationeries - Robots.txt
+# ARIS - Robots.txt
 # https://arisstationaries.co.ke
 
 User-agent: Googlebot

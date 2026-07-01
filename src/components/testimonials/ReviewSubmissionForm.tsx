@@ -247,7 +247,7 @@ const ReviewSubmissionForm = ({ onSuccess, prefillData }: ReviewSubmissionFormPr
           id="review_text"
           value={formData.review_text}
           onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
-          placeholder="Share your experience with ARIS STATIONERIES..."
+          placeholder="Share your experience with ARIS..."
           rows={4}
           maxLength={500}
           required

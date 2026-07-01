@@ -109,11 +109,11 @@ export async function markReviewRequestsSent(
  * after Delivered / Picked Up.
  */
 export function buildReviewMessage(customerName: string, rows: ReviewRequestRow[]): string {
-  const intro = `Hello ${customerName},\n\nThank you for shopping with ARIS STATIONERIES.\n\nWe'd love your honest feedback on the items from your recent order:\n`;
+  const intro = `Hello ${customerName},\n\nThank you for shopping with ARIS.\n\nWe'd love your honest feedback on the items from your recent order:\n`;
   const list = rows
     .map((r, i) => `\n${i + 1}. ${r.product_name}\n${SITE}/review/${r.token}`)
     .join("");
-  const outro = `\n\nReview any or all — even a quick rating helps fellow students choose with confidence.\n\nARIS STATIONERIES`;
+  const outro = `\n\nReview any or all — even a quick rating helps fellow students choose with confidence.\n\nARIS`;
   return intro + list + outro;
 }
 
@@ -129,8 +129,8 @@ export function buildStatusReviewMessage(
   const shortId = order.id.slice(0, 8).toUpperCase();
   const header =
     status === "delivered"
-      ? `Hi ${order.customer_name}! Your order #${shortId} has been delivered. Thank you for shopping with ARIS STATIONERIES!`
-      : `Hi ${order.customer_name}! Thank you for picking up your order #${shortId} at ARIS STATIONERIES.`;
+      ? `Hi ${order.customer_name}! Your order #${shortId} has been delivered. Thank you for shopping with ARIS!`
+      : `Hi ${order.customer_name}! Thank you for picking up your order #${shortId} at ARIS.`;
 
   if (rows.length === 0) {
     return `${header}\n\nWe'd love to hear your feedback — reply here any time.`;

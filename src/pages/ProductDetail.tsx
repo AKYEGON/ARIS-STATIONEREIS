@@ -181,10 +181,10 @@ const ProductDetail = () => {
     ? product.image
     : `https://arisstationaries.co.ke${product.image}`;
 
-  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | Aris Stationeries`.slice(0, 70);
-  const seoDescription = `Buy ${product.name} in Kenya at Aris Stationeries Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
+  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS`.slice(0, 70);
+  const seoDescription = `Buy ${product.name} in Kenya at ARIS Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
 
-  const fallbackDescription = `${product.name} available in Kenya at Aris Stationeries Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
+  const fallbackDescription = `${product.name} available in Kenya at ARIS Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
 
   const productSchema: any = {
     "@context": "https://schema.org",
@@ -197,7 +197,7 @@ const ProductDetail = () => {
     sku: product.id,
     mpn: product.id,
     category: product.category,
-    brand: { "@type": "Brand", name: "Aris Stationeries" },
+    brand: { "@type": "Brand", name: "ARIS" },
     offers: {
       "@type": "Offer",
       url: fullUrl,
@@ -205,7 +205,7 @@ const ProductDetail = () => {
       price: displayPrice,
       availability: "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
-      seller: { "@type": "Organization", name: "Aris Stationeries" },
+      seller: { "@type": "Organization", name: "ARIS" },
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split("T")[0],
@@ -288,7 +288,7 @@ const ProductDetail = () => {
         canonicalUrl={productUrl}
         ogImage={fullImage}
         ogType="product"
-        keywords={`${product.name}, ${product.category}, buy ${product.name} Kenya, ${product.name} price Kenya, Aris Stationeries`}
+        keywords={`${product.name}, ${product.category}, buy ${product.name} Kenya, ${product.name} price Kenya, ARIS`}
         structuredData={productSchema}
         breadcrumbs={[
           { name: "Home", url: "/" },
@@ -333,7 +333,7 @@ const ProductDetail = () => {
               {activeMedia.type === "image" ? (
                 <img
                   src={activeMedia.url}
-                  alt={`${product.name} - ${product.description} - Buy at Aris Stationeries Kenya`}
+                  alt={`${product.name} - ${product.description} - Buy at ARIS Kenya`}
                   className="max-h-full max-w-full object-contain p-4"
                 />
               ) : (

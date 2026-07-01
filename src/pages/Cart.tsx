@@ -218,7 +218,7 @@ const Cart = () => {
         ? outlets.find(o => o.id === selectedPickupOutlet || o.name === selectedPickupOutlet)?.name || selectedPickupOutlet
         : 'N/A';
 
-      let message = `*NEW ORDER — ARIS STATIONERIES*\n`;
+      let message = `*NEW ORDER — ARIS*\n`;
       message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
       message += `*Order ID:* #${orderId.slice(0, 8)}\n`;
       message += `*Date:* ${new Date().toLocaleDateString('en-KE', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
@@ -304,8 +304,8 @@ const Cart = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Shopping Cart | Aris Stationeries"
-        description="Review your cart and checkout securely at Aris Stationeries. Affordable stationery delivered to your university or doorstep in Kenya."
+        title="Shopping Cart | ARIS"
+        description="Review your cart and checkout securely at ARIS. Affordable stationery delivered to your university or doorstep in Kenya."
         canonicalUrl="/cart"
         noindex
       />

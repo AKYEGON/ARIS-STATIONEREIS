@@ -24,11 +24,11 @@ export function QuickSaleSuccessDialog({ open, onClose, saleData }: QuickSaleSuc
   
   // Match the exact same message format as the "Delivered" status template
   const reviewMessage = saleData.customerName && saleData.customerName !== 'Walk-in Customer'
-    ? `Hi ${saleData.customerName}! Your order #${orderRef} has been delivered. Thank you for shopping with ARIS STATIONERIES! 💙
+    ? `Hi ${saleData.customerName}! Your order #${orderRef} has been delivered. Thank you for shopping with ARIS! 💙
 
 We'd love to hear about your experience! Share a quick review here:
 ${reviewLink}`
-    : `Hi! Your order #${orderRef} has been delivered. Thank you for shopping at ARIS STATIONERIES! 💙
+    : `Hi! Your order #${orderRef} has been delivered. Thank you for shopping at ARIS! 💙
 
 We'd love to hear about your experience! Share a quick review here:
 ${reviewLink}`;
