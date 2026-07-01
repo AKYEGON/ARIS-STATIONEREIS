@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Shield, Phone, MapPin, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import lockup from "@/assets/aris-lockup.png.asset.json";
+import icon from "@/assets/aris-icon.png.asset.json";
 
 const Footer = () => {
   const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
@@ -30,16 +30,16 @@ const Footer = () => {
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
             <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
               <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0">
-                <img src={lockup.url} alt="ARIS — Spend less. Study better." className="h-12 sm:h-20 w-auto" />
+                <img src={icon.url} alt="ARIS" className="h-12 sm:h-16 w-auto" />
               </div>
-              <div className="min-w-0">
-                <h3 className="font-display font-black uppercase tracking-tight text-sm sm:text-xl text-primary">
+              <div className="min-w-0 flex flex-col">
+                <span className="font-display font-black tracking-tight text-primary text-3xl sm:text-5xl leading-none">
                   ARIS
-                </h3>
-                <p className="text-[10px] sm:text-xs text-primary/80 tracking-[0.15em] uppercase font-medium mb-1">
+                </span>
+                <span className="text-[10px] sm:text-xs text-primary/80 tracking-[0.15em] uppercase font-medium mt-1">
                   Spend less. Study better.
-                </p>
-                <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block">
+                </span>
+                <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block mt-2">
                   Kenya's student-first platform — course kits, academic essentials and campus tech.
                 </p>
               </div>
