@@ -276,7 +276,8 @@ const Admin = () => {
             media_type,
             display_order,
             created_at
-          )
+          ),
+          product_variants (*)
         `)
         .order("created_at", { ascending: false });
 
@@ -300,7 +301,16 @@ const Admin = () => {
         media: (p.product_media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
-        }))
+        })),
+        variants: ((p as any).product_variants || [])
+          .filter((v: any) => v.is_active !== false)
+          .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+          .map((v: any) => ({
+            ...v,
+            price: Number(v.price),
+            cost_price: Number(v.cost_price || 0),
+            stock: v.stock || 0,
+          })),
       }));
       
       setProductList(formattedProducts);
