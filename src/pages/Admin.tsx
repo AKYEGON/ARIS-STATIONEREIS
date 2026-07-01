@@ -2689,6 +2689,9 @@ const Admin = () => {
                           .filter(t => {
                             if (testimonialFilter === "pending" && t.is_published) return false;
                             if (testimonialFilter === "published" && !t.is_published) return false;
+                            if (testimonialFilter === "featured" && !t.is_featured) return false;
+                            if (testimonialFilter === "verified" && !t.is_verified_purchase) return false;
+                            if (testimonialFilter === "with-video" && !t.video_url) return false;
                             if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
                             if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                             return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
