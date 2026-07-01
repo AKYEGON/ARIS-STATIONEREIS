@@ -2429,7 +2429,35 @@ const Admin = () => {
                 <span className="xs:hidden">Pub</span>
                 <span className="ml-1">({testimonialsList.filter(t => t.is_published).length})</span>
               </Button>
+              <Button
+                variant={testimonialFilter === "featured" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("featured")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Featured
+                <span className="ml-1">({testimonialsList.filter(t => t.is_featured).length})</span>
+              </Button>
+              <Button
+                variant={testimonialFilter === "verified" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("verified")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Verified
+                <span className="ml-1">({testimonialsList.filter(t => t.is_verified_purchase).length})</span>
+              </Button>
+              <Button
+                variant={testimonialFilter === "with-video" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("with-video")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Video
+                <span className="ml-1">({testimonialsList.filter(t => !!t.video_url).length})</span>
+              </Button>
             </div>
+
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">Manage customer testimonials and reviews</p>
