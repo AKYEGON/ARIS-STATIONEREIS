@@ -2253,7 +2253,7 @@ const Admin = () => {
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {["all", "pending", "confirmed", "processing", "dispatched", "delivered", "fulfilled", "completed", "cancelled"].map((status) => (
+                    {["all", "pending", "processing", "shipped", "delivered", "cancelled"].map((status) => (
                       <Button
                         key={status}
                         variant={orderStatusFilter === status ? "default" : "outline"}
