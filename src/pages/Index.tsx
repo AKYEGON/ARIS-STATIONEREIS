@@ -251,12 +251,12 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Aris Stationeries Nairobi | Buy Stationery Online in Kenya"
-        description="Aris Stationeries Nairobi — affordable pens, notebooks, calculators, drawing sets & engineering kits. Same-day Nairobi pickup, countrywide delivery. Order on WhatsApp +254 119 774470."
+        title="ARIS Nairobi | Buy Stationery Online in Kenya"
+        description="ARIS Nairobi — affordable pens, notebooks, calculators, drawing sets & engineering kits. Same-day Nairobi pickup, countrywide delivery. Order on WhatsApp +254 119 774470."
         canonicalUrl="/"
         breadcrumbs={[{ name: "Home", url: "/" }]}
       />
-      <h1 className="sr-only">Aris Stationeries Nairobi — Buy Stationery Online in Kenya</h1>
+      <h1 className="sr-only">ARIS Nairobi — Buy Stationery Online in Kenya</h1>
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Offers Section - moved to top */}

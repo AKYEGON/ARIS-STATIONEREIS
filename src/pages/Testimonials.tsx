@@ -91,7 +91,7 @@ const Testimonials = () => {
       <div className="min-h-screen pb-16 md:pb-0">
         <SEO 
           title="Customer Reviews & Stories"
-          description="Read what our customers say about Aris Stationeries. Real reviews from happy customers in Nairobi, Kenya."
+          description="Read what our customers say about ARIS. Real reviews from happy customers in Nairobi, Kenya."
           canonicalUrl="/testimonials"
         />
         <Header cartItemCount={getCartItemCount()} />
@@ -106,8 +106,8 @@ const Testimonials = () => {
   return (
     <div className="min-h-screen pb-16 md:pb-0">
       <SEO
-        title="Customer Reviews | Aris Stationeries Kenya"
-        description="Read verified reviews from Aris Stationeries customers across Kenya. See why students at UoN, KU, Strathmore and USIU trust us for affordable stationery."
+        title="Customer Reviews | ARIS Kenya"
+        description="Read verified reviews from ARIS customers across Kenya. See why students at UoN, KU, Strathmore and USIU trust us for affordable stationery."
         canonicalUrl="/testimonials"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Reviews", url: "/testimonials" }]}
       />
@@ -141,7 +141,7 @@ const Testimonials = () => {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-xl sm:text-2xl font-bold mb-2 sm:mb-4">Share Your Experience</h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-            Had a great experience with Aris Stationeries? We'd love to hear from you!
+            Had a great experience with ARIS? We'd love to hear from you!
           </p>
           
           <Dialog open={isSubmitDialogOpen} onOpenChange={(open) => {

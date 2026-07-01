@@ -174,8 +174,13 @@ const OffersSection = () => {
 
   const handleAddProduct = (product: Product, variant?: ProductVariant) => addToCart(product, variant);
 
-  // Duplicate the list so the marquee loop is seamless.
-  const marquee = useMemo(() => [...items, ...items], [items]);
+  // Only duplicate for the marquee loop when there are enough items to
+  // scroll — otherwise a single offer would render twice on the row.
+  const shouldMarquee = items.length >= 4;
+  const marquee = useMemo(
+    () => (shouldMarquee ? [...items, ...items] : items),
+    [items, shouldMarquee],
+  );
 
   if (isLoading || items.length === 0) return null;
 
@@ -200,13 +205,19 @@ const OffersSection = () => {
           onTouchEnd={() => setIsPaused(false)}
         >
           <div
-            className="flex items-start gap-2 md:gap-4 w-max will-change-transform"
-            style={{
-              animation: `horizontal-marquee ${Math.max(items.length * 5, 20)}s linear infinite`,
-              animationPlayState: isPaused ? "paused" : "running",
-              transform: "translateZ(0)",
-              backfaceVisibility: "hidden",
-            }}
+            className={`flex items-start gap-2 md:gap-4 will-change-transform ${
+              shouldMarquee ? "w-max" : "flex-wrap justify-start"
+            }`}
+            style={
+              shouldMarquee
+                ? {
+                    animation: `horizontal-marquee ${Math.max(items.length * 5, 20)}s linear infinite`,
+                    animationPlayState: isPaused ? "paused" : "running",
+                    transform: "translateZ(0)",
+                    backfaceVisibility: "hidden",
+                  }
+                : undefined
+            }
           >
             {marquee.map((item, index) => (
               <div

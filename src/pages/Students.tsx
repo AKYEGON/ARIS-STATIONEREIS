@@ -310,16 +310,16 @@ const Students = () => {
   ];
 
   const seoTitle = activeCourse
-    ? `${activeCourse.name} Stationery List — Nairobi Universities | Aris Stationeries`
+    ? `${activeCourse.name} Stationery List — Nairobi Universities | ARIS`
     : activeFaculty
-    ? `${activeFaculty.name} Stationery — Course Lists | Aris Stationeries Nairobi`
-    : "Shop Stationery by Course — UoN, KU, Strathmore, JKUAT | Aris Stationeries";
+    ? `${activeFaculty.name} Stationery — Course Lists | ARIS Nairobi`
+    : "Shop Stationery by Course — UoN, KU, Strathmore, JKUAT | ARIS";
 
   const seoDescription = activeCourse
-    ? `The exact stationery list for ${activeCourse.name} students in Kenya — drawing sets, calculators, notebooks and more. Same-day Nairobi pickup, countrywide delivery from Aris Stationeries.`
+    ? `The exact stationery list for ${activeCourse.name} students in Kenya — drawing sets, calculators, notebooks and more. Same-day Nairobi pickup, countrywide delivery from ARIS.`
     : activeFaculty
-    ? `Browse ${activeFaculty.name} stationery by course at Aris Stationeries Nairobi. Curated lists for UoN, KU, Strathmore, USIU and JKUAT students.`
-    : "Find the exact stationery you need for your course at Aris Stationeries. Faculty-by-faculty, course-by-course lists for Nairobi universities — UoN, KU, Strathmore, USIU, JKUAT.";
+    ? `Browse ${activeFaculty.name} stationery by course at ARIS Nairobi. Curated lists for UoN, KU, Strathmore, USIU and JKUAT students.`
+    : "Find the exact stationery you need for your course at ARIS. Faculty-by-faculty, course-by-course lists for Nairobi universities — UoN, KU, Strathmore, USIU, JKUAT.";
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
