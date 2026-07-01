@@ -150,7 +150,7 @@ const Admin = () => {
   const [testimonialVideoFile, setTestimonialVideoFile] = useState<File | null>(null);
   const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
-  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
+  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published" | "featured" | "verified" | "with-video">("all");
   const [testimonialProductFilter, setTestimonialProductFilter] = useState<string>("all");
   const [testimonialVerifiedOnly, setTestimonialVerifiedOnly] = useState(false);
   
