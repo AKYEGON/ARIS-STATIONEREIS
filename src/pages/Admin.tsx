@@ -150,7 +150,7 @@ const Admin = () => {
   const [testimonialVideoFile, setTestimonialVideoFile] = useState<File | null>(null);
   const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
-  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
+  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published" | "featured" | "verified" | "with-video">("all");
   const [testimonialProductFilter, setTestimonialProductFilter] = useState<string>("all");
   const [testimonialVerifiedOnly, setTestimonialVerifiedOnly] = useState(false);
   
@@ -276,7 +276,8 @@ const Admin = () => {
             media_type,
             display_order,
             created_at
-          )
+          ),
+          product_variants (*)
         `)
         .order("created_at", { ascending: false });
 
@@ -300,7 +301,16 @@ const Admin = () => {
         media: (p.product_media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
-        }))
+        })),
+        variants: ((p as any).product_variants || [])
+          .filter((v: any) => v.is_active !== false)
+          .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+          .map((v: any) => ({
+            ...v,
+            price: Number(v.price),
+            cost_price: Number(v.cost_price || 0),
+            stock: v.stock || 0,
+          })),
       }));
       
       setProductList(formattedProducts);
@@ -2253,7 +2263,7 @@ const Admin = () => {
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {["all", "pending", "confirmed", "processing", "dispatched", "delivered", "fulfilled", "completed", "cancelled"].map((status) => (
+                    {["all", "pending", "processing", "shipped", "delivered", "cancelled"].map((status) => (
                       <Button
                         key={status}
                         variant={orderStatusFilter === status ? "default" : "outline"}
@@ -2419,7 +2429,35 @@ const Admin = () => {
                 <span className="xs:hidden">Pub</span>
                 <span className="ml-1">({testimonialsList.filter(t => t.is_published).length})</span>
               </Button>
+              <Button
+                variant={testimonialFilter === "featured" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("featured")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Featured
+                <span className="ml-1">({testimonialsList.filter(t => t.is_featured).length})</span>
+              </Button>
+              <Button
+                variant={testimonialFilter === "verified" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("verified")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Verified
+                <span className="ml-1">({testimonialsList.filter(t => t.is_verified_purchase).length})</span>
+              </Button>
+              <Button
+                variant={testimonialFilter === "with-video" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("with-video")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Video
+                <span className="ml-1">({testimonialsList.filter(t => !!t.video_url).length})</span>
+              </Button>
             </div>
+
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">Manage customer testimonials and reviews</p>
@@ -2623,6 +2661,9 @@ const Admin = () => {
                   {testimonialsList.filter(t => {
                     if (testimonialFilter === "pending" && t.is_published) return false;
                     if (testimonialFilter === "published" && !t.is_published) return false;
+                    if (testimonialFilter === "featured" && !t.is_featured) return false;
+                    if (testimonialFilter === "verified" && !t.is_verified_purchase) return false;
+                    if (testimonialFilter === "with-video" && !t.video_url) return false;
                     if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
                     if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                     return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
@@ -2648,6 +2689,9 @@ const Admin = () => {
                           .filter(t => {
                             if (testimonialFilter === "pending" && t.is_published) return false;
                             if (testimonialFilter === "published" && !t.is_published) return false;
+                            if (testimonialFilter === "featured" && !t.is_featured) return false;
+                            if (testimonialFilter === "verified" && !t.is_verified_purchase) return false;
+                            if (testimonialFilter === "with-video" && !t.video_url) return false;
                             if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
                             if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                             return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
