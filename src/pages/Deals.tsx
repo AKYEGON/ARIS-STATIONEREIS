@@ -168,8 +168,8 @@ const Deals = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Stationery Deals in Kenya — Flash Sales & Bundles | ARIS"
-        description="Live flash sales, course bundles and Buy-X-Get-Y offers on stationery in Kenya. Save on pens, notebooks, calculators and drawing sets at ARIS Nairobi."
+        title="Deals worth actually opening | ARIS"
+        description="What's on right now — flash sales counting down, course bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."
         canonicalUrl="/deals"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Deals", url: "/deals" }]}
       />
@@ -197,7 +197,8 @@ const Deals = () => {
 
           {flashSales.length > 0 && (
             <section>
-              <SectionHeader icon={Flame} title="Flash Sales" subtitle="Limited time — ending soon" color="bg-red-600" />
+              <SectionHeader icon={Flame} title="Flash Sales" subtitle="Clock's running. Grab it before it flips back." color="bg-red-600" />
+
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {flashSales.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAdd} compact />)}
               </div>
