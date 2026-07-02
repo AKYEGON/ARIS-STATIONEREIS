@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Shield, Phone, MapPin, Heart } from "lucide-react";
+import { Shield, MapPin, Mail, MessageCircle, Instagram, Facebook, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import icon from "@/assets/aris-icon.png.asset.json";
@@ -24,95 +24,142 @@ const Footer = () => {
       <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background to-transparent -translate-y-full" />
 
       <div className="bg-black relative">
-        <div className="h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
+        <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
-        <div className="container py-4 sm:py-6 px-4 relative z-10">
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 sm:gap-6">
-            <div className="col-span-2 sm:col-span-1 flex items-center gap-3 sm:flex-col sm:items-start sm:gap-3">
-              <div className="bg-white rounded-lg sm:rounded-xl p-2 sm:p-3 flex-shrink-0">
-                <img src={icon.url} alt="ARIS" className="h-12 sm:h-16 w-auto" />
+        <div className="container py-8 sm:py-12 px-4 sm:px-6 relative z-10">
+          {/* Top: Brand + Columns */}
+          <div className="grid grid-cols-2 sm:grid-cols-12 gap-8 sm:gap-10">
+            {/* Brand block */}
+            <div className="col-span-2 sm:col-span-4">
+              <div className="flex items-center gap-3">
+                <div className="bg-white rounded-xl p-2 flex-shrink-0 shadow-lg shadow-primary/10">
+                  <img src={icon.url} alt="ARIS" className="h-11 w-auto" />
+                </div>
+                <div className="flex flex-col leading-none">
+                  <span className="font-display font-black tracking-tight text-primary text-3xl">
+                    ARIS
+                  </span>
+                  <span className="text-[10px] text-primary/80 tracking-[0.18em] uppercase font-medium mt-1.5">
+                    Spend less. Study better.
+                  </span>
+                </div>
               </div>
-              <div className="min-w-0 flex flex-col">
-                <span className="font-display font-black tracking-tight text-primary text-3xl sm:text-5xl leading-none">
-                  ARIS
-                </span>
-                <span className="text-[10px] sm:text-xs text-primary/80 tracking-[0.15em] uppercase font-medium mt-1">
-                  Spend less. Study better.
-                </span>
-                <p className="text-xs sm:text-sm text-white/70 leading-snug hidden sm:block mt-2">
-                  Kenya's student-first platform — course kits, academic essentials and campus tech.
-                </p>
-              </div>
-            </div>
+              <p className="text-sm text-white/60 leading-relaxed mt-4 max-w-xs">
+                Kenya's student-first stationery platform — course kits, academic essentials and campus tech, delivered.
+              </p>
 
-            <div>
-              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
-                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
-                Links
-              </h4>
-              <div className="space-y-1.5 sm:space-y-3">
-                <Link to="/" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Home</Link>
-                <Link to="/deals" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Deals</Link>
-                <Link to="/students" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Shop by Course</Link>
-                <Link to="/testimonials" className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all block">Reviews</Link>
-              </div>
-            </div>
-
-            <div className="col-span-2 sm:col-span-2">
-              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
-                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
-                Shop by Category
-              </h4>
-              <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 sm:gap-y-2">
-                {categories.map((c) => (
-                  <Link
-                    key={c.slug}
-                    to={`/category/${c.slug}`}
-                    className="text-xs sm:text-sm text-white/70 hover:text-primary transition-all truncate"
-                  >
-                    {c.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold mb-2 sm:mb-4 text-xs sm:text-base text-white flex items-center gap-2">
-                <span className="w-4 sm:w-8 h-0.5 bg-primary rounded-full" />
-                Contact
-              </h4>
-              <div className="space-y-1.5 sm:space-y-3">
+              {/* Socials */}
+              <div className="flex items-center gap-2 mt-5">
                 <a
                   href="https://wa.me/254119774470"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70 hover:text-primary transition-all"
+                  aria-label="WhatsApp"
+                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all"
                 >
-                  <Phone className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">+254 119 774470</span>
-                  <span className="sm:hidden">WhatsApp</span>
+                  <MessageCircle className="h-4 w-4" />
                 </a>
-                <div className="flex items-center gap-1.5 text-xs sm:text-sm text-white/70">
-                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                  <span>Nairobi</span>
-                </div>
-                <Link
-                  to="/auth"
-                  className="flex items-center gap-1.5 text-xs sm:text-sm text-primary hover:text-primary/80 transition-all"
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all"
                 >
-                  <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
-                  Admin
-                </Link>
+                  <Instagram className="h-4 w-4" />
+                </a>
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all"
+                >
+                  <Facebook className="h-4 w-4" />
+                </a>
               </div>
+            </div>
+
+            {/* Explore */}
+            <div className="sm:col-span-2">
+              <h4 className="font-semibold mb-4 text-xs uppercase tracking-[0.15em] text-white/90">
+                Explore
+              </h4>
+              <ul className="space-y-2.5">
+                <li><Link to="/" className="text-sm text-white/60 hover:text-primary transition-colors">Home</Link></li>
+                <li><Link to="/deals" className="text-sm text-white/60 hover:text-primary transition-colors">Deals</Link></li>
+                <li><Link to="/students" className="text-sm text-white/60 hover:text-primary transition-colors">Shop by Course</Link></li>
+                <li><Link to="/testimonials" className="text-sm text-white/60 hover:text-primary transition-colors">Reviews</Link></li>
+              </ul>
+            </div>
+
+            {/* Categories */}
+            <div className="col-span-2 sm:col-span-3">
+              <h4 className="font-semibold mb-4 text-xs uppercase tracking-[0.15em] text-white/90">
+                Categories
+              </h4>
+              <ul className="grid grid-cols-2 sm:grid-cols-1 gap-x-4 gap-y-2.5">
+                {categories.map((c) => (
+                  <li key={c.slug}>
+                    <Link
+                      to={`/category/${c.slug}`}
+                      className="text-sm text-white/60 hover:text-primary transition-colors truncate block"
+                    >
+                      {c.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div className="col-span-2 sm:col-span-3">
+              <h4 className="font-semibold mb-4 text-xs uppercase tracking-[0.15em] text-white/90">
+                Get in Touch
+              </h4>
+              <ul className="space-y-2.5">
+                <li>
+                  <a
+                    href="https://wa.me/254119774470"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-white/60 hover:text-primary transition-colors"
+                  >
+                    <MessageCircle className="h-4 w-4 flex-shrink-0" />
+                    +254 119 774470
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:arisstationeries@gmail.com"
+                    className="flex items-center gap-2 text-sm text-white/60 hover:text-primary transition-colors break-all"
+                  >
+                    <Mail className="h-4 w-4 flex-shrink-0" />
+                    arisstationeries@gmail.com
+                  </a>
+                </li>
+                <li className="flex items-center gap-2 text-sm text-white/60">
+                  <MapPin className="h-4 w-4 flex-shrink-0" />
+                  Nairobi, Kenya
+                </li>
+              </ul>
             </div>
           </div>
 
-          <div className="mt-3 sm:mt-4 pt-3 border-t border-white/10">
-            <div className="flex items-center justify-between text-xs sm:text-sm text-white/50">
-              <p>© {new Date().getFullYear()} ARIS · Spend less. Study better.</p>
-              <p className="flex items-center gap-1">
-                <Heart className="h-3 w-3 text-red-400 fill-red-400" /> Kenya
+          {/* Bottom bar */}
+          <div className="mt-8 pt-5 border-t border-white/10">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <p className="text-xs text-white/45">
+                © {new Date().getFullYear()} ARIS. All rights reserved.
               </p>
+              <div className="flex items-center gap-4 text-xs text-white/45">
+                <Link to="/auth" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                  <Shield className="h-3.5 w-3.5" /> Admin
+                </Link>
+                <span className="flex items-center gap-1.5">
+                  Made with <Heart className="h-3 w-3 text-red-400 fill-red-400" /> in Kenya
+                </span>
+              </div>
             </div>
           </div>
         </div>
