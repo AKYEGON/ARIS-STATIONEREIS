@@ -210,7 +210,7 @@ const Deals = () => {
               <SectionHeader
                 icon={GraduationCap}
                 title="Course Bundles"
-                subtitle="Everything you need for your course, in one pack"
+                subtitle="Your whole reading list, boxed as one pack."
                 color="bg-blue-600"
               />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
@@ -223,7 +223,7 @@ const Deals = () => {
 
           {bundles.length > 0 && (
             <section>
-              <SectionHeader icon={Package} title="Bundle Deals" subtitle="Save when you buy together" color="bg-primary" />
+              <SectionHeader icon={Package} title="Bundle Deals" subtitle="Cheaper together than apart." color="bg-primary" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bundles.map(b => <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />)}
               </div>
@@ -232,7 +232,7 @@ const Deals = () => {
 
           {bogo.length > 0 && (
             <section>
-              <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Auto-applied at checkout" color="bg-purple-600" />
+              <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Freebie lands in the cart on its own." color="bg-purple-600" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bogo.map(o => <BogoCard key={o.id} offer={o} onAddToCart={handleAdd} />)}
               </div>

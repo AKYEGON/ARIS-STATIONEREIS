@@ -304,8 +304,8 @@ const Cart = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Shopping Cart | ARIS"
-        description="Review your cart and checkout securely at ARIS. Affordable stationery delivered to your university or doorstep in Kenya."
+        title="Your cart | ARIS"
+        description="Check your list, pick pickup or delivery, and we take it from there."
         canonicalUrl="/cart"
         noindex
       />
