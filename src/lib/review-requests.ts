@@ -11,7 +11,7 @@ export interface ReviewRequestRow {
 
 /**
  * Idempotently ensure a review_requests row exists for every product in the order,
- * then return the full set. Safe to call repeatedly — relies on UNIQUE(order_id, product_id).
+ * then return the full set. Safe to call repeatedly - relies on UNIQUE(order_id, product_id).
  */
 export async function prepareReviewRequests(order: {
   id: string;
@@ -113,7 +113,7 @@ export function buildReviewMessage(customerName: string, rows: ReviewRequestRow[
   const list = rows
     .map((r, i) => `\n${i + 1}. ${r.product_name}\n${SITE}/review/${r.token}`)
     .join("");
-  const outro = `\n\nReview any or all — even a quick rating helps fellow students choose with confidence.\n\nARIS`;
+  const outro = `\n\nReview any or all - even a quick rating helps fellow students choose with confidence.\n\nARIS`;
   return intro + list + outro;
 }
 
@@ -133,14 +133,14 @@ export function buildStatusReviewMessage(
       : `Hi ${order.customer_name}! Thank you for picking up your order #${shortId} at ARIS.`;
 
   if (rows.length === 0) {
-    return `${header}\n\nWe'd love to hear your feedback — reply here any time.`;
+    return `${header}\n\nWe'd love to hear your feedback - reply here any time.`;
   }
 
   const list = rows
     .map((r, i) => `\n${i + 1}. ${r.product_name}\n${SITE}/review/${r.token}`)
     .join("");
 
-  return `${header}\n\nWe'd love your honest feedback on the items you received:\n${list}\n\nReview any or all — even a quick rating helps fellow students choose with confidence.`;
+  return `${header}\n\nWe'd love your honest feedback on the items you received:\n${list}\n\nReview any or all - even a quick rating helps fellow students choose with confidence.`;
 }
 
 export function isReviewTriggerStatus(status: string): "delivered" | "picked_up" | null {

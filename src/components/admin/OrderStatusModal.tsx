@@ -55,7 +55,7 @@ export function OrderStatusModal({ isOpen, onClose, order, newStatus, onConfirm 
       .catch((err) => {
         console.error(err);
         if (!cancelled) {
-          toast.error('Could not prepare review links — falling back to a plain message.');
+          toast.error('Could not prepare review links - falling back to a plain message.');
           setMessage(getMessageForStatus(newStatus, order));
         }
       })

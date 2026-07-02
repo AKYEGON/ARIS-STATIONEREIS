@@ -88,7 +88,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
         unitPrice: variant ? Number(variant.price) : product.price,
         unitCost: variant ? Number(variant.cost_price || 0) : (product.costPrice || 0),
       }]);
-      toast.success(`${product.name}${variant ? ` — ${variant.variant_value}` : ''} added`);
+      toast.success(`${product.name}${variant ? ` - ${variant.variant_value}` : ''} added`);
     }
   };
 
@@ -427,7 +427,7 @@ export const QuickSaleDialog = ({ open, onClose, products, onSaleCompleted }: Qu
       <Dialog open={!!variantPickerProduct} onOpenChange={(o) => !o && setVariantPickerProduct(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-base">Choose variant — {variantPickerProduct?.name}</DialogTitle>
+            <DialogTitle className="text-base">Choose variant - {variantPickerProduct?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
             {variantPickerProduct?.variants?.map(v => {

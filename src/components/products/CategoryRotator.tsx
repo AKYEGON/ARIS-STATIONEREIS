@@ -114,7 +114,7 @@ const MobileVerticalRotator = ({
   const shouldAnimate = !hasSelection && !isPaused && isVisible && !isScrolling;
   const durationS = Math.max(items.length * 4, 24);
 
-  // Pause animation while the user scrolls the page — fixes painting artifacts on some Android devices
+  // Pause animation while the user scrolls the page - fixes painting artifacts on some Android devices
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout>;
     const onScroll = () => {

@@ -1796,7 +1796,7 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
+                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">- shows strike-through + SALE badge</span></Label>
                       <Input
                         id="originalPrice"
                         type="number"
@@ -1879,7 +1879,7 @@ const Admin = () => {
                     <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
                       <div>
                         <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
-                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
                       </div>
                       <Switch
                         id="is_common"
@@ -2171,7 +2171,7 @@ const Admin = () => {
           </TabsContent>
 
           {/* Bundles Tab */}
-          {/* Unified Offers Tab — Flash Sales, Bundles, BOGO in one place */}
+          {/* Unified Offers Tab - Flash Sales, Bundles, BOGO in one place */}
           <TabsContent value="offers">
             <Tabs defaultValue="flash" className="space-y-4">
               <TabsList className="w-full sm:w-auto justify-start overflow-x-auto">
@@ -2728,7 +2728,7 @@ const Admin = () => {
                                       <span className="hidden xs:inline">Verified</span>
                                     </Badge>
                                   ) : (
-                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                    <span className="text-[10px] text-muted-foreground">-</span>
                                   )}
                                 </TableCell>
                                 <TableCell className="p-2 sm:p-4">
@@ -2869,7 +2869,7 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
+                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">- shows strike-through + SALE badge</span></Label>
                 <Input
                   id="edit-originalPrice"
                   type="number"
@@ -2952,7 +2952,7 @@ const Admin = () => {
               <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
                 <div>
                   <Label htmlFor="edit-is_common" className="font-medium">Common stationery</Label>
-                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
                 </div>
                 <Switch
                   id="edit-is_common"

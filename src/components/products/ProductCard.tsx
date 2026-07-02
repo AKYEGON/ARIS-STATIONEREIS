@@ -136,7 +136,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             </p>
           )}
 
-          {/* Variant Selection — compact dropdown keeps card height consistent */}
+          {/* Variant Selection - compact dropdown keeps card height consistent */}
           {hasVariants && Object.entries(variantGroups).map(([type, variants]) => {
             const allOut = variants.every((v) => v.stock <= 0);
             return (
@@ -150,7 +150,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
                   disabled={allOut}
                 >
                   <SelectTrigger className="h-7 xs:h-8 text-[10px] xs:text-xs px-2 py-0 bg-background">
-                    <SelectValue placeholder={allOut ? `${type} — Out of stock` : `Select ${type}`} />
+                    <SelectValue placeholder={allOut ? `${type} - Out of stock` : `Select ${type}`} />
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {variants.map((v) => {
