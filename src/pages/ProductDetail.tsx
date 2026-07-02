@@ -181,8 +181,8 @@ const ProductDetail = () => {
     ? product.image
     : `https://arisstationaries.co.ke${product.image}`;
 
-  const seoTitle = `${product.name} — KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS`.slice(0, 70);
-  const seoDescription = `Buy ${product.name} in Kenya at ARIS Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock — same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
+  const seoTitle = `${product.name} - KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS`.slice(0, 70);
+  const seoDescription = `Buy ${product.name} in Kenya at ARIS Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock - same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);
 
   const fallbackDescription = `${product.name} available in Kenya at ARIS Nairobi. Genuine ${product.category.toLowerCase()} stock with same-day Nairobi pick-up and countrywide delivery. Order online or via WhatsApp +254 119 774 470.`;
 

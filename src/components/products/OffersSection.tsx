@@ -12,7 +12,7 @@ import { useCart } from "@/contexts/CartContext";
 import { isOnSale } from "./SaleBadge";
 
 /**
- * Homepage "Special Offers" row — unified marquee of every active offer type:
+ * Homepage "Special Offers" row - unified marquee of every active offer type:
  * flash sales, regular bundles, course bundles, BOGO. Pauses on hover/touch.
  */
 type OfferItem =
@@ -175,7 +175,7 @@ const OffersSection = () => {
   const handleAddProduct = (product: Product, variant?: ProductVariant) => addToCart(product, variant);
 
   // Only duplicate for the marquee loop when there are enough items to
-  // scroll — otherwise a single offer would render twice on the row.
+  // scroll - otherwise a single offer would render twice on the row.
   const shouldMarquee = items.length >= 4;
   const marquee = useMemo(
     () => (shouldMarquee ? [...items, ...items] : items),

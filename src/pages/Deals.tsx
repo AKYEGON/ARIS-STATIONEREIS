@@ -169,7 +169,7 @@ const Deals = () => {
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
         title="Deals worth actually opening | ARIS"
-        description="What's on right now — flash sales counting down, course bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."
+        description="What's on right now - flash sales counting down, course bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."
         canonicalUrl="/deals"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Deals", url: "/deals" }]}
       />
@@ -180,7 +180,7 @@ const Deals = () => {
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Deals</h1>
             <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Flash sales, course bundles & free items — refresh often
+              Flash sales, course bundles & free items - refresh often
             </p>
           </div>
 

@@ -199,14 +199,14 @@ export const BogoOffersTab = () => {
                         <div className="text-[10px] text-muted-foreground">order #{o.display_order}</div>
                       </TableCell>
                       <TableCell className="p-2 sm:p-4 text-xs sm:text-sm">
-                        {o.buy_quantity}× {o.product?.name || "—"}
+                        {o.buy_quantity}× {o.product?.name || "-"}
                       </TableCell>
                       <TableCell className="p-2 sm:p-4 text-xs sm:text-sm">
                         {o.get_quantity}× {(o.free_product?.name) || o.product?.name || "(same)"}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-[11px] text-muted-foreground">
-                        {o.starts_at ? new Date(o.starts_at).toLocaleDateString() : "—"} →{" "}
-                        {o.ends_at ? new Date(o.ends_at).toLocaleDateString() : "—"}
+                        {o.starts_at ? new Date(o.starts_at).toLocaleDateString() : "-"} →{" "}
+                        {o.ends_at ? new Date(o.ends_at).toLocaleDateString() : "-"}
                       </TableCell>
                       <TableCell className="p-2 sm:p-4">
                         {isLive(o) ? (

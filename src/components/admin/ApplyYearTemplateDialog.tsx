@@ -146,7 +146,7 @@ export const ApplyYearTemplateDialog = ({ open, onOpenChange, templateId, templa
       }
 
       if (rows.length === 0) {
-        toast.message("Nothing to add — picked courses already have all labels.");
+        toast.message("Nothing to add - picked courses already have all labels.");
       } else {
         const { error: insErr } = await supabase.from("course_years").insert(rows);
         if (insErr) throw insErr;

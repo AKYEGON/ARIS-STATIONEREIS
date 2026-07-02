@@ -179,7 +179,7 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
         const desiredYearIds = new Set<string>();
         courseYears.forEach((y) => { if (chosenLabels.has(norm(y.label))) desiredYearIds.add(y.id); });
 
-        // Current tags for this course (from initial state — only valid for previously-assigned courses)
+        // Current tags for this course (from initial state - only valid for previously-assigned courses)
         const currentLabelKeys = initialLabelsByCourse[cid] || new Set<string>();
         const currentYearIds = new Set<string>();
         courseYears.forEach((y) => { if (currentLabelKeys.has(norm(y.label))) currentYearIds.add(y.id); });
@@ -248,7 +248,7 @@ export const ProductCoursesDialog = ({ open, onOpenChange, productId, productNam
               </p>
               {availableLabels.length === 0 ? (
                 <p className="text-[11px] text-muted-foreground italic">
-                  None of the picked courses have year labels yet — product will show in "All years".
+                  None of the picked courses have year labels yet - product will show in "All years".
                 </p>
               ) : (
                 <div className="flex flex-wrap gap-1.5">

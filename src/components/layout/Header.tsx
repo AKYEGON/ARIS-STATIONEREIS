@@ -32,7 +32,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           <Link
             to="/"
             className="flex items-center gap-2 sm:gap-3 transition-transform duration-200 hover:scale-[1.02] min-w-0"
-            aria-label="ARIS — Spend less. Study better."
+            aria-label="ARIS - Spend less. Study better."
           >
             <img
               src={icon.url}

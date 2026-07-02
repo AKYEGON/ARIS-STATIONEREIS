@@ -3,14 +3,14 @@ import logo from "@/assets/aris-icon.png.asset.json";
 interface WatermarkProps {
   /** Visual size preset. `sm` for cards, `md` for product detail, `lg` for fullscreen viewer. */
   size?: "sm" | "md" | "lg";
-  /** Opacity 0-1. Default 0.55 — visible without obscuring product. */
+  /** Opacity 0-1. Default 0.55 - visible without obscuring product. */
   opacity?: number;
 }
 
 /**
  * Bottom-right brand watermark overlay.
  * Place inside any `relative` container that holds a product/bundle image.
- * Purely presentational — `pointer-events-none` so it never blocks clicks.
+ * Purely presentational - `pointer-events-none` so it never blocks clicks.
  */
 const Watermark = ({ size = "sm", opacity = 0.55 }: WatermarkProps) => {
   const sizing =

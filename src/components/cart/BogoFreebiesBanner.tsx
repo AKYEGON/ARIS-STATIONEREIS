@@ -33,7 +33,7 @@ const BogoFreebiesBanner = ({ earned }: BogoFreebiesBannerProps) => {
               Free items unlocked
             </h3>
             <p className="text-[11px] sm:text-xs text-emerald-800/80 dark:text-emerald-200/80">
-              You save KSh {totalSaved.toFixed(0)} — added to your order automatically
+              You save KSh {totalSaved.toFixed(0)} - added to your order automatically
             </p>
           </div>
         </div>

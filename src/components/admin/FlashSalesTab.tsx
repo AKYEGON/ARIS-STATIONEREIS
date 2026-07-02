@@ -206,7 +206,7 @@ export const FlashSalesTab = () => {
                         ) : null}
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-[11px] text-muted-foreground">
-                        {p.sale_starts_at ? new Date(p.sale_starts_at).toLocaleString() : "—"}
+                        {p.sale_starts_at ? new Date(p.sale_starts_at).toLocaleString() : "-"}
                         <br />
                         {p.sale_ends_at ? new Date(p.sale_ends_at).toLocaleString() : "no end"}
                       </TableCell>

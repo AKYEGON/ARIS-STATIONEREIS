@@ -455,7 +455,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
         <DialogContent className="max-w-[95vw] sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-sm sm:text-base">
-              Adjust Stock — {selectedProduct?.name}
+              Adjust Stock - {selectedProduct?.name}
               {selectedVariant && (
                 <span className="block text-xs font-normal text-muted-foreground mt-0.5">
                   {selectedVariant.variant_type}: {selectedVariant.variant_value}

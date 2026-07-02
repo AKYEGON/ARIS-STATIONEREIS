@@ -1,5 +1,5 @@
 /**
- * Smart search utilities — tolerant of whitespace, casing, diacritics,
+ * Smart search utilities - tolerant of whitespace, casing, diacritics,
  * punctuation, word order, partials, and (optionally) 1-char typos.
  */
 
