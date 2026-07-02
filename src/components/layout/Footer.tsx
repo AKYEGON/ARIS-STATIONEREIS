@@ -45,7 +45,7 @@ const Footer = () => {
                 </div>
               </div>
               <p className="text-sm text-white/60 leading-relaxed mt-4 max-w-xs">
-                Kenya's student-first stationery platform — course kits, academic essentials and campus tech, delivered.
+                Stationery picked to your course list. Packed in Nairobi, on the road the same day.
               </p>
 
               {/* Socials */}

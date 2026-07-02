@@ -90,8 +90,8 @@ const Testimonials = () => {
     return (
       <div className="min-h-screen pb-16 md:pb-0">
         <SEO 
-          title="Customer Reviews & Stories"
-          description="Read what our customers say about ARIS. Real reviews from happy customers in Nairobi, Kenya."
+          title="What students actually say"
+          description="Unfiltered notes from students who've ordered from ARIS."
           canonicalUrl="/testimonials"
         />
         <Header cartItemCount={getCartItemCount()} />
@@ -106,8 +106,8 @@ const Testimonials = () => {
   return (
     <div className="min-h-screen pb-16 md:pb-0">
       <SEO
-        title="Customer Reviews | ARIS Kenya"
-        description="Read verified reviews from ARIS customers across Kenya. See why students at UoN, KU, Strathmore and USIU trust us for affordable stationery."
+        title="Reviews from real ARIS customers"
+        description="Verified reviews from students at UoN, KU, Strathmore, JKUAT and USIU. Read before you order."
         canonicalUrl="/testimonials"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Reviews", url: "/testimonials" }]}
       />

@@ -168,8 +168,8 @@ const Deals = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Stationery Deals in Kenya — Flash Sales & Bundles | ARIS"
-        description="Live flash sales, course bundles and Buy-X-Get-Y offers on stationery in Kenya. Save on pens, notebooks, calculators and drawing sets at ARIS Nairobi."
+        title="Deals worth actually opening | ARIS"
+        description="What's on right now — flash sales counting down, course bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."
         canonicalUrl="/deals"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Deals", url: "/deals" }]}
       />
@@ -197,7 +197,8 @@ const Deals = () => {
 
           {flashSales.length > 0 && (
             <section>
-              <SectionHeader icon={Flame} title="Flash Sales" subtitle="Limited time — ending soon" color="bg-red-600" />
+              <SectionHeader icon={Flame} title="Flash Sales" subtitle="Clock's running. Grab it before it flips back." color="bg-red-600" />
+
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {flashSales.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAdd} compact />)}
               </div>
@@ -209,7 +210,7 @@ const Deals = () => {
               <SectionHeader
                 icon={GraduationCap}
                 title="Course Bundles"
-                subtitle="Everything you need for your course, in one pack"
+                subtitle="Your whole reading list, boxed as one pack."
                 color="bg-blue-600"
               />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
@@ -222,7 +223,7 @@ const Deals = () => {
 
           {bundles.length > 0 && (
             <section>
-              <SectionHeader icon={Package} title="Bundle Deals" subtitle="Save when you buy together" color="bg-primary" />
+              <SectionHeader icon={Package} title="Bundle Deals" subtitle="Cheaper together than apart." color="bg-primary" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bundles.map(b => <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />)}
               </div>
@@ -231,7 +232,7 @@ const Deals = () => {
 
           {bogo.length > 0 && (
             <section>
-              <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Auto-applied at checkout" color="bg-purple-600" />
+              <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Freebie lands in the cart on its own." color="bg-purple-600" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bogo.map(o => <BogoCard key={o.id} offer={o} onAddToCart={handleAdd} />)}
               </div>
