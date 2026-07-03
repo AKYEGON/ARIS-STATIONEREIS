@@ -2578,7 +2578,7 @@ const Admin = () => {
                         placeholder="0"
                       />
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                       <div className="flex items-center space-x-2">
                         <input
                           type="checkbox"
@@ -2598,6 +2598,18 @@ const Admin = () => {
                           className="cursor-pointer"
                         />
                         <Label htmlFor="is_published" className="cursor-pointer">Published</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="show_in_stories"
+                          checked={testimonialFormData.show_in_stories}
+                          onChange={(e) => setTestimonialFormData({...testimonialFormData, show_in_stories: e.target.checked})}
+                          className="cursor-pointer"
+                        />
+                        <Label htmlFor="show_in_stories" className="cursor-pointer" title="If off, review still shows on the product page but is hidden from the Customer Stories carousel">
+                          Show in Customer Stories
+                        </Label>
                       </div>
                     </div>
                   </div>
