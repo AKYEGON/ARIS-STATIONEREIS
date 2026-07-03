@@ -73,7 +73,7 @@ const Students = () => {
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [loadedCourseId, setLoadedCourseId] = useState<string | null>(null);
-  // True whenever the URL course doesn't yet match the loaded dataset — prevents
+  // True whenever the URL course doesn't yet match the loaded dataset - prevents
   // a flash of the "No stationery" empty state on the first render after clicking a course.
   const courseLoading = !!courseId && loadedCourseId !== courseId;
   const [search, setSearch] = useState("");
@@ -111,7 +111,7 @@ const Students = () => {
 
   const [commonProducts, setCommonProducts] = useState<Product[]>([]);
 
-  // Load common stationery once — independent of any specific course allocation
+  // Load common stationery once - independent of any specific course allocation
   useEffect(() => {
     const loadCommon = async () => {
       const { data } = await supabase
@@ -310,16 +310,16 @@ const Students = () => {
   ];
 
   const seoTitle = activeCourse
-    ? `${activeCourse.name} Stationery List — Nairobi Universities | Aris Stationeries`
+    ? `${activeCourse.name} Stationery List - Nairobi Universities | ARIS`
     : activeFaculty
-    ? `${activeFaculty.name} Stationery — Course Lists | Aris Stationeries Nairobi`
-    : "Shop Stationery by Course — UoN, KU, Strathmore, JKUAT | Aris Stationeries";
+    ? `${activeFaculty.name} Stationery - Course Lists | ARIS Nairobi`
+    : "Shop Stationery by Course - UoN, KU, Strathmore, JKUAT | ARIS";
 
   const seoDescription = activeCourse
-    ? `The exact stationery list for ${activeCourse.name} students in Kenya — drawing sets, calculators, notebooks and more. Same-day Nairobi pickup, countrywide delivery from Aris Stationeries.`
+    ? `The exact stationery list for ${activeCourse.name} students in Kenya - drawing sets, calculators, notebooks and more. Same-day Nairobi pickup, countrywide delivery from ARIS.`
     : activeFaculty
-    ? `Browse ${activeFaculty.name} stationery by course at Aris Stationeries Nairobi. Curated lists for UoN, KU, Strathmore, USIU and JKUAT students.`
-    : "Find the exact stationery you need for your course at Aris Stationeries. Faculty-by-faculty, course-by-course lists for Nairobi universities — UoN, KU, Strathmore, USIU, JKUAT.";
+    ? `Browse ${activeFaculty.name} stationery by course at ARIS Nairobi. Curated lists for UoN, KU, Strathmore, USIU and JKUAT students.`
+    : "Find the exact stationery you need for your course at ARIS. Faculty-by-faculty, course-by-course lists for Nairobi universities - UoN, KU, Strathmore, USIU, JKUAT.";
 
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
@@ -375,7 +375,7 @@ const Students = () => {
                 ? `Stationery curated for ${activeCourse.name} students.`
                 : activeFaculty
                 ? `Choose your course in ${activeFaculty.name}.`
-                : "Find the right stationery for your course — pick a faculty to begin."}
+                : "Find the right stationery for your course - pick a faculty to begin."}
             </p>
           </div>
 
@@ -694,7 +694,7 @@ const Students = () => {
                 </div>
               )}
 
-              {/* Common stationery — clearly separated, collapsed by default */}
+              {/* Common stationery - clearly separated, collapsed by default */}
               {commonProducts.length > 0 && (
                 <section className="mt-12" aria-labelledby="common-stationery-heading">
                   <div className="relative flex items-center mb-5">

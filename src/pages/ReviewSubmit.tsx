@@ -164,7 +164,7 @@ export default function ReviewSubmit() {
 
   return (
     <div className="min-h-screen bg-background pb-16">
-      <SEO title="Share Your Review | Aris Stationeries" description="Submit your verified product review for Aris Stationeries." noindex />
+      <SEO title="Share Your Review | ARIS" description="Submit your verified product review for ARIS." noindex />
       <div className="max-w-xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold mb-1">Share Your Review</h1>
         <p className="text-sm text-muted-foreground mb-6">

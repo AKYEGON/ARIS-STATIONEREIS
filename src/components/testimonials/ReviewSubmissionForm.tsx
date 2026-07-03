@@ -247,7 +247,7 @@ const ReviewSubmissionForm = ({ onSuccess, prefillData }: ReviewSubmissionFormPr
           id="review_text"
           value={formData.review_text}
           onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
-          placeholder="Share your experience with ARIS STATIONERIES..."
+          placeholder="Share your experience with ARIS..."
           rows={4}
           maxLength={500}
           required
@@ -367,7 +367,7 @@ const ReviewSubmissionForm = ({ onSuccess, prefillData }: ReviewSubmissionFormPr
         <p className="text-xs text-muted-foreground mt-1">Max 50MB</p>
       </div>
 
-      {/* Submit Button — sticky on mobile so it's always reachable */}
+      {/* Submit Button - sticky on mobile so it's always reachable */}
       <div className="sticky bottom-0 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 bg-background border-t sm:border-t-0 sm:bg-transparent sm:py-0 sm:pt-4 sm:flex sm:justify-end z-10" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 0.75rem)' }}>
         <Button type="submit" disabled={isSubmitting} size="lg" className="w-full sm:w-auto">
           {isSubmitting ? (

@@ -2,99 +2,93 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://arisstationaries.co.ke/</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/deals</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/testimonials</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/students</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/scientific-calculators</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/mathematics-equipments</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/writing-instruments</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/notebooks-books</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/filing-organization</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/art-craft-supplies</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/office-supplies</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/exam-essentials</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/gifts-accessories</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/general-stationery</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/category/engineering-drawing</loc>
-    <lastmod>2026-06-24</lastmod>
+    <lastmod>2026-07-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
-  </url>
-  <url>
-    <loc>https://arisstationaries.co.ke/product/180-transparent-protractor-6c7fbc</loc>
-    <lastmod>2026-05-15</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
   </url>
   <url>
     <loc>https://arisstationaries.co.ke/product/big-engineering-drawing-set-7d488d</loc>
@@ -195,6 +189,12 @@
   <url>
     <loc>https://arisstationaries.co.ke/product/display-books-with-10-pockets-0e79df</loc>
     <lastmod>2025-11-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://arisstationaries.co.ke/product/180-transparent-protractor-6c7fbc</loc>
+    <lastmod>2026-05-15</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -343,14 +343,14 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/oxford-set-metallic-5a4567</loc>
-    <lastmod>2025-11-19</lastmod>
+    <loc>https://arisstationaries.co.ke/product/adjustable-set-square-90740c</loc>
+    <lastmod>2026-05-06</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://arisstationaries.co.ke/product/adjustable-set-square-90740c</loc>
-    <lastmod>2026-05-06</lastmod>
+    <loc>https://arisstationaries.co.ke/product/oxford-set-metallic-5a4567</loc>
+    <lastmod>2025-11-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

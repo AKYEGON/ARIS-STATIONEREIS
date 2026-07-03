@@ -242,7 +242,7 @@ export const CheckoutOptionsManager = () => {
                   {outlets.map(o => (
                     <TableRow key={o.id}>
                       <TableCell>{o.name}</TableCell>
-                      <TableCell className="text-muted-foreground">{o.location || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{o.location || "-"}</TableCell>
                       <TableCell><Switch checked={o.is_active} onCheckedChange={() => toggleOutlet(o.id, o.is_active)} /></TableCell>
                       <TableCell><Button variant="ghost" size="icon" onClick={() => deleteOutlet(o.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button></TableCell>
                     </TableRow>

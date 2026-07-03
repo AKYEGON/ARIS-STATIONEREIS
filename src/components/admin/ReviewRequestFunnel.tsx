@@ -112,7 +112,7 @@ export function ReviewRequestFunnel() {
   };
 
   const daysSince = (iso: string | null) => {
-    if (!iso) return "—";
+    if (!iso) return "-";
     const d = Math.floor((Date.now() - new Date(iso).getTime()) / (24 * 60 * 60 * 1000));
     return `${d}d ago`;
   };

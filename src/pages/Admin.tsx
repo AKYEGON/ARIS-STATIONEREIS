@@ -143,6 +143,7 @@ const Admin = () => {
     rating: 5 as 1 | 2 | 3 | 4 | 5,
     is_featured: false,
     is_published: false,
+    show_in_stories: true,
     display_order: 0
   });
   const [testimonialPhotoFile, setTestimonialPhotoFile] = useState<File | null>(null);
@@ -150,7 +151,7 @@ const Admin = () => {
   const [testimonialVideoFile, setTestimonialVideoFile] = useState<File | null>(null);
   const [testimonialVideoPreview, setTestimonialVideoPreview] = useState("");
   const [testimonialSearchQuery, setTestimonialSearchQuery] = useState("");
-  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published">("all");
+  const [testimonialFilter, setTestimonialFilter] = useState<"all" | "pending" | "published" | "featured" | "verified" | "with-video">("all");
   const [testimonialProductFilter, setTestimonialProductFilter] = useState<string>("all");
   const [testimonialVerifiedOnly, setTestimonialVerifiedOnly] = useState(false);
   
@@ -276,7 +277,8 @@ const Admin = () => {
             media_type,
             display_order,
             created_at
-          )
+          ),
+          product_variants (*)
         `)
         .order("created_at", { ascending: false });
 
@@ -300,7 +302,16 @@ const Admin = () => {
         media: (p.product_media || []).map((m: any) => ({
           ...m,
           media_type: m.media_type as 'image' | 'video'
-        }))
+        })),
+        variants: ((p as any).product_variants || [])
+          .filter((v: any) => v.is_active !== false)
+          .sort((a: any, b: any) => (a.display_order || 0) - (b.display_order || 0))
+          .map((v: any) => ({
+            ...v,
+            price: Number(v.price),
+            cost_price: Number(v.cost_price || 0),
+            stock: v.stock || 0,
+          })),
       }));
       
       setProductList(formattedProducts);
@@ -614,6 +625,7 @@ const Admin = () => {
       rating: 5,
       is_featured: false,
       is_published: false,
+      show_in_stories: true,
       display_order: 0
     });
     setTestimonialPhotoFile(null);
@@ -668,8 +680,9 @@ const Admin = () => {
           video_url: videoUrl,
           display_order: testimonialFormData.display_order,
           is_featured: testimonialFormData.is_featured,
-          is_published: testimonialFormData.is_published
-        });
+          is_published: testimonialFormData.is_published,
+          show_in_stories: testimonialFormData.show_in_stories,
+        } as any);
 
       if (error) throw error;
 
@@ -712,8 +725,9 @@ const Admin = () => {
           video_url: videoUrl,
           display_order: testimonialFormData.display_order,
           is_featured: testimonialFormData.is_featured,
-          is_published: testimonialFormData.is_published
-        })
+          is_published: testimonialFormData.is_published,
+          show_in_stories: testimonialFormData.show_in_stories,
+        } as any)
         .eq("id", editingTestimonial.id);
 
       if (error) throw error;
@@ -790,6 +804,7 @@ const Admin = () => {
       rating: testimonial.rating,
       is_featured: testimonial.is_featured,
       is_published: testimonial.is_published,
+      show_in_stories: testimonial.show_in_stories !== false,
       display_order: testimonial.display_order
     });
     setTestimonialPhotoPreview(testimonial.customer_photo || "");
@@ -1786,7 +1801,7 @@ const Admin = () => {
                       />
                     </div>
                     <div>
-                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
+                      <Label htmlFor="originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">- shows strike-through + SALE badge</span></Label>
                       <Input
                         id="originalPrice"
                         type="number"
@@ -1869,7 +1884,7 @@ const Admin = () => {
                     <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
                       <div>
                         <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
-                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
                       </div>
                       <Switch
                         id="is_common"
@@ -2161,7 +2176,7 @@ const Admin = () => {
           </TabsContent>
 
           {/* Bundles Tab */}
-          {/* Unified Offers Tab — Flash Sales, Bundles, BOGO in one place */}
+          {/* Unified Offers Tab - Flash Sales, Bundles, BOGO in one place */}
           <TabsContent value="offers">
             <Tabs defaultValue="flash" className="space-y-4">
               <TabsList className="w-full sm:w-auto justify-start overflow-x-auto">
@@ -2253,7 +2268,7 @@ const Admin = () => {
                     </Button>
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {["all", "pending", "confirmed", "processing", "dispatched", "delivered", "fulfilled", "completed", "cancelled"].map((status) => (
+                    {["all", "pending", "processing", "shipped", "delivered", "cancelled"].map((status) => (
                       <Button
                         key={status}
                         variant={orderStatusFilter === status ? "default" : "outline"}
@@ -2419,7 +2434,35 @@ const Admin = () => {
                 <span className="xs:hidden">Pub</span>
                 <span className="ml-1">({testimonialsList.filter(t => t.is_published).length})</span>
               </Button>
+              <Button
+                variant={testimonialFilter === "featured" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("featured")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Featured
+                <span className="ml-1">({testimonialsList.filter(t => t.is_featured).length})</span>
+              </Button>
+              <Button
+                variant={testimonialFilter === "verified" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("verified")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Verified
+                <span className="ml-1">({testimonialsList.filter(t => t.is_verified_purchase).length})</span>
+              </Button>
+              <Button
+                variant={testimonialFilter === "with-video" ? "default" : "outline"}
+                onClick={() => setTestimonialFilter("with-video")}
+                size="sm"
+                className="text-xs sm:text-sm px-2.5 sm:px-4"
+              >
+                Video
+                <span className="ml-1">({testimonialsList.filter(t => !!t.video_url).length})</span>
+              </Button>
             </div>
+
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">Manage customer testimonials and reviews</p>
@@ -2535,7 +2578,7 @@ const Admin = () => {
                         placeholder="0"
                       />
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-4">
                       <div className="flex items-center space-x-2">
                         <input
                           type="checkbox"
@@ -2555,6 +2598,18 @@ const Admin = () => {
                           className="cursor-pointer"
                         />
                         <Label htmlFor="is_published" className="cursor-pointer">Published</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="show_in_stories"
+                          checked={testimonialFormData.show_in_stories}
+                          onChange={(e) => setTestimonialFormData({...testimonialFormData, show_in_stories: e.target.checked})}
+                          className="cursor-pointer"
+                        />
+                        <Label htmlFor="show_in_stories" className="cursor-pointer" title="If off, review still shows on the product page but is hidden from the Customer Stories carousel">
+                          Show in Customer Stories
+                        </Label>
                       </div>
                     </div>
                   </div>
@@ -2623,6 +2678,9 @@ const Admin = () => {
                   {testimonialsList.filter(t => {
                     if (testimonialFilter === "pending" && t.is_published) return false;
                     if (testimonialFilter === "published" && !t.is_published) return false;
+                    if (testimonialFilter === "featured" && !t.is_featured) return false;
+                    if (testimonialFilter === "verified" && !t.is_verified_purchase) return false;
+                    if (testimonialFilter === "with-video" && !t.video_url) return false;
                     if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
                     if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                     return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
@@ -2648,6 +2706,9 @@ const Admin = () => {
                           .filter(t => {
                             if (testimonialFilter === "pending" && t.is_published) return false;
                             if (testimonialFilter === "published" && !t.is_published) return false;
+                            if (testimonialFilter === "featured" && !t.is_featured) return false;
+                            if (testimonialFilter === "verified" && !t.is_verified_purchase) return false;
+                            if (testimonialFilter === "with-video" && !t.video_url) return false;
                             if (testimonialProductFilter !== "all" && t.product_id !== testimonialProductFilter) return false;
                             if (testimonialVerifiedOnly && !t.is_verified_purchase) return false;
                             return smartMatch(testimonialSearchQuery, [t.customer_name, t.product_name, t.review_text], { fuzzy: true });
@@ -2684,7 +2745,7 @@ const Admin = () => {
                                       <span className="hidden xs:inline">Verified</span>
                                     </Badge>
                                   ) : (
-                                    <span className="text-[10px] text-muted-foreground">—</span>
+                                    <span className="text-[10px] text-muted-foreground">-</span>
                                   )}
                                 </TableCell>
                                 <TableCell className="p-2 sm:p-4">
@@ -2825,7 +2886,7 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">— shows strike-through + SALE badge</span></Label>
+                <Label htmlFor="edit-originalPrice">Original Price (KSh) <span className="text-xs text-muted-foreground">- shows strike-through + SALE badge</span></Label>
                 <Input
                   id="edit-originalPrice"
                   type="number"
@@ -2908,7 +2969,7 @@ const Admin = () => {
               <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
                 <div>
                   <Label htmlFor="edit-is_common" className="font-medium">Common stationery</Label>
-                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages — shown via toggle.</p>
+                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
                 </div>
                 <Switch
                   id="edit-is_common"
@@ -3170,7 +3231,7 @@ const Admin = () => {
                         <MessageCircle className="h-3.5 w-3.5 text-blue-600" />
                       </a>
                       <a
-                        href={`https://wa.me/${selectedOrder.customer_phone.replace(/^0/, '254').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${selectedOrder.customer_name}! This is ARIS STATIONERIES following up on your order #${selectedOrder.id.slice(0, 8)}. How can we help you?`)}`}
+                        href={`https://wa.me/${selectedOrder.customer_phone.replace(/^0/, '254').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${selectedOrder.customer_name}! This is ARIS following up on your order #${selectedOrder.id.slice(0, 8)}. How can we help you?`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center justify-center h-7 px-2 rounded-md border border-input bg-background hover:bg-green-50 hover:border-green-500 transition-colors gap-1"

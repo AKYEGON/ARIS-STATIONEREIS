@@ -339,7 +339,7 @@ export const EmployeeManagement = () => {
                       <TableRow key={member.id}>
                         <TableCell className="p-2 sm:p-4">
                           <div>
-                            <div className="font-medium text-xs sm:text-sm">{member.profile?.name || "—"}</div>
+                            <div className="font-medium text-xs sm:text-sm">{member.profile?.name || "-"}</div>
                             <div className="text-[10px] sm:text-xs text-muted-foreground sm:hidden">{member.email}</div>
                             {isAgent && (
                               <div className="text-[10px] text-muted-foreground md:hidden flex items-center gap-1 mt-0.5">
@@ -376,7 +376,7 @@ export const EmployeeManagement = () => {
                               <Badge variant="destructive" className="text-[10px]">No zone</Badge>
                             )
                           ) : (
-                            <span className="text-muted-foreground">—</span>
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </TableCell>
                         <TableCell className="p-2 sm:p-4">
@@ -473,9 +473,9 @@ export const EmployeeManagement = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="employee">Employee — Orders + Quick Sale</SelectItem>
-                  <SelectItem value="manager">Manager — Orders, Inventory, Sales (no profit)</SelectItem>
-                  <SelectItem value="agent">Agent — Zone-only order access</SelectItem>
+                  <SelectItem value="employee">Employee - Orders + Quick Sale</SelectItem>
+                  <SelectItem value="manager">Manager - Orders, Inventory, Sales (no profit)</SelectItem>
+                  <SelectItem value="agent">Agent - Zone-only order access</SelectItem>
                 </SelectContent>
               </Select>
             </div>

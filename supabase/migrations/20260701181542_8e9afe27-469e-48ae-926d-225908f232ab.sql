@@ -1,0 +1,1 @@
+UPDATE public.message_templates SET template = replace(replace(template, 'ARIS STATIONERIES', 'ARIS'), 'ARIS STATIONARIES', 'ARIS'), name = replace(replace(name, 'ARIS STATIONERIES', 'ARIS'), 'ARIS STATIONARIES', 'ARIS') WHERE template ILIKE '%STATION%RIES%' OR template ILIKE '%STATIONARIES%';

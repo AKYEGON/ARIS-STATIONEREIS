@@ -115,7 +115,7 @@ export const CourseBundlesDialog = ({ open, onOpenChange, courseId, courseName }
   const save = async () => {
     if (!form.name.trim()) return toast.error("Name required");
     if (!form.course_year_id) return toast.error("Pick a year first (add years on the course)");
-    // image is optional — empty means auto-collage from included products
+    // image is optional - empty means auto-collage from included products
     if (items.length === 0) return toast.error("Add at least one product to the bundle");
 
     const payload = {

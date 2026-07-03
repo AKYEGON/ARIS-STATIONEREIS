@@ -194,7 +194,7 @@ const Cart = () => {
           const variantLabel = item.selectedVariant 
             ? ` (${item.selectedVariant.variant_type}: ${item.selectedVariant.variant_value})`
             : '';
-          return `${index + 1}. ${item.name}${variantLabel} × ${item.quantity} — KSh ${(item.price * item.quantity).toFixed(2)}`;
+          return `${index + 1}. ${item.name}${variantLabel} × ${item.quantity} - KSh ${(item.price * item.quantity).toFixed(2)}`;
         })
         .join("\n");
       
@@ -204,7 +204,7 @@ const Cart = () => {
             `   • ${bi.product?.name || 'Product'} ${bi.quantity > 1 ? `(×${bi.quantity})` : ''}`
           ).join('\n') || '';
           const num = cartItems.length + index + 1;
-          return `${num}. ${bundle.name} (Bundle) × ${bundle.quantity} — KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
+          return `${num}. ${bundle.name} (Bundle) × ${bundle.quantity} - KSh ${(bundle.bundle_price * bundle.quantity).toFixed(2)}\n${itemsList}`;
         })
         .join("\n\n");
       
@@ -218,7 +218,7 @@ const Cart = () => {
         ? outlets.find(o => o.id === selectedPickupOutlet || o.name === selectedPickupOutlet)?.name || selectedPickupOutlet
         : 'N/A';
 
-      let message = `*NEW ORDER — ARIS STATIONERIES*\n`;
+      let message = `*NEW ORDER - ARIS*\n`;
       message += `━━━━━━━━━━━━━━━━━━━━━━\n\n`;
       message += `*Order ID:* #${orderId.slice(0, 8)}\n`;
       message += `*Date:* ${new Date().toLocaleDateString('en-KE', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}\n\n`;
@@ -235,7 +235,7 @@ const Cart = () => {
       if (earnedBogos.length > 0) {
         message += `\n*FREE ITEMS UNLOCKED (BOGO)*\n`;
         earnedBogos.forEach((e, i) => {
-          message += `${i + 1}. ${e.freeProduct.name} × ${e.freeQty}  —  FREE  (${e.offer.name})\n`;
+          message += `${i + 1}. ${e.freeProduct.name} × ${e.freeQty}  -  FREE  (${e.offer.name})\n`;
         });
       }
       message += `────────────────────\n`;
@@ -304,8 +304,8 @@ const Cart = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="Shopping Cart | Aris Stationeries"
-        description="Review your cart and checkout securely at Aris Stationeries. Affordable stationery delivered to your university or doorstep in Kenya."
+        title="Your cart | ARIS"
+        description="Check your list, pick pickup or delivery, and we take it from there."
         canonicalUrl="/cart"
         noindex
       />
@@ -663,7 +663,7 @@ const Cart = () => {
                     <SelectContent>
                       {outlets.map(o => (
                         <SelectItem key={o.id} value={o.name} className="text-xs xs:text-sm sm:text-base">
-                          {o.name}{o.location ? ` — ${o.location}` : ""}
+                          {o.name}{o.location ? ` - ${o.location}` : ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

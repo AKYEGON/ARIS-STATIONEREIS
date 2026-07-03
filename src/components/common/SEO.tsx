@@ -17,7 +17,7 @@ const BASE_URL = "https://arisstationaries.co.ke";
 const SEO = ({
   title,
   description,
-  keywords = "cheap stationery Kenya, affordable stationery Kenya, buy stationery online Kenya, university stationery Kenya, Aris Stationeries",
+  keywords = "ARIS Kenya, student platform Kenya, course kits Kenya, campus stationery Nairobi, UoN, KU, JKUAT, Strathmore, USIU, affordable stationery Kenya",
   canonicalUrl,
   ogImage = "/favicon.png",
   ogType = "website",
@@ -25,9 +25,9 @@ const SEO = ({
   noindex = false,
   breadcrumbs,
 }: SEOProps) => {
-  const fullTitle = title.includes("Aris") || title.includes("ARIS")
+  const fullTitle = title.includes("ARIS") || title.includes("Aris")
     ? title
-    : `${title} | Aris Stationeries`;
+    : `${title} | ARIS`;
   const fullUrl = canonicalUrl ? `${BASE_URL}${canonicalUrl}` : BASE_URL;
   const fullOgImage = ogImage.startsWith("http") ? ogImage : `${BASE_URL}${ogImage}`;
 
@@ -72,7 +72,7 @@ const SEO = ({
       <meta property="og:image" content={fullOgImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
-      <meta property="og:site_name" content="Aris Stationeries" />
+      <meta property="og:site_name" content="ARIS" />
       <meta property="og:locale" content="en_KE" />
 
       {/* Twitter / WhatsApp */}

@@ -127,7 +127,7 @@ export const YearTemplatesManager = () => {
           <Layers className="h-4 w-4 text-primary shrink-0" />
           <div className="min-w-0">
             <p className="text-sm font-semibold">Year Templates</p>
-            <p className="text-[11px] text-muted-foreground">Create once, apply to many courses — no more retyping Year 1, Year 2…</p>
+            <p className="text-[11px] text-muted-foreground">Create once, apply to many courses - no more retyping Year 1, Year 2…</p>
           </div>
         </div>
         <Button size="sm" onClick={openNew} className="bg-primary hover:bg-primary/90 shrink-0 self-start sm:self-auto">
