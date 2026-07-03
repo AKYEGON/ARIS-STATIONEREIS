@@ -695,6 +695,7 @@ export type Database = {
           rating: number
           review_text: string
           review_token: string | null
+          show_in_stories: boolean
           video_url: string | null
           views: number | null
         }
@@ -718,6 +719,7 @@ export type Database = {
           rating: number
           review_text: string
           review_token?: string | null
+          show_in_stories?: boolean
           video_url?: string | null
           views?: number | null
         }
@@ -741,6 +743,7 @@ export type Database = {
           rating?: number
           review_text?: string
           review_token?: string | null
+          show_in_stories?: boolean
           video_url?: string | null
           views?: number | null
         }

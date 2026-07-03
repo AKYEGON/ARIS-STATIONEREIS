@@ -1,0 +1,2 @@
+ALTER TABLE public.customer_testimonials ADD COLUMN IF NOT EXISTS show_in_stories boolean NOT NULL DEFAULT true;
+COMMENT ON COLUMN public.customer_testimonials.show_in_stories IS 'When true, this testimonial appears in the Customer Stories carousel on /testimonials. When false, it only appears on the linked product page.';
