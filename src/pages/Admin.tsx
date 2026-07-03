@@ -143,6 +143,7 @@ const Admin = () => {
     rating: 5 as 1 | 2 | 3 | 4 | 5,
     is_featured: false,
     is_published: false,
+    show_in_stories: true,
     display_order: 0
   });
   const [testimonialPhotoFile, setTestimonialPhotoFile] = useState<File | null>(null);
@@ -624,6 +625,7 @@ const Admin = () => {
       rating: 5,
       is_featured: false,
       is_published: false,
+      show_in_stories: true,
       display_order: 0
     });
     setTestimonialPhotoFile(null);
@@ -678,8 +680,9 @@ const Admin = () => {
           video_url: videoUrl,
           display_order: testimonialFormData.display_order,
           is_featured: testimonialFormData.is_featured,
-          is_published: testimonialFormData.is_published
-        });
+          is_published: testimonialFormData.is_published,
+          show_in_stories: testimonialFormData.show_in_stories,
+        } as any);
 
       if (error) throw error;
 
@@ -722,8 +725,9 @@ const Admin = () => {
           video_url: videoUrl,
           display_order: testimonialFormData.display_order,
           is_featured: testimonialFormData.is_featured,
-          is_published: testimonialFormData.is_published
-        })
+          is_published: testimonialFormData.is_published,
+          show_in_stories: testimonialFormData.show_in_stories,
+        } as any)
         .eq("id", editingTestimonial.id);
 
       if (error) throw error;
@@ -800,6 +804,7 @@ const Admin = () => {
       rating: testimonial.rating,
       is_featured: testimonial.is_featured,
       is_published: testimonial.is_published,
+      show_in_stories: testimonial.show_in_stories !== false,
       display_order: testimonial.display_order
     });
     setTestimonialPhotoPreview(testimonial.customer_photo || "");

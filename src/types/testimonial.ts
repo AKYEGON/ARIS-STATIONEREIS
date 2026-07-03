@@ -11,5 +11,6 @@ export interface CustomerTestimonial {
   is_featured: boolean;
   is_published: boolean;
   is_verified_purchase?: boolean;
+  show_in_stories?: boolean;
   created_at: string;
 }
