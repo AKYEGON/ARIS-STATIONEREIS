@@ -24,6 +24,7 @@ Disallow: /auth
 Disallow: /reset-password
 Disallow: /cart
 Disallow: /checkout
+Disallow: /brochure
 
 # Sitemap
 Sitemap: https://arisstationaries.co.ke/sitemap.xml

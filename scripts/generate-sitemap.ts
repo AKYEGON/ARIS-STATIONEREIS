@@ -35,6 +35,11 @@ const staticEntries: SitemapEntry[] = [
   { path: "/deals", lastmod: today, changefreq: "daily", priority: "0.9" },
   { path: "/testimonials", lastmod: today, changefreq: "weekly", priority: "0.8" },
   { path: "/students", lastmod: today, changefreq: "weekly", priority: "0.8" },
+  { path: "/cart", lastmod: today, changefreq: "monthly", priority: "0.3" },
+  { path: "/auth", lastmod: today, changefreq: "monthly", priority: "0.1" },
+  { path: "/reset-password", lastmod: today, changefreq: "monthly", priority: "0.1" },
+  { path: "/admin", lastmod: today, changefreq: "monthly", priority: "0.1" },
+  { path: "/brochure", lastmod: today, changefreq: "monthly", priority: "0.1" },
 ];
 
 function buildXml(entries: SitemapEntry[]) {
