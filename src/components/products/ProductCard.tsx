@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ShoppingCart, Images } from "lucide-react";
 import { Product, ProductVariant } from "@/types/product";
 import ProductMediaViewer from "./ProductMediaViewer";
-import SaleBadge, { isOnSale } from "./SaleBadge";
+import SaleBadge, { isOnSale, getEffectivePrice } from "./SaleBadge";
 import CountdownTimer from "./CountdownTimer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
