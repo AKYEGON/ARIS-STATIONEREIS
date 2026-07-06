@@ -1762,6 +1762,18 @@ const Admin = () => {
             <FacultyManager />
           </TabsContent>
 
+          {/* Marketplace API Tab */}
+          <TabsContent value="api" className="space-y-6">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold">Marketplace API</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                Generate and manage API keys for external marketplaces to list ARIS products.
+              </p>
+            </div>
+            <MarketplaceApiKeysTab />
+          </TabsContent>
+
+
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
