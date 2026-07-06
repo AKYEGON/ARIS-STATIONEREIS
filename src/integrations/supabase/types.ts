@@ -1019,6 +1019,51 @@ export type Database = {
           },
         ]
       }
+      partner_api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          notes: string | null
+          partner_name: string
+          revoked_at: string | null
+          scopes: string[]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          notes?: string | null
+          partner_name: string
+          revoked_at?: string | null
+          scopes?: string[]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          notes?: string | null
+          partner_name?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pickup_outlets: {
         Row: {
           created_at: string
@@ -1781,6 +1826,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      verify_partner_api_key: {
+        Args: { p_key_hash: string }
+        Returns: {
+          id: string
+          partner_name: string
+          scopes: string[]
+        }[]
       }
     }
     Enums: {

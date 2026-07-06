@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import { isOnSale, getEffectivePrice } from "@/components/products/SaleBadge";
 
 const formatProduct = (p: any): Product & { slug?: string } => ({
   id: p.id,
@@ -167,7 +168,9 @@ const ProductDetail = () => {
       }, {})
     : {};
 
-  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+  const baseEffective = getEffectivePrice(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
+  const saleActive = isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
+  const displayPrice = selectedVariant ? selectedVariant.price : baseEffective;
   const allMedia = [
     { type: "image" as const, url: product.image },
     ...(product.media?.map((m) => ({ type: m.media_type, url: m.media_url })) || []),
@@ -393,13 +396,13 @@ const ProductDetail = () => {
               <span className="text-2xl sm:text-3xl font-bold text-primary">
                 KSh {displayPrice.toFixed(0)}
               </span>
-              {!selectedVariant && product.originalPrice && product.originalPrice > product.price && (
+              {!selectedVariant && saleActive && (
                 <>
                   <span className="text-base text-muted-foreground line-through">
-                    KSh {product.originalPrice.toFixed(0)}
+                    KSh {product.originalPrice!.toFixed(0)}
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold">
-                    Save KSh {(product.originalPrice - product.price).toFixed(0)}
+                    Save KSh {(product.originalPrice! - product.price).toFixed(0)}
                   </span>
                 </>
               )}

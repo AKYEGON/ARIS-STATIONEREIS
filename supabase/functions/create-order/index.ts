@@ -94,13 +94,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    // For items with product_id, verify prices against database
+    // For items with product_id, verify prices against database (window-aware)
     const itemsWithIds = body.items.filter(item => item.product_id);
     if (itemsWithIds.length > 0) {
       const productIds = itemsWithIds.map(item => item.product_id);
       const { data: products, error: productsError } = await supabase
         .from("products")
-        .select("id, name, price")
+        .select("id, name, price, original_price, sale_starts_at, sale_ends_at")
         .in("id", productIds);
 
       if (productsError) {
@@ -112,16 +112,31 @@ Deno.serve(async (req) => {
       }
 
       const productMap = new Map(products?.map(p => [p.id, p]) || []);
+      const now = Date.now();
 
       for (const item of itemsWithIds) {
-        const product = productMap.get(item.product_id!);
-        if (product) {
-          // Verify price matches (allow small floating point differences)
-          if (Math.abs(Number(product.price) - item.price) > 0.01) {
-            console.log(`Price mismatch for ${item.product_name}: submitted ${item.price}, actual ${product.price}`);
-            // Use the actual price from database
-            item.price = Number(product.price);
-          }
+        const product: any = productMap.get(item.product_id!);
+        if (!product) continue;
+
+        const price = Number(product.price);
+        const originalPrice = product.original_price != null ? Number(product.original_price) : null;
+        const startsAt = product.sale_starts_at ? new Date(product.sale_starts_at).getTime() : null;
+        const endsAt = product.sale_ends_at ? new Date(product.sale_ends_at).getTime() : null;
+
+        // Sale window is active only if original_price > price AND now within window
+        const inWindow =
+          originalPrice !== null &&
+          originalPrice > price &&
+          (startsAt === null || startsAt <= now) &&
+          (endsAt === null || endsAt >= now);
+
+        const effectivePrice = inWindow
+          ? price
+          : (originalPrice !== null && originalPrice > price ? originalPrice : price);
+
+        if (Math.abs(effectivePrice - item.price) > 0.01) {
+          console.log(`Price adjusted for ${item.product_name}: submitted ${item.price}, effective ${effectivePrice} (sale active: ${inWindow})`);
+          item.price = effectivePrice;
         }
       }
     }
