@@ -1707,6 +1707,13 @@ const Admin = () => {
                   <span className="xs:hidden">Set</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("api") && (
+                <TabsTrigger value="api" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">API</span>
+                  <span className="xs:hidden">API</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
