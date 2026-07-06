@@ -168,7 +168,9 @@ const ProductDetail = () => {
       }, {})
     : {};
 
-  const displayPrice = selectedVariant ? selectedVariant.price : product.price;
+  const baseEffective = getEffectivePrice(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
+  const saleActive = isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
+  const displayPrice = selectedVariant ? selectedVariant.price : baseEffective;
   const allMedia = [
     { type: "image" as const, url: product.image },
     ...(product.media?.map((m) => ({ type: m.media_type, url: m.media_url })) || []),
