@@ -396,13 +396,13 @@ const ProductDetail = () => {
               <span className="text-2xl sm:text-3xl font-bold text-primary">
                 KSh {displayPrice.toFixed(0)}
               </span>
-              {!selectedVariant && product.originalPrice && product.originalPrice > product.price && (
+              {!selectedVariant && saleActive && (
                 <>
                   <span className="text-base text-muted-foreground line-through">
-                    KSh {product.originalPrice.toFixed(0)}
+                    KSh {product.originalPrice!.toFixed(0)}
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded bg-primary/10 text-primary font-semibold">
-                    Save KSh {(product.originalPrice - product.price).toFixed(0)}
+                    Save KSh {(product.originalPrice! - product.price).toFixed(0)}
                   </span>
                 </>
               )}
