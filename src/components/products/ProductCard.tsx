@@ -182,15 +182,15 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
           })}
 
           <div className={compact ? "mt-auto" : ""}>
-            {!selectedVariant && product.originalPrice && product.originalPrice > product.price ? (
+            {!selectedVariant && saleActive ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
-                  Was KSh {product.originalPrice.toFixed(0)}
+                  Was KSh {product.originalPrice!.toFixed(0)}
                 </p>
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}
                 </p>
-                {!compact && product.saleEndsAt && isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt) && (
+                {!compact && product.saleEndsAt && (
                   <CountdownTimer endsAt={product.saleEndsAt} compact className="mt-0.5" />
                 )}
               </div>
