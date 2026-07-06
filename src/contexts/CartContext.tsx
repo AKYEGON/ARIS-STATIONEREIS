@@ -77,7 +77,13 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         return itemKey === cartKey;
       });
       
-      const effectivePrice = selectedVariant ? selectedVariant.price : product.price;
+      const baseEffectivePrice = getEffectivePrice(
+        product.price,
+        product.originalPrice,
+        product.saleStartsAt,
+        product.saleEndsAt,
+      );
+      const effectivePrice = selectedVariant ? selectedVariant.price : baseEffectivePrice;
       const availableStock = selectedVariant ? selectedVariant.stock : (product.stock ?? Infinity);
       
       if (existingItem) {
