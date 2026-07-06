@@ -14,6 +14,7 @@ import { Card } from "@/components/ui/card";
 import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
+import { isOnSale, getEffectivePrice } from "@/components/products/SaleBadge";
 
 const formatProduct = (p: any): Product & { slug?: string } => ({
   id: p.id,
