@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Product, CartItem, ProductVariant } from "@/types/product";
 import { Bundle, CartBundle } from "@/types/bundle";
 import { toast } from "sonner";
+import { getEffectivePrice } from "@/components/products/SaleBadge";
 
 const CART_STORAGE_KEY = "aris-cart-items";
 const BUNDLE_STORAGE_KEY = "aris-bundle-items";
