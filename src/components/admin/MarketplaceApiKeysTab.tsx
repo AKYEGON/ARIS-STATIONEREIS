@@ -141,14 +141,24 @@ export const MarketplaceApiKeysTab = () => {
       </CardHeader>
 
       <CardContent className="p-2 sm:p-6 pt-0 space-y-4">
-        <div className="rounded-lg border bg-muted/40 p-3 text-xs space-y-1">
-          <p className="font-semibold">Endpoint</p>
+        <div className="rounded-lg border bg-muted/40 p-3 text-xs space-y-2">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <p className="font-semibold">Endpoint</p>
+            <a
+              href="/ARIS-Marketplace-API-Partner-Guide.pdf"
+              download
+              className="inline-flex items-center gap-1 text-primary hover:underline text-[11px] font-medium"
+            >
+              📄 Download Partner Integration Guide (PDF)
+            </a>
+          </div>
           <code className="block bg-background rounded px-2 py-1 break-all">{FUNCTION_BASE}</code>
-          <p className="mt-2">
+          <p>
             Send header <code className="bg-background px-1 rounded">X-API-Key: &lt;the key&gt;</code>. Available routes:
             <span className="ml-1">/products, /products/&#123;id_or_slug&#125;, /categories, /stock</span>
           </p>
         </div>
+
 
         {loading ? (
           <p className="text-sm text-muted-foreground text-center py-6">Loading...</p>
