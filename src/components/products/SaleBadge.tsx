@@ -25,6 +25,23 @@ export const isOnSale = (
   return true;
 };
 
+/**
+ * The price a customer should actually pay right now.
+ * - If a sale window is active: the discounted `price`
+ * - Otherwise, if `original_price` is set (pre-sale amount): revert to `original_price`
+ * - Otherwise: `price`
+ */
+export const getEffectivePrice = (
+  price: number,
+  originalPrice?: number | null,
+  saleStartsAt?: string | null,
+  saleEndsAt?: string | null,
+): number => {
+  if (isOnSale(price, originalPrice, saleStartsAt, saleEndsAt)) return price;
+  if (originalPrice && originalPrice > price) return originalPrice;
+  return price;
+};
+
 const SaleBadge = ({
   price,
   originalPrice,

@@ -44,7 +44,8 @@ import { FacultyManager } from "@/components/admin/FacultyManager";
 import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
 import { ReviewRequestFunnel } from "@/components/admin/ReviewRequestFunnel";
-import { ShieldCheck } from "lucide-react";
+import { MarketplaceApiKeysTab } from "@/components/admin/MarketplaceApiKeysTab";
+import { ShieldCheck, KeyRound } from "lucide-react";
 
 interface OrderItem {
   product_name: string;
@@ -73,14 +74,14 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings"];
+const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings", "api"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings", "api"];
     case 'manager':
-      return ["orders", "inventory", "sales", "settings"];
+      return ["orders", "inventory", "sales", "settings", "api"];
     case 'employee':
       return ["orders"];
     case 'agent':
@@ -1706,6 +1707,13 @@ const Admin = () => {
                   <span className="xs:hidden">Set</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("api") && (
+                <TabsTrigger value="api" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">API</span>
+                  <span className="xs:hidden">API</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -1753,6 +1761,18 @@ const Admin = () => {
             <CategoryManager />
             <FacultyManager />
           </TabsContent>
+
+          {/* Marketplace API Tab */}
+          <TabsContent value="api" className="space-y-6">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold">Marketplace API</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                Generate and manage API keys for external marketplaces to list ARIS products.
+              </p>
+            </div>
+            <MarketplaceApiKeysTab />
+          </TabsContent>
+
 
           {/* Products Tab */}
           <TabsContent value="products" className="space-y-6">
