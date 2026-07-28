@@ -92,32 +92,26 @@ const Footer = () => {
                   <WhatsAppIcon className="h-4 w-4" />
                 </a>
                 <a
-                  href="https://instagram.com/arisstationeries"
+                  href="https://www.instagram.com/aris.kenya/"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
+                  rel="me noopener noreferrer"
+                  aria-label="ARIS on Instagram"
+                  title="ARIS on Instagram"
                   className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
                 >
                   <Instagram className="h-4 w-4" />
                 </a>
                 <a
-                  href="https://facebook.com/arisstationeries"
+                  href="https://www.tiktok.com/@aris.kenya"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
-                >
-                  <Facebook className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://tiktok.com/@arisstationeries"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
+                  rel="me noopener noreferrer"
+                  aria-label="ARIS on TikTok"
+                  title="ARIS on TikTok"
                   className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
                 >
                   <TikTokIcon className="h-4 w-4" />
                 </a>
+
               </div>
             </div>
 
