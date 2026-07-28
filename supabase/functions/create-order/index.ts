@@ -94,13 +94,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Cost prices captured for profit reporting
+    const costMap = new Map<string, number>();
+
     // For items with product_id, verify prices against database (window-aware)
     const itemsWithIds = body.items.filter(item => item.product_id);
     if (itemsWithIds.length > 0) {
       const productIds = itemsWithIds.map(item => item.product_id);
       const { data: products, error: productsError } = await supabase
         .from("products")
-        .select("id, name, price, original_price, sale_starts_at, sale_ends_at")
+        .select("id, name, price, original_price, cost_price, sale_starts_at, sale_ends_at")
         .in("id", productIds);
 
       if (productsError) {
@@ -111,6 +114,7 @@ Deno.serve(async (req) => {
         );
       }
 
+      products?.forEach((p: any) => costMap.set(p.id, Number(p.cost_price || 0)));
       const productMap = new Map(products?.map(p => [p.id, p]) || []);
       const now = Date.now();
 
