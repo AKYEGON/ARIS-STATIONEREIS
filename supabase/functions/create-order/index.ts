@@ -227,6 +227,8 @@ Deno.serve(async (req) => {
       );
     }
 
+    await supabase.from("orders").update({ profit: orderProfit }).eq("id", orderId);
+
     console.log("Order items created successfully");
 
     return new Response(
