@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Shield, MapPin, Mail, Instagram, Facebook, Heart, ArrowUpRight, HelpCircle } from "lucide-react";
+import { Shield, MapPin, Mail, Instagram, Heart, ArrowUpRight, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import icon from "@/assets/aris-icon.png.asset.json";
