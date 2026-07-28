@@ -46,7 +46,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
   }, [product.image]);
 
   // Generate product URL for SEO
-  const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
+  const productUrl = `https://arisstationaries.co.ke/product/${product.slug || product.id}`;
   
   // Product Schema for SEO
   const productSchema = {
