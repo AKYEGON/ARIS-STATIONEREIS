@@ -196,14 +196,22 @@ Deno.serve(async (req) => {
 
     console.log("Order created:", orderId);
 
-    // Create order items
-    const orderItems = body.items.map(item => ({
-      order_id: orderId,
-      product_name: item.product_name.trim(),
-      product_image: item.product_image,
-      quantity: item.quantity,
-      price: item.price
-    }));
+    // Create order items (with cost + profit so analytics stay accurate)
+    let orderProfit = 0;
+    const orderItems = body.items.map(item => {
+      const unitCost = item.product_id ? (costMap.get(item.product_id) || 0) : 0;
+      const lineProfit = (item.price - unitCost) * item.quantity;
+      orderProfit += lineProfit;
+      return {
+        order_id: orderId,
+        product_name: item.product_name.trim(),
+        product_image: item.product_image,
+        quantity: item.quantity,
+        price: item.price,
+        cost_price: unitCost,
+        profit: lineProfit,
+      };
+    });
 
     const { error: itemsError } = await supabase
       .from("order_items")
