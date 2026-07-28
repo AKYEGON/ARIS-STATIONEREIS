@@ -15,6 +15,14 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# TikTok / Instagram in-app link previews
+User-agent: Bytespider
+Allow: /
+
+User-agent: TikTokSpider
+Allow: /
+
+
 User-agent: *
 Allow: /
 
