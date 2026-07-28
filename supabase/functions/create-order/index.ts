@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     const orderInsert: any = {
       id: orderId,
       customer_name: body.customer_name.trim(),
-      customer_email: body.customer_email ? body.customer_email.trim() : null,
+      customer_email: body.customer_email && body.customer_email.trim() ? body.customer_email.trim() : "",
       customer_phone: body.customer_phone.trim(),
       delivery_address: body.delivery_address.trim(),
       total: calculatedTotal,
