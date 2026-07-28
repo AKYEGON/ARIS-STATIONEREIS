@@ -94,13 +94,16 @@ Deno.serve(async (req) => {
       }
     }
 
+    // Cost prices captured for profit reporting
+    const costMap = new Map<string, number>();
+
     // For items with product_id, verify prices against database (window-aware)
     const itemsWithIds = body.items.filter(item => item.product_id);
     if (itemsWithIds.length > 0) {
       const productIds = itemsWithIds.map(item => item.product_id);
       const { data: products, error: productsError } = await supabase
         .from("products")
-        .select("id, name, price, original_price, sale_starts_at, sale_ends_at")
+        .select("id, name, price, original_price, cost_price, sale_starts_at, sale_ends_at")
         .in("id", productIds);
 
       if (productsError) {
@@ -111,6 +114,7 @@ Deno.serve(async (req) => {
         );
       }
 
+      products?.forEach((p: any) => costMap.set(p.id, Number(p.cost_price || 0)));
       const productMap = new Map(products?.map(p => [p.id, p]) || []);
       const now = Date.now();
 
@@ -165,7 +169,7 @@ Deno.serve(async (req) => {
     const orderInsert: any = {
       id: orderId,
       customer_name: body.customer_name.trim(),
-      customer_email: body.customer_email ? body.customer_email.trim() : null,
+      customer_email: body.customer_email && body.customer_email.trim() ? body.customer_email.trim() : "",
       customer_phone: body.customer_phone.trim(),
       delivery_address: body.delivery_address.trim(),
       total: calculatedTotal,
@@ -192,14 +196,22 @@ Deno.serve(async (req) => {
 
     console.log("Order created:", orderId);
 
-    // Create order items
-    const orderItems = body.items.map(item => ({
-      order_id: orderId,
-      product_name: item.product_name.trim(),
-      product_image: item.product_image,
-      quantity: item.quantity,
-      price: item.price
-    }));
+    // Create order items (with cost + profit so analytics stay accurate)
+    let orderProfit = 0;
+    const orderItems = body.items.map(item => {
+      const unitCost = item.product_id ? (costMap.get(item.product_id) || 0) : 0;
+      const lineProfit = (item.price - unitCost) * item.quantity;
+      orderProfit += lineProfit;
+      return {
+        order_id: orderId,
+        product_name: item.product_name.trim(),
+        product_image: item.product_image,
+        quantity: item.quantity,
+        price: item.price,
+        cost_price: unitCost,
+        profit: lineProfit,
+      };
+    });
 
     const { error: itemsError } = await supabase
       .from("order_items")
@@ -214,6 +226,8 @@ Deno.serve(async (req) => {
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    await supabase.from("orders").update({ profit: orderProfit }).eq("id", orderId);
 
     console.log("Order items created successfully");
 
