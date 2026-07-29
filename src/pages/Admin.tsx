@@ -1534,7 +1534,7 @@ const Admin = () => {
   const exportProductsToCSV = () => {
     try {
       // Define CSV headers
-      const headers = ['Name', 'Description', 'Category', 'Price', 'Original Price', 'Cost Price', 'Stock', 'Created At'];
+      const headers = ['Name', 'Description', 'Category', 'Price', 'Original Price', 'Cost Price', 'Stock', 'Image', 'Created At'];
       
       // Convert products to CSV rows
       const rows = productList.map(product => [
@@ -1545,8 +1545,10 @@ const Admin = () => {
         product.originalPrice ? product.originalPrice.toFixed(2) : '',
         product.costPrice ? product.costPrice.toFixed(2) : '',
         product.stock || 0,
+        product.image || '',
         new Date().toISOString().split('T')[0]
       ]);
+
       
       // Combine headers and rows
       const csvContent = [
