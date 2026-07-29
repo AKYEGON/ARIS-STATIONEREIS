@@ -1553,7 +1553,8 @@ const Admin = () => {
       // Combine headers and rows
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+
       ].join('\n');
       
       // Create blob and download
