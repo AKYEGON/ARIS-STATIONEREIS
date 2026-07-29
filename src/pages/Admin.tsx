@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 import { Product, ProductMedia, ProductCategory } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star, GraduationCap } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star, GraduationCap, Upload } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { smartMatch } from "@/lib/smart-search";
+import { parseProductsCSV } from "@/lib/product-csv";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
@@ -96,6 +97,7 @@ const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [productList, setProductList] = useState<Product[]>([]);
+  const [importingProducts, setImportingProducts] = useState(false);
   const [coursesDialogProduct, setCoursesDialogProduct] = useState<Product | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -1534,7 +1536,7 @@ const Admin = () => {
   const exportProductsToCSV = () => {
     try {
       // Define CSV headers
-      const headers = ['Name', 'Description', 'Category', 'Price', 'Original Price', 'Cost Price', 'Stock', 'Created At'];
+      const headers = ['Name', 'Description', 'Category', 'Price', 'Original Price', 'Cost Price', 'Stock', 'Image', 'Created At'];
       
       // Convert products to CSV rows
       const rows = productList.map(product => [
@@ -1545,13 +1547,16 @@ const Admin = () => {
         product.originalPrice ? product.originalPrice.toFixed(2) : '',
         product.costPrice ? product.costPrice.toFixed(2) : '',
         product.stock || 0,
+        product.image || '',
         new Date().toISOString().split('T')[0]
       ]);
+
       
       // Combine headers and rows
       const csvContent = [
         headers.join(','),
-        ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+        ...rows.map(row => row.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+
       ].join('\n');
       
       // Create blob and download
@@ -1571,6 +1576,79 @@ const Admin = () => {
       toast.error('Failed to export products');
     }
   };
+
+  const handleImportProductsCSV = async (file: File) => {
+    setImportingProducts(true);
+    try {
+      const text = await file.text();
+      const { rows, errors } = parseProductsCSV(text);
+
+      if (rows.length === 0) {
+        toast.error(errors[0] || "No valid products found in that file.");
+        return;
+      }
+
+      // Match against what's already in the catalogue (by name, case-insensitive)
+      const { data: existing, error: fetchErr } = await supabase
+        .from("products")
+        .select("id, name, image");
+      if (fetchErr) throw fetchErr;
+
+      const byName = new Map(
+        (existing || []).map((p: any) => [p.name.trim().toLowerCase(), p])
+      );
+
+      let created = 0;
+      let updated = 0;
+      const failures: string[] = [];
+
+      for (const row of rows) {
+        const match = byName.get(row.name.trim().toLowerCase());
+        const payload: Record<string, any> = {
+          name: row.name,
+          description: row.description,
+          category: row.category,
+          price: row.price,
+          original_price: row.original_price,
+          cost_price: row.cost_price,
+          stock: row.stock,
+        };
+
+        try {
+          if (match) {
+            if (row.image) payload.image = row.image;
+            const { error } = await supabase.from("products").update(payload).eq("id", match.id);
+            if (error) throw error;
+            updated++;
+          } else {
+            payload.image = row.image || "/placeholder.svg";
+            const { error } = await supabase.from("products").insert(payload as any);
+            if (error) throw error;
+            created++;
+          }
+        } catch (e: any) {
+          failures.push(`${row.name}: ${e.message || "failed"}`);
+        }
+      }
+
+      await fetchProducts();
+
+      const summary = `${created} added, ${updated} updated`;
+      if (failures.length || errors.length) {
+        console.warn("CSV import issues:", [...errors, ...failures]);
+        toast.warning(`${summary}. ${failures.length + errors.length} row(s) skipped - see console for details.`);
+      } else {
+        toast.success(`Import complete: ${summary}.`);
+      }
+    } catch (error: any) {
+      console.error("Error importing products:", error);
+      toast.error(error.message || "Failed to import products");
+    } finally {
+      setImportingProducts(false);
+    }
+  };
+
+
 
   const exportOrdersToCSV = () => {
     try {
@@ -2107,15 +2185,43 @@ const Admin = () => {
                     onChange={(e) => setProductSearchQuery(e.target.value)}
                     className="max-w-md"
                   />
-                  <Button
-                    onClick={exportProductsToCSV}
-                    variant="outline"
-                    className="gap-2 w-full sm:w-auto"
-                  >
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </Button>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button
+                      onClick={exportProductsToCSV}
+                      variant="outline"
+                      className="gap-2 flex-1 sm:flex-none"
+                    >
+                      <Download className="h-4 w-4" />
+                      Export CSV
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="gap-2 flex-1 sm:flex-none cursor-pointer"
+                      disabled={importingProducts}
+                    >
+                      <label>
+                        <Upload className="h-4 w-4" />
+                        {importingProducts ? "Importing..." : "Import CSV"}
+                        <input
+                          type="file"
+                          accept=".csv,text/csv"
+                          className="hidden"
+                          disabled={importingProducts}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) handleImportProductsCSV(file);
+                          }}
+                        />
+                      </label>
+                    </Button>
+                  </div>
                 </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Import accepts the same file the Export button produces. Products are matched by name: existing ones are updated, new names are added.
+                </p>
+
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
