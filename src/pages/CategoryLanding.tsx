@@ -175,16 +175,15 @@ const CategoryLanding = () => {
       intro: "Notebooks from KSh 30. Exercise books, A5 hardcovers, leather journals, gazzel notebooks and spiral pads - all in stock and ready today. Order on WhatsApp +254 119 774470 for instant pricing or pick up at our Nairobi shop.",
     },
     "scientific-calculators": {
-      title: "Scientific Calculators in Kenya from KSh 750",
-      desc: "Genuine Casio fx-991EX, fx-82MS and school models from KSh 750. Sealed boxes, Nairobi pickup today, delivery countrywide.",
+      title: "Scientific Calculators in Kenya",
+      desc: "Casio fx-991EX, fx-82MS and more. Genuine units, best prices in Nairobi, delivered the same day.",
       intro: "Genuine Casio scientific calculators - fx-991EX (552 functions), fx-82MS and the full school range. Lowest verified prices in Nairobi, sealed boxes, one-year guarantee. WhatsApp +254 119 774470 and we'll deliver today.",
     },
     "engineering-drawing": {
-      title: "Engineering Drawing Sets in Kenya from KSh 24",
-      desc: "T-squares, set squares, French curves, scale rulers and drawing boards from KSh 24. Full first-year kits for UoN, JKUAT, KU and Strathmore, ready today.",
+      title: "Engineering & Drawing Sets in Kenya",
+      desc: "T-squares, set squares, French curves, scale rulers and drawing boards for UoN, JKUAT, Kenyatta and Strathmore students.",
       intro: "Everything an engineering or architecture student needs - T-squares, set squares, French curves, scale rulers, drawing boards. Stocked for first-year kits at UoN, JKUAT, Kenyatta, Strathmore and USIU. WhatsApp +254 119 774470 for a full kit price.",
     },
-
     "mathematics-equipments": {
       title: "Mathematics Sets & Equipment in Kenya",
       desc: "Geometry sets, compasses, protractors and rulers for school and exam use. Affordable, in stock, delivered fast.",
@@ -236,8 +235,7 @@ const CategoryLanding = () => {
   const copy = COPY[category.slug] || fallback;
   const title = copy.title.includes("ARIS") || copy.title.includes("Aris")
     ? copy.title
-    : `${copy.title} | ARIS`;
-
+    : `${copy.title} - Buy Online | ARIS`;
   const description = copy.desc;
   const intro = copy.intro;
 
