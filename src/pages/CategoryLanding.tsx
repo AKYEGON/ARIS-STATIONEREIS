@@ -236,7 +236,8 @@ const CategoryLanding = () => {
   const copy = COPY[category.slug] || fallback;
   const title = copy.title.includes("ARIS") || copy.title.includes("Aris")
     ? copy.title
-    : `${copy.title} - Buy Online | ARIS`;
+    : `${copy.title} | ARIS`;
+
   const description = copy.desc;
   const intro = copy.intro;
 
