@@ -2185,15 +2185,43 @@ const Admin = () => {
                     onChange={(e) => setProductSearchQuery(e.target.value)}
                     className="max-w-md"
                   />
-                  <Button
-                    onClick={exportProductsToCSV}
-                    variant="outline"
-                    className="gap-2 w-full sm:w-auto"
-                  >
-                    <Download className="h-4 w-4" />
-                    Export CSV
-                  </Button>
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    <Button
+                      onClick={exportProductsToCSV}
+                      variant="outline"
+                      className="gap-2 flex-1 sm:flex-none"
+                    >
+                      <Download className="h-4 w-4" />
+                      Export CSV
+                    </Button>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="gap-2 flex-1 sm:flex-none cursor-pointer"
+                      disabled={importingProducts}
+                    >
+                      <label>
+                        <Upload className="h-4 w-4" />
+                        {importingProducts ? "Importing..." : "Import CSV"}
+                        <input
+                          type="file"
+                          accept=".csv,text/csv"
+                          className="hidden"
+                          disabled={importingProducts}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (file) handleImportProductsCSV(file);
+                          }}
+                        />
+                      </label>
+                    </Button>
+                  </div>
                 </div>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Import accepts the same file the Export button produces. Products are matched by name: existing ones are updated, new names are added.
+                </p>
+
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
