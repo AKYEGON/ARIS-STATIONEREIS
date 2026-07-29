@@ -24,6 +24,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { smartMatch } from "@/lib/smart-search";
+import { parseProductsCSV } from "@/lib/product-csv";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
@@ -96,6 +97,7 @@ const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [productList, setProductList] = useState<Product[]>([]);
+  const [importingProducts, setImportingProducts] = useState(false);
   const [coursesDialogProduct, setCoursesDialogProduct] = useState<Product | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -1620,7 +1622,7 @@ const Admin = () => {
             updated++;
           } else {
             payload.image = row.image || "/placeholder.svg";
-            const { error } = await supabase.from("products").insert(payload);
+            const { error } = await supabase.from("products").insert(payload as any);
             if (error) throw error;
             created++;
           }
