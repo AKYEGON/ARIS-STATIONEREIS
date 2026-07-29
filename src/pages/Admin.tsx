@@ -1575,6 +1575,79 @@ const Admin = () => {
     }
   };
 
+  const handleImportProductsCSV = async (file: File) => {
+    setImportingProducts(true);
+    try {
+      const text = await file.text();
+      const { rows, errors } = parseProductsCSV(text);
+
+      if (rows.length === 0) {
+        toast.error(errors[0] || "No valid products found in that file.");
+        return;
+      }
+
+      // Match against what's already in the catalogue (by name, case-insensitive)
+      const { data: existing, error: fetchErr } = await supabase
+        .from("products")
+        .select("id, name, image");
+      if (fetchErr) throw fetchErr;
+
+      const byName = new Map(
+        (existing || []).map((p: any) => [p.name.trim().toLowerCase(), p])
+      );
+
+      let created = 0;
+      let updated = 0;
+      const failures: string[] = [];
+
+      for (const row of rows) {
+        const match = byName.get(row.name.trim().toLowerCase());
+        const payload: Record<string, any> = {
+          name: row.name,
+          description: row.description,
+          category: row.category,
+          price: row.price,
+          original_price: row.original_price,
+          cost_price: row.cost_price,
+          stock: row.stock,
+        };
+
+        try {
+          if (match) {
+            if (row.image) payload.image = row.image;
+            const { error } = await supabase.from("products").update(payload).eq("id", match.id);
+            if (error) throw error;
+            updated++;
+          } else {
+            payload.image = row.image || "/placeholder.svg";
+            const { error } = await supabase.from("products").insert(payload);
+            if (error) throw error;
+            created++;
+          }
+        } catch (e: any) {
+          failures.push(`${row.name}: ${e.message || "failed"}`);
+        }
+      }
+
+      await fetchProducts();
+
+      const summary = `${created} added, ${updated} updated`;
+      if (failures.length || errors.length) {
+        console.warn("CSV import issues:", [...errors, ...failures]);
+        toast.warning(`${summary}. ${failures.length + errors.length} row(s) skipped - see console for details.`);
+      } else {
+        toast.success(`Import complete: ${summary}.`);
+      }
+    } catch (error: any) {
+      console.error("Error importing products:", error);
+      toast.error(error.message || "Failed to import products");
+    } finally {
+      setImportingProducts(false);
+    }
+  };
+
+
+
   const exportOrdersToCSV = () => {
     try {
       // Define CSV headers
