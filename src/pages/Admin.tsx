@@ -2096,7 +2096,9 @@ const Admin = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             </div>
+
 
             <Card className="transition-all duration-300">
               <CardHeader>
