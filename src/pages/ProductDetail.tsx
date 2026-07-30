@@ -179,10 +179,10 @@ const ProductDetail = () => {
 
   const productSlug = product.slug || slug || "";
   const productUrl = `/product/${productSlug}`;
-  const fullUrl = `https://arisstationaries.co.ke${productUrl}`;
+  const fullUrl = `https://www.arisstationaries.co.ke${productUrl}`;
   const fullImage = product.image.startsWith("http")
     ? product.image
-    : `https://arisstationaries.co.ke${product.image}`;
+    : `https://www.arisstationaries.co.ke${product.image}`;
 
   const seoTitle = `${product.name} - KSh ${displayPrice.toFixed(0)} | Price in Kenya | ARIS`.slice(0, 70);
   const seoDescription = `Buy ${product.name} in Kenya at ARIS Nairobi for KSh ${displayPrice.toFixed(0)}. ${product.description || "In stock - same-day Nairobi pickup, countrywide delivery."}`.slice(0, 160);

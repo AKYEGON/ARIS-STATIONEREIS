@@ -46,7 +46,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
   }, [product.image]);
 
   // Generate product URL for SEO
-  const productUrl = `https://arisstationaries.co.ke/product/${product.slug || product.id}`;
+  const productUrl = `https://www.arisstationaries.co.ke/product/${product.slug || product.id}`;
   
   // Product Schema for SEO
   const productSchema = {
@@ -54,7 +54,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
     "@type": "Product",
     "name": product.name,
     "description": product.description,
-    "image": product.image.startsWith("http") ? product.image : `https://arisstationaries.co.ke${product.image}`,
+    "image": product.image.startsWith("http") ? product.image : `https://www.arisstationaries.co.ke${product.image}`,
     "brand": {
       "@type": "Brand",
       "name": "ARIS"

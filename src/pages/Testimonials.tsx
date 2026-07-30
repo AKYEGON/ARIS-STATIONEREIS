@@ -103,7 +103,7 @@ const Testimonials = () => {
       "@context": "https://schema.org",
       "@type": "Organization",
       name: "ARIS Stationeries",
-      url: "https://arisstationaries.co.ke",
+      url: "https://www.arisstationaries.co.ke",
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: stats.average.toFixed(1),

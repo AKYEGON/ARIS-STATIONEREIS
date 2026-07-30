@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const SITE = "https://arisstationaries.co.ke";
+const SITE = "https://www.arisstationaries.co.ke";
 
 export interface ReviewRequestRow {
   product_id: string;

@@ -18,7 +18,7 @@ interface CategoryRow {
   icon: string | null;
 }
 
-const BASE_URL = "https://arisstationaries.co.ke";
+const BASE_URL = "https://www.arisstationaries.co.ke";
 
 const formatProduct = (p: any): Product & { slug?: string } => ({
   id: p.id,

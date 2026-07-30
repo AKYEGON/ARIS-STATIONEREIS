@@ -12,7 +12,7 @@ interface SEOProps {
   breadcrumbs?: { name: string; url: string }[];
 }
 
-const BASE_URL = "https://arisstationaries.co.ke";
+const BASE_URL = "https://www.arisstationaries.co.ke";
 
 const SEO = ({
   title,
