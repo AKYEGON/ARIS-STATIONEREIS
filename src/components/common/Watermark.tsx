@@ -1,4 +1,4 @@
-import logo from "@/assets/aris-icon.png.asset.json";
+import logo from "@/assets/aris-icon.png";
 
 interface WatermarkProps {
   /** Visual size preset. `sm` for cards, `md` for product detail, `lg` for fullscreen viewer. */

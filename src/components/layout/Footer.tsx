@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Shield, MapPin, Mail, Instagram, Heart, ArrowUpRight, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import icon from "@/assets/aris-icon.png.asset.json";
+import icon from "@/assets/aris-icon.png";
 
 // Inline brand marks (lucide has no official WhatsApp / TikTok glyphs)
 const WhatsAppIcon = ({ className = "h-4 w-4" }: { className?: string }) => (

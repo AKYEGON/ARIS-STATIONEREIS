@@ -2,7 +2,7 @@ import { ShoppingCart, GraduationCap, Users, Flame, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import icon from "@/assets/aris-icon.png.asset.json";
+import icon from "@/assets/aris-icon.png";
 
 interface HeaderProps {
   cartItemCount: number;
