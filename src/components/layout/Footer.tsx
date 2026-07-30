@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Shield, MapPin, Mail, Instagram, Heart, ArrowUpRight, HelpCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import icon from "@/assets/aris-icon.png.asset.json";
+import icon from "@/assets/aris-icon.png";
 
 // Inline brand marks (lucide has no official WhatsApp / TikTok glyphs)
 const WhatsAppIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
@@ -53,7 +53,7 @@ const Footer = () => {
             <div className="col-span-2 sm:col-span-4">
               <div className="flex items-center gap-3">
                 <div className="bg-white rounded-xl p-2 flex-shrink-0 shadow-lg shadow-primary/10">
-                  <img src={icon.url} alt="ARIS" className="h-11 w-auto" />
+                  <img src={icon} alt="ARIS" className="h-11 w-auto" />
                 </div>
                 <div className="flex flex-col leading-none">
                   <span className="font-display font-black tracking-tight text-primary text-3xl">

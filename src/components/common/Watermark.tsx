@@ -1,4 +1,4 @@
-import logo from "@/assets/aris-icon.png.asset.json";
+import logo from "@/assets/aris-icon.png";
 
 interface WatermarkProps {
   /** Visual size preset. `sm` for cards, `md` for product detail, `lg` for fullscreen viewer. */
@@ -27,7 +27,7 @@ const Watermark = ({ size = "sm", opacity = 0.55 }: WatermarkProps) => {
       aria-hidden="true"
     >
       <img
-        src={logo.url}
+        src={logo}
         alt=""
         className={`${sizing.logo} w-auto drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]`}
         loading="lazy"
