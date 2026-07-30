@@ -27,7 +27,7 @@ const Watermark = ({ size = "sm", opacity = 0.55 }: WatermarkProps) => {
       aria-hidden="true"
     >
       <img
-        src={logo.url}
+        src={logo}
         alt=""
         className={`${sizing.logo} w-auto drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]`}
         loading="lazy"

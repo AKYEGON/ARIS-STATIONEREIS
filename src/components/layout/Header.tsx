@@ -35,7 +35,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             aria-label="ARIS - Spend less. Study better."
           >
             <img
-              src={icon.url}
+              src={icon}
               alt=""
               aria-hidden="true"
               className="h-10 sm:h-12 md:h-14 w-auto flex-shrink-0"
