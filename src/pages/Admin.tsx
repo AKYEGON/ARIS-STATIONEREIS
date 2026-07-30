@@ -1778,7 +1778,10 @@ const Admin = () => {
           <TabsContent value="products" className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <p className="text-muted-foreground">Manage your product catalog</p>
-              
+
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              <ProductImportDialog onImported={() => { fetchProducts(); }} />
+
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button onClick={() => resetForm()} className="w-full sm:w-auto transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90">
