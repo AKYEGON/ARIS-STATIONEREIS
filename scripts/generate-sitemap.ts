@@ -5,7 +5,7 @@ import { writeFileSync } from "fs";
 import { resolve } from "path";
 import { createClient } from "@supabase/supabase-js";
 
-const BASE_URL = "https://arisstationaries.co.ke";
+const BASE_URL = "https://www.arisstationaries.co.ke";
 
 const SUPABASE_URL =
   process.env.VITE_SUPABASE_URL || "https://ryiwclzfoctbgmkhgept.supabase.co";

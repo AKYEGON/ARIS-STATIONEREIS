@@ -1,5 +1,5 @@
 # ARIS - Robots.txt
-# https://arisstationaries.co.ke
+# https://www.arisstationaries.co.ke
 
 User-agent: Googlebot
 Allow: /
@@ -35,4 +35,4 @@ Disallow: /checkout
 Disallow: /brochure
 
 # Sitemap
-Sitemap: https://arisstationaries.co.ke/sitemap.xml
+Sitemap: https://www.arisstationaries.co.ke/sitemap.xml
