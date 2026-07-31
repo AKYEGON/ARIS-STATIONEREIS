@@ -55,7 +55,18 @@ export const CategoryManager = () => {
     if (error) {
       toast.error("Failed to load categories");
     } else {
-      setCategories((data || []) as ProductCategory[]);
+      const rows = (data || []) as ProductCategory[];
+      // Group subcategories directly under their parent for readability.
+      const roots = rows.filter((c) => !c.parent_id);
+      const ordered: ProductCategory[] = [];
+      roots.forEach((r) => {
+        ordered.push(r);
+        rows.filter((c) => c.parent_id === r.id).forEach((c) => ordered.push(c));
+      });
+      rows.forEach((c) => {
+        if (!ordered.includes(c)) ordered.push(c);
+      });
+      setCategories(ordered);
     }
     setLoading(false);
   };

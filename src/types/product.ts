@@ -48,6 +48,11 @@ export interface ProductCategory {
   icon: string | null;
   display_order: number;
   is_active: boolean;
+  parent_id?: string | null;
+  image?: string | null;
+  intro_copy?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
 }
 
 export interface CartItem extends Product {
