@@ -20,7 +20,6 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
-import CategoryRotator from "@/components/products/CategoryRotator";
 import CategoryTiles from "@/components/products/CategoryTiles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { smartMatch } from "@/lib/smart-search";
