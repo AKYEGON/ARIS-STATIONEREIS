@@ -47,6 +47,7 @@ const ProductDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { addToCart, getCartItemCount } = useCart();
+  const { data: categoryData } = useCategoryTree();
   const [product, setProduct] = useState<(Product & { slug?: string }) | null>(null);
   const [related, setRelated] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
