@@ -15,6 +15,7 @@ import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "l
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { isOnSale, getEffectivePrice } from "@/components/products/SaleBadge";
+import { useCategoryTree } from "@/hooks/use-category-tree";
 
 const formatProduct = (p: any): Product & { slug?: string } => ({
   id: p.id,
