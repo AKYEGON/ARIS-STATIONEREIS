@@ -30,16 +30,17 @@ interface SitemapEntry {
 
 const today = new Date().toISOString().split("T")[0];
 
+// No <lastmod> on static routes: build time is not a page-specific timestamp.
 const staticEntries: SitemapEntry[] = [
-  { path: "/", lastmod: today, changefreq: "daily", priority: "1.0" },
-  { path: "/deals", lastmod: today, changefreq: "daily", priority: "0.9" },
-  { path: "/testimonials", lastmod: today, changefreq: "weekly", priority: "0.8" },
-  { path: "/students", lastmod: today, changefreq: "weekly", priority: "0.8" },
-  { path: "/cart", lastmod: today, changefreq: "monthly", priority: "0.3" },
-  { path: "/auth", lastmod: today, changefreq: "monthly", priority: "0.1" },
-  { path: "/reset-password", lastmod: today, changefreq: "monthly", priority: "0.1" },
-  { path: "/admin", lastmod: today, changefreq: "monthly", priority: "0.1" },
-  { path: "/brochure", lastmod: today, changefreq: "monthly", priority: "0.1" },
+  { path: "/", changefreq: "daily", priority: "1.0" },
+  { path: "/deals", changefreq: "daily", priority: "0.9" },
+  { path: "/testimonials", changefreq: "weekly", priority: "0.8" },
+  { path: "/students", changefreq: "weekly", priority: "0.8" },
+  { path: "/cart", changefreq: "monthly", priority: "0.3" },
+  { path: "/auth", changefreq: "monthly", priority: "0.1" },
+  { path: "/reset-password", changefreq: "monthly", priority: "0.1" },
+  { path: "/admin", changefreq: "monthly", priority: "0.1" },
+  { path: "/brochure", changefreq: "monthly", priority: "0.1" },
 ];
 
 function buildXml(entries: SitemapEntry[]) {
