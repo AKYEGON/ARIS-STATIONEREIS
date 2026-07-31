@@ -30,16 +30,17 @@ interface SitemapEntry {
 
 const today = new Date().toISOString().split("T")[0];
 
+// No <lastmod> on static routes: build time is not a page-specific timestamp.
 const staticEntries: SitemapEntry[] = [
-  { path: "/", lastmod: today, changefreq: "daily", priority: "1.0" },
-  { path: "/deals", lastmod: today, changefreq: "daily", priority: "0.9" },
-  { path: "/testimonials", lastmod: today, changefreq: "weekly", priority: "0.8" },
-  { path: "/students", lastmod: today, changefreq: "weekly", priority: "0.8" },
-  { path: "/cart", lastmod: today, changefreq: "monthly", priority: "0.3" },
-  { path: "/auth", lastmod: today, changefreq: "monthly", priority: "0.1" },
-  { path: "/reset-password", lastmod: today, changefreq: "monthly", priority: "0.1" },
-  { path: "/admin", lastmod: today, changefreq: "monthly", priority: "0.1" },
-  { path: "/brochure", lastmod: today, changefreq: "monthly", priority: "0.1" },
+  { path: "/", changefreq: "daily", priority: "1.0" },
+  { path: "/deals", changefreq: "daily", priority: "0.9" },
+  { path: "/testimonials", changefreq: "weekly", priority: "0.8" },
+  { path: "/students", changefreq: "weekly", priority: "0.8" },
+  { path: "/cart", changefreq: "monthly", priority: "0.3" },
+  { path: "/auth", changefreq: "monthly", priority: "0.1" },
+  { path: "/reset-password", changefreq: "monthly", priority: "0.1" },
+  { path: "/admin", changefreq: "monthly", priority: "0.1" },
+  { path: "/brochure", changefreq: "monthly", priority: "0.1" },
 ];
 
 function buildXml(entries: SitemapEntry[]) {
@@ -68,21 +69,30 @@ async function main() {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   const entries: SitemapEntry[] = [...staticEntries];
 
-  // Categories
+  // Categories: main categories at /category/{slug}, subcategories nested
+  // under their parent at /category/{parent}/{child}.
   try {
     const { data: categories } = await supabase
       .from("product_categories")
-      .select("slug, is_active")
+      .select("id, slug, parent_id, is_active")
       .eq("is_active", true);
-    (categories || []).forEach((c: any) => {
-      if (c.slug) {
-        entries.push({
-          path: `/category/${c.slug}`,
-          lastmod: today,
-          changefreq: "weekly",
-          priority: "0.85",
-        });
+
+    const rows = categories || [];
+    const byId = new Map(rows.map((c: any) => [c.id, c]));
+
+    rows.forEach((c: any) => {
+      if (!c.slug) return;
+      if (!c.parent_id) {
+        entries.push({ path: `/category/${c.slug}`, changefreq: "weekly", priority: "0.9" });
+        return;
       }
+      const parent: any = byId.get(c.parent_id);
+      if (!parent?.slug) return;
+      entries.push({
+        path: `/category/${parent.slug}/${c.slug}`,
+        changefreq: "weekly",
+        priority: "0.85",
+      });
     });
   } catch (err) {
     console.warn("[sitemap] categories fetch failed:", err);

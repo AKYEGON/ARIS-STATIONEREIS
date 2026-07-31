@@ -23,8 +23,9 @@ const Footer = () => {
   useEffect(() => {
     supabase
       .from("product_categories")
-      .select("name,slug,display_order")
+      .select("name,slug,display_order,parent_id")
       .eq("is_active", true)
+      .is("parent_id", null)
       .order("display_order")
       .limit(6)
       .then(({ data }) => {

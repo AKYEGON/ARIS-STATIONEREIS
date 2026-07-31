@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Tag, Package, icons } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Textarea } from "@/components/ui/textarea";
 import { ProductCategory } from "@/types/product";
 
 const SUGGESTED_ICONS = [
@@ -39,6 +40,10 @@ export const CategoryManager = () => {
     icon: "",
     display_order: 0,
     is_active: true,
+    parent_id: "none",
+    intro_copy: "",
+    meta_title: "",
+    meta_description: "",
   });
 
   const fetchCategories = async () => {
@@ -50,7 +55,18 @@ export const CategoryManager = () => {
     if (error) {
       toast.error("Failed to load categories");
     } else {
-      setCategories((data || []) as ProductCategory[]);
+      const rows = (data || []) as ProductCategory[];
+      // Group subcategories directly under their parent for readability.
+      const roots = rows.filter((c) => !c.parent_id);
+      const ordered: ProductCategory[] = [];
+      roots.forEach((r) => {
+        ordered.push(r);
+        rows.filter((c) => c.parent_id === r.id).forEach((c) => ordered.push(c));
+      });
+      rows.forEach((c) => {
+        if (!ordered.includes(c)) ordered.push(c);
+      });
+      setCategories(ordered);
     }
     setLoading(false);
   };
@@ -63,7 +79,17 @@ export const CategoryManager = () => {
     name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   const resetForm = () => {
-    setFormData({ name: "", slug: "", icon: "", display_order: 0, is_active: true });
+    setFormData({
+      name: "",
+      slug: "",
+      icon: "",
+      display_order: 0,
+      is_active: true,
+      parent_id: "none",
+      intro_copy: "",
+      meta_title: "",
+      meta_description: "",
+    });
   };
 
   const handleAdd = async () => {
@@ -80,6 +106,10 @@ export const CategoryManager = () => {
       icon: formData.icon || null,
       display_order: formData.display_order,
       is_active: formData.is_active,
+      parent_id: formData.parent_id === "none" ? null : formData.parent_id,
+      intro_copy: formData.intro_copy.trim() || null,
+      meta_title: formData.meta_title.trim() || null,
+      meta_description: formData.meta_description.trim() || null,
     });
 
     if (error) {
@@ -105,6 +135,10 @@ export const CategoryManager = () => {
         icon: formData.icon || null,
         display_order: formData.display_order,
         is_active: formData.is_active,
+        parent_id: formData.parent_id === "none" ? null : formData.parent_id,
+        intro_copy: formData.intro_copy.trim() || null,
+        meta_title: formData.meta_title.trim() || null,
+        meta_description: formData.meta_description.trim() || null,
       })
       .eq("id", editingCategory.id);
 
@@ -139,6 +173,10 @@ export const CategoryManager = () => {
       icon: cat.icon || "",
       display_order: cat.display_order,
       is_active: cat.is_active,
+      parent_id: cat.parent_id || "none",
+      intro_copy: cat.intro_copy || "",
+      meta_title: cat.meta_title || "",
+      meta_description: cat.meta_description || "",
     });
     setIsEditOpen(true);
   };
@@ -193,6 +231,56 @@ export const CategoryManager = () => {
         </Select>
       </div>
       <div>
+        <Label>Main category (parent)</Label>
+        <Select
+          value={formData.parent_id}
+          onValueChange={(val) => setFormData((prev) => ({ ...prev, parent_id: val }))}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="None - this is a main category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None - this is a main category</SelectItem>
+            {categories
+              .filter((c) => !c.parent_id && c.id !== editingCategory?.id)
+              .map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
+        <p className="text-[11px] text-muted-foreground mt-1">
+          Main categories live at /category/slug. Subcategories at /category/parent/slug.
+        </p>
+      </div>
+      <div>
+        <Label>Intro copy (shown above the products)</Label>
+        <Textarea
+          rows={5}
+          value={formData.intro_copy}
+          onChange={(e) => setFormData((prev) => ({ ...prev, intro_copy: e.target.value }))}
+          placeholder="150-250 words for a main category, 50-100 for a subcategory."
+        />
+      </div>
+      <div>
+        <Label>Meta title</Label>
+        <Input
+          value={formData.meta_title}
+          onChange={(e) => setFormData((prev) => ({ ...prev, meta_title: e.target.value }))}
+          placeholder="Auto-generated if left blank"
+        />
+      </div>
+      <div>
+        <Label>Meta description</Label>
+        <Textarea
+          rows={2}
+          value={formData.meta_description}
+          onChange={(e) => setFormData((prev) => ({ ...prev, meta_description: e.target.value }))}
+          placeholder="Auto-generated if left blank"
+        />
+      </div>
+      <div>
         <Label>Display Order</Label>
         <Input
           type="number"
@@ -233,7 +321,7 @@ export const CategoryManager = () => {
               <Plus className="h-4 w-4 mr-1" /> Add
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-sm">
+          <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add Category</DialogTitle>
             </DialogHeader>
@@ -257,7 +345,7 @@ export const CategoryManager = () => {
               <TableRow key={cat.id}>
                 <TableCell className="text-muted-foreground text-xs">{cat.display_order}</TableCell>
                 <TableCell className="font-medium">
-                  <span className="flex items-center gap-1.5">
+                  <span className={`flex items-center gap-1.5 ${cat.parent_id ? "pl-4 font-normal text-muted-foreground" : ""}`}>
                     {renderIcon(cat.icon, "h-4 w-4 shrink-0")}
                     {cat.name}
                   </span>
@@ -300,7 +388,7 @@ export const CategoryManager = () => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Category</DialogTitle>
           </DialogHeader>

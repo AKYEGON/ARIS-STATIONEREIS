@@ -20,7 +20,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Product, ProductCategory } from "@/types/product";
 import OffersSection from "@/components/products/OffersSection";
-import CategoryRotator from "@/components/products/CategoryRotator";
+import CategoryTiles from "@/components/products/CategoryTiles";
 import { Skeleton } from "@/components/ui/skeleton";
 import { smartMatch } from "@/lib/smart-search";
 
@@ -262,6 +262,9 @@ const Index = () => {
       {/* Offers Section - moved to top */}
       <OffersSection />
 
+      {/* Main category entry points */}
+      <CategoryTiles />
+
       {/* Search Section */}
       <section className="container py-4 sm:py-6 md:py-8 px-4">
         <div className="max-w-xl mx-auto space-y-4">
@@ -368,13 +371,9 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Category Rotator */}
-      <CategoryRotator
-        categories={categories}
-        selectedCategory={selectedCategory}
-        onSelectCategory={setSelectedCategory}
-        useNativeSelectOnMobile
-      />
+      {/* Category browsing now lives in the mega menu and the tiles above,
+          each backed by a real indexable URL. */}
+
 
       {/* Products Section */}
       <main className="flex-1 container pb-8 sm:pb-12 md:pb-16 px-3 sm:px-4">
