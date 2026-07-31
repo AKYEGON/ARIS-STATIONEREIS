@@ -2,6 +2,7 @@ import { ShoppingCart, GraduationCap, Users, Flame, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { CategoryMegaMenu, CategoryMobileMenu } from "@/components/layout/CategoryMegaMenu";
 import icon from "@/assets/aris-icon.png";
 
 interface HeaderProps {
@@ -50,8 +51,12 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             </span>
           </Link>
 
+          {/* Mobile categories entry */}
+          <CategoryMobileMenu />
+
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-2">
+            <CategoryMegaMenu />
             <Link to="/deals">
               <Button variant="ghost" size="sm" className="font-medium">
                 <Flame className="h-4 w-4 mr-2" />
