@@ -318,11 +318,7 @@ const ProductDetail = () => {
         ogType="product"
         keywords={`${product.name}, ${product.category}, buy ${product.name} Kenya, ${product.name} price Kenya, ARIS`}
         structuredData={productSchema}
-        breadcrumbs={[
-          { name: "Home", url: "/" },
-          { name: product.category, url: `/category/${product.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}` },
-          { name: product.name, url: productUrl },
-        ]}
+        breadcrumbs={productBreadcrumbs}
       />
 
       <Header cartItemCount={getCartItemCount()} />
@@ -335,21 +331,45 @@ const ProductDetail = () => {
           <Link to="/" className="hover:text-primary">
             Home
           </Link>
-          <ChevronRight className="h-3 w-3" />
-          <Link
-            to={`/category/${product.category
-              .toLowerCase()
-              .replace(/[^a-z0-9]+/g, "-")
-              .replace(/^-+|-+$/g, "")}`}
-            className="hover:text-primary truncate max-w-[160px]"
-          >
+          {productParentCat && (
+            <>
+              <ChevronRight className="h-3 w-3" aria-hidden="true" />
+              <Link
+                to={`/category/${productParentCat.slug}`}
+                className="hover:text-primary truncate max-w-[160px]"
+              >
+                {productParentCat.name}
+              </Link>
+            </>
+          )}
+          <ChevronRight className="h-3 w-3" aria-hidden="true" />
+          <Link to={productCatUrl} className="hover:text-primary truncate max-w-[160px]">
             {product.category}
           </Link>
-          <ChevronRight className="h-3 w-3" />
+          <ChevronRight className="h-3 w-3" aria-hidden="true" />
           <span className="text-foreground font-medium truncate max-w-[200px]">
             {product.name}
           </span>
         </nav>
+
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-muted-foreground">More like this:</span>
+          {productParentCat && (
+            <Link
+              to={`/category/${productParentCat.slug}`}
+              className="rounded-full border border-primary/30 bg-secondary px-3 py-1 hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              {productParentCat.name}
+            </Link>
+          )}
+          <Link
+            to={productCatUrl}
+            className="rounded-full border border-primary/30 bg-secondary px-3 py-1 hover:bg-primary hover:text-primary-foreground transition-colors"
+          >
+            {product.category}
+          </Link>
+        </div>
+
 
         <div className="grid md:grid-cols-2 gap-6 lg:gap-10 mb-10">
           {/* Image column */}
