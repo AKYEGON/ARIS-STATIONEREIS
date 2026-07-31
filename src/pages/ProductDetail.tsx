@@ -285,6 +285,29 @@ const ProductDetail = () => {
     addToCart(product, selectedVariant);
   };
 
+  // Resolve the product's real place in the category tree for internal linking.
+  const catRecords = categoryData?.records || [];
+  const productCat = catRecords.find((c) => c.name === product.category) || null;
+  const productParentCat = productCat?.parent_id
+    ? catRecords.find((c) => c.id === productCat.parent_id) || null
+    : null;
+  const productCatUrl = productCat
+    ? productParentCat
+      ? `/category/${productParentCat.slug}/${productCat.slug}`
+      : `/category/${productCat.slug}`
+    : `/category/${product.category.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}`;
+
+  const productBreadcrumbs = [
+    { name: "Home", url: "/" },
+    ...(productParentCat
+      ? [{ name: productParentCat.name, url: `/category/${productParentCat.slug}` }]
+      : []),
+    { name: product.category, url: productCatUrl },
+    { name: product.name, url: productUrl },
+  ];
+
+
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <SEO
