@@ -187,7 +187,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             {!selectedVariant && saleActive ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
-                  Was KSh {product.originalPrice!.toFixed(0)}
+                  Was KSh {Number(product.originalPrice ?? 0).toFixed(0)}
                 </p>
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}
