@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { smartMatch } from "@/lib/smart-search";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
+import { HomepageManager } from "@/components/admin/HomepageManager";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
