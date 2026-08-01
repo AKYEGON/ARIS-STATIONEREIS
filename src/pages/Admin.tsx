@@ -79,7 +79,7 @@ const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "o
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings", "api"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "homepage", "team", "settings", "api"];
     case 'manager':
       return ["orders", "inventory", "sales", "settings", "api"];
     case 'employee':
