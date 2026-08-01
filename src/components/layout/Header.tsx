@@ -1,19 +1,25 @@
-import { ShoppingCart, GraduationCap, Users, Flame, Store } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import icon from "@/assets/aris-icon.png.asset.json";
+import {
+  IconHome,
+  IconStorefront,
+  IconPriceDrop,
+  IconCustomers,
+  IconCart,
+} from "@/components/icons/aris-icons";
 
 interface HeaderProps {
   cartItemCount: number;
 }
 
 const bottomTabs = [
-  { to: "/", label: "Shop", icon: Store },
-  { to: "/deals", label: "Deals", icon: Flame },
-  { to: "/testimonials", label: "Customers", icon: Users },
-  { to: "/students", label: "Courses", icon: GraduationCap },
-  { to: "/cart", label: "Cart", icon: ShoppingCart },
+  { to: "/", label: "Home", icon: IconHome },
+  { to: "/shop", label: "Shop", icon: IconStorefront },
+  { to: "/deals", label: "Deals", icon: IconPriceDrop },
+  { to: "/testimonials", label: "Customers", icon: IconCustomers },
+  { to: "/cart", label: "Cart", icon: IconCart },
 ] as const;
 
 const Header = ({ cartItemCount }: HeaderProps) => {
@@ -52,24 +58,24 @@ const Header = ({ cartItemCount }: HeaderProps) => {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-2">
+            <Link to="/shop">
+              <Button variant="ghost" size="sm" className="font-medium gap-2">
+                <IconStorefront size={18} />
+                <span className="hidden lg:inline">Shop</span>
+              </Button>
+            </Link>
+
             <Link to="/deals">
-              <Button variant="ghost" size="sm" className="font-medium">
-                <Flame className="h-4 w-4 mr-2" />
+              <Button variant="ghost" size="sm" className="font-medium gap-2">
+                <IconPriceDrop size={18} />
                 <span className="hidden lg:inline">Deals</span>
               </Button>
             </Link>
 
             <Link to="/testimonials">
-              <Button variant="ghost" size="sm" className="font-medium">
-                <Users className="h-4 w-4 mr-2" />
+              <Button variant="ghost" size="sm" className="font-medium gap-2">
+                <IconCustomers size={18} />
                 <span className="hidden lg:inline">Customers</span>
-              </Button>
-            </Link>
-
-            <Link to="/students">
-              <Button variant="ghost" size="sm" className="font-medium">
-                <GraduationCap className="h-4 w-4 mr-2" />
-                <span className="hidden lg:inline">Shop by Course</span>
               </Button>
             </Link>
 
@@ -78,8 +84,9 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                 variant="default"
                 size="icon"
                 className="relative transition-all duration-200 hover:scale-110 active:scale-95 ml-1"
+                aria-label="Cart"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <IconCart size={20} />
                 {cartItemCount > 0 && (
                   <Badge
                     className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-foreground text-background text-[10px]"
@@ -112,7 +119,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
                 }`}
               >
                 <span className="relative">
-                  <Icon className="h-[clamp(18px,2.5vh,22px)] w-[clamp(18px,2.5vh,22px)]" />
+                  <Icon size={21} />
                   {to === "/cart" && cartItemCount > 0 && (
                     <Badge
                       className="absolute -top-1.5 -right-2.5 h-4 min-w-4 flex items-center justify-center p-0 text-[9px] bg-primary"
