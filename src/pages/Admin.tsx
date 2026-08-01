@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { smartMatch } from "@/lib/smart-search";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
+import { HomepageManager } from "@/components/admin/HomepageManager";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
@@ -79,7 +80,7 @@ const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "o
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings", "api"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "homepage", "team", "settings", "api"];
     case 'manager':
       return ["orders", "inventory", "sales", "settings", "api"];
     case 'employee':
@@ -1714,13 +1715,25 @@ const Admin = () => {
                   <span className="xs:hidden">API</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("homepage") && (
+                <TabsTrigger value="homepage" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span>Homepage</span>
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
+
+          {/* Homepage CMS Tab */}
+          <TabsContent value="homepage" className="space-y-6">
+            <HomepageManager />
+          </TabsContent>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
             <InventoryDashboard userRole={userRole} />
           </TabsContent>
+
 
           {/* Sales Dashboard Tab */}
           <TabsContent value="sales" className="space-y-4 sm:space-y-6">
