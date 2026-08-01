@@ -39,7 +39,9 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
 
   const saleActive = isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
   const baseEffectivePrice = getEffectivePrice(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
-  const displayPrice = selectedVariant ? selectedVariant.price : baseEffectivePrice;
+  const displayPrice = Number(
+    (selectedVariant ? selectedVariant.price : baseEffectivePrice) ?? 0
+  );
 
   useEffect(() => {
     setImageLoaded(false);
