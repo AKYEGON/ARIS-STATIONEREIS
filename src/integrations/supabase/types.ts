@@ -110,7 +110,22 @@ export type Database = {
           starts_at?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bogo_offers_free_product_id_fkey"
+            columns: ["free_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bogo_offers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       book_genres: {
         Row: {
@@ -1097,8 +1112,13 @@ export type Database = {
           display_order: number
           icon: string | null
           id: string
+          image: string | null
+          intro_copy: string | null
           is_active: boolean
+          meta_description: string | null
+          meta_title: string | null
           name: string
+          parent_id: string | null
           slug: string
         }
         Insert: {
@@ -1106,8 +1126,13 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          image?: string | null
+          intro_copy?: string | null
           is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name: string
+          parent_id?: string | null
           slug: string
         }
         Update: {
@@ -1115,11 +1140,24 @@ export type Database = {
           display_order?: number
           icon?: string | null
           id?: string
+          image?: string | null
+          intro_copy?: string | null
           is_active?: boolean
+          meta_description?: string | null
+          meta_title?: string | null
           name?: string
+          parent_id?: string | null
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "product_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_category_assignments: {
         Row: {
