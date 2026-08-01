@@ -34,8 +34,8 @@ const Footer = () => {
 
   const exploreLinks = [
     { to: "/", label: "Home" },
+    { to: "/shop", label: "All Products" },
     { to: "/deals", label: "Deals" },
-    { to: "/students", label: "Shop by Course" },
     { to: "/testimonials", label: "Reviews" },
     { to: "/cart", label: "Your Cart" },
   ];
