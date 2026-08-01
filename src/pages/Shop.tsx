@@ -251,12 +251,13 @@ const Shop = () => {
   return (
     <div className="min-h-screen flex flex-col pb-16 md:pb-0">
       <SEO
-        title="ARIS - Stationery built around your course. Nairobi."
-        description="Pens, notebooks, calculators, drawing sets, engineering kits. Same-day pickup in Nairobi, countrywide delivery. WhatsApp +254 119 774470."
-        canonicalUrl="/"
-        breadcrumbs={[{ name: "Home", url: "/" }]}
+        title="Shop all stationery and course kits | ARIS"
+        description="Every ARIS item in one place: pens, notebooks, scientific calculators, drawing sets, engineering kits. Search, filter by category, order on WhatsApp or checkout online."
+        canonicalUrl="/shop"
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Shop", url: "/shop" }]}
       />
-      <h1 className="sr-only">ARIS - stationery and course kits for students in Kenya</h1>
+      <h1 className="sr-only">Shop all ARIS stationery and course equipment</h1>
+
       <Header cartItemCount={getCartItemCount()} />
       
       {/* Offers Section - moved to top */}
