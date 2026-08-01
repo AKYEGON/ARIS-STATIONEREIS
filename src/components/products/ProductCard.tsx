@@ -39,7 +39,9 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
 
   const saleActive = isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
   const baseEffectivePrice = getEffectivePrice(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
-  const displayPrice = selectedVariant ? selectedVariant.price : baseEffectivePrice;
+  const displayPrice = Number(
+    (selectedVariant ? selectedVariant.price : baseEffectivePrice) ?? 0
+  );
 
   useEffect(() => {
     setImageLoaded(false);
@@ -169,7 +171,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
                               {v.variant_value}
                             </span>
                             <span className="text-muted-foreground tabular-nums">
-                              {outOfStock ? "Out of stock" : `KSh ${v.price.toFixed(0)}`}
+                              {outOfStock ? "Out of stock" : `KSh ${Number(v.price ?? 0).toFixed(0)}`}
                             </span>
                           </span>
                         </SelectItem>
@@ -185,7 +187,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             {!selectedVariant && saleActive ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
-                  Was KSh {product.originalPrice!.toFixed(0)}
+                  Was KSh {Number(product.originalPrice ?? 0).toFixed(0)}
                 </p>
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}

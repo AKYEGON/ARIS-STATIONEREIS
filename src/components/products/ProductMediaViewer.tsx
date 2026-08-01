@@ -72,7 +72,7 @@ const ProductMediaViewer = ({ product, open, onClose }: ProductMediaViewerProps)
           <div className="absolute top-4 left-4 z-20 text-white max-w-md">
             <h2 className="font-bold text-lg md:text-xl mb-1">{product.name}</h2>
             <p className="text-sm md:text-base font-semibold text-primary">
-              KSh {product.price.toFixed(2)}
+              KSh {Number(product.price ?? 0).toFixed(2)}
             </p>
           </div>
 
