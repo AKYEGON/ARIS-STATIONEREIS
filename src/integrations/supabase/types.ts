@@ -711,6 +711,7 @@ export type Database = {
           review_text: string
           review_token: string | null
           show_in_stories: boolean
+          university: string | null
           video_url: string | null
           views: number | null
         }
@@ -735,6 +736,7 @@ export type Database = {
           review_text: string
           review_token?: string | null
           show_in_stories?: boolean
+          university?: string | null
           video_url?: string | null
           views?: number | null
         }
@@ -759,6 +761,7 @@ export type Database = {
           review_text?: string
           review_token?: string | null
           show_in_stories?: boolean
+          university?: string | null
           video_url?: string | null
           views?: number | null
         }
