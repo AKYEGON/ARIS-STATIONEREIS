@@ -842,6 +842,83 @@ export type Database = {
         }
         Relationships: []
       }
+      hero_slides: {
+        Row: {
+          caption: string | null
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          display_order: number
+          headline: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          subheadline: string | null
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          display_order?: number
+          headline?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          subheadline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          display_order?: number
+          headline?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          subheadline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_picks: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          kind: string
+          product_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          kind?: string
+          product_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          kind?: string
+          product_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homepage_picks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_templates: {
         Row: {
           channel: string | null
@@ -1738,6 +1815,13 @@ export type Database = {
         }[]
       }
       get_store_credit_balance: { Args: { p_phone: string }; Returns: number }
+      get_top_selling_products: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          product_id: string
+          units_sold: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
