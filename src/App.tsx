@@ -10,7 +10,7 @@ import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import Students from "./pages/Students";
+import Shop from "./pages/Shop";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import Deals from "./pages/Deals";
