@@ -171,7 +171,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
                               {v.variant_value}
                             </span>
                             <span className="text-muted-foreground tabular-nums">
-                              {outOfStock ? "Out of stock" : `KSh ${v.price.toFixed(0)}`}
+                              {outOfStock ? "Out of stock" : `KSh ${Number(v.price ?? 0).toFixed(0)}`}
                             </span>
                           </span>
                         </SelectItem>
