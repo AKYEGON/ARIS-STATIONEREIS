@@ -5,7 +5,6 @@ import {
   IconSameDayScooter,
   IconCountrywideRoute,
   IconMpesaPhone,
-  IconCardPayment,
   IconPickupPoint,
   IconStar,
   IconVerifiedBuyer,
