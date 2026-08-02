@@ -111,7 +111,7 @@ const Shop = () => {
     let list = scope ? products.filter((p) => scope.has(p.id)) : products;
 
     if (q.trim()) {
-      list = list.filter((p) => smartMatch(q, [p.name, p.description, p.category].join(" ")));
+      list = list.filter((p) => smartMatch(q, [p.name, p.description, p.category]));
     }
 
     const price = (p: Product) =>
