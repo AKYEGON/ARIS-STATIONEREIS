@@ -90,18 +90,12 @@ const DeliveryTrustStrip = () => {
       tone: "text-emerald-600 bg-emerald-600/10",
     },
     {
-      Icon: IconCardPayment,
-      label: "Card accepted",
-      detail: "Visa and Mastercard at checkout.",
-      tone: "text-violet-600 bg-violet-600/10",
-    },
-    {
       Icon: IconPickupPoint,
-      label: outlets.length > 0 ? `Pickup: ${outlets.slice(0, 3).join(", ")}` : "Pickup at UoN",
+      label: "Pickup",
       detail:
-        outlets.length > 3
-          ? `Plus ${outlets.length - 3} more collection points.`
-          : "Collect in person, pay nothing for delivery.",
+        outlets.length > 0
+          ? `Collect in person, pay nothing for delivery. ${outlets.length} pickup ${outlets.length === 1 ? "point" : "points"} listed at checkout.`
+          : "Collect in person, pay nothing for delivery. Pickup points are listed at checkout.",
       tone: "text-amber-600 bg-amber-600/10",
     },
   ];
