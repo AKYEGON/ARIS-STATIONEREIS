@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-import { Shield, MapPin, Mail, Instagram, Facebook, Heart, ArrowUpRight, HelpCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { Shield, MapPin, Mail, Instagram, ArrowUpRight, HelpCircle } from "lucide-react";
 import icon from "@/assets/aris-icon.png.asset.json";
+import { useCategoryTree } from "@/hooks/use-category-tree";
 
 // Inline brand marks (lucide has no official WhatsApp / TikTok glyphs)
 const WhatsAppIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
@@ -17,209 +16,204 @@ const TikTokIcon = ({ className = "h-4 w-4" }: { className?: string }) => (
   </svg>
 );
 
+const MpesaMark = () => (
+  <span className="inline-flex items-center gap-1.5 rounded-md border border-white/15 bg-white/5 px-2.5 py-1.5">
+    <svg viewBox="0 0 24 24" className="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="6" y="2.6" width="12" height="18.8" rx="2.2" />
+      <path d="M10 8.6h4M10 11.4h4" />
+      <path d="M11 8.6v4.4c0 1.4 1.1 2.3 2.5 2.3" />
+    </svg>
+    <span className="text-[11px] font-semibold tracking-wide text-white/80">M-PESA</span>
+  </span>
+);
+
+const aboutLinks = [
+  { to: "/about", label: "About Us" },
+  { to: "/contact", label: "Contact Us" },
+  { to: "/returns", label: "Return Policy" },
+  { to: "/privacy", label: "Privacy Policy" },
+  { to: "/terms", label: "Terms & Conditions" },
+];
+
+const quickLinks = [
+  { to: "/shop", label: "Browse everything" },
+  { to: "/deals", label: "Deals" },
+  { to: "/testimonials", label: "Customer reviews" },
+  { to: "/cart", label: "Your cart" },
+];
+
+const FooterLink = ({ to, label }: { to: string; label: string }) => (
+  <li>
+    <Link
+      to={to}
+      className="group inline-flex items-center gap-1.5 text-sm text-white/60 transition-colors hover:text-primary"
+    >
+      <span className="relative truncate">
+        {label}
+        <span className="absolute -bottom-0.5 left-0 h-px w-0 bg-primary transition-all duration-300 group-hover:w-full" />
+      </span>
+      <ArrowUpRight className="h-3 w-3 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+    </Link>
+  </li>
+);
+
 const Footer = () => {
-  const [categories, setCategories] = useState<{ name: string; slug: string }[]>([]);
-
-  useEffect(() => {
-    supabase
-      .from("product_categories")
-      .select("name,slug,display_order")
-      .eq("is_active", true)
-      .order("display_order")
-      .limit(6)
-      .then(({ data }) => {
-        if (data) setCategories(data as any);
-      });
-  }, []);
-
-  const exploreLinks = [
-    { to: "/", label: "Home" },
-    { to: "/shop", label: "All Products" },
-    { to: "/deals", label: "Deals" },
-    { to: "/testimonials", label: "Reviews" },
-    { to: "/cart", label: "Your Cart" },
-  ];
+  const { tree, loading } = useCategoryTree();
 
   return (
     <footer className="relative mt-auto overflow-hidden">
-      <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-background to-transparent -translate-y-full" />
-
-      <div className="bg-black relative">
+      <div className="relative bg-black">
         <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
-        <div className="container py-8 sm:py-12 px-4 sm:px-6 relative z-10">
-          <div className="grid grid-cols-2 sm:grid-cols-12 gap-8 sm:gap-10">
-            {/* Brand block */}
-            <div className="col-span-2 sm:col-span-4">
+        <div className="container relative z-10 px-4 py-10 sm:px-6 sm:py-12">
+          <div className="grid gap-9 sm:grid-cols-12 sm:gap-8">
+            {/* Brand */}
+            <div className="sm:col-span-4">
               <div className="flex items-center gap-3">
-                <div className="bg-white rounded-xl p-2 flex-shrink-0 shadow-lg shadow-primary/10">
-                  <img src={icon.url} alt="ARIS" className="h-11 w-auto" />
+                <div className="flex-shrink-0 rounded-xl bg-white p-2 shadow-lg shadow-primary/10">
+                  <img src={icon.url} alt="ARIS" className="h-10 w-auto" />
                 </div>
                 <div className="flex flex-col leading-none">
-                  <span className="font-display font-black tracking-tight text-primary text-3xl">
-                    ARIS
-                  </span>
-                  <span className="text-[10px] text-primary/80 tracking-[0.18em] uppercase font-medium mt-1.5">
+                  <span className="font-display text-2xl font-black tracking-tight text-primary">ARIS</span>
+                  <span className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-primary/80">
                     Spend less. Study better.
                   </span>
                 </div>
               </div>
-              <p className="text-sm text-white/60 leading-relaxed mt-4 max-w-xs">
-                Stationery picked to your course list. Packed in Nairobi, on the road the same day.
+              <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
+                Course equipment and stationery for Kenyan university students. Packed at our Nairobi
+                counter, dispatched the same day.
               </p>
 
-              {/* Support callout */}
-              <a
-                href="https://wa.me/254119774470?text=Hi%20ARIS%2C%20I%20need%20help"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/60 px-3.5 py-2 text-xs text-primary transition-all group"
-              >
-                <HelpCircle className="h-3.5 w-3.5" />
-                <span className="font-medium">Need help? WhatsApp us</span>
-                <ArrowUpRight className="h-3.5 w-3.5 -translate-x-0.5 group-hover:translate-x-0 group-hover:-translate-y-0.5 transition-transform" />
-              </a>
-
-              {/* Socials */}
-              <div className="flex items-center gap-2 mt-5">
+              <div className="mt-5 flex items-center gap-2">
                 <a
                   href="https://wa.me/254119774470"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="WhatsApp"
-                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
+                  rel="me noopener noreferrer"
+                  aria-label="WhatsApp ARIS"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/20 hover:text-primary"
                 >
-                  <WhatsAppIcon className="h-4 w-4" />
+                  <WhatsAppIcon />
                 </a>
                 <a
-                  href="https://instagram.com/arisstationeries"
+                  href="https://www.instagram.com/aris.kenya/"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram"
-                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
+                  rel="me noopener noreferrer"
+                  aria-label="ARIS on Instagram"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/20 hover:text-primary"
                 >
                   <Instagram className="h-4 w-4" />
                 </a>
                 <a
-                  href="https://facebook.com/arisstationeries"
+                  href="https://www.tiktok.com/@aris.kenya"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Facebook"
-                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
+                  rel="me noopener noreferrer"
+                  aria-label="ARIS on TikTok"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/70 transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/20 hover:text-primary"
                 >
-                  <Facebook className="h-4 w-4" />
-                </a>
-                <a
-                  href="https://tiktok.com/@arisstationeries"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="TikTok"
-                  className="h-9 w-9 rounded-full bg-white/5 hover:bg-primary/20 border border-white/10 hover:border-primary/40 flex items-center justify-center text-white/70 hover:text-primary transition-all hover:-translate-y-0.5"
-                >
-                  <TikTokIcon className="h-4 w-4" />
+                  <TikTokIcon />
                 </a>
               </div>
             </div>
 
-            {/* Explore */}
+            {/* About */}
             <div className="sm:col-span-2">
-              <h4 className="font-semibold mb-4 text-xs uppercase tracking-[0.15em] text-white/90">
-                Explore
-              </h4>
+              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">About</h4>
               <ul className="space-y-2.5">
-                {exploreLinks.map((l) => (
-                  <li key={l.to}>
-                    <Link
-                      to={l.to}
-                      className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-primary transition-colors"
-                    >
-                      <span className="relative">
-                        {l.label}
-                        <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-primary group-hover:w-full transition-all duration-300" />
-                      </span>
-                      <ArrowUpRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                    </Link>
-                  </li>
+                {aboutLinks.map((l) => (
+                  <FooterLink key={l.to} {...l} />
                 ))}
               </ul>
             </div>
 
-            {/* Categories */}
-            <div className="col-span-2 sm:col-span-3">
-              <h4 className="font-semibold mb-4 text-xs uppercase tracking-[0.15em] text-white/90">
-                Categories
+            {/* Categories, straight from the taxonomy */}
+            <div className="sm:col-span-3">
+              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
+                Shop by category
               </h4>
-              <ul className="grid grid-cols-2 sm:grid-cols-1 gap-x-4 gap-y-2.5">
-                {categories.length === 0 ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <li key={i} className="h-4 rounded bg-white/5 animate-pulse" />
-                  ))
-                ) : (
-                  categories.map((c) => (
-                    <li key={c.slug}>
-                      <Link
-                        to={`/category/${c.slug}`}
-                        className="group inline-flex items-center gap-1.5 text-sm text-white/60 hover:text-primary transition-colors truncate"
-                      >
-                        <span className="relative truncate">
-                          {c.name}
-                          <span className="absolute left-0 -bottom-0.5 h-px w-0 bg-primary group-hover:w-full transition-all duration-300" />
-                        </span>
-                        <ArrowUpRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all shrink-0" />
-                      </Link>
-                    </li>
-                  ))
-                )}
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-1">
+                {loading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <li key={i} className="h-4 animate-pulse rounded bg-white/5" />
+                    ))
+                  : tree.map((c) => (
+                      <FooterLink key={c.slug} to={`/category/${c.slug}`} label={c.name} />
+                    ))}
               </ul>
             </div>
 
-            {/* Contact */}
-            <div className="col-span-2 sm:col-span-3">
-              <h4 className="font-semibold mb-4 text-xs uppercase tracking-[0.15em] text-white/90">
-                Get in Touch
+            {/* Quick links + contact */}
+            <div className="sm:col-span-3">
+              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
+                Quick links
               </h4>
               <ul className="space-y-2.5">
-                <li>
-                  <a
-                    href="https://wa.me/254119774470"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-sm text-white/60 hover:text-primary transition-colors"
-                  >
-                    <WhatsAppIcon className="h-4 w-4 flex-shrink-0" />
-                    +254 119 774470
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="mailto:arisstationeries@gmail.com"
-                    className="flex items-center gap-2 text-sm text-white/60 hover:text-primary transition-colors break-all"
-                  >
-                    <Mail className="h-4 w-4 flex-shrink-0" />
-                    arisstationeries@gmail.com
-                  </a>
-                </li>
-                <li className="flex items-center gap-2 text-sm text-white/60">
-                  <MapPin className="h-4 w-4 flex-shrink-0" />
-                  Nairobi, Kenya
-                </li>
+                {quickLinks.map((l) => (
+                  <FooterLink key={l.to} {...l} />
+                ))}
               </ul>
             </div>
           </div>
 
+          {/* Support strip */}
+          <div className="mt-9 grid gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5 sm:grid-cols-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">Support</p>
+              <a
+                href="https://wa.me/254119774470?text=Hi%20ARIS%2C%20I%20need%20help"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group mt-2 inline-flex items-center gap-2 text-sm text-white/75 transition-colors hover:text-primary"
+              >
+                <HelpCircle className="h-4 w-4" />
+                WhatsApp +254 119 774470
+                <ArrowUpRight className="h-3.5 w-3.5 -translate-x-0.5 transition-transform group-hover:translate-x-0 group-hover:-translate-y-0.5" />
+              </a>
+              <a
+                href="mailto:arisstationeries@gmail.com"
+                className="mt-2 flex items-center gap-2 break-all text-sm text-white/60 transition-colors hover:text-primary"
+              >
+                <Mail className="h-4 w-4 flex-shrink-0" />
+                arisstationeries@gmail.com
+              </a>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">Pickup</p>
+              <p className="mt-2 flex items-start gap-2 text-sm text-white/60">
+                <MapPin className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                Nairobi, Kenya. Current pickup points are listed at checkout.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">Payment</p>
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <MpesaMark />
+              </div>
+              <p className="mt-2 text-xs text-white/40">M-Pesa only for now. No card payments yet.</p>
+            </div>
+          </div>
+
           {/* Bottom bar */}
-          <div className="mt-8 pt-5 border-t border-white/10">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="mt-8 border-t border-white/10 pt-5">
+            <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
               <p className="text-xs text-white/45">
                 © {new Date().getFullYear()} ARIS. All rights reserved.
               </p>
-              <div className="flex items-center gap-4 text-xs text-white/45">
-                <Link to="/auth" className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                  <Shield className="h-3.5 w-3.5" /> Admin
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-white/45">
+                <Link to="/privacy" className="transition-colors hover:text-primary">
+                  Privacy Policy
                 </Link>
-                <span className="flex items-center gap-1.5">
-                  Made with <Heart className="h-3 w-3 text-red-400 fill-red-400" /> in Kenya
-                </span>
+                <Link to="/terms" className="transition-colors hover:text-primary">
+                  Terms
+                </Link>
+                <Link to="/returns" className="transition-colors hover:text-primary">
+                  Return Policy
+                </Link>
+                <Link to="/auth" className="flex items-center gap-1.5 transition-colors hover:text-primary">
+                  <Shield className="h-3.5 w-3.5" /> Staff
+                </Link>
               </div>
             </div>
           </div>
