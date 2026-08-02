@@ -229,35 +229,36 @@ export const IconSameDayScooter = (p: ArisIconProps) => (
   </Svg>
 );
 
-/** Countrywide 48hrs: route arc across the country landing on a pin. */
+/**
+ * Countrywide 48hrs: a long-haul box truck on a dashed upcountry road,
+ * clock face on the cargo door. Deliberately not a globe.
+ */
 export const IconCountrywideRoute = (p: ArisIconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="9.2" />
-    <path d="M2.9 9.4h18.2M2.9 14.6h13" opacity=".5" />
-    <path d="M12 2.8c2.6 2.6 3.9 5.7 3.9 9.2 0 1.3-.2 2.5-.5 3.7" opacity=".5" />
-    <path d="M12 2.8C9.4 5.4 8.1 8.5 8.1 12s1.3 6.6 3.9 9.2" opacity=".5" />
-    <path d="M18.4 21.4c1.7-2.4 2.6-4 2.6-5a2.6 2.6 0 0 0-5.2 0c0 1 .9 2.6 2.6 5z" fill="currentColor" stroke="none" />
+    <path d="M1.6 16.2h1.2M2 4.2h11.6a1 1 0 0 1 1 1v10.9" />
+    <path d="M14.6 8.4h3.2l3.2 3.6v4.1h-2.2" />
+    <path d="M14.6 16.1h-1.9M8.9 16.1H4.2" />
+    <circle cx="6.6" cy="16.4" r="2.3" />
+    <circle cx="16.4" cy="16.4" r="2.3" />
+    <circle cx="8.2" cy="9.4" r="3" />
+    <path d="M8.2 7.8v1.8l1.3.8" />
+    <path d="M1.6 20.6h20.8" strokeDasharray="2.4 2.6" opacity=".55" />
   </Svg>
 );
 
-/** M-Pesa: phone with a shilling mark on screen. */
+/**
+ * M-Pesa: a feature-phone keypad sending a shilling upward, i.e. a till
+ * payment leaving the handset. Reads as mobile money, not "a phone".
+ */
 export const IconMpesaPhone = (p: ArisIconProps) => (
   <Svg {...p}>
-    <rect x="6" y="2.4" width="12" height="19.2" rx="2.4" />
-    <path d="M10.4 4.8h3.2" opacity=".6" />
-    <path d="M10 9.4h4M10 12.2h4" />
-    <path d="M11 9.4v4.6c0 1.5 1.1 2.4 2.6 2.4" />
-    <path d="M11 19.2h2" opacity=".5" />
-  </Svg>
-);
-
-/** Card payment: chip and contactless waves. */
-export const IconCardPayment = (p: ArisIconProps) => (
-  <Svg {...p}>
-    <rect x="2.4" y="5.4" width="19.2" height="13.2" rx="2" />
-    <path d="M2.4 9.6h19.2" />
-    <rect x="5.2" y="12.4" width="3.6" height="2.8" rx=".6" />
-    <path d="M15.6 13a2.6 2.6 0 0 1 0 3.4M17.8 11.8a4.6 4.6 0 0 1 0 5.8" opacity=".7" />
+    <rect x="4.4" y="8.2" width="10.4" height="13.4" rx="2.2" />
+    <path d="M4.4 12h10.4M4.4 18h10.4" opacity=".45" />
+    <path d="M8 20.2h3.2" />
+    <circle cx="18" cy="5.6" r="3.6" />
+    <path d="M16.8 4.2h2.4M16.8 6h2.4" />
+    <path d="M17.4 4.2v2.3c0 1 .7 1.6 1.7 1.6" />
+    <path d="M13.4 9.6 16 7" opacity=".6" />
   </Svg>
 );
 
