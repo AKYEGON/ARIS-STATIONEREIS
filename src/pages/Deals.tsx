@@ -77,13 +77,14 @@ const Deals = () => {
           .select(`*, items:course_bundle_items(*, product:products(*))`)
           .eq("is_active", true)
           .order("display_order", { ascending: false }),
-        // Flash sales: only products that have a configured sale end window
+        // Every product with a live price cut, exactly like the homepage carousel.
+        // (The old query also required sale_ends_at to be set, so open-ended
+        // discounts - which is most of them - never reached this page.)
         supabase
           .from("products")
           .select(`*, media:product_media(*), variants:product_variants(*)`)
           .not("original_price", "is", null)
-          .not("sale_ends_at", "is", null)
-          .order("sale_ends_at", { ascending: true }),
+          .order("sale_ends_at", { ascending: true, nullsFirst: false }),
         supabase
           .from("bogo_offers")
           .select(`*, product:products!bogo_offers_product_id_fkey(*), free_product:products!bogo_offers_free_product_id_fkey(*)`)
