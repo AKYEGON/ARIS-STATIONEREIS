@@ -167,7 +167,7 @@ const Deals = () => {
     bogo.length === 0;
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
       <SEO
         title="Deals worth actually opening | ARIS"
         description="What's on right now - flash sales counting down, course bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."

@@ -189,7 +189,7 @@ const LegalPage = () => {
   const doc = LEGAL_DOCS.find((d) => d.path === pathname) || LEGAL_DOCS[0];
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+    <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <SEO
         title={`${doc.title} | ARIS`}
         description={doc.description}

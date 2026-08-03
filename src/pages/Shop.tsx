@@ -146,7 +146,7 @@ const Shop = () => {
   const heading = activeSub?.name || activeMain?.name || "Everything in stock";
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+    <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <SEO
         title="Browse every ARIS product | ARIS"
         description="Filter the full ARIS catalogue by department and section: course equipment, stationery, art supplies, office and gifts. Nairobi same-day, countrywide in 48 hours."

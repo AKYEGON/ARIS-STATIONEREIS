@@ -121,7 +121,7 @@ const Testimonials = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen pb-16 md:pb-0">
+      <div className="min-h-screen pb-16 lg:pb-0">
         <SEO
           title="What students actually say"
           description="Unfiltered notes from students who've ordered from ARIS."
@@ -167,7 +167,7 @@ const Testimonials = () => {
   );
 
   return (
-    <div className="min-h-screen pb-16 md:pb-0">
+    <div className="min-h-screen pb-16 lg:pb-0">
       <SEO
         title="Reviews from real ARIS customers"
         description="Verified reviews from students at UoN, KU, Strathmore, JKUAT and USIU. Read before you order."
