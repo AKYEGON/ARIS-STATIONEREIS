@@ -358,7 +358,7 @@ const Shop = () => {
           </aside>
 
 
-          <section>
+          <section className="min-w-0">
             {/* Mobile subcategory row */}
             {activeMain && activeMain.children.length > 0 && (
               <div className="mb-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
@@ -379,7 +379,7 @@ const Shop = () => {
             )}
 
             {loading ? (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="space-y-2 rounded-lg border border-border p-3">
                     <Skeleton className="aspect-square w-full rounded-md" />
@@ -400,7 +400,7 @@ const Shop = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                   {pageItems.map((p) => (
                     <ProductCard
                       key={p.id}
