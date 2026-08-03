@@ -90,7 +90,7 @@ const HeroCarousel = () => {
             touchX.current = null;
           }}
         >
-          <div className="relative aspect-[4/3] w-full sm:aspect-[2/1] lg:aspect-[64/23]">
+          <div className="relative aspect-[16/10] w-full sm:aspect-[2/1] lg:aspect-[64/23]">
             {slides === null ? (
               /* Neutral skeleton: no placeholder copy that could read as wrong */
               <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
@@ -116,7 +116,7 @@ const HeroCarousel = () => {
                   loading={i === 0 ? "eager" : "lazy"}
                   fetchPriority={i === 0 ? "high" : "auto"}
                   decoding="async"
-                  className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out ${
+                  className={`absolute inset-0 h-full w-full object-contain sm:object-cover transition-all duration-700 ease-out ${
                     i === index ? "scale-100 opacity-100" : "scale-[1.03] opacity-0"
                   }`}
                 />
