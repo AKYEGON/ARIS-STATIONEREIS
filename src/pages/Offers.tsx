@@ -40,7 +40,7 @@ const Offers = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
       <SEO
         title="Stationery Bundle Offers in Kenya | ARIS"
         description="Save more on stationery in Kenya with curated bundle offers from ARIS. Pens, notebooks, calculators and drawing sets at the best prices online."

@@ -162,7 +162,7 @@ export const HomepageManager = () => {
               Hero slides
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-1">
-              {slides.length} slides. Leave headline blank to use the default ARIS copy.
+              {slides.length} slides. The image carries the visible message; headline is the hidden SEO text, CTA label + link drive the button.
             </p>
           </div>
           <Dialog

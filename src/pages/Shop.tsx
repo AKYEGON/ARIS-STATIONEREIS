@@ -14,7 +14,8 @@ import { smartMatch } from "@/lib/smart-search";
 import { useCategoryTree, CategoryNode } from "@/hooks/use-category-tree";
 import { getCategoryIcon, IconArrowRight } from "@/components/icons/aris-icons";
 import { getEffectivePrice, isOnSale } from "@/components/products/SaleBadge";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const PER_PAGE = 24;
 
@@ -46,6 +47,7 @@ const Shop = () => {
   const [assignments, setAssignments] = useState<Record<string, string[]>>({}); // categoryId -> productIds
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const q = params.get("q") || "";
   const categorySlug = params.get("category") || "";
@@ -144,7 +146,7 @@ const Shop = () => {
   const heading = activeSub?.name || activeMain?.name || "Everything in stock";
 
   return (
-    <div className="flex min-h-screen flex-col pb-16 md:pb-0">
+    <div className="flex min-h-screen flex-col pb-16 lg:pb-0">
       <SEO
         title="Browse every ARIS product | ARIS"
         description="Filter the full ARIS catalogue by department and section: course equipment, stationery, art supplies, office and gifts. Nairobi same-day, countrywide in 48 hours."
@@ -205,9 +207,85 @@ const Shop = () => {
           </Select>
         </div>
 
-        <div className="mt-5 grid gap-6 lg:grid-cols-[228px_1fr]">
+        {/* Mobile / tablet filter drawer, real sidebar from lg up */}
+        <div className="mt-4 lg:hidden">
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="h-10 w-full justify-between">
+                <span className="flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {activeSub?.name || activeMain?.name || "All departments"}
+                </span>
+                <span className="text-xs text-muted-foreground">{filtered.length}</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[86vw] max-w-sm overflow-y-auto p-0">
+              <div className="border-b border-border p-4">
+                <p className="font-display text-base font-bold">Filter by department</p>
+              </div>
+              <div className="space-y-1 p-3">
+                <button
+                  onClick={() => {
+                    setParam("category", null);
+                    setFiltersOpen(false);
+                  }}
+                  className={`w-full rounded-md px-3 py-2.5 text-left text-sm ${
+                    !activeMain ? "bg-primary/10 font-semibold text-primary" : "hover:bg-secondary"
+                  }`}
+                >
+                  All products
+                </button>
+                {tree.map((m) => {
+                  const Icon = getCategoryIcon(m.slug);
+                  const on = activeMain?.slug === m.slug;
+                  return (
+                    <div key={m.id}>
+                      <button
+                        onClick={() => setParam("category", on ? null : m.slug)}
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-left text-sm ${
+                          on ? "bg-primary/10 font-semibold text-primary" : "hover:bg-secondary"
+                        }`}
+                      >
+                        <Icon size={18} />
+                        <span className="flex-1 truncate">{m.name}</span>
+                        <span className="text-[11px] text-muted-foreground">{countFor(m)}</span>
+                      </button>
+                      {on && m.children.length > 0 && (
+                        <div className="mb-1 ml-4 space-y-0.5 border-l border-border pl-3">
+                          {m.children.map((c) => (
+                            <button
+                              key={c.id}
+                              onClick={() => {
+                                setParam("sub", activeSub?.slug === c.slug ? null : c.slug);
+                                setFiltersOpen(false);
+                              }}
+                              className={`block w-full truncate rounded px-2 py-2 text-left text-[13px] ${
+                                activeSub?.slug === c.slug
+                                  ? "bg-secondary font-medium text-foreground"
+                                  : "text-muted-foreground hover:bg-secondary"
+                              }`}
+                            >
+                              {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="border-t border-border p-3">
+                <Button className="w-full" onClick={() => setFiltersOpen(false)}>
+                  Show {filtered.length} products
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+
+        <div className="mt-4 grid gap-6 lg:mt-5 lg:grid-cols-[228px_minmax(0,1fr)]">
           {/* Taxonomy filter, identical structure to the category pages */}
-          <aside className="lg:sticky lg:top-[92px] lg:self-start">
+          <aside className="hidden min-w-0 lg:sticky lg:top-[92px] lg:block lg:self-start">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
               Departments
             </p>
@@ -218,10 +296,10 @@ const Shop = () => {
                 ))}
               </div>
             ) : (
-              <div className="flex gap-2 overflow-x-auto pb-2 lg:block lg:overflow-visible lg:pb-0">
+              <div className="block">
                 <button
                   onClick={() => setParam("category", null)}
-                  className={`shrink-0 rounded-md px-3 py-2 text-left text-sm transition-colors lg:w-full ${
+                  className={`w-full rounded-md px-3 py-2 text-left text-sm transition-colors ${
                     !activeMain ? "bg-primary/10 font-semibold text-primary" : "hover:bg-secondary"
                   }`}
                 >
@@ -231,10 +309,10 @@ const Shop = () => {
                   const Icon = getCategoryIcon(m.slug);
                   const on = activeMain?.slug === m.slug;
                   return (
-                    <div key={m.id} className="shrink-0 lg:w-full">
+                    <div key={m.id} className="w-full">
                       <button
                         onClick={() => setParam("category", on ? null : m.slug)}
-                        className={`flex w-full items-center gap-2 whitespace-nowrap rounded-md px-3 py-2 text-left text-sm transition-colors ${
+                        className={`flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm transition-colors ${
                           on ? "bg-primary/10 font-semibold text-primary" : "hover:bg-secondary"
                         }`}
                       >
@@ -246,7 +324,7 @@ const Shop = () => {
                       </button>
 
                       {on && m.children.length > 0 && (
-                        <div className="mt-1 hidden space-y-0.5 border-l border-border pl-3 lg:block">
+                        <div className="mt-1 space-y-0.5 border-l border-border pl-3">
                           {m.children.map((c) => (
                             <button
                               key={c.id}
@@ -271,7 +349,7 @@ const Shop = () => {
             {activeMain && (
               <Link
                 to={`/category/${(activeSub || activeMain).slug}`}
-                className="mt-3 hidden items-center gap-1.5 text-xs font-medium text-primary hover:underline lg:inline-flex"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline"
               >
                 Open the {(activeSub || activeMain).name} page
                 <IconArrowRight size={13} />
@@ -279,7 +357,8 @@ const Shop = () => {
             )}
           </aside>
 
-          <section>
+
+          <section className="min-w-0">
             {/* Mobile subcategory row */}
             {activeMain && activeMain.children.length > 0 && (
               <div className="mb-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
@@ -300,7 +379,7 @@ const Shop = () => {
             )}
 
             {loading ? (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className="space-y-2 rounded-lg border border-border p-3">
                     <Skeleton className="aspect-square w-full rounded-md" />
@@ -321,7 +400,7 @@ const Shop = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                   {pageItems.map((p) => (
                     <ProductCard
                       key={p.id}

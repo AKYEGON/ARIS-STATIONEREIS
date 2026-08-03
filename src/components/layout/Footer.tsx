@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Shield, MapPin, Mail, Instagram, ArrowUpRight, HelpCircle } from "lucide-react";
+import { Shield, MapPin, Mail, Instagram, ArrowUpRight, HelpCircle, ChevronDown } from "lucide-react";
 import icon from "@/assets/aris-icon.png.asset.json";
 import { useCategoryTree } from "@/hooks/use-category-tree";
 
@@ -57,6 +58,35 @@ const FooterLink = ({ to, label }: { to: string; label: string }) => (
   </li>
 );
 
+const FooterSection = ({
+  title,
+  className = "",
+  children,
+}: {
+  title: string;
+  className?: string;
+  children: React.ReactNode;
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className={`border-b border-white/10 lg:border-0 ${className}`}>
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center justify-between py-3.5 text-left lg:pointer-events-none lg:mb-4 lg:py-0"
+      >
+        <h4 className="text-xs font-semibold uppercase tracking-[0.15em] text-white/90">{title}</h4>
+        <ChevronDown
+          className={`h-4 w-4 text-white/50 transition-transform lg:hidden ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        />
+      </button>
+      <div className={`${open ? "block pb-4" : "hidden"} lg:block lg:pb-0`}>{children}</div>
+    </div>
+  );
+};
+
 const Footer = () => {
   const { tree, loading } = useCategoryTree();
 
@@ -66,9 +96,9 @@ const Footer = () => {
         <div className="h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent" />
 
         <div className="container relative z-10 px-4 py-10 sm:px-6 sm:py-12">
-          <div className="grid gap-9 sm:grid-cols-12 sm:gap-8">
+          <div className="grid gap-0 lg:grid-cols-12 lg:gap-8">
             {/* Brand */}
-            <div className="sm:col-span-4">
+            <div className="pb-6 lg:col-span-4 lg:pb-0">
               <div className="flex items-center gap-3">
                 <div className="flex-shrink-0 rounded-xl bg-white p-2 shadow-lg shadow-primary/10">
                   <img src={icon.url} alt="ARIS" className="h-10 w-auto" />
@@ -117,21 +147,17 @@ const Footer = () => {
             </div>
 
             {/* About */}
-            <div className="sm:col-span-2">
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">About</h4>
+            <FooterSection title="About" className="lg:col-span-2">
               <ul className="space-y-2.5">
                 {aboutLinks.map((l) => (
                   <FooterLink key={l.to} {...l} />
                 ))}
               </ul>
-            </div>
+            </FooterSection>
 
             {/* Categories, straight from the taxonomy */}
-            <div className="sm:col-span-3">
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
-                Shop by category
-              </h4>
-              <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-1">
+            <FooterSection title="Shop by category" className="lg:col-span-3">
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 lg:grid-cols-1">
                 {loading
                   ? Array.from({ length: 5 }).map((_, i) => (
                       <li key={i} className="h-4 animate-pulse rounded bg-white/5" />
@@ -140,23 +166,21 @@ const Footer = () => {
                       <FooterLink key={c.slug} to={`/category/${c.slug}`} label={c.name} />
                     ))}
               </ul>
-            </div>
+            </FooterSection>
 
             {/* Quick links + contact */}
-            <div className="sm:col-span-3">
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
-                Quick links
-              </h4>
+            <FooterSection title="Quick links" className="lg:col-span-3">
               <ul className="space-y-2.5">
                 {quickLinks.map((l) => (
                   <FooterLink key={l.to} {...l} />
                 ))}
               </ul>
-            </div>
+            </FooterSection>
+
           </div>
 
           {/* Support strip */}
-          <div className="mt-9 grid gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5 sm:grid-cols-3">
+          <div className="mt-7 grid gap-5 rounded-xl border border-white/10 bg-white/[0.03] p-5 sm:grid-cols-2 lg:grid-cols-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/50">Support</p>
               <a

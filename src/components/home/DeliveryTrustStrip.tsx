@@ -75,19 +75,19 @@ const DeliveryTrustStrip = () => {
       Icon: IconSameDayScooter,
       label: "Same-day in Nairobi",
       detail: "Order before 11am, it reaches you today.",
-      tone: "text-primary bg-primary/10",
+      tone: "bg-primary text-primary-foreground shadow-md shadow-primary/25",
     },
     {
       Icon: IconCountrywideRoute,
       label: "Countrywide in 48 hours",
       detail: "Kisumu, Eldoret, Mombasa, Nakuru and everywhere between.",
-      tone: "text-blue-600 bg-blue-600/10",
+      tone: "bg-blue-600 text-primary-foreground shadow-md shadow-blue-600/25",
     },
     {
       Icon: IconMpesaPhone,
       label: "Pay with M-Pesa",
       detail: "Till confirmation on the spot. No account needed.",
-      tone: "text-emerald-600 bg-emerald-600/10",
+      tone: "bg-emerald-600 text-primary-foreground shadow-md shadow-emerald-600/25",
     },
     {
       Icon: IconPickupPoint,
@@ -96,12 +96,12 @@ const DeliveryTrustStrip = () => {
         outlets.length > 0
           ? `Collect in person, pay nothing for delivery. ${outlets.length} pickup ${outlets.length === 1 ? "point" : "points"} listed at checkout.`
           : "Collect in person, pay nothing for delivery. Pickup points are listed at checkout.",
-      tone: "text-amber-600 bg-amber-600/10",
+      tone: "bg-amber-500 text-primary-foreground shadow-md shadow-amber-500/25",
     },
   ];
 
   return (
-    <section className="border-y border-border bg-card py-10 sm:py-14">
+    <section className="border-y border-border bg-background py-10 sm:py-14">
       <div className="container px-4">
         <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr] lg:gap-12">
           {/* Operational facts */}
@@ -116,7 +116,7 @@ const DeliveryTrustStrip = () => {
             <ul className="mt-6 grid gap-4 sm:grid-cols-2">
               {facts.map(({ Icon, label, detail, tone }) => (
                 <li key={label} className="flex gap-3">
-                  <span className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${tone}`}>
+                  <span className={`inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${tone}`}>
                     <Icon size={24} />
                   </span>
                   <span className="min-w-0">
@@ -129,7 +129,7 @@ const DeliveryTrustStrip = () => {
           </div>
 
           {/* Real customer proof, rotating */}
-          <div className="rounded-2xl border border-border bg-secondary/40 p-5 sm:p-6">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6">
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               <IconVerifiedBuyer size={16} />
               From the customers page

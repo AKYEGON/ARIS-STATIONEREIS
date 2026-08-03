@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IconArrowRight, IconDraftingCompass } from "@/components/icons/aris-icons";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { IconArrowRight } from "@/components/icons/aris-icons";
 
 export interface HeroSlide {
   id: string;
@@ -15,16 +15,24 @@ export interface HeroSlide {
   cta_link: string | null;
 }
 
-const AUTOPLAY_MS = 6500;
+const AUTOPLAY_MS = 6000;
+
+const isExternal = (href: string) =>
+  /^(https?:)?\/\//i.test(href) || href.startsWith("wa.me") || href.startsWith("mailto:") || href.startsWith("tel:");
+
+const normalise = (href: string) =>
+  href.startsWith("wa.me") ? `https://${href}` : href;
 
 /**
- * Hero imagery is admin-managed (hero_slides). Copy defaults live here only as
- * the zero-slide fallback so the page never renders an empty band.
+ * Image-first promotional carousel. Every slide is admin-managed artwork with a
+ * single CTA. Real (non-image) copy stays in the markup for SEO and screen
+ * readers even when the visible messaging lives inside the artwork.
  */
 const HeroCarousel = () => {
-  const [slides, setSlides] = useState<HeroSlide[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [slides, setSlides] = useState<HeroSlide[] | null>(null);
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const touchX = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,133 +42,157 @@ const HeroCarousel = () => {
         .select("id,image_url,headline,subheadline,caption,cta_label,cta_link")
         .eq("is_active", true)
         .order("display_order", { ascending: true });
-      if (!cancelled) {
-        setSlides((data || []) as HeroSlide[]);
-        setLoading(false);
-      }
+      if (!cancelled) setSlides((data || []) as HeroSlide[]);
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  useEffect(() => {
-    if (slides.length < 2) return;
-    const t = setInterval(() => setIndex((i) => (i + 1) % slides.length), AUTOPLAY_MS);
-    return () => clearInterval(t);
-  }, [slides.length]);
+  const count = slides?.length ?? 0;
 
-  const active = slides[index];
-
-  const copy = useMemo(
-    () => ({
-      headline: active?.headline?.trim() || "Everything your course list asks for, in one place.",
-      subheadline:
-        active?.subheadline?.trim() ||
-        "Drawing sets, scientific calculators, lab coats, notebooks. Priced for a student budget and delivered same-day inside Nairobi.",
-      ctaLabel: active?.cta_label?.trim() || "Browse categories",
-      ctaLink: active?.cta_link?.trim() || "#categories",
-    }),
-    [active],
+  const go = useCallback(
+    (dir: 1 | -1) => setIndex((i) => (count ? (i + dir + count) % count : 0)),
+    [count],
   );
 
+  useEffect(() => {
+    if (count < 2 || paused) return;
+    const t = setInterval(() => setIndex((i) => (i + 1) % count), AUTOPLAY_MS);
+    return () => clearInterval(t);
+  }, [count, paused]);
+
+  const active = slides?.[index];
+
+  // Real text for crawlers and assistive tech, never a visible "wrong then
+  // corrected" flash: it is derived only from loaded data or the brand line.
+  const headingText =
+    active?.headline?.trim() ||
+    "ARIS stationery and course equipment for Kenyan university students";
+  const subText = active?.subheadline?.trim() || active?.caption?.trim() || null;
+
   return (
-    <section className="relative overflow-hidden border-b border-border bg-secondary/40">
-      <div className="container px-4 py-8 sm:py-12 md:py-16">
-        <div className="grid gap-8 md:grid-cols-2 md:items-center">
-          {/* Copy column - first in DOM so it paints before imagery (LCP text) */}
-          <div className="max-w-xl">
-            <p className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background px-3 py-1 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
-              <IconDraftingCompass size={14} />
-              Built for university students
-            </p>
+    <section className="bg-background" aria-label="ARIS promotions">
+      <div className="container px-4 pb-6 pt-4 sm:pb-8 sm:pt-6">
+        <h1 className="sr-only">{headingText}</h1>
 
-            <h1 className="mt-4 font-display text-3xl font-black leading-[1.08] tracking-tight sm:text-4xl md:text-5xl">
-              {copy.headline}
-            </h1>
+        <div
+          className="group relative overflow-hidden rounded-2xl border border-border bg-muted shadow-[0_18px_40px_-24px_hsl(var(--foreground)/0.45)]"
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onTouchStart={(e) => {
+            touchX.current = e.touches[0].clientX;
+          }}
+          onTouchEnd={(e) => {
+            if (touchX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchX.current;
+            if (Math.abs(dx) > 45) go(dx < 0 ? 1 : -1);
+            touchX.current = null;
+          }}
+        >
+          <div className="relative aspect-[16/10] w-full sm:aspect-[2/1] lg:aspect-[5/2]">
+            {slides === null ? (
+              /* Neutral skeleton: no placeholder copy that could read as wrong */
+              <Skeleton className="absolute inset-0 h-full w-full rounded-none" />
+            ) : count === 0 ? (
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-secondary/40 px-6 text-center">
+                <p className="font-display text-lg font-bold sm:text-2xl">{headingText}</p>
+                <Link
+                  to="/shop"
+                  className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-transform hover:scale-[1.03]"
+                >
+                  Browse the catalogue
+                  <IconArrowRight size={16} />
+                </Link>
+              </div>
+            ) : (
+              slides.map((s, i) => (
+                <img
+                  key={s.id}
+                  src={s.image_url}
+                  alt={s.caption || s.headline || "ARIS promotion"}
+                  width={1600}
+                  height={575}
+                  loading={i === 0 ? "eager" : "lazy"}
+                  fetchPriority={i === 0 ? "high" : "auto"}
+                  decoding="async"
+                  className={`absolute inset-0 h-full w-full object-contain transition-all duration-700 ease-out ${
+                    i === index ? "scale-100 opacity-100" : "scale-[1.03] opacity-0"
+                  }`}
+                />
+              ))
+            )}
 
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
-              {copy.subheadline}
-            </p>
-
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <Button asChild size="lg" className="gap-2">
-                {copy.ctaLink.startsWith("#") ? (
-                  <a href={copy.ctaLink}>
-                    {copy.ctaLabel}
-                    <IconArrowRight size={18} />
+            {/* CTA layer, lifted above the artwork with real depth */}
+            {active?.cta_label?.trim() && active?.cta_link?.trim() && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center p-4 sm:justify-start sm:p-6">
+                {isExternal(active.cta_link) ? (
+                  <a
+                    href={normalise(active.cta_link)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-xl sm:px-6 sm:py-3 sm:text-base"
+                  >
+                    {active.cta_label}
+                    <IconArrowRight size={17} />
                   </a>
                 ) : (
-                  <Link to={copy.ctaLink}>
-                    {copy.ctaLabel}
-                    <IconArrowRight size={18} />
+                  <Link
+                    to={active.cta_link.startsWith("/") ? active.cta_link : `/${active.cta_link}`}
+                    className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-xl sm:px-6 sm:py-3 sm:text-base"
+                  >
+                    {active.cta_label}
+                    <IconArrowRight size={17} />
                   </Link>
                 )}
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/shop">Search the full catalogue</Link>
-              </Button>
-            </div>
-
-            <p className="mt-5 text-xs text-muted-foreground">
-              Order by 11am, get it the same day in Nairobi. Anywhere else in Kenya, 48 hours.
-            </p>
-          </div>
-
-          {/* Imagery column */}
-          <div className="relative">
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted shadow-lg sm:aspect-[16/10]">
-              {loading ? (
-                <Skeleton className="h-full w-full" />
-              ) : slides.length === 0 ? (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-2 text-muted-foreground">
-                  <IconDraftingCompass size={44} />
-                  <p className="px-6 text-center text-xs">
-                    Hero imagery is managed in Admin, Homepage tab.
-                  </p>
-                </div>
-              ) : (
-                slides.map((s, i) => (
-                  <img
-                    key={s.id}
-                    src={s.image_url}
-                    alt={s.caption || s.headline || "ARIS stationery"}
-                    width={960}
-                    height={600}
-                    loading={i === 0 ? "eager" : "lazy"}
-                    fetchPriority={i === 0 ? "high" : "auto"}
-                    decoding="async"
-                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
-                      i === index ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                ))
-              )}
-
-              {active?.caption && (
-                <p className="absolute bottom-0 left-0 right-0 bg-foreground/70 px-4 py-2 text-xs text-background">
-                  {active.caption}
-                </p>
-              )}
-            </div>
-
-            {slides.length > 1 && (
-              <div className="mt-3 flex justify-center gap-2">
-                {slides.map((s, i) => (
-                  <button
-                    key={s.id}
-                    onClick={() => setIndex(i)}
-                    aria-label={`Show slide ${i + 1}`}
-                    aria-current={i === index}
-                    className={`h-1.5 rounded-full transition-all ${
-                      i === index ? "w-6 bg-primary" : "w-2.5 bg-muted-foreground/40"
-                    }`}
-                  />
-                ))}
               </div>
+            )}
+
+            {/* Arrows */}
+            {count > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => go(-1)}
+                  aria-label="Previous slide"
+                  className="absolute left-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/85 text-foreground shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-background sm:flex"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => go(1)}
+                  aria-label="Next slide"
+                  className="absolute right-2 top-1/2 z-20 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/85 text-foreground shadow-md backdrop-blur transition-all hover:scale-105 hover:bg-background sm:flex"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
             )}
           </div>
         </div>
+
+        {/* Dots */}
+        {count > 1 && (
+          <div className="mt-3 flex justify-center gap-2">
+            {slides!.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={() => setIndex(i)}
+                aria-label={`Show slide ${i + 1}`}
+                aria-current={i === index}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === index ? "w-7 bg-primary" : "w-2 bg-muted-foreground/35 hover:bg-muted-foreground/60"
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {subText && (
+          <p className="mt-3 text-center text-sm text-muted-foreground sm:text-left">{subText}</p>
+        )}
       </div>
     </section>
   );
