@@ -20,6 +20,7 @@ import {
   IconPriceDrop,
   IconCustomers,
   IconCart,
+  IconSearch,
   getCategoryIcon,
 } from "@/components/icons/aris-icons";
 
@@ -46,6 +47,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
   const { tree } = useCategoryTree();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -72,12 +74,12 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </Link>
 
           {/* Persistent search, desktop */}
-          <div className="hidden flex-1 justify-center md:flex">
+          <div className="hidden flex-1 justify-center lg:flex">
             <SearchBar className="w-full max-w-xl" />
           </div>
 
           {/* Desktop nav */}
-          <nav className="hidden shrink-0 items-center gap-1 md:flex">
+          <nav className="hidden shrink-0 items-center gap-1 lg:flex">
             <div
               className="relative"
               onMouseEnter={() => setMegaOpen(true)}
@@ -103,7 +105,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
               </button>
 
               {megaOpen && (
-                <div className="absolute right-0 top-full z-50 w-[860px] pt-2">
+                <div className="absolute right-0 top-full z-50 w-[min(860px,calc(100vw-2rem))] pt-2">
                   <div className="overflow-hidden rounded-xl border border-border bg-popover shadow-xl">
                     <MegaMenu onNavigate={() => setMegaOpen(false)} />
                   </div>
@@ -141,7 +143,16 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </nav>
 
           {/* Mobile: categories drawer */}
-          <div className="ml-auto flex items-center gap-1 md:hidden">
+          <div className="ml-auto flex items-center gap-1 lg:hidden">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Search products"
+              onClick={() => setSearchOpen(true)}
+            >
+              <IconSearch size={20} />
+            </Button>
+
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Browse categories">
@@ -201,16 +212,31 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </div>
         </div>
 
-        {/* Persistent search, mobile */}
-        <div className="border-t border-border/60 px-4 pb-2.5 pt-2 md:hidden">
-          <SearchBar />
-        </div>
       </header>
+
+      {/* Mobile / tablet full-width search overlay */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-[120] lg:hidden">
+          <button
+            aria-label="Close search"
+            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
+            onClick={() => setSearchOpen(false)}
+          />
+          <div className="relative border-b border-border bg-background p-3 shadow-lg">
+            <div className="flex items-center gap-2">
+              <SearchBar className="flex-1" autoFocus onSubmitted={() => setSearchOpen(false)} />
+              <Button variant="ghost" size="sm" onClick={() => setSearchOpen(false)}>
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile bottom tab bar */}
       <nav
         data-bottom-nav
-        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-border bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.15)] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] border-t border-border bg-background shadow-[0_-4px_20px_rgba(0,0,0,0.15)] lg:hidden"
         style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 4px)" }}
       >
         <div className="flex items-center justify-around" style={{ height: "clamp(52px, 8vh, 64px)" }}>
