@@ -52,10 +52,10 @@ const CategoryStrip = () => {
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
           <h2 className="font-display text-xl font-bold tracking-tight sm:text-2xl">
-            Start with your department
+            Organised the way your course list is
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Pick a shelf. Each one opens onto the subcategories under it.
+            Not shop aisles. Departments that match what your lecturer actually put on the list.
           </p>
         </div>
         <Link to="/shop" className="shrink-0 text-sm font-medium text-primary hover:underline">

@@ -110,7 +110,7 @@ const PopularStrip = ({ onAddToCart }: Props) => {
             <p className="mt-0.5 text-sm text-muted-foreground">
               {fromOrders
                 ? "Ranked by units that actually left the shelf in the last 30 days."
-                : "Hand-picked by the ARIS counter team."}
+                : "What first-years keep walking in and asking for, straight off the counter."}
             </p>
           </div>
         </div>
