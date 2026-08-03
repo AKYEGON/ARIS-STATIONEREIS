@@ -14,7 +14,8 @@ import { smartMatch } from "@/lib/smart-search";
 import { useCategoryTree, CategoryNode } from "@/hooks/use-category-tree";
 import { getCategoryIcon, IconArrowRight } from "@/components/icons/aris-icons";
 import { getEffectivePrice, isOnSale } from "@/components/products/SaleBadge";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, SlidersHorizontal } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const PER_PAGE = 24;
 
@@ -46,6 +47,7 @@ const Shop = () => {
   const [assignments, setAssignments] = useState<Record<string, string[]>>({}); // categoryId -> productIds
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const q = params.get("q") || "";
   const categorySlug = params.get("category") || "";
