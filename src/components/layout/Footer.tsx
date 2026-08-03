@@ -117,21 +117,17 @@ const Footer = () => {
             </div>
 
             {/* About */}
-            <div className="sm:col-span-2">
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">About</h4>
+            <FooterSection title="About" className="sm:col-span-2">
               <ul className="space-y-2.5">
                 {aboutLinks.map((l) => (
                   <FooterLink key={l.to} {...l} />
                 ))}
               </ul>
-            </div>
+            </FooterSection>
 
             {/* Categories, straight from the taxonomy */}
-            <div className="sm:col-span-3">
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
-                Shop by category
-              </h4>
-              <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 sm:grid-cols-1">
+            <FooterSection title="Shop by category" className="sm:col-span-3">
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-2.5 lg:grid-cols-1">
                 {loading
                   ? Array.from({ length: 5 }).map((_, i) => (
                       <li key={i} className="h-4 animate-pulse rounded bg-white/5" />
@@ -140,19 +136,17 @@ const Footer = () => {
                       <FooterLink key={c.slug} to={`/category/${c.slug}`} label={c.name} />
                     ))}
               </ul>
-            </div>
+            </FooterSection>
 
             {/* Quick links + contact */}
-            <div className="sm:col-span-3">
-              <h4 className="mb-4 text-xs font-semibold uppercase tracking-[0.15em] text-white/90">
-                Quick links
-              </h4>
+            <FooterSection title="Quick links" className="sm:col-span-3">
               <ul className="space-y-2.5">
                 {quickLinks.map((l) => (
                   <FooterLink key={l.to} {...l} />
                 ))}
               </ul>
-            </div>
+            </FooterSection>
+
           </div>
 
           {/* Support strip */}
