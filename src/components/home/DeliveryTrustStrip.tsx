@@ -81,13 +81,13 @@ const DeliveryTrustStrip = () => {
       Icon: IconCountrywideRoute,
       label: "Countrywide in 48 hours",
       detail: "Kisumu, Eldoret, Mombasa, Nakuru and everywhere between.",
-      tone: "bg-blue-600 text-white shadow-md shadow-blue-600/25",
+      tone: "bg-blue-600 text-primary-foreground shadow-md shadow-blue-600/25",
     },
     {
       Icon: IconMpesaPhone,
       label: "Pay with M-Pesa",
       detail: "Till confirmation on the spot. No account needed.",
-      tone: "bg-emerald-600 text-white shadow-md shadow-emerald-600/25",
+      tone: "bg-emerald-600 text-primary-foreground shadow-md shadow-emerald-600/25",
     },
     {
       Icon: IconPickupPoint,
@@ -96,7 +96,7 @@ const DeliveryTrustStrip = () => {
         outlets.length > 0
           ? `Collect in person, pay nothing for delivery. ${outlets.length} pickup ${outlets.length === 1 ? "point" : "points"} listed at checkout.`
           : "Collect in person, pay nothing for delivery. Pickup points are listed at checkout.",
-      tone: "bg-amber-500 text-white shadow-md shadow-amber-500/25",
+      tone: "bg-amber-500 text-primary-foreground shadow-md shadow-amber-500/25",
     },
   ];
 
