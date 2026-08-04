@@ -1312,6 +1312,7 @@ export type Database = {
       }
       product_variants: {
         Row: {
+          color_hex: string | null
           cost_price: number | null
           created_at: string
           display_order: number
@@ -1326,6 +1327,7 @@ export type Database = {
           variant_value: string
         }
         Insert: {
+          color_hex?: string | null
           cost_price?: number | null
           created_at?: string
           display_order?: number
@@ -1340,6 +1342,7 @@ export type Database = {
           variant_value: string
         }
         Update: {
+          color_hex?: string | null
           cost_price?: number | null
           created_at?: string
           display_order?: number
@@ -1365,6 +1368,7 @@ export type Database = {
       }
       products: {
         Row: {
+          brand: string | null
           category: string
           cost_price: number | null
           created_at: string
@@ -1384,6 +1388,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          brand?: string | null
           category: string
           cost_price?: number | null
           created_at?: string
@@ -1403,6 +1408,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          brand?: string | null
           category?: string
           cost_price?: number | null
           created_at?: string
@@ -1499,6 +1505,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      school_list_submissions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          list_text: string | null
+          school_or_course: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          list_text?: string | null
+          school_or_course?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          list_text?: string | null
+          school_or_course?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       stock_movements: {
         Row: {
