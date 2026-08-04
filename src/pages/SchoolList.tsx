@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { z } from "zod";
 import Header from "@/components/layout/Header";
@@ -29,6 +30,7 @@ const schema = z
   .refine((v) => (v.list_text || "").length >= 10 || true, { message: "" });
 
 const SchoolList = () => {
+  const { getCartItemCount } = useCart();
   const [form, setForm] = useState({
     customer_name: "",
     customer_phone: "",
@@ -61,7 +63,7 @@ const SchoolList = () => {
     e.preventDefault();
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
-      toast.error(parsed.error.errors[0].message);
+      toast.error(parsed.error.issues[0].message);
       return;
     }
     if (!form.list_text.trim() && !file) {
@@ -116,7 +118,7 @@ const SchoolList = () => {
           { name: "School List", url: "/school-list" },
         ]}
       />
-      <Header />
+      <Header cartItemCount={getCartItemCount()} />
 
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <header className="mb-6">
