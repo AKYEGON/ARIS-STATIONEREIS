@@ -53,8 +53,10 @@ const App = () => {
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
                 <Route path="/review/:token" element={<ReviewSubmit />} />
+                <Route path="/school-list" element={<SchoolList />} />
                 <Route path="/about" element={<LegalPage />} />
                 <Route path="/contact" element={<LegalPage />} />
+
                 <Route path="/privacy" element={<LegalPage />} />
                 <Route path="/returns" element={<LegalPage />} />
                 <Route path="/terms" element={<LegalPage />} />
