@@ -20,7 +20,9 @@ import CategoryLanding from "./pages/CategoryLanding";
 import ReviewSubmit from "./pages/ReviewSubmit";
 import ScrollToTop from "./components/common/ScrollToTop";
 import LegalPage from "./pages/LegalPage";
+import SchoolList from "./pages/SchoolList";
 import PixelRouteTracker from "./components/common/PixelRouteTracker";
+
 
 const queryClient = new QueryClient();
 
