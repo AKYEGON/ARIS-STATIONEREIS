@@ -1846,6 +1846,16 @@ const Admin = () => {
                       />
                     </div>
                     <div>
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input
+                        id="brand"
+                        value={formData.brand}
+                        onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                        placeholder="e.g. Casio, Oxford, M&G"
+                        list="brand-suggestions"
+                      />
+                    </div>
+                    <div>
                       <Label htmlFor="description">Description</Label>
                       <Textarea
                         id="description"
@@ -2928,6 +2938,16 @@ const Admin = () => {
                   value={formData.name}
                   onChange={(e) => setFormData({...formData, name: e.target.value})}
                   placeholder="Enter product name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-brand">Brand</Label>
+                <Input
+                  id="edit-brand"
+                  value={formData.brand}
+                  onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                  placeholder="e.g. Casio, Oxford, M&G"
+                  list="brand-suggestions"
                 />
               </div>
               <div>
