@@ -48,7 +48,7 @@ import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
 import { ReviewRequestFunnel } from "@/components/admin/ReviewRequestFunnel";
 import { MarketplaceApiKeysTab } from "@/components/admin/MarketplaceApiKeysTab";
-import { ShieldCheck, KeyRound } from "lucide-react";
+import { ShieldCheck, KeyRound, ClipboardList } from "lucide-react";
 
 interface OrderItem {
   product_name: string;
