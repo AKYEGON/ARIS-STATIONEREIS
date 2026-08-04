@@ -38,7 +38,9 @@ import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
-import { CategoryManager } from "@/components/admin/CategoryManager";
+import { CategoryTreeManager } from "@/components/admin/CategoryTreeManager";
+import { SchoolListSubmissions } from "@/components/admin/SchoolListSubmissions";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
 import { FacultyManager } from "@/components/admin/FacultyManager";
@@ -80,9 +82,9 @@ const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "o
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "homepage", "team", "settings", "api"];
+      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "homepage", "lists", "team", "settings", "api"];
     case 'manager':
-      return ["orders", "inventory", "sales", "settings", "api"];
+      return ["orders", "inventory", "sales", "lists", "settings", "api"];
     case 'employee':
       return ["orders"];
     case 'agent':
@@ -1715,6 +1717,13 @@ const Admin = () => {
                   <span className="xs:hidden">API</span>
                 </TabsTrigger>
               )}
+              {visibleTabs.includes("lists") && (
+                <TabsTrigger value="lists" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
+                  <ClipboardList className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="hidden xs:inline">School Lists</span>
+                  <span className="xs:hidden">Lists</span>
+                </TabsTrigger>
+              )}
               {visibleTabs.includes("homepage") && (
                 <TabsTrigger value="homepage" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
                   <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -1726,12 +1735,23 @@ const Admin = () => {
 
           {/* Homepage CMS Tab */}
           <TabsContent value="homepage" className="space-y-6">
-            <HomepageManager />
+            <ErrorBoundary label="Homepage manager">
+              <HomepageManager />
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* School List Submissions Tab */}
+          <TabsContent value="lists" className="space-y-6">
+            <ErrorBoundary label="School lists">
+              <SchoolListSubmissions />
+            </ErrorBoundary>
           </TabsContent>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
-            <InventoryDashboard userRole={userRole} />
+            <ErrorBoundary label="Inventory">
+              <InventoryDashboard userRole={userRole} />
+            </ErrorBoundary>
           </TabsContent>
 
 
@@ -1755,7 +1775,9 @@ const Admin = () => {
                 </Button>
               )}
             </div>
-            <SalesDashboard hideProfitData={userRole !== 'admin'} />
+            <ErrorBoundary label="Sales analytics">
+              <SalesDashboard hideProfitData={userRole !== 'admin'} />
+            </ErrorBoundary>
           </TabsContent>
 
           {/* Team Management Tab */}
@@ -1771,7 +1793,7 @@ const Admin = () => {
             </div>
             <CheckoutOptionsManager />
             <AgentZoneManager />
-            <CategoryManager />
+            <CategoryTreeManager />
             <FacultyManager />
           </TabsContent>
 
