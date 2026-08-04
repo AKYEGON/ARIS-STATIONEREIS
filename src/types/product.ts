@@ -12,6 +12,7 @@ export interface ProductVariant {
   product_id: string;
   variant_type: string;
   variant_value: string;
+  color_hex?: string | null;
   price: number;
   cost_price: number;
   stock: number;
@@ -29,6 +30,7 @@ export interface Product {
   costPrice?: number;
   stock?: number;
   image: string;
+  brand?: string | null;
   category: string;
   categories?: string[];
   is_featured?: boolean;

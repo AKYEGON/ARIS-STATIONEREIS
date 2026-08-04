@@ -10,6 +10,7 @@ export interface ProductVariant {
   id?: string;
   variant_type: string;
   variant_value: string;
+  color_hex?: string | null;
   price: number;
   cost_price: number;
   stock: number;
@@ -31,6 +32,7 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
   const [newVariant, setNewVariant] = useState<Partial<ProductVariant>>({
     variant_type: "",
     variant_value: "",
+    color_hex: "#000000",
     price: 0,
     cost_price: 0,
     stock: 0,
@@ -47,6 +49,7 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
     const variant: ProductVariant = {
       variant_type: activeType,
       variant_value: newVariant.variant_value || "",
+      color_hex: /colou?r/i.test(activeType) ? newVariant.color_hex || "#000000" : null,
       price: newVariant.price || 0,
       cost_price: newVariant.cost_price || 0,
       stock: newVariant.stock || 0,
@@ -60,6 +63,7 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
     setNewVariant({
       variant_type: "",
       variant_value: "",
+      color_hex: "#000000",
       price: 0,
       cost_price: 0,
       stock: 0,
@@ -110,7 +114,18 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
                 <Card key={v.origIndex} className="border-border/50">
                   <CardContent className="p-2.5 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{v.variant_value}</span>
+                      <span className="flex items-center gap-2 text-sm font-medium">
+                        {/colou?r/i.test(v.variant_type) && (
+                          <input
+                            type="color"
+                            value={v.color_hex || "#000000"}
+                            onChange={(e) => updateVariant(v.origIndex, "color_hex", e.target.value)}
+                            className="h-6 w-6 rounded-full border border-border cursor-pointer bg-transparent p-0"
+                            title="Swatch colour shown on the product page"
+                          />
+                        )}
+                        {v.variant_value}
+                      </span>
                       <Button
                         type="button"
                         variant="ghost"
@@ -183,6 +198,17 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
                       onChange={(e) => setCustomType(e.target.value)}
                       placeholder="e.g., Material"
                       className="h-8 text-xs"
+                    />
+                  </div>
+                )}
+                {/colou?r/i.test(activeType) && (
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">Swatch</Label>
+                    <Input
+                      type="color"
+                      value={newVariant.color_hex || "#000000"}
+                      onChange={(e) => setNewVariant({ ...newVariant, color_hex: e.target.value })}
+                      className="h-8 p-1 cursor-pointer"
                     />
                   </div>
                 )}
