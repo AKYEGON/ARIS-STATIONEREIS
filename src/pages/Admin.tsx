@@ -1852,7 +1852,7 @@ const Admin = () => {
                         value={formData.brand}
                         onChange={(e) => setFormData({...formData, brand: e.target.value})}
                         placeholder="e.g. Casio, Oxford, M&G"
-                        list="brand-suggestions"
+                       
                       />
                     </div>
                     <div>
@@ -2947,7 +2947,7 @@ const Admin = () => {
                   value={formData.brand}
                   onChange={(e) => setFormData({...formData, brand: e.target.value})}
                   placeholder="e.g. Casio, Oxford, M&G"
-                  list="brand-suggestions"
+                 
                 />
               </div>
               <div>
