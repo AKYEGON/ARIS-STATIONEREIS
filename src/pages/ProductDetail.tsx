@@ -418,43 +418,95 @@ const ProductDetail = () => {
             )}
 
             {hasVariants &&
-              Object.entries(variantGroups).map(([type, variants]) => (
-                <div key={type}>
-                  <p className="text-sm font-semibold mb-2">
-                    {type}{" "}
-                    {!selectedVariant && (
-                      <span className="text-destructive font-normal">*required</span>
+              Object.entries(variantGroups).map(([type, variants]) => {
+                const isColour = /colou?r/i.test(type);
+                return (
+                  <div key={type}>
+                    <p className="text-sm font-semibold mb-2">
+                      {type}{" "}
+                      {isColour && selectedVariant && selectedVariant.variant_type === type && (
+                        <span className="font-normal text-muted-foreground">
+                          {selectedVariant.variant_value}
+                        </span>
+                      )}
+                      {!selectedVariant && (
+                        <span className="text-destructive font-normal">*required</span>
+                      )}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {variants.map((v) => {
+                        const outOfStock = (v.stock ?? 0) <= 0;
+                        const selected = selectedVariant?.id === v.id;
+                        const pick = () =>
+                          !outOfStock && setSelectedVariant(selected ? undefined : v);
+
+                        if (isColour) {
+                          return (
+                            <button
+                              key={v.id}
+                              type="button"
+                              disabled={outOfStock}
+                              onClick={pick}
+                              title={`${v.variant_value}${outOfStock ? " (out of stock)" : ` - KSh ${Number(v.price || 0).toFixed(0)}`}`}
+                              aria-label={`${v.variant_value}${outOfStock ? ", out of stock" : ""}`}
+                              aria-pressed={selected}
+                              className={`relative h-10 w-10 rounded-full border-2 transition-all ${
+                                selected
+                                  ? "border-primary ring-2 ring-primary/30 scale-105"
+                                  : "border-border hover:border-primary/50"
+                              } ${outOfStock ? "opacity-40 cursor-not-allowed" : ""}`}
+                              style={{
+                                backgroundColor: (v as any).color_hex || "hsl(var(--muted))",
+                              }}
+                            >
+                              {!(v as any).color_hex && (
+                                <span className="absolute inset-0 flex items-center justify-center text-[9px] font-semibold uppercase">
+                                  {v.variant_value.slice(0, 3)}
+                                </span>
+                              )}
+                              {outOfStock && (
+                                <span className="absolute inset-0 flex items-center justify-center">
+                                  <span className="block h-[2px] w-8 bg-destructive rotate-45" />
+                                </span>
+                              )}
+                            </button>
+                          );
+                        }
+
+                        return (
+                          <button
+                            key={v.id}
+                            type="button"
+                            disabled={outOfStock}
+                            onClick={pick}
+                            className={`text-sm px-3 py-2 rounded-md border transition-all ${
+                              outOfStock
+                                ? "border-border/40 bg-muted/30 text-muted-foreground/50 cursor-not-allowed line-through"
+                                : selected
+                                  ? "border-primary bg-primary/10 text-primary font-semibold"
+                                  : "border-border hover:border-primary/50"
+                            }`}
+                          >
+                            {v.variant_value}
+                            <span className="ml-1.5 opacity-70 text-xs">
+                              {outOfStock ? "Out of Stock" : `KSh ${Number(v.price || 0).toFixed(0)}`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {isColour && selectedVariant?.variant_type === type && (
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        KSh {Number(selectedVariant.price || 0).toFixed(0)} ·{" "}
+                        {(selectedVariant.stock ?? 0) > 0
+                          ? `${selectedVariant.stock} in stock`
+                          : "Out of stock"}
+                      </p>
                     )}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {variants.map((v) => {
-                      const outOfStock = v.stock <= 0;
-                      return (
-                        <button
-                          key={v.id}
-                          type="button"
-                          disabled={outOfStock}
-                          onClick={() =>
-                            !outOfStock && setSelectedVariant(selectedVariant?.id === v.id ? undefined : v)
-                          }
-                          className={`text-sm px-3 py-2 rounded-md border transition-all ${
-                            outOfStock
-                              ? "border-border/40 bg-muted/30 text-muted-foreground/50 cursor-not-allowed line-through"
-                              : selectedVariant?.id === v.id
-                                ? "border-primary bg-primary/10 text-primary font-semibold"
-                                : "border-border hover:border-primary/50"
-                          }`}
-                        >
-                          {v.variant_value}
-                          <span className="ml-1.5 opacity-70 text-xs">
-                            {outOfStock ? "Out of Stock" : `KSh ${v.price.toFixed(0)}`}
-                          </span>
-                        </button>
-                      );
-                    })}
                   </div>
-                </div>
-              ))}
+                );
+              })}
+
 
             <Button size="lg" className="w-full h-12 text-base" onClick={handleAddToCart}>
               <ShoppingCart className="mr-2 h-5 w-5" />

@@ -87,10 +87,25 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
         .order("name");
 
       if (error) throw error;
+      // Normalise nullable numeric columns. products.cost_price / stock are
+      // nullable in the DB, and a single null was crashing the whole table at
+      // `product.cost_price.toFixed(0)`.
+      const num = (v: any) => (v === null || v === undefined || isNaN(Number(v)) ? 0 : Number(v));
       const shaped = (data || []).map((p: any) => ({
         ...p,
-        variants: (p.variants || []).filter((v: any) => v.is_active),
+        price: num(p.price),
+        cost_price: num(p.cost_price),
+        stock: num(p.stock),
+        variants: (p.variants || [])
+          .filter((v: any) => v.is_active)
+          .map((v: any) => ({
+            ...v,
+            price: num(v.price),
+            cost_price: num(v.cost_price),
+            stock: num(v.stock),
+          })),
       }));
+
       setProducts(shaped);
     } catch (error) {
       console.error("Error fetching products:", error);

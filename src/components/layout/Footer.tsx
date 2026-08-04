@@ -39,6 +39,7 @@ const aboutLinks = [
 const quickLinks = [
   { to: "/shop", label: "Browse everything" },
   { to: "/deals", label: "Deals" },
+  { to: "/school-list", label: "Send your list" },
   { to: "/testimonials", label: "Customer reviews" },
   { to: "/cart", label: "Your cart" },
 ];
