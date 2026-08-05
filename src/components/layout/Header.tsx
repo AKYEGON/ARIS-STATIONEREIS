@@ -47,7 +47,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
   const { tree } = useCategoryTree();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -55,7 +55,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="container flex h-16 items-center gap-3 px-4 sm:h-[70px] sm:gap-5">
+        <div className="container flex h-16 items-center gap-3 px-4 sm:h-[70px] sm:gap-5 md:gap-6 lg:h-16 lg:gap-3">
           {/* Brand */}
           <Link
             to="/"
@@ -72,6 +72,11 @@ const Header = ({ cartItemCount }: HeaderProps) => {
               </span>
             </span>
           </Link>
+
+          {/* Persistent search, mobile + tablet */}
+          <div className="flex flex-1 justify-center px-4 pb-3 pt-2 lg:hidden">
+            <SearchBar className="w-full max-w-xl" />
+          </div>
 
           {/* Persistent search, desktop */}
           <div className="hidden flex-1 justify-center lg:flex">
@@ -142,17 +147,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             </Link>
           </nav>
 
-          {/* Mobile: categories drawer */}
           <div className="ml-auto flex items-center gap-1 lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Search products"
-              onClick={() => setSearchOpen(true)}
-            >
-              <IconSearch size={20} />
-            </Button>
-
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Browse categories">
@@ -214,24 +209,7 @@ const Header = ({ cartItemCount }: HeaderProps) => {
 
       </header>
 
-      {/* Mobile / tablet full-width search overlay */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-[120] lg:hidden">
-          <button
-            aria-label="Close search"
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            onClick={() => setSearchOpen(false)}
-          />
-          <div className="relative border-b border-border bg-background p-3 shadow-lg">
-            <div className="flex items-center gap-2">
-              <SearchBar className="flex-1" autoFocus onSubmitted={() => setSearchOpen(false)} />
-              <Button variant="ghost" size="sm" onClick={() => setSearchOpen(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Mobile bottom tab bar */}
       <nav

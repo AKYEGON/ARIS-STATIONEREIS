@@ -83,11 +83,8 @@ const DealsCarousel = ({ onAddToCart }: Props) => {
             </span>
             <div>
               <h2 className="font-display text-xl font-bold tracking-tight sm:text-2xl">
-                Prices currently cut
+                Deals
               </h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Biggest reduction first. These come straight off the live discount list.
-              </p>
             </div>
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">

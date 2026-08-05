@@ -30,7 +30,7 @@ import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
-import { ProductCoursesDialog } from "@/components/admin/ProductCoursesDialog";
+
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
 import { SendReviewRequestsModal } from "@/components/admin/SendReviewRequestsModal";
@@ -99,7 +99,7 @@ const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [productList, setProductList] = useState<Product[]>([]);
-  const [coursesDialogProduct, setCoursesDialogProduct] = useState<Product | null>(null);
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -187,7 +187,6 @@ const Admin = () => {
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
-    is_common: false,
     display_order: "0",
     saleStartsAt: "",
     saleEndsAt: ""
@@ -1033,9 +1032,8 @@ const Admin = () => {
             ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
             : "",
           image: imageUrl,
-          is_featured: formData.is_featured,
-          is_common: formData.is_common,
-          display_order: parseInt(formData.display_order) || 0,
+          is_featured: formData.is_featured || false,
+            display_order: formData.display_order || 0,
           sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
           sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
         })
@@ -1147,7 +1145,6 @@ const Admin = () => {
       category: product.category,
       image: product.image,
       is_featured: product.is_featured || false,
-      is_common: (product as any).is_common || false,
       display_order: (product.display_order || 0).toString(),
       saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
       saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
@@ -1956,17 +1953,7 @@ const Admin = () => {
                         onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
                       />
                     </div>
-                    <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
-                      <div>
-                        <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
-                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
-                      </div>
-                      <Switch
-                        id="is_common"
-                        checked={formData.is_common}
-                        onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
-                      />
-                    </div>
+
                     <div>
                       <Label htmlFor="display_order">Display Order (Position out of {products.length} products)</Label>
                       <Input
@@ -2226,7 +2213,7 @@ const Admin = () => {
                                 variant="outline"
                                 size="icon"
                                 className="h-8 w-8 sm:h-9 sm:w-9 transition-all duration-200 hover:scale-110 active:scale-95"
-                                onClick={() => setCoursesDialogProduct(product)}
+
                                 title="Assign to courses"
                               >
                                 <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4" />
@@ -3534,12 +3521,7 @@ const Admin = () => {
         }}
       />
 
-      <ProductCoursesDialog
-        open={!!coursesDialogProduct}
-        onOpenChange={(v) => { if (!v) setCoursesDialogProduct(null); }}
-        productId={coursesDialogProduct?.id ?? null}
-        productName={coursesDialogProduct?.name}
-      />
+
 
       {/* Order Status Modal */}
       {pendingStatusChange && (() => {

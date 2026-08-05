@@ -107,11 +107,8 @@ const DeliveryTrustStrip = () => {
           {/* Operational facts */}
           <div>
             <h2 className="font-display text-xl font-bold tracking-tight sm:text-2xl">
-              How the order actually reaches you
+              Delivery & Payment
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Two delivery lanes, M-Pesa on confirmation, and a counter you can walk into.
-            </p>
 
             <ul className="mt-6 grid gap-4 sm:grid-cols-2">
               {facts.map(({ Icon, label, detail, tone }) => (
