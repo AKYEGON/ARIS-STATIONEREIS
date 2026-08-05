@@ -462,233 +462,6 @@ export type Database = {
           },
         ]
       }
-      course_bundle_items: {
-        Row: {
-          course_bundle_id: string
-          created_at: string
-          id: string
-          product_id: string
-          quantity: number
-        }
-        Insert: {
-          course_bundle_id: string
-          created_at?: string
-          id?: string
-          product_id: string
-          quantity?: number
-        }
-        Update: {
-          course_bundle_id?: string
-          created_at?: string
-          id?: string
-          product_id?: string
-          quantity?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_bundle_items_course_bundle_id_fkey"
-            columns: ["course_bundle_id"]
-            isOneToOne: false
-            referencedRelation: "course_bundles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_bundle_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_bundles: {
-        Row: {
-          bundle_price: number
-          course_id: string
-          course_year_id: string
-          created_at: string
-          description: string | null
-          display_order: number
-          id: string
-          image: string
-          is_active: boolean
-          name: string
-          original_total_price: number
-          updated_at: string
-        }
-        Insert: {
-          bundle_price: number
-          course_id: string
-          course_year_id: string
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          id?: string
-          image: string
-          is_active?: boolean
-          name: string
-          original_total_price: number
-          updated_at?: string
-        }
-        Update: {
-          bundle_price?: number
-          course_id?: string
-          course_year_id?: string
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          id?: string
-          image?: string
-          is_active?: boolean
-          name?: string
-          original_total_price?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_bundles_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_bundles_course_year_id_fkey"
-            columns: ["course_year_id"]
-            isOneToOne: false
-            referencedRelation: "course_years"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_product_years: {
-        Row: {
-          course_product_id: string
-          course_year_id: string
-          created_at: string
-          id: string
-        }
-        Insert: {
-          course_product_id: string
-          course_year_id: string
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          course_product_id?: string
-          course_year_id?: string
-          created_at?: string
-          id?: string
-        }
-        Relationships: []
-      }
-      course_products: {
-        Row: {
-          course_id: string
-          created_at: string
-          display_order: number
-          id: string
-          product_id: string
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          product_id: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_products_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_years: {
-        Row: {
-          course_id: string
-          created_at: string
-          display_order: number
-          id: string
-          is_active: boolean
-          label: string
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          label: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          label?: string
-        }
-        Relationships: []
-      }
-      courses: {
-        Row: {
-          created_at: string
-          description: string | null
-          display_order: number
-          faculty_id: string
-          id: string
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          faculty_id: string
-          id?: string
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          faculty_id?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_faculty_id_fkey"
-            columns: ["faculty_id"]
-            isOneToOne: false
-            referencedRelation: "faculties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       customer_testimonials: {
         Row: {
           average_view_duration: number | null
@@ -809,39 +582,6 @@ export type Database = {
           phone?: string | null
           updated_at?: string | null
           user_id?: string
-        }
-        Relationships: []
-      }
-      faculties: {
-        Row: {
-          created_at: string
-          description: string | null
-          display_order: number
-          icon: string | null
-          id: string
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          icon?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          icon?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -1376,7 +1116,6 @@ export type Database = {
           display_order: number
           id: string
           image: string
-          is_common: boolean
           is_featured: boolean
           name: string
           original_price: number | null
@@ -1396,7 +1135,6 @@ export type Database = {
           display_order?: number
           id?: string
           image: string
-          is_common?: boolean
           is_featured?: boolean
           name: string
           original_price?: number | null
@@ -1416,7 +1154,6 @@ export type Database = {
           display_order?: number
           id?: string
           image?: string
-          is_common?: boolean
           is_featured?: boolean
           name?: string
           original_price?: number | null
@@ -1703,65 +1440,6 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
-        }
-        Relationships: []
-      }
-      year_template_items: {
-        Row: {
-          created_at: string
-          display_order: number
-          id: string
-          label: string
-          template_id: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          label: string
-          template_id: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          label?: string
-          template_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "year_template_items_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "year_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      year_templates: {
-        Row: {
-          created_at: string
-          display_order: number
-          id: string
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          name?: string
-          updated_at?: string
         }
         Relationships: []
       }

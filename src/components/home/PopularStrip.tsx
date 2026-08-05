@@ -105,8 +105,13 @@ const PopularStrip = ({ onAddToCart }: Props) => {
           </span>
           <div>
             <h2 className="font-display text-xl font-bold tracking-tight sm:text-2xl">
-              Best Sellers
+              What students are buying this month
             </h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {fromOrders
+                ? "Ranked by units that actually left the shelf in the last 30 days."
+                : "What first-years keep walking in and asking for, straight off the counter."}
+            </p>
           </div>
         </div>
         <Link to="/shop" className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-primary hover:underline sm:inline-flex">

@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS public.course_bundle_items CASCADE;
+DROP TABLE IF EXISTS public.course_bundles CASCADE;
+DROP TABLE IF EXISTS public.course_product_years CASCADE;
+DROP TABLE IF EXISTS public.course_products CASCADE;
+DROP TABLE IF EXISTS public.course_years CASCADE;
+DROP TABLE IF EXISTS public.courses CASCADE;
+DROP TABLE IF EXISTS public.faculties CASCADE;
+DROP TABLE IF EXISTS public.year_template_items CASCADE;
+DROP TABLE IF EXISTS public.year_templates CASCADE;
+ALTER TABLE public.products DROP COLUMN IF EXISTS is_common;
