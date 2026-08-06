@@ -971,6 +971,8 @@ const Admin = () => {
             cost_price: v.cost_price,
             stock: v.stock,
             sku: v.sku || null,
+            stock_status: v.stock_status || "active",
+            backorder_eta_days: v.backorder_eta_days ?? null,
             is_active: v.is_active,
             display_order: i,
           }));
@@ -1096,6 +1098,8 @@ const Admin = () => {
           cost_price: v.cost_price,
           stock: v.stock,
           sku: v.sku || null,
+          stock_status: v.stock_status || "active",
+          backorder_eta_days: v.backorder_eta_days ?? null,
           is_active: v.is_active,
           display_order: i,
         }));
@@ -1201,6 +1205,8 @@ const Admin = () => {
         cost_price: Number(v.cost_price),
         stock: v.stock || 0,
         sku: v.sku || "",
+        stock_status: (v as any).stock_status || "active",
+        backorder_eta_days: (v as any).backorder_eta_days ?? null,
         is_active: v.is_active,
         display_order: v.display_order,
       })));
