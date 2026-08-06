@@ -16,6 +16,9 @@ const formatProduct = (p: any): Product => ({
   originalPrice: p.original_price ? Number(p.original_price) : undefined,
   saleStartsAt: p.sale_starts_at || null,
   saleEndsAt: p.sale_ends_at || null,
+  stock: p.stock ?? 0,
+  stockStatus: p.stock_status || 'active',
+  backorderEtaDays: p.backorder_eta_days ?? null,
   category: p.category,
   image: p.image,
   is_featured: p.is_featured,
@@ -83,11 +86,9 @@ const DealsCarousel = ({ onAddToCart }: Props) => {
             </span>
             <div>
               <h2 className="font-display text-xl font-bold tracking-tight sm:text-2xl">
-                Prices currently cut
+                Deals
               </h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                Biggest reduction first. These come straight off the live discount list.
-              </p>
+
             </div>
           </div>
           <div className="hidden shrink-0 items-center gap-2 sm:flex">

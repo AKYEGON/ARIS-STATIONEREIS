@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { IconSearch } from "@/components/icons/aris-icons";
 import { X } from "lucide-react";
@@ -29,6 +29,7 @@ const SearchBar = ({ className = "", autoFocus, onSubmitted }: Props) => {
   const [value, setValue] = useState(params.get("q") || "");
   const [promptIdx, setPromptIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fieldId = useId();
 
   // Reflect the URL when arriving on /shop from elsewhere.
   useEffect(() => {
@@ -52,7 +53,7 @@ const SearchBar = ({ className = "", autoFocus, onSubmitted }: Props) => {
 
   return (
     <form onSubmit={submit} role="search" className={`relative ${className}`}>
-      <label htmlFor="site-search" className="sr-only">
+      <label htmlFor={fieldId} className="sr-only">
         Search ARIS products
       </label>
       <IconSearch
@@ -60,7 +61,7 @@ const SearchBar = ({ className = "", autoFocus, onSubmitted }: Props) => {
         className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
       />
       <input
-        id="site-search"
+        id={fieldId}
         ref={inputRef}
         autoFocus={autoFocus}
         value={value}

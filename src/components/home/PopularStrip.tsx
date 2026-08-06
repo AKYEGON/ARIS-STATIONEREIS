@@ -14,6 +14,9 @@ const formatProduct = (p: any): Product => ({
   originalPrice: p.original_price ? Number(p.original_price) : undefined,
   saleStartsAt: p.sale_starts_at || null,
   saleEndsAt: p.sale_ends_at || null,
+  stock: p.stock ?? 0,
+  stockStatus: p.stock_status || 'active',
+  backorderEtaDays: p.backorder_eta_days ?? null,
   category: p.category,
   image: p.image,
   is_featured: p.is_featured,
@@ -105,13 +108,9 @@ const PopularStrip = ({ onAddToCart }: Props) => {
           </span>
           <div>
             <h2 className="font-display text-xl font-bold tracking-tight sm:text-2xl">
-              What students are buying this month
+              Best Sellers
             </h2>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {fromOrders
-                ? "Ranked by units that actually left the shelf in the last 30 days."
-                : "What first-years keep walking in and asking for, straight off the counter."}
-            </p>
+
           </div>
         </div>
         <Link to="/shop" className="hidden shrink-0 items-center gap-1.5 text-sm font-medium text-primary hover:underline sm:inline-flex">

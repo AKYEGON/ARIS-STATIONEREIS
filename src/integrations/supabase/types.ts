@@ -1052,6 +1052,7 @@ export type Database = {
       }
       product_variants: {
         Row: {
+          backorder_eta_days: number | null
           color_hex: string | null
           cost_price: number | null
           created_at: string
@@ -1062,11 +1063,13 @@ export type Database = {
           product_id: string
           sku: string | null
           stock: number | null
+          stock_status: string
           updated_at: string
           variant_type: string
           variant_value: string
         }
         Insert: {
+          backorder_eta_days?: number | null
           color_hex?: string | null
           cost_price?: number | null
           created_at?: string
@@ -1077,11 +1080,13 @@ export type Database = {
           product_id: string
           sku?: string | null
           stock?: number | null
+          stock_status?: string
           updated_at?: string
           variant_type: string
           variant_value: string
         }
         Update: {
+          backorder_eta_days?: number | null
           color_hex?: string | null
           cost_price?: number | null
           created_at?: string
@@ -1092,6 +1097,7 @@ export type Database = {
           product_id?: string
           sku?: string | null
           stock?: number | null
+          stock_status?: string
           updated_at?: string
           variant_type?: string
           variant_value?: string
@@ -1108,6 +1114,7 @@ export type Database = {
       }
       products: {
         Row: {
+          backorder_eta_days: number | null
           brand: string | null
           category: string
           cost_price: number | null
@@ -1124,9 +1131,11 @@ export type Database = {
           sale_starts_at: string | null
           slug: string
           stock: number | null
+          stock_status: string
           updated_at: string
         }
         Insert: {
+          backorder_eta_days?: number | null
           brand?: string | null
           category: string
           cost_price?: number | null
@@ -1143,9 +1152,11 @@ export type Database = {
           sale_starts_at?: string | null
           slug: string
           stock?: number | null
+          stock_status?: string
           updated_at?: string
         }
         Update: {
+          backorder_eta_days?: number | null
           brand?: string | null
           category?: string
           cost_price?: number | null
@@ -1162,9 +1173,61 @@ export type Database = {
           sale_starts_at?: string | null
           slug?: string
           stock?: number | null
+          stock_status?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      restock_requests: {
+        Row: {
+          contact: string
+          contact_type: string
+          created_at: string
+          customer_name: string | null
+          id: string
+          notified_at: string | null
+          product_id: string
+          status: string
+          variant_id: string | null
+        }
+        Insert: {
+          contact: string
+          contact_type?: string
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          notified_at?: string | null
+          product_id: string
+          status?: string
+          variant_id?: string | null
+        }
+        Update: {
+          contact?: string
+          contact_type?: string
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          notified_at?: string | null
+          product_id?: string
+          status?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restock_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restock_requests_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_requests: {
         Row: {

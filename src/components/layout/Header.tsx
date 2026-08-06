@@ -20,7 +20,6 @@ import {
   IconPriceDrop,
   IconCustomers,
   IconCart,
-  IconSearch,
   getCategoryIcon,
 } from "@/components/icons/aris-icons";
 
@@ -47,7 +46,6 @@ const Header = ({ cartItemCount }: HeaderProps) => {
   const { tree } = useCategoryTree();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -73,10 +71,11 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             </span>
           </Link>
 
-          {/* Persistent search, desktop */}
-          <div className="hidden flex-1 justify-center lg:flex">
+          {/* Persistent search, tablet + desktop */}
+          <div className="hidden min-w-0 flex-1 justify-center md:flex">
             <SearchBar className="w-full max-w-xl" />
           </div>
+
 
           {/* Desktop nav */}
           <nav className="hidden shrink-0 items-center gap-1 lg:flex">
@@ -142,16 +141,24 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             </Link>
           </nav>
 
-          {/* Mobile: categories drawer */}
+          {/* Mobile + tablet controls */}
           <div className="ml-auto flex items-center gap-1 lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Search products"
-              onClick={() => setSearchOpen(true)}
+            <Link
+              to="/cart"
+              aria-label="Cart"
+              className={`relative hidden h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-secondary md:inline-flex ${
+                isActive("/cart") ? "text-primary" : ""
+              }`}
             >
-              <IconSearch size={20} />
-            </Button>
+              <IconCart size={17} />
+              Cart
+              {cartItemCount > 0 && (
+                <Badge className="ml-0.5 h-5 min-w-5 justify-center p-0 px-1 text-[10px]">
+                  {cartItemCount}
+                </Badge>
+              )}
+            </Link>
+
 
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
@@ -212,26 +219,13 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </div>
         </div>
 
+        {/* Mobile: persistent full-width search row */}
+        <div className="border-t border-border/60 px-4 pb-2.5 pt-2 md:hidden">
+          <SearchBar className="w-full" />
+        </div>
       </header>
 
-      {/* Mobile / tablet full-width search overlay */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-[120] lg:hidden">
-          <button
-            aria-label="Close search"
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            onClick={() => setSearchOpen(false)}
-          />
-          <div className="relative border-b border-border bg-background p-3 shadow-lg">
-            <div className="flex items-center gap-2">
-              <SearchBar className="flex-1" autoFocus onSubmitted={() => setSearchOpen(false)} />
-              <Button variant="ghost" size="sm" onClick={() => setSearchOpen(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Mobile bottom tab bar */}
       <nav

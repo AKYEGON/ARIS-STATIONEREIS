@@ -22,6 +22,9 @@ const formatProduct = (p: any): Product => ({
   originalPrice: p.original_price ? Number(p.original_price) : undefined,
   saleStartsAt: p.sale_starts_at || null,
   saleEndsAt: p.sale_ends_at || null,
+  stock: p.stock ?? 0,
+  stockStatus: p.stock_status || 'active',
+  backorderEtaDays: p.backorder_eta_days ?? null,
   category: p.category,
   image: p.image,
   is_featured: p.is_featured,
@@ -120,14 +123,13 @@ const Deals = () => {
 
   const handleAdd = (product: Product, variant?: ProductVariant) => addToCart(product, variant);
 
-  const SectionHeader = ({ icon: Icon, title, subtitle, color }: any) => (
+  const SectionHeader = ({ icon: Icon, title, color }: any) => (
     <div className="flex items-center gap-3 mb-3 sm:mb-4">
       <div className={`p-2 rounded-lg ${color}`}>
         <Icon className="h-5 w-5 text-white" />
       </div>
       <div>
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold">{title}</h2>
-        {subtitle && <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>}
       </div>
     </div>
   );
@@ -152,9 +154,6 @@ const Deals = () => {
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Deals</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Flash sales, bundles & free items - refresh often
-            </p>
           </div>
 
           {isLoading && (
@@ -170,7 +169,7 @@ const Deals = () => {
 
           {flashSales.length > 0 && (
             <section>
-              <SectionHeader icon={Flame} title="Flash Sales" subtitle="Clock's running. Grab it before it flips back." color="bg-red-600" />
+              <SectionHeader icon={Flame} title="Flash Sales" color="bg-red-600" />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {flashSales.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAdd} compact />)}
@@ -181,7 +180,7 @@ const Deals = () => {
 
           {bundles.length > 0 && (
             <section>
-              <SectionHeader icon={Package} title="Bundle Deals" subtitle="Cheaper together than apart." color="bg-primary" />
+              <SectionHeader icon={Package} title="Bundle Deals" color="bg-primary" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bundles.map(b => <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />)}
               </div>
@@ -190,7 +189,7 @@ const Deals = () => {
 
           {bogo.length > 0 && (
             <section>
-              <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Freebie lands in the cart on its own." color="bg-purple-600" />
+              <SectionHeader icon={Gift} title="Buy X, Get Y Free" color="bg-purple-600" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bogo.map(o => <BogoCard key={o.id} offer={o} onAddToCart={handleAdd} />)}
               </div>
