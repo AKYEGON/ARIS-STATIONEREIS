@@ -143,16 +143,24 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             </Link>
           </nav>
 
-          {/* Mobile: categories drawer */}
+          {/* Mobile + tablet controls */}
           <div className="ml-auto flex items-center gap-1 lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Search products"
-              onClick={() => setSearchOpen(true)}
+            <Link
+              to="/cart"
+              aria-label="Cart"
+              className={`relative hidden h-9 items-center gap-1.5 rounded-md border border-border px-3 text-sm font-medium transition-colors hover:bg-secondary md:inline-flex ${
+                isActive("/cart") ? "text-primary" : ""
+              }`}
             >
-              <IconSearch size={20} />
-            </Button>
+              <IconCart size={17} />
+              Cart
+              {cartItemCount > 0 && (
+                <Badge className="ml-0.5 h-5 min-w-5 justify-center p-0 px-1 text-[10px]">
+                  {cartItemCount}
+                </Badge>
+              )}
+            </Link>
+
 
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
