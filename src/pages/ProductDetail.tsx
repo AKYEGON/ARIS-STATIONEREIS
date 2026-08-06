@@ -15,6 +15,8 @@ import { ShoppingCart, ChevronRight, Truck, ShieldCheck, Phone, Images } from "l
 import { useCart } from "@/contexts/CartContext";
 import { toast } from "sonner";
 import { isOnSale, getEffectivePrice } from "@/components/products/SaleBadge";
+import { productStock, variantStock, backorderLabel } from "@/lib/stock";
+import RestockNotifyDialog from "@/components/products/RestockNotifyDialog";
 
 const formatProduct = (p: any): Product & { slug?: string } => ({
   id: p.id,
@@ -56,6 +58,7 @@ const ProductDetail = () => {
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [viewerOpen, setViewerOpen] = useState(false);
+  const [notifyOpen, setNotifyOpen] = useState(false);
   const [reviewStats, setReviewStats] = useState<{ count: number; average: number; reviews: any[] }>({ count: 0, average: 0, reviews: [] });
 
   const fetchProduct = useCallback(async () => {
@@ -163,6 +166,9 @@ const ProductDetail = () => {
   }
 
   const hasVariants = !!(product.variants && product.variants.length > 0);
+  const stockInfo = productStock(product, selectedVariant);
+  const soldOut = stockInfo.state === "out_of_stock";
+  const onBackorder = stockInfo.state === "backorder";
   const variantGroups = hasVariants
     ? product.variants!.reduce<Record<string, ProductVariant[]>>((acc, v) => {
         if (!acc[v.variant_type]) acc[v.variant_type] = [];
@@ -209,7 +215,11 @@ const ProductDetail = () => {
       url: fullUrl,
       priceCurrency: "KES",
       price: displayPrice,
-      availability: "https://schema.org/InStock",
+      availability: soldOut
+        ? "https://schema.org/OutOfStock"
+        : onBackorder
+          ? "https://schema.org/BackOrder"
+          : "https://schema.org/InStock",
       itemCondition: "https://schema.org/NewCondition",
       seller: { "@type": "Organization", name: "ARIS" },
       priceValidUntil: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
@@ -347,6 +357,12 @@ const ProductDetail = () => {
               )}
               {activeMedia.type === "image" && <Watermark size="md" />}
 
+              {soldOut && (
+                <span className="absolute inset-x-0 bottom-0 bg-foreground/85 py-2 text-center text-sm font-bold uppercase tracking-wider text-background">
+                  Out of stock
+                </span>
+              )}
+
               {allMedia.length > 1 && (
                 <div className="absolute top-3 right-3 bg-black/70 text-white px-2 py-1 rounded-full flex items-center gap-1 text-xs font-medium">
                   <Images className="h-3 w-3" />
@@ -438,7 +454,8 @@ const ProductDetail = () => {
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {variants.map((v) => {
-                        const outOfStock = (v.stock ?? 0) <= 0;
+                        const vInfo = variantStock(v);
+                        const outOfStock = !vInfo.purchasable;
                         const selected = selectedVariant?.id === v.id;
                         const pick = () =>
                           !outOfStock && setSelectedVariant(selected ? undefined : v);
@@ -492,7 +509,9 @@ const ProductDetail = () => {
                           >
                             {v.variant_value}
                             <span className="ml-1.5 opacity-70 text-xs">
-                              {outOfStock ? "Out of Stock" : `KSh ${Number(v.price || 0).toFixed(0)}`}
+                              {outOfStock
+                                ? "Out of Stock"
+                                : `KSh ${Number(v.price || 0).toFixed(0)}${vInfo.state === "backorder" ? " · backorder" : ""}`}
                             </span>
                           </button>
                         );
@@ -501,9 +520,11 @@ const ProductDetail = () => {
                     {isColour && selectedVariant?.variant_type === type && (
                       <p className="text-xs text-muted-foreground mt-1.5">
                         KSh {Number(selectedVariant.price || 0).toFixed(0)} ·{" "}
-                        {(selectedVariant.stock ?? 0) > 0
+                        {variantStock(selectedVariant).state === "in_stock"
                           ? `${selectedVariant.stock} in stock`
-                          : "Out of stock"}
+                          : variantStock(selectedVariant).state === "backorder"
+                            ? backorderLabel(variantStock(selectedVariant).etaDays)
+                            : "Out of stock"}
                       </p>
                     )}
                   </div>
@@ -511,10 +532,38 @@ const ProductDetail = () => {
               })}
 
 
-            <Button size="lg" className="w-full h-12 text-base" onClick={handleAddToCart}>
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              {hasVariants && !selectedVariant ? "Select Option" : "Add to Cart"}
-            </Button>
+            {onBackorder && (
+              <div className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm font-medium text-amber-700">
+                {backorderLabel(stockInfo.etaDays)}
+              </div>
+            )}
+
+            {soldOut ? (
+              <div className="grid grid-cols-2 gap-2">
+                <Button size="lg" variant="outline" className="h-12 text-base" onClick={() => setNotifyOpen(true)}>
+                  Notify me
+                </Button>
+                <Button size="lg" variant="secondary" className="h-12 text-base" asChild>
+                  <Link to={`/shop?q=${encodeURIComponent(product.name.split(" ").slice(0, 2).join(" "))}`}>
+                    Alternatives
+                  </Link>
+                </Button>
+              </div>
+            ) : (
+              <Button size="lg" className="w-full h-12 text-base" onClick={handleAddToCart}>
+                <ShoppingCart className="mr-2 h-5 w-5" />
+                {hasVariants && !selectedVariant ? "Select Option" : onBackorder ? "Pre-order" : "Add to Cart"}
+              </Button>
+            )}
+
+            <RestockNotifyDialog
+              open={notifyOpen}
+              onClose={() => setNotifyOpen(false)}
+              productId={product.id}
+              productName={product.name}
+              variantId={selectedVariant?.id}
+              variantLabel={selectedVariant ? `${selectedVariant.variant_type}: ${selectedVariant.variant_value}` : null}
+            />
 
             <div className="grid grid-cols-3 gap-2 pt-3 border-t">
               <div className="flex flex-col items-center text-center gap-1 p-2">
