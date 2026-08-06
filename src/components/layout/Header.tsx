@@ -221,26 +221,13 @@ const Header = ({ cartItemCount }: HeaderProps) => {
           </div>
         </div>
 
+        {/* Mobile: persistent full-width search row */}
+        <div className="border-t border-border/60 px-4 pb-2.5 pt-2 md:hidden">
+          <SearchBar className="w-full" />
+        </div>
       </header>
 
-      {/* Mobile / tablet full-width search overlay */}
-      {searchOpen && (
-        <div className="fixed inset-0 z-[120] lg:hidden">
-          <button
-            aria-label="Close search"
-            className="absolute inset-0 bg-foreground/40 backdrop-blur-sm"
-            onClick={() => setSearchOpen(false)}
-          />
-          <div className="relative border-b border-border bg-background p-3 shadow-lg">
-            <div className="flex items-center gap-2">
-              <SearchBar className="flex-1" autoFocus onSubmitted={() => setSearchOpen(false)} />
-              <Button variant="ghost" size="sm" onClick={() => setSearchOpen(false)}>
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+
 
       {/* Mobile bottom tab bar */}
       <nav
