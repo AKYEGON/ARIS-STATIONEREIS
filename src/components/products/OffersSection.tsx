@@ -13,7 +13,7 @@ import { isOnSale } from "./SaleBadge";
 
 /**
  * Homepage "Special Offers" row - unified marquee of every active offer type:
- * flash sales, regular bundles, course bundles, BOGO. Pauses on hover/touch.
+ * flash sales, bundles, BOGO. Pauses on hover/touch.
  */
 type OfferItem =
   | { kind: "bundle"; id: string; sort: number; bundle: Bundle }
@@ -28,6 +28,9 @@ const formatProduct = (p: any): Product => ({
   originalPrice: p.original_price ? Number(p.original_price) : undefined,
   saleStartsAt: p.sale_starts_at || null,
   saleEndsAt: p.sale_ends_at || null,
+  stock: p.stock ?? 0,
+  stockStatus: p.stock_status || 'active',
+  backorderEtaDays: p.backorder_eta_days ?? null,
   category: p.category,
   image: p.image,
   is_featured: p.is_featured,
@@ -39,25 +42,6 @@ const formatProduct = (p: any): Product => ({
     .map((v: any) => ({ ...v, price: Number(v.price) })),
 });
 
-const formatCourseBundle = (b: any): Bundle => ({
-  id: b.id,
-  name: b.name,
-  description: b.description ?? null,
-  bundle_price: Number(b.bundle_price),
-  original_total_price: Number(b.original_total_price),
-  image: b.image || "",
-  is_active: b.is_active ?? true,
-  display_order: b.display_order ?? 0,
-  created_at: b.created_at || "",
-  items: (b.items || []).map((it: any) => ({
-    id: it.id,
-    bundle_id: b.id,
-    product_id: it.product_id,
-    quantity: it.quantity,
-    product: it.product ? formatProduct(it.product) : undefined,
-  })),
-});
-
 const OffersSection = () => {
   const { addToCart, addBundleToCart } = useCart();
   const [items, setItems] = useState<OfferItem[]>([]);
@@ -67,15 +51,10 @@ const OffersSection = () => {
   useEffect(() => {
     (async () => {
       try {
-        const [bundlesRes, courseBundlesRes, productsRes, bogoRes] = await Promise.all([
+        const [bundlesRes, productsRes, bogoRes] = await Promise.all([
           supabase
             .from("bundles")
             .select(`*, items:bundle_items(*, product:products(*))`)
-            .eq("is_active", true)
-            .order("display_order", { ascending: false }),
-          supabase
-            .from("course_bundles")
-            .select(`*, items:course_bundle_items(*, product:products(*))`)
             .eq("is_active", true)
             .order("display_order", { ascending: false }),
           supabase
@@ -96,9 +75,6 @@ const OffersSection = () => {
 
         (bundlesRes.data || []).forEach((b: any) =>
           collected.push({ kind: "bundle", id: `b-${b.id}`, sort: b.display_order ?? 0, bundle: b as Bundle }),
-        );
-        (courseBundlesRes.data || []).forEach((b: any) =>
-          collected.push({ kind: "bundle", id: `cb-${b.id}`, sort: b.display_order ?? 0, bundle: formatCourseBundle(b) }),
         );
         (productsRes.data || [])
           .map(formatProduct)

@@ -12,12 +12,15 @@ export interface ProductVariant {
   product_id: string;
   variant_type: string;
   variant_value: string;
+  color_hex?: string | null;
   price: number;
   cost_price: number;
   stock: number;
   sku: string | null;
   is_active: boolean;
   display_order: number;
+  stock_status?: string | null;
+  backorder_eta_days?: number | null;
 }
 
 export interface Product {
@@ -28,11 +31,13 @@ export interface Product {
   originalPrice?: number;
   costPrice?: number;
   stock?: number;
+  stockStatus?: string | null;
+  backorderEtaDays?: number | null;
   image: string;
+  brand?: string | null;
   category: string;
   categories?: string[];
   is_featured?: boolean;
-  is_common?: boolean;
   display_order?: number;
   slug?: string;
   saleStartsAt?: string | null;

@@ -10,12 +10,15 @@ export interface ProductVariant {
   id?: string;
   variant_type: string;
   variant_value: string;
+  color_hex?: string | null;
   price: number;
   cost_price: number;
   stock: number;
   sku: string;
   is_active: boolean;
   display_order: number;
+  stock_status?: string;
+  backorder_eta_days?: number | null;
   isNew?: boolean; // for tracking unsaved variants
 }
 
@@ -31,10 +34,12 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
   const [newVariant, setNewVariant] = useState<Partial<ProductVariant>>({
     variant_type: "",
     variant_value: "",
+    color_hex: "#000000",
     price: 0,
     cost_price: 0,
     stock: 0,
     sku: "",
+    stock_status: "active",
   });
   const [customType, setCustomType] = useState("");
   const [selectedPresetType, setSelectedPresetType] = useState("");
@@ -47,10 +52,13 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
     const variant: ProductVariant = {
       variant_type: activeType,
       variant_value: newVariant.variant_value || "",
+      color_hex: /colou?r/i.test(activeType) ? newVariant.color_hex || "#000000" : null,
       price: newVariant.price || 0,
       cost_price: newVariant.cost_price || 0,
       stock: newVariant.stock || 0,
       sku: newVariant.sku || "",
+      stock_status: newVariant.stock_status || "active",
+      backorder_eta_days: newVariant.backorder_eta_days ?? null,
       is_active: true,
       display_order: variants.length,
       isNew: true,
@@ -60,10 +68,12 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
     setNewVariant({
       variant_type: "",
       variant_value: "",
+      color_hex: "#000000",
       price: 0,
       cost_price: 0,
       stock: 0,
       sku: "",
+      stock_status: "active",
     });
   };
 
@@ -110,7 +120,18 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
                 <Card key={v.origIndex} className="border-border/50">
                   <CardContent className="p-2.5 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">{v.variant_value}</span>
+                      <span className="flex items-center gap-2 text-sm font-medium">
+                        {/colou?r/i.test(v.variant_type) && (
+                          <input
+                            type="color"
+                            value={v.color_hex || "#000000"}
+                            onChange={(e) => updateVariant(v.origIndex, "color_hex", e.target.value)}
+                            className="h-6 w-6 rounded-full border border-border cursor-pointer bg-transparent p-0"
+                            title="Swatch colour shown on the product page"
+                          />
+                        )}
+                        {v.variant_value}
+                      </span>
                       <Button
                         type="button"
                         variant="ghost"
@@ -150,6 +171,33 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
                         />
                       </div>
                     </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-muted-foreground">Availability</Label>
+                        <select
+                          className="flex h-7 w-full rounded-md border border-input bg-background px-2 text-xs"
+                          value={v.stock_status || "active"}
+                          onChange={(e) => updateVariant(v.origIndex, "stock_status", e.target.value)}
+                        >
+                          <option value="active">Active</option>
+                          <option value="out_of_stock">Out of stock</option>
+                          <option value="backorder">Backorder</option>
+                        </select>
+                      </div>
+                      {(v.stock_status || "active") === "backorder" && (
+                        <div>
+                          <Label className="text-[10px] text-muted-foreground">Ships in (days)</Label>
+                          <Input
+                            type="number"
+                            value={v.backorder_eta_days ?? ""}
+                            onChange={(e) =>
+                              updateVariant(v.origIndex, "backorder_eta_days", parseInt(e.target.value) || null)
+                            }
+                            className="h-7 text-xs"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -183,6 +231,17 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
                       onChange={(e) => setCustomType(e.target.value)}
                       placeholder="e.g., Material"
                       className="h-8 text-xs"
+                    />
+                  </div>
+                )}
+                {/colou?r/i.test(activeType) && (
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">Swatch</Label>
+                    <Input
+                      type="color"
+                      value={newVariant.color_hex || "#000000"}
+                      onChange={(e) => setNewVariant({ ...newVariant, color_hex: e.target.value })}
+                      className="h-8 p-1 cursor-pointer"
                     />
                   </div>
                 )}
@@ -227,6 +286,18 @@ export const ProductVariantManager = ({ variants, onChange }: ProductVariantMana
                     className="h-8 text-xs"
                   />
                 </div>
+              </div>
+              <div>
+                <Label className="text-[10px] text-muted-foreground">Availability</Label>
+                <select
+                  className="flex h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+                  value={newVariant.stock_status || "active"}
+                  onChange={(e) => setNewVariant({ ...newVariant, stock_status: e.target.value })}
+                >
+                  <option value="active">Active</option>
+                  <option value="out_of_stock">Out of stock</option>
+                  <option value="backorder">Backorder</option>
+                </select>
               </div>
               <Button
                 type="button"

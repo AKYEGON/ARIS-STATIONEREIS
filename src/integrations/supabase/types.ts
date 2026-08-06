@@ -462,233 +462,6 @@ export type Database = {
           },
         ]
       }
-      course_bundle_items: {
-        Row: {
-          course_bundle_id: string
-          created_at: string
-          id: string
-          product_id: string
-          quantity: number
-        }
-        Insert: {
-          course_bundle_id: string
-          created_at?: string
-          id?: string
-          product_id: string
-          quantity?: number
-        }
-        Update: {
-          course_bundle_id?: string
-          created_at?: string
-          id?: string
-          product_id?: string
-          quantity?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_bundle_items_course_bundle_id_fkey"
-            columns: ["course_bundle_id"]
-            isOneToOne: false
-            referencedRelation: "course_bundles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_bundle_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_bundles: {
-        Row: {
-          bundle_price: number
-          course_id: string
-          course_year_id: string
-          created_at: string
-          description: string | null
-          display_order: number
-          id: string
-          image: string
-          is_active: boolean
-          name: string
-          original_total_price: number
-          updated_at: string
-        }
-        Insert: {
-          bundle_price: number
-          course_id: string
-          course_year_id: string
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          id?: string
-          image: string
-          is_active?: boolean
-          name: string
-          original_total_price: number
-          updated_at?: string
-        }
-        Update: {
-          bundle_price?: number
-          course_id?: string
-          course_year_id?: string
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          id?: string
-          image?: string
-          is_active?: boolean
-          name?: string
-          original_total_price?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_bundles_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_bundles_course_year_id_fkey"
-            columns: ["course_year_id"]
-            isOneToOne: false
-            referencedRelation: "course_years"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_product_years: {
-        Row: {
-          course_product_id: string
-          course_year_id: string
-          created_at: string
-          id: string
-        }
-        Insert: {
-          course_product_id: string
-          course_year_id: string
-          created_at?: string
-          id?: string
-        }
-        Update: {
-          course_product_id?: string
-          course_year_id?: string
-          created_at?: string
-          id?: string
-        }
-        Relationships: []
-      }
-      course_products: {
-        Row: {
-          course_id: string
-          created_at: string
-          display_order: number
-          id: string
-          product_id: string
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          product_id: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          product_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "course_products_course_id_fkey"
-            columns: ["course_id"]
-            isOneToOne: false
-            referencedRelation: "courses"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "course_products_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      course_years: {
-        Row: {
-          course_id: string
-          created_at: string
-          display_order: number
-          id: string
-          is_active: boolean
-          label: string
-        }
-        Insert: {
-          course_id: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          label: string
-        }
-        Update: {
-          course_id?: string
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          label?: string
-        }
-        Relationships: []
-      }
-      courses: {
-        Row: {
-          created_at: string
-          description: string | null
-          display_order: number
-          faculty_id: string
-          id: string
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          faculty_id: string
-          id?: string
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          display_order?: number
-          faculty_id?: string
-          id?: string
-          is_active?: boolean
-          name?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "courses_faculty_id_fkey"
-            columns: ["faculty_id"]
-            isOneToOne: false
-            referencedRelation: "faculties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       customer_testimonials: {
         Row: {
           average_view_duration: number | null
@@ -711,6 +484,7 @@ export type Database = {
           review_text: string
           review_token: string | null
           show_in_stories: boolean
+          university: string | null
           video_url: string | null
           views: number | null
         }
@@ -735,6 +509,7 @@ export type Database = {
           review_text: string
           review_token?: string | null
           show_in_stories?: boolean
+          university?: string | null
           video_url?: string | null
           views?: number | null
         }
@@ -759,6 +534,7 @@ export type Database = {
           review_text?: string
           review_token?: string | null
           show_in_stories?: boolean
+          university?: string | null
           video_url?: string | null
           views?: number | null
         }
@@ -809,38 +585,82 @@ export type Database = {
         }
         Relationships: []
       }
-      faculties: {
+      hero_slides: {
+        Row: {
+          caption: string | null
+          created_at: string
+          cta_label: string | null
+          cta_link: string | null
+          display_order: number
+          headline: string | null
+          id: string
+          image_url: string
+          is_active: boolean
+          subheadline: string | null
+          updated_at: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          display_order?: number
+          headline?: string | null
+          id?: string
+          image_url: string
+          is_active?: boolean
+          subheadline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          cta_label?: string | null
+          cta_link?: string | null
+          display_order?: number
+          headline?: string | null
+          id?: string
+          image_url?: string
+          is_active?: boolean
+          subheadline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      homepage_picks: {
         Row: {
           created_at: string
-          description: string | null
           display_order: number
-          icon: string | null
           id: string
-          is_active: boolean
-          name: string
+          kind: string
+          product_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
           display_order?: number
-          icon?: string | null
           id?: string
-          is_active?: boolean
-          name: string
+          kind?: string
+          product_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          description?: string | null
           display_order?: number
-          icon?: string | null
           id?: string
-          is_active?: boolean
-          name?: string
+          kind?: string
+          product_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "homepage_picks_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       message_templates: {
         Row: {
@@ -1232,6 +1052,8 @@ export type Database = {
       }
       product_variants: {
         Row: {
+          backorder_eta_days: number | null
+          color_hex: string | null
           cost_price: number | null
           created_at: string
           display_order: number
@@ -1241,11 +1063,14 @@ export type Database = {
           product_id: string
           sku: string | null
           stock: number | null
+          stock_status: string
           updated_at: string
           variant_type: string
           variant_value: string
         }
         Insert: {
+          backorder_eta_days?: number | null
+          color_hex?: string | null
           cost_price?: number | null
           created_at?: string
           display_order?: number
@@ -1255,11 +1080,14 @@ export type Database = {
           product_id: string
           sku?: string | null
           stock?: number | null
+          stock_status?: string
           updated_at?: string
           variant_type: string
           variant_value: string
         }
         Update: {
+          backorder_eta_days?: number | null
+          color_hex?: string | null
           cost_price?: number | null
           created_at?: string
           display_order?: number
@@ -1269,6 +1097,7 @@ export type Database = {
           product_id?: string
           sku?: string | null
           stock?: number | null
+          stock_status?: string
           updated_at?: string
           variant_type?: string
           variant_value?: string
@@ -1285,6 +1114,8 @@ export type Database = {
       }
       products: {
         Row: {
+          backorder_eta_days: number | null
+          brand: string | null
           category: string
           cost_price: number | null
           created_at: string
@@ -1292,7 +1123,6 @@ export type Database = {
           display_order: number
           id: string
           image: string
-          is_common: boolean
           is_featured: boolean
           name: string
           original_price: number | null
@@ -1301,9 +1131,12 @@ export type Database = {
           sale_starts_at: string | null
           slug: string
           stock: number | null
+          stock_status: string
           updated_at: string
         }
         Insert: {
+          backorder_eta_days?: number | null
+          brand?: string | null
           category: string
           cost_price?: number | null
           created_at?: string
@@ -1311,7 +1144,6 @@ export type Database = {
           display_order?: number
           id?: string
           image: string
-          is_common?: boolean
           is_featured?: boolean
           name: string
           original_price?: number | null
@@ -1320,9 +1152,12 @@ export type Database = {
           sale_starts_at?: string | null
           slug: string
           stock?: number | null
+          stock_status?: string
           updated_at?: string
         }
         Update: {
+          backorder_eta_days?: number | null
+          brand?: string | null
           category?: string
           cost_price?: number | null
           created_at?: string
@@ -1330,7 +1165,6 @@ export type Database = {
           display_order?: number
           id?: string
           image?: string
-          is_common?: boolean
           is_featured?: boolean
           name?: string
           original_price?: number | null
@@ -1339,9 +1173,61 @@ export type Database = {
           sale_starts_at?: string | null
           slug?: string
           stock?: number | null
+          stock_status?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      restock_requests: {
+        Row: {
+          contact: string
+          contact_type: string
+          created_at: string
+          customer_name: string | null
+          id: string
+          notified_at: string | null
+          product_id: string
+          status: string
+          variant_id: string | null
+        }
+        Insert: {
+          contact: string
+          contact_type?: string
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          notified_at?: string | null
+          product_id: string
+          status?: string
+          variant_id?: string | null
+        }
+        Update: {
+          contact?: string
+          contact_type?: string
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          notified_at?: string | null
+          product_id?: string
+          status?: string
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restock_requests_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "restock_requests_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       review_requests: {
         Row: {
@@ -1419,6 +1305,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      school_list_submissions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string
+          customer_phone: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          list_text: string | null
+          school_or_course: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name: string
+          customer_phone: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          list_text?: string | null
+          school_or_course?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string
+          customer_phone?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          list_text?: string | null
+          school_or_course?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       stock_movements: {
         Row: {
@@ -1575,65 +1506,6 @@ export type Database = {
         }
         Relationships: []
       }
-      year_template_items: {
-        Row: {
-          created_at: string
-          display_order: number
-          id: string
-          label: string
-          template_id: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          label: string
-          template_id: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          label?: string
-          template_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "year_template_items_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "year_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      year_templates: {
-        Row: {
-          created_at: string
-          display_order: number
-          id: string
-          is_active: boolean
-          name: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          name: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          display_order?: number
-          id?: string
-          is_active?: boolean
-          name?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       testimonial_performance: {
@@ -1738,6 +1610,13 @@ export type Database = {
         }[]
       }
       get_store_credit_balance: { Args: { p_phone: string }; Returns: number }
+      get_top_selling_products: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: {
+          product_id: string
+          units_sold: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

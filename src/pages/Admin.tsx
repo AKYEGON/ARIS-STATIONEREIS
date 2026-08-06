@@ -16,7 +16,7 @@ import { products } from "@/data/products";
 import { Product, ProductMedia, ProductCategory } from "@/types/product";
 import { CustomerTestimonial } from "@/types/testimonial";
 import { Bundle } from "@/types/bundle";
-import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star, GraduationCap } from "lucide-react";
+import { Pencil, Trash2, Plus, Package, ShoppingBag, X, TrendingUp, Warehouse, Download, Percent, DollarSign, Store, ImagePlus, Video, Trash, Users, BarChart3, Tag, Phone, MessageCircle, UsersRound, LogOut, Settings, Star, FileSpreadsheet } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,11 +25,11 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { smartMatch } from "@/lib/smart-search";
 import { InventoryDashboard } from "@/components/admin/InventoryDashboard";
+import { HomepageManager } from "@/components/admin/HomepageManager";
 import { SalesDashboard } from "@/components/admin/SalesDashboard";
 import { QuickSaleDialog } from "@/components/admin/QuickSaleDialog";
 import TestimonialAnalytics from "@/components/admin/TestimonialAnalytics";
 import { BundlesTab } from "@/components/admin/BundlesTab";
-import { ProductCoursesDialog } from "@/components/admin/ProductCoursesDialog";
 import { PullToRefresh } from "@/components/common/PullToRefresh";
 import { OrderStatusModal } from "@/components/admin/OrderStatusModal";
 import { SendReviewRequestsModal } from "@/components/admin/SendReviewRequestsModal";
@@ -37,16 +37,19 @@ import { OrderQuickActions } from "@/components/admin/OrderQuickActions";
 import { OrderCommunicationHistory } from "@/components/admin/OrderCommunicationHistory";
 import { EmployeeManagement } from "@/components/admin/EmployeeManagement";
 import { CheckoutOptionsManager } from "@/components/admin/CheckoutOptionsManager";
-import { CategoryManager } from "@/components/admin/CategoryManager";
+import { CategoryTreeManager } from "@/components/admin/CategoryTreeManager";
+import { CategoryPicker } from "@/components/admin/CategoryPicker";
+import { ProductImportDialog } from "@/components/admin/ProductImportDialog";
+import { AdminNav } from "@/components/admin/AdminNav";
+import { SchoolListSubmissions } from "@/components/admin/SchoolListSubmissions";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { ProductVariantManager, ProductVariant } from "@/components/admin/ProductVariantManager";
 import { AgentZoneManager } from "@/components/admin/AgentZoneManager";
-import { FacultyManager } from "@/components/admin/FacultyManager";
 import { BogoOffersTab } from "@/components/admin/BogoOffersTab";
 import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
 import { ReviewRequestFunnel } from "@/components/admin/ReviewRequestFunnel";
 import { MarketplaceApiKeysTab } from "@/components/admin/MarketplaceApiKeysTab";
-import ProductImportDialog from "@/components/admin/ProductImportDialog";
-import { ShieldCheck, KeyRound } from "lucide-react";
+import { ShieldCheck, KeyRound, ClipboardList } from "lucide-react";
 
 interface OrderItem {
   product_name: string;
@@ -75,14 +78,14 @@ interface Order {
 
 type UserRole = 'admin' | 'manager' | 'employee' | 'agent';
 
-const ALL_TABS = ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings", "api"];
+const ALL_TABS = ["products", "orders", "inventory", "categories", "sales", "testimonials", "offers", "team", "settings", "api"];
 
 const getVisibleTabs = (role: UserRole) => {
   switch (role) {
     case 'admin':
-      return ["products", "orders", "inventory", "sales", "testimonials", "offers", "team", "settings", "api"];
+      return ["orders", "sales", "offers", "products", "inventory", "categories", "homepage", "testimonials", "lists", "team", "settings", "api"];
     case 'manager':
-      return ["orders", "inventory", "sales", "settings", "api"];
+      return ["orders", "sales", "inventory", "lists", "settings", "api"];
     case 'employee':
       return ["orders"];
     case 'agent':
@@ -97,7 +100,7 @@ const Admin = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { getCartItemCount } = useCart();
   const [productList, setProductList] = useState<Product[]>([]);
-  const [coursesDialogProduct, setCoursesDialogProduct] = useState<Product | null>(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -181,13 +184,15 @@ const Admin = () => {
     originalPrice: "",
     costPrice: "",
     stock: "",
+    brand: "",
     category: "",
     image: "/placeholder.svg",
     is_featured: false,
-    is_common: false,
     display_order: "0",
     saleStartsAt: "",
-    saleEndsAt: ""
+    saleEndsAt: "",
+    stockStatus: "active",
+    backorderEtaDays: ""
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -296,10 +301,12 @@ const Admin = () => {
         saleEndsAt: (p as any).sale_ends_at || null,
         costPrice: p.cost_price ? Number(p.cost_price) : 0,
         stock: p.stock || 0,
+        stockStatus: (p as any).stock_status || 'active',
+        backorderEtaDays: (p as any).backorder_eta_days ?? null,
         category: p.category,
+        brand: (p as any).brand || null,
         image: p.image,
         is_featured: p.is_featured,
-        is_common: (p as any).is_common || false,
         display_order: p.display_order,
         media: (p.product_media || []).map((m: any) => ({
           ...m,
@@ -313,6 +320,7 @@ const Admin = () => {
             price: Number(v.price),
             cost_price: Number(v.cost_price || 0),
             stock: v.stock || 0,
+            color_hex: v.color_hex || null,
           })),
       }));
       
@@ -824,13 +832,15 @@ const Admin = () => {
       originalPrice: "",
       costPrice: "",
       stock: "",
+      brand: "",
       category: "",
       image: "/placeholder.svg",
       is_featured: false,
-      is_common: false,
-      display_order: "0",
+        display_order: "0",
       saleStartsAt: "",
-      saleEndsAt: ""
+      saleEndsAt: "",
+      stockStatus: "active",
+      backorderEtaDays: ""
     });
     setSelectedCategoryIds([]);
     setSelectedImageFile(null);
@@ -899,13 +909,17 @@ const Admin = () => {
         original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
         cost_price: effectiveCost,
         stock: formData.stock ? parseInt(formData.stock) : 0,
+        brand: formData.brand.trim() || null,
         category: primaryCatName,
         image: imageUrl,
         is_featured: formData.is_featured,
-        is_common: formData.is_common,
         display_order: parseInt(formData.display_order) || 0,
         sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
-        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
+        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null,
+        stock_status: formData.stockStatus,
+        backorder_eta_days: formData.stockStatus === "backorder" && formData.backorderEtaDays
+          ? parseInt(formData.backorderEtaDays)
+          : null
       };
 
 
@@ -952,10 +966,13 @@ const Admin = () => {
             product_id: productId,
             variant_type: v.variant_type,
             variant_value: v.variant_value,
+            color_hex: v.color_hex || null,
             price: v.price,
             cost_price: v.cost_price,
             stock: v.stock,
             sku: v.sku || null,
+            stock_status: v.stock_status || "active",
+            backorder_eta_days: v.backorder_eta_days ?? null,
             is_active: v.is_active,
             display_order: i,
           }));
@@ -1020,13 +1037,17 @@ const Admin = () => {
           original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           cost_price: effectiveCost,
           stock: formData.stock ? parseInt(formData.stock) : 0,
+          stock_status: formData.stockStatus,
+          backorder_eta_days: formData.stockStatus === "backorder" && formData.backorderEtaDays
+            ? parseInt(formData.backorderEtaDays)
+            : null,
+          brand: formData.brand.trim() || null,
           category: selectedCategoryIds.length > 0
             ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
             : "",
           image: imageUrl,
           is_featured: formData.is_featured,
-          is_common: formData.is_common,
-          display_order: parseInt(formData.display_order) || 0,
+            display_order: parseInt(formData.display_order) || 0,
           sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
           sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
         })
@@ -1072,10 +1093,13 @@ const Admin = () => {
           product_id: editingProduct.id,
           variant_type: v.variant_type,
           variant_value: v.variant_value,
+          color_hex: v.color_hex || null,
           price: v.price,
           cost_price: v.cost_price,
           stock: v.stock,
           sku: v.sku || null,
+          stock_status: v.stock_status || "active",
+          backorder_eta_days: v.backorder_eta_days ?? null,
           is_active: v.is_active,
           display_order: i,
         }));
@@ -1133,13 +1157,15 @@ const Admin = () => {
       originalPrice: product.originalPrice?.toString() || "",
       costPrice: product.costPrice?.toString() || "0",
       stock: product.stock?.toString() || "0",
+      brand: (product as any).brand || "",
       category: product.category,
       image: product.image,
       is_featured: product.is_featured || false,
-      is_common: (product as any).is_common || false,
       display_order: (product.display_order || 0).toString(),
       saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
-      saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
+      saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : "",
+      stockStatus: (product as any).stockStatus || "active",
+      backorderEtaDays: (product as any).backorderEtaDays?.toString() || ""
     });
     setSelectedImageFile(null);
     setImageUrl(product.image);
@@ -1174,10 +1200,13 @@ const Admin = () => {
         id: v.id,
         variant_type: v.variant_type,
         variant_value: v.variant_value,
+        color_hex: (v as any).color_hex || null,
         price: Number(v.price),
         cost_price: Number(v.cost_price),
         stock: v.stock || 0,
         sku: v.sku || "",
+        stock_status: (v as any).stock_status || "active",
+        backorder_eta_days: (v as any).backorder_eta_days ?? null,
         is_active: v.is_active,
         display_order: v.display_order,
       })));
@@ -1628,7 +1657,7 @@ const Admin = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
       <Header cartItemCount={getCartItemCount()} />
       
       <main className="flex-1 container py-4 sm:py-6 md:py-8 px-4">
@@ -1650,78 +1679,42 @@ const Admin = () => {
         </div>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="overflow-x-auto -mx-4 px-4 mb-6">
-            <TabsList className={`inline-flex w-auto min-w-full sm:grid sm:w-full gap-1`} style={{ gridTemplateColumns: `repeat(${visibleTabs.length}, minmax(0, 1fr))` }}>
-              {visibleTabs.includes("products") && (
-                <TabsTrigger value="products" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Products</span>
-                  <span className="xs:hidden">Prod</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("offers") && (
-                <TabsTrigger value="offers" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <Percent className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Offers</span>
-                  <span className="xs:hidden">Off</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("inventory") && (
-                <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <Warehouse className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Inventory</span>
-                  <span className="xs:hidden">Inv</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("sales") && (
-                <TabsTrigger value="sales" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Sales</span>
-                  <span className="xs:hidden">Sale</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("orders") && (
-                <TabsTrigger value="orders" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Orders</span>
-                  <span className="xs:hidden">Ord</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("testimonials") && (
-                <TabsTrigger value="testimonials" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Reviews</span>
-                  <span className="xs:hidden">Rev</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("team") && (
-                <TabsTrigger value="team" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <UsersRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Team</span>
-                  <span className="xs:hidden">Team</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("settings") && (
-                <TabsTrigger value="settings" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <Settings className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">Settings</span>
-                  <span className="xs:hidden">Set</span>
-                </TabsTrigger>
-              )}
-              {visibleTabs.includes("api") && (
-                <TabsTrigger value="api" className="flex items-center gap-1.5 px-2.5 sm:px-3 text-xs sm:text-sm whitespace-nowrap">
-                  <KeyRound className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span className="hidden xs:inline">API</span>
-                  <span className="xs:hidden">API</span>
-                </TabsTrigger>
-              )}
-            </TabsList>
-          </div>
+          <AdminNav visibleTabs={visibleTabs} activeTab={activeTab} onChange={setActiveTab} />
+
+          {/* Categories Tab */}
+          <TabsContent value="categories" className="space-y-6">
+            <div>
+              <h3 className="text-base sm:text-lg font-semibold">Categories</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-4">
+                The taxonomy behind /shop, the mega menu, the footer and every product form.
+              </p>
+            </div>
+            <ErrorBoundary label="Categories">
+              <CategoryTreeManager />
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* Homepage CMS Tab */}
+          <TabsContent value="homepage" className="space-y-6">
+            <ErrorBoundary label="Homepage manager">
+              <HomepageManager />
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* School List Submissions Tab */}
+          <TabsContent value="lists" className="space-y-6">
+            <ErrorBoundary label="School lists">
+              <SchoolListSubmissions />
+            </ErrorBoundary>
+          </TabsContent>
 
           {/* Inventory Tab */}
           <TabsContent value="inventory" className="space-y-6">
-            <InventoryDashboard userRole={userRole} />
+            <ErrorBoundary label="Inventory">
+              <InventoryDashboard userRole={userRole} />
+            </ErrorBoundary>
           </TabsContent>
+
 
           {/* Sales Dashboard Tab */}
           <TabsContent value="sales" className="space-y-4 sm:space-y-6">
@@ -1743,7 +1736,9 @@ const Admin = () => {
                 </Button>
               )}
             </div>
-            <SalesDashboard hideProfitData={userRole !== 'admin'} />
+            <ErrorBoundary label="Sales analytics">
+              <SalesDashboard hideProfitData={userRole !== 'admin'} />
+            </ErrorBoundary>
           </TabsContent>
 
           {/* Team Management Tab */}
@@ -1759,8 +1754,6 @@ const Admin = () => {
             </div>
             <CheckoutOptionsManager />
             <AgentZoneManager />
-            <CategoryManager />
-            <FacultyManager />
           </TabsContent>
 
           {/* Marketplace API Tab */}
@@ -1781,8 +1774,10 @@ const Admin = () => {
               <p className="text-muted-foreground">Manage your product catalog</p>
 
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <ProductImportDialog onImported={() => { fetchProducts(); }} />
-
+              <Button variant="outline" onClick={() => setIsImportOpen(true)} className="w-full sm:w-auto">
+                <FileSpreadsheet className="mr-2 h-4 w-4" />
+                Import / bulk edit
+              </Button>
               <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
                 <DialogTrigger asChild>
                   <Button onClick={() => resetForm()} className="w-full sm:w-auto transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90">
@@ -1802,6 +1797,16 @@ const Admin = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({...formData, name: e.target.value})}
                         placeholder="Enter product name"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="brand">Brand</Label>
+                      <Input
+                        id="brand"
+                        value={formData.brand}
+                        onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                        placeholder="e.g. Casio, Oxford, M&G"
+                       
                       />
                     </div>
                     <div>
@@ -1872,30 +1877,36 @@ const Admin = () => {
                       />
                     </div>
                     <div>
+                      <Label htmlFor="add-stock-status">Availability</Label>
+                      <select
+                        id="add-stock-status"
+                        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={formData.stockStatus}
+                        onChange={(e) => setFormData({ ...formData, stockStatus: e.target.value })}
+                      >
+                        <option value="active">Active (sell while stock lasts)</option>
+                        <option value="out_of_stock">Out of stock (no orders)</option>
+                        <option value="backorder">Backorder (keep taking orders)</option>
+                      </select>
+                      {formData.stockStatus === "backorder" && (
+                        <Input
+                          className="mt-2"
+                          type="number"
+                          min={1}
+                          placeholder="Ships in how many days?"
+                          value={formData.backorderEtaDays}
+                          onChange={(e) => setFormData({ ...formData, backorderEtaDays: e.target.value })}
+                        />
+                      )}
+                    </div>
+                    <div>
                       <Label>Categories</Label>
-                      <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 mt-1">
-                        {productCategories.map((cat) => (
-                          <div key={cat.id} className="flex items-center gap-2">
-                            <Checkbox
-                              id={`cat-add-${cat.id}`}
-                              checked={selectedCategoryIds.includes(cat.id)}
-                              onCheckedChange={(checked) => {
-                                setSelectedCategoryIds(prev =>
-                                  checked
-                                    ? [...prev, cat.id]
-                                    : prev.filter(id => id !== cat.id)
-                                );
-                              }}
-                            />
-                            <label htmlFor={`cat-add-${cat.id}`} className="text-sm cursor-pointer">
-                              {cat.icon} {cat.name}
-                            </label>
-                          </div>
-                        ))}
-                        {productCategories.length === 0 && (
-                          <p className="text-xs text-muted-foreground">No categories yet. Add them in Settings.</p>
-                        )}
-                      </div>
+                      <CategoryPicker
+                        categories={productCategories as any}
+                        selected={selectedCategoryIds}
+                        onChange={setSelectedCategoryIds}
+                        idPrefix="cat-add"
+                      />
                     </div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="is_featured">Show on Homepage</Label>
@@ -1903,17 +1914,6 @@ const Admin = () => {
                         id="is_featured"
                         checked={formData.is_featured}
                         onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
-                      <div>
-                        <Label htmlFor="is_common" className="font-medium">Common stationery</Label>
-                        <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
-                      </div>
-                      <Switch
-                        id="is_common"
-                        checked={formData.is_common}
-                        onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                       />
                     </div>
                     <div>
@@ -2100,6 +2100,11 @@ const Admin = () => {
               </div>
             </div>
 
+            <ProductImportDialog
+              open={isImportOpen}
+              onOpenChange={setIsImportOpen}
+              onDone={() => { fetchProducts(); fetchProductCategories(); }}
+            />
 
             <Card className="transition-all duration-300">
               <CardHeader>
@@ -2172,15 +2177,6 @@ const Admin = () => {
                                 title="Edit product"
                               >
                                 <Pencil className="h-3 w-3 sm:h-4 sm:w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="icon"
-                                className="h-8 w-8 sm:h-9 sm:w-9 transition-all duration-200 hover:scale-110 active:scale-95"
-                                onClick={() => setCoursesDialogProduct(product)}
-                                title="Assign to courses"
-                              >
-                                <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4" />
                               </Button>
                               <Button
                                 variant="destructive"
@@ -2892,6 +2888,16 @@ const Admin = () => {
                 />
               </div>
               <div>
+                <Label htmlFor="edit-brand">Brand</Label>
+                <Input
+                  id="edit-brand"
+                  value={formData.brand}
+                  onChange={(e) => setFormData({...formData, brand: e.target.value})}
+                  placeholder="e.g. Casio, Oxford, M&G"
+                 
+                />
+              </div>
+              <div>
                 <Label htmlFor="edit-description">Description</Label>
                 <Textarea
                   id="edit-description"
@@ -2958,31 +2964,37 @@ const Admin = () => {
                   placeholder="0"
                 />
               </div>
+                    <div>
+                      <Label htmlFor="edit-stock-status">Availability</Label>
+                      <select
+                        id="edit-stock-status"
+                        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={formData.stockStatus}
+                        onChange={(e) => setFormData({ ...formData, stockStatus: e.target.value })}
+                      >
+                        <option value="active">Active (sell while stock lasts)</option>
+                        <option value="out_of_stock">Out of stock (no orders)</option>
+                        <option value="backorder">Backorder (keep taking orders)</option>
+                      </select>
+                      {formData.stockStatus === "backorder" && (
+                        <Input
+                          className="mt-2"
+                          type="number"
+                          min={1}
+                          placeholder="Ships in how many days?"
+                          value={formData.backorderEtaDays}
+                          onChange={(e) => setFormData({ ...formData, backorderEtaDays: e.target.value })}
+                        />
+                      )}
+                    </div>
               <div>
                 <Label>Categories</Label>
-                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-2 mt-1">
-                  {productCategories.map((cat) => (
-                    <div key={cat.id} className="flex items-center gap-2">
-                      <Checkbox
-                        id={`cat-edit-${cat.id}`}
-                        checked={selectedCategoryIds.includes(cat.id)}
-                        onCheckedChange={(checked) => {
-                          setSelectedCategoryIds(prev =>
-                            checked
-                              ? [...prev, cat.id]
-                              : prev.filter(id => id !== cat.id)
-                          );
-                        }}
-                      />
-                      <label htmlFor={`cat-edit-${cat.id}`} className="text-sm cursor-pointer">
-                        {cat.icon} {cat.name}
-                      </label>
-                    </div>
-                  ))}
-                  {productCategories.length === 0 && (
-                    <p className="text-xs text-muted-foreground">No categories yet. Add them in Settings.</p>
-                  )}
-                </div>
+                <CategoryPicker
+                  categories={productCategories as any}
+                  selected={selectedCategoryIds}
+                  onChange={setSelectedCategoryIds}
+                  idPrefix="cat-edit"
+                />
               </div>
               <div className="flex items-center justify-between">
                 <Label htmlFor="edit-is_featured">Show on Homepage</Label>
@@ -2990,17 +3002,6 @@ const Admin = () => {
                   id="edit-is_featured"
                   checked={formData.is_featured}
                   onCheckedChange={(checked) => setFormData({...formData, is_featured: checked})}
-                />
-              </div>
-              <div className="flex items-center justify-between rounded-md border border-dashed p-2.5 bg-muted/30">
-                <div>
-                  <Label htmlFor="edit-is_common" className="font-medium">Common stationery</Label>
-                  <p className="text-[11px] text-muted-foreground">Pens, books, etc. Hidden by default on course pages - shown via toggle.</p>
-                </div>
-                <Switch
-                  id="edit-is_common"
-                  checked={formData.is_common}
-                  onCheckedChange={(checked) => setFormData({...formData, is_common: checked})}
                 />
               </div>
               <div>
@@ -3475,12 +3476,6 @@ const Admin = () => {
         }}
       />
 
-      <ProductCoursesDialog
-        open={!!coursesDialogProduct}
-        onOpenChange={(v) => { if (!v) setCoursesDialogProduct(null); }}
-        productId={coursesDialogProduct?.id ?? null}
-        productName={coursesDialogProduct?.name}
-      />
 
       {/* Order Status Modal */}
       {pendingStatusChange && (() => {

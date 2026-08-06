@@ -11,7 +11,7 @@ import { Bundle } from "@/types/bundle";
 import { Product, ProductVariant } from "@/types/product";
 import { BogoOffer } from "@/types/bogo";
 import { supabase } from "@/integrations/supabase/client";
-import { Flame, Package, GraduationCap, Gift } from "lucide-react";
+import { Flame, Package, Gift } from "lucide-react";
 import { isOnSale } from "@/components/products/SaleBadge";
 
 const formatProduct = (p: any): Product => ({
@@ -22,6 +22,9 @@ const formatProduct = (p: any): Product => ({
   originalPrice: p.original_price ? Number(p.original_price) : undefined,
   saleStartsAt: p.sale_starts_at || null,
   saleEndsAt: p.sale_ends_at || null,
+  stock: p.stock ?? 0,
+  stockStatus: p.stock_status || 'active',
+  backorderEtaDays: p.backorder_eta_days ?? null,
   category: p.category,
   image: p.image,
   is_featured: p.is_featured,
@@ -31,30 +34,9 @@ const formatProduct = (p: any): Product => ({
   variants: (p.variants || []).filter((v: any) => v.is_active).map((v: any) => ({ ...v, price: Number(v.price) })),
 });
 
-// Shape a course_bundle row into our Bundle type so BundleCard + collage work.
-const formatCourseBundle = (b: any): Bundle => ({
-  id: b.id,
-  name: b.name,
-  description: b.description ?? null,
-  bundle_price: Number(b.bundle_price),
-  original_total_price: Number(b.original_total_price),
-  image: b.image || "",
-  is_active: b.is_active ?? true,
-  display_order: b.display_order ?? 0,
-  created_at: b.created_at || "",
-  items: (b.items || []).map((it: any) => ({
-    id: it.id,
-    bundle_id: b.id,
-    product_id: it.product_id,
-    quantity: it.quantity,
-    product: it.product ? formatProduct(it.product) : undefined,
-  })),
-});
-
 const Deals = () => {
   const { addToCart, addBundleToCart, getCartItemCount } = useCart();
   const [bundles, setBundles] = useState<Bundle[]>([]);
-  const [courseBundles, setCourseBundles] = useState<Bundle[]>([]);
   const [flashSales, setFlashSales] = useState<Product[]>([]);
   const [bogo, setBogo] = useState<BogoOffer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,24 +48,20 @@ const Deals = () => {
   const fetchAll = async () => {
     setIsLoading(true);
     try {
-      const [bundlesRes, courseBundlesRes, productsRes, bogoRes] = await Promise.all([
+      const [bundlesRes, productsRes, bogoRes] = await Promise.all([
         supabase
           .from("bundles")
           .select(`*, items:bundle_items(*, product:products(*))`)
           .eq("is_active", true)
           .order("display_order", { ascending: false }),
-        supabase
-          .from("course_bundles")
-          .select(`*, items:course_bundle_items(*, product:products(*))`)
-          .eq("is_active", true)
-          .order("display_order", { ascending: false }),
-        // Flash sales: only products that have a configured sale end window
+        // Every product with a live price cut, exactly like the homepage carousel.
+        // (The old query also required sale_ends_at to be set, so open-ended
+        // discounts - which is most of them - never reached this page.)
         supabase
           .from("products")
           .select(`*, media:product_media(*), variants:product_variants(*)`)
           .not("original_price", "is", null)
-          .not("sale_ends_at", "is", null)
-          .order("sale_ends_at", { ascending: true }),
+          .order("sale_ends_at", { ascending: true, nullsFirst: false }),
         supabase
           .from("bogo_offers")
           .select(`*, product:products!bogo_offers_product_id_fkey(*), free_product:products!bogo_offers_free_product_id_fkey(*)`)
@@ -92,7 +70,6 @@ const Deals = () => {
       ]);
 
       setBundles(bundlesRes.data || []);
-      setCourseBundles((courseBundlesRes.data || []).map(formatCourseBundle));
 
       const products = (productsRes.data || []).map(formatProduct);
       // Keep only products currently inside their active flash window
@@ -146,14 +123,13 @@ const Deals = () => {
 
   const handleAdd = (product: Product, variant?: ProductVariant) => addToCart(product, variant);
 
-  const SectionHeader = ({ icon: Icon, title, subtitle, color }: any) => (
+  const SectionHeader = ({ icon: Icon, title, color }: any) => (
     <div className="flex items-center gap-3 mb-3 sm:mb-4">
       <div className={`p-2 rounded-lg ${color}`}>
         <Icon className="h-5 w-5 text-white" />
       </div>
       <div>
         <h2 className="text-lg sm:text-xl md:text-2xl font-bold">{title}</h2>
-        {subtitle && <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>}
       </div>
     </div>
   );
@@ -161,15 +137,14 @@ const Deals = () => {
   const nothing =
     !isLoading &&
     bundles.length === 0 &&
-    courseBundles.length === 0 &&
     flashSales.length === 0 &&
     bogo.length === 0;
 
   return (
-    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col pb-16 lg:pb-0">
       <SEO
         title="Deals worth actually opening | ARIS"
-        description="What's on right now - flash sales counting down, course bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."
+        description="What's on right now - flash sales counting down, bundles priced as a pack, and buy-X-get-Y freebies that drop into your cart on their own."
         canonicalUrl="/deals"
         breadcrumbs={[{ name: "Home", url: "/" }, { name: "Deals", url: "/deals" }]}
       />
@@ -179,9 +154,6 @@ const Deals = () => {
         <div className="max-w-7xl mx-auto space-y-8 sm:space-y-12">
           <div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Deals</h1>
-            <p className="text-sm sm:text-base text-muted-foreground mt-1">
-              Flash sales, course bundles & free items - refresh often
-            </p>
           </div>
 
           {isLoading && (
@@ -197,7 +169,7 @@ const Deals = () => {
 
           {flashSales.length > 0 && (
             <section>
-              <SectionHeader icon={Flame} title="Flash Sales" subtitle="Clock's running. Grab it before it flips back." color="bg-red-600" />
+              <SectionHeader icon={Flame} title="Flash Sales" color="bg-red-600" />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {flashSales.map(p => <ProductCard key={p.id} product={p} onAddToCart={handleAdd} compact />)}
@@ -205,25 +177,10 @@ const Deals = () => {
             </section>
           )}
 
-          {courseBundles.length > 0 && (
-            <section>
-              <SectionHeader
-                icon={GraduationCap}
-                title="Course Bundles"
-                subtitle="Your whole reading list, boxed as one pack."
-                color="bg-blue-600"
-              />
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
-                {courseBundles.map(b => (
-                  <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />
-                ))}
-              </div>
-            </section>
-          )}
 
           {bundles.length > 0 && (
             <section>
-              <SectionHeader icon={Package} title="Bundle Deals" subtitle="Cheaper together than apart." color="bg-primary" />
+              <SectionHeader icon={Package} title="Bundle Deals" color="bg-primary" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bundles.map(b => <BundleCard key={b.id} bundle={b} onAddToCart={addBundleToCart} compact />)}
               </div>
@@ -232,7 +189,7 @@ const Deals = () => {
 
           {bogo.length > 0 && (
             <section>
-              <SectionHeader icon={Gift} title="Buy X, Get Y Free" subtitle="Freebie lands in the cart on its own." color="bg-purple-600" />
+              <SectionHeader icon={Gift} title="Buy X, Get Y Free" color="bg-purple-600" />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 auto-rows-fr">
                 {bogo.map(o => <BogoCard key={o.id} offer={o} onAddToCart={handleAdd} />)}
               </div>

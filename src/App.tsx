@@ -10,7 +10,7 @@ import Cart from "./pages/Cart";
 import Admin from "./pages/Admin";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
-import Students from "./pages/Students";
+import Shop from "./pages/Shop";
 import Testimonials from "./pages/Testimonials";
 import Offers from "./pages/Offers";
 import Deals from "./pages/Deals";
@@ -20,6 +20,10 @@ import CategoryLanding from "./pages/CategoryLanding";
 import SubcategoryLanding from "./pages/SubcategoryLanding";
 import ReviewSubmit from "./pages/ReviewSubmit";
 import ScrollToTop from "./components/common/ScrollToTop";
+import LegalPage from "./pages/LegalPage";
+import SchoolList from "./pages/SchoolList";
+import PixelRouteTracker from "./components/common/PixelRouteTracker";
+
 
 const queryClient = new QueryClient();
 
@@ -33,14 +37,16 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <ScrollToTop />
+              <PixelRouteTracker />
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/admin" element={<Admin />} />
-                <Route path="/students" element={<Students />} />
-                <Route path="/brochure" element={<Navigate to="/students" replace />} />
+                <Route path="/shop" element={<Shop />} />
+                <Route path="/students" element={<Navigate to="/shop" replace />} />
+                <Route path="/brochure" element={<Navigate to="/shop" replace />} />
                 <Route path="/testimonials" element={<Testimonials />} />
                 <Route path="/happy-customers" element={<Navigate to="/testimonials" replace />} />
                 <Route path="/deals" element={<Deals />} />
@@ -49,6 +55,13 @@ const App = () => {
                 <Route path="/category/:slug" element={<CategoryLanding />} />
                 <Route path="/category/:parentSlug/:slug" element={<SubcategoryLanding />} />
                 <Route path="/review/:token" element={<ReviewSubmit />} />
+                <Route path="/school-list" element={<SchoolList />} />
+                <Route path="/about" element={<LegalPage />} />
+                <Route path="/contact" element={<LegalPage />} />
+
+                <Route path="/privacy" element={<LegalPage />} />
+                <Route path="/returns" element={<LegalPage />} />
+                <Route path="/terms" element={<LegalPage />} />
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>

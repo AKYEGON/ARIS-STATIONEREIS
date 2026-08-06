@@ -1,35 +1,37 @@
-import { useState } from "react";
-import Papa from "papaparse";
-import { supabase } from "@/integrations/supabase/client";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Upload, Download, FileSpreadsheet, AlertTriangle, CheckCircle2, RefreshCw } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Download,
+  FileSpreadsheet,
+  Loader2,
+  Upload,
+} from "lucide-react";
 
-const PLACEHOLDER_IMAGE = "/placeholder.svg";
-
+/** Columns the importer understands. `name` is the only hard requirement. */
 const COLUMNS = [
-  "slug",
   "name",
+  "slug",
   "description",
+  "brand",
   "price",
   "original_price",
   "cost_price",
   "stock",
-  "category",
-  "categories",
   "image",
+  "categories",
   "is_featured",
-  "is_common",
   "display_order",
   "sale_starts_at",
   "sale_ends_at",
@@ -39,391 +41,426 @@ type Row = Record<string, string>;
 
 interface ParsedRow {
   line: number;
-  action: "create" | "update" | "skip";
+  raw: Row;
   errors: string[];
   warnings: string[];
+  action: "create" | "update" | "skip";
   existingId?: string;
-  values: {
-    slug?: string;
-    name: string;
-    description: string | null;
-    price: number;
-    original_price: number | null;
-    cost_price: number | null;
-    stock: number;
-    category: string;
-    image: string;
-    is_featured: boolean;
-    is_common: boolean;
-    display_order: number;
-    sale_starts_at: string | null;
-    sale_ends_at: string | null;
-  };
   categoryIds: string[];
+  payload: Record<string, any>;
 }
 
-const norm = (v?: string) => (v ?? "").trim();
-const toBool = (v?: string) => ["1", "true", "yes", "y"].includes(norm(v).toLowerCase());
-
-const toNumber = (v: string | undefined, field: string, errors: string[], fallback: number | null = null) => {
-  const raw = norm(v).replace(/[, ]/g, "").replace(/^KSh/i, "");
-  if (!raw) return fallback;
-  const n = Number(raw);
-  if (Number.isNaN(n)) {
-    errors.push(`${field} is not a number ("${v}")`);
-    return fallback;
+/** Minimal RFC4180 CSV parser (handles quotes, commas and newlines in fields). */
+const parseCsv = (text: string): string[][] => {
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let field = "";
+  let inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else inQuotes = false;
+      } else field += c;
+      continue;
+    }
+    if (c === '"') inQuotes = true;
+    else if (c === ",") {
+      row.push(field);
+      field = "";
+    } else if (c === "\n" || c === "\r") {
+      if (c === "\r" && text[i + 1] === "\n") i++;
+      row.push(field);
+      field = "";
+      if (row.some((v) => v.trim() !== "")) rows.push(row);
+      row = [];
+    } else field += c;
   }
-  if (n < 0) {
-    errors.push(`${field} cannot be negative`);
-    return fallback;
-  }
-  return n;
+  row.push(field);
+  if (row.some((v) => v.trim() !== "")) rows.push(row);
+  return rows;
 };
 
-const toDate = (v: string | undefined, field: string, errors: string[]) => {
-  const raw = norm(v);
-  if (!raw) return null;
-  const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) {
-    errors.push(`${field} is not a valid date ("${v}")`);
-    return null;
-  }
-  return d.toISOString();
+const csvEscape = (v: any) => {
+  const s = v === null || v === undefined ? "" : String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 };
+
+const truthy = (v: string) => ["true", "yes", "1", "y"].includes(v.trim().toLowerCase());
+const num = (v: string) => (v.trim() === "" ? null : Number(v));
 
 interface Props {
-  onImported: () => void;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  onDone: () => void;
 }
 
-const ProductImportDialog = ({ onImported }: Props) => {
-  const [open, setOpen] = useState(false);
-  const [rows, setRows] = useState<ParsedRow[]>([]);
-  const [fileName, setFileName] = useState("");
+/**
+ * CSV import / bulk edit. Export the catalogue, edit in a spreadsheet, upload
+ * it back. Rows are matched by slug first, then by name, so re-uploading an
+ * export updates the same products instead of duplicating them.
+ */
+export const ProductImportDialog = ({ open, onOpenChange, onDone }: Props) => {
+  const fileRef = useRef<HTMLInputElement>(null);
   const [parsing, setParsing] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [rows, setRows] = useState<ParsedRow[] | null>(null);
+  const [fileName, setFileName] = useState("");
   const [progress, setProgress] = useState(0);
 
   const reset = () => {
-    setRows([]);
+    setRows(null);
     setFileName("");
     setProgress(0);
+    if (fileRef.current) fileRef.current.value = "";
   };
 
-  const downloadCsv = (csv: string, name: string) => {
-    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
+  const downloadTemplate = async () => {
+    const { data } = await supabase
+      .from("products")
+      .select("*")
+      .order("display_order", { ascending: true });
+    const { data: assignments } = await supabase
+      .from("product_category_assignments")
+      .select("product_id, category:product_categories(slug)");
+
+    const bySlug: Record<string, string[]> = {};
+    (assignments || []).forEach((a: any) => {
+      if (a.category?.slug) (bySlug[a.product_id] ||= []).push(a.category.slug);
+    });
+
+    const lines = [COLUMNS.join(",")];
+    (data || []).forEach((p: any) => {
+      lines.push(
+        [
+          p.name,
+          p.slug,
+          p.description,
+          p.brand,
+          p.price,
+          p.original_price,
+          p.cost_price,
+          p.stock,
+          p.image,
+          (bySlug[p.id] || []).join("|"),
+          p.is_featured,
+          p.display_order,
+          p.sale_starts_at,
+          p.sale_ends_at,
+        ]
+          .map(csvEscape)
+          .join(","),
+      );
+    });
+    if (!data?.length) {
+      lines.push(
+        ["Example Pen", "", "Blue ballpoint", "Bic", "50", "", "30", "100", "", "pens|writing", "false", "0", "", ""].join(","),
+      );
+    }
+
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = name;
+    a.download = `aris-products-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const downloadTemplate = () => {
-    const sample = {
-      slug: "",
-      name: "Oxford A4 Counter Book 288 Pages",
-      description: "Hard cover counter book, 288 pages, A4.",
-      price: "450",
-      original_price: "600",
-      cost_price: "310",
-      stock: "40",
-      category: "Notebooks & Books",
-      categories: "Notebooks & Books|Filing & Organization",
-      image: "https://example.com/counter-book.jpg",
-      is_featured: "false",
-      is_common: "true",
-      display_order: "0",
-      sale_starts_at: "",
-      sale_ends_at: "",
-    };
-    downloadCsv(Papa.unparse({ fields: [...COLUMNS], data: [sample] }), "aris-product-import-template.csv");
-  };
-
-  const exportCurrent = async () => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("slug,name,description,price,original_price,cost_price,stock,category,image,is_featured,is_common,display_order,sale_starts_at,sale_ends_at")
-      .order("display_order");
-    if (error) {
-      toast.error("Could not export products");
-      return;
-    }
-    const withCats = (data || []).map((p: any) => ({ ...p, categories: "" }));
-    downloadCsv(
-      Papa.unparse({ fields: [...COLUMNS], data: withCats.map((p) => COLUMNS.map((c) => p[c] ?? "")) }),
-      `aris-products-${new Date().toISOString().slice(0, 10)}.csv`,
-    );
-    toast.success(`Exported ${data?.length ?? 0} products`);
   };
 
   const handleFile = async (file: File) => {
     setParsing(true);
     setFileName(file.name);
     try {
-      const text = await file.text();
-      const parsed = Papa.parse<Row>(text, {
-        header: true,
-        skipEmptyLines: "greedy",
-        transformHeader: (h) => h.trim().toLowerCase().replace(/\s+/g, "_"),
-      });
-
-      const missingName = !parsed.meta.fields?.includes("name");
-      if (missingName) {
-        toast.error('CSV must contain a "name" column. Download the template.');
-        setRows([]);
+      const grid = parseCsv(await file.text());
+      if (grid.length < 2) {
+        toast.error("That file has no data rows");
+        setParsing(false);
         return;
       }
+      const header = grid[0].map((h) => h.trim().toLowerCase().replace(/\s+/g, "_"));
+      if (!header.includes("name")) {
+        toast.error("Missing required column: name");
+        setParsing(false);
+        return;
+      }
+      const unknown = header.filter((h) => h && !COLUMNS.includes(h as any));
 
-      const [{ data: products }, { data: cats }] = await Promise.all([
-        supabase.from("products").select("id,name,slug"),
-        supabase.from("product_categories").select("id,name,slug"),
+      const [{ data: existing }, { data: cats }] = await Promise.all([
+        supabase.from("products").select("id, name, slug"),
+        supabase.from("product_categories").select("id, name, slug"),
       ]);
 
-      const bySlug = new Map((products || []).filter((p) => p.slug).map((p) => [p.slug!.toLowerCase(), p]));
-      const byName = new Map((products || []).map((p) => [p.name.trim().toLowerCase(), p]));
-      const catByKey = new Map<string, string>();
-      (cats || []).forEach((c) => {
-        catByKey.set(c.name.trim().toLowerCase(), c.id);
-        catByKey.set(c.slug.trim().toLowerCase(), c.id);
-      });
+      const bySlug = new Map((existing || []).map((p: any) => [String(p.slug || "").toLowerCase(), p]));
+      const byName = new Map((existing || []).map((p: any) => [p.name.trim().toLowerCase(), p]));
+      const catBySlug = new Map((cats || []).map((c: any) => [c.slug.toLowerCase(), c]));
+      const catByName = new Map((cats || []).map((c: any) => [c.name.trim().toLowerCase(), c]));
 
       const seen = new Set<string>();
-      const result: ParsedRow[] = parsed.data.map((raw, i) => {
+      const parsed: ParsedRow[] = grid.slice(1).map((cells, i) => {
+        const raw: Row = {};
+        header.forEach((h, idx) => (raw[h] = (cells[idx] ?? "").trim()));
+
         const errors: string[] = [];
         const warnings: string[] = [];
-        const name = norm(raw.name);
+        if (unknown.length && i === 0) warnings.push(`Ignored columns: ${unknown.join(", ")}`);
+
+        const name = raw.name;
         if (!name) errors.push("name is required");
 
-        const slug = norm(raw.slug).toLowerCase();
-        const key = slug || name.toLowerCase();
-        if (key && seen.has(key)) errors.push("duplicate row for this product inside the file");
-        if (key) seen.add(key);
+        const key = (raw.slug || name).toLowerCase();
+        if (key && seen.has(key)) errors.push("duplicate row in this file");
+        seen.add(key);
 
-        const existing = slug ? bySlug.get(slug) : byName.get(name.toLowerCase());
-        if (slug && !existing) warnings.push("slug not found, will be created as a new product");
+        const match =
+          (raw.slug && bySlug.get(raw.slug.toLowerCase())) ||
+          (name && byName.get(name.toLowerCase())) ||
+          undefined;
 
-        const price = toNumber(raw.price, "price", errors, existing ? null : 0);
-        if (!existing && (price === null || price === 0) && !norm(raw.price)) {
-          errors.push("price is required for new products");
-        }
-        const original_price = toNumber(raw.original_price, "original_price", errors);
-        const cost_price = toNumber(raw.cost_price, "cost_price", errors);
-        if (original_price !== null && price !== null && original_price <= price) {
-          warnings.push("original_price is not higher than price, no SALE badge will show");
-        }
-        const stock = toNumber(raw.stock, "stock", errors, 0) ?? 0;
+        ["price", "original_price", "cost_price", "stock", "display_order"].forEach((f) => {
+          if (raw[f] && Number.isNaN(Number(raw[f]))) errors.push(`${f} must be a number`);
+          else if (raw[f] && Number(raw[f]) < 0) errors.push(`${f} cannot be negative`);
+        });
+        if (!match && !raw.price) errors.push("price is required for new products");
+        if (raw.price && raw.original_price && Number(raw.original_price) < Number(raw.price))
+          warnings.push("original_price is below price, no discount will show");
 
-        const categoryNames = norm(raw.categories)
-          .split(/[|;]/)
-          .map((c) => c.trim())
-          .filter(Boolean);
-        const categoryIds: string[] = [];
-        categoryNames.forEach((c) => {
-          const id = catByKey.get(c.toLowerCase());
-          if (id) categoryIds.push(id);
-          else warnings.push(`category "${c}" does not exist, skipped`);
+        ["sale_starts_at", "sale_ends_at"].forEach((f) => {
+          if (raw[f] && Number.isNaN(Date.parse(raw[f]))) errors.push(`${f} is not a valid date`);
         });
 
-        const image = norm(raw.image);
-        if (!image && !existing) warnings.push("no image, placeholder will be used");
+        const categoryIds: string[] = [];
+        (raw.categories || "")
+          .split(/[|;]/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+          .forEach((token) => {
+            const cat = catBySlug.get(token.toLowerCase()) || catByName.get(token.toLowerCase());
+            if (cat) categoryIds.push(cat.id);
+            else warnings.push(`unknown category "${token}" skipped`);
+          });
 
-        const sale_starts_at = toDate(raw.sale_starts_at, "sale_starts_at", errors);
-        const sale_ends_at = toDate(raw.sale_ends_at, "sale_ends_at", errors);
-        if (sale_starts_at && sale_ends_at && sale_starts_at >= sale_ends_at) {
-          errors.push("sale_ends_at must be after sale_starts_at");
+        const primaryName = categoryIds.length
+          ? (cats || []).find((c: any) => c.id === categoryIds[0])?.name || ""
+          : undefined;
+
+        const payload: Record<string, any> = { name };
+        const setIf = (col: string, val: any) => {
+          if (val !== undefined && val !== null) payload[col] = val;
+        };
+        if (raw.description !== undefined && raw.description !== "") payload.description = raw.description;
+        if (raw.brand !== undefined && raw.brand !== "") payload.brand = raw.brand;
+        if (raw.image) payload.image = raw.image;
+        if (raw.price) setIf("price", num(raw.price));
+        if (raw.original_price !== undefined && "original_price" in raw)
+          payload.original_price = num(raw.original_price);
+        if (raw.cost_price) setIf("cost_price", num(raw.cost_price));
+        if (raw.stock !== "" && raw.stock !== undefined) setIf("stock", num(raw.stock));
+        if (raw.display_order) setIf("display_order", num(raw.display_order));
+        if (raw.is_featured !== undefined && raw.is_featured !== "")
+          payload.is_featured = truthy(raw.is_featured);
+        if ("sale_starts_at" in raw)
+          payload.sale_starts_at = raw.sale_starts_at ? new Date(raw.sale_starts_at).toISOString() : null;
+        if ("sale_ends_at" in raw)
+          payload.sale_ends_at = raw.sale_ends_at ? new Date(raw.sale_ends_at).toISOString() : null;
+        if (primaryName !== undefined) payload.category = primaryName;
+        if (!match) {
+          payload.image = payload.image || "/placeholder.svg";
+          payload.category = payload.category ?? "";
+          payload.description = payload.description ?? "";
         }
 
         return {
           line: i + 2,
-          action: errors.length ? "skip" : existing ? "update" : "create",
+          raw,
           errors,
           warnings,
-          existingId: existing?.id,
+          action: errors.length ? "skip" : match ? "update" : "create",
+          existingId: match?.id,
           categoryIds,
-          values: {
-            slug: slug || undefined,
-            name,
-            description: norm(raw.description) || null,
-            price: price ?? 0,
-            original_price,
-            cost_price,
-            stock: Math.round(stock),
-            category: norm(raw.category) || categoryNames[0] || "General",
-            image: image || PLACEHOLDER_IMAGE,
-            is_featured: toBool(raw.is_featured),
-            is_common: toBool(raw.is_common),
-            display_order: Math.round(toNumber(raw.display_order, "display_order", errors, 0) ?? 0),
-            sale_starts_at,
-            sale_ends_at,
-          },
+          payload,
         };
       });
 
-      setRows(result);
-    } catch (e) {
+      setRows(parsed);
+    } catch (e: any) {
       console.error(e);
       toast.error("Could not read that file");
-    } finally {
-      setParsing(false);
     }
+    setParsing(false);
   };
 
-  const valid = rows.filter((r) => r.action !== "skip");
-  const creates = valid.filter((r) => r.action === "create");
-  const updates = valid.filter((r) => r.action === "update");
-  const invalid = rows.filter((r) => r.action === "skip");
-
   const runImport = async () => {
-    if (!valid.length) return;
+    if (!rows) return;
+    const usable = rows.filter((r) => r.action !== "skip");
     setImporting(true);
     setProgress(0);
-    let done = 0;
-    let ok = 0;
-    const failures: string[] = [];
+    let created = 0;
+    let updated = 0;
+    let failed = 0;
 
-    for (const row of valid) {
+    for (let i = 0; i < usable.length; i++) {
+      const r = usable[i];
       try {
-        const payload: Record<string, unknown> = { ...row.values };
-        if (row.action === "update") {
-          // Never blank out an existing image with the placeholder.
-          if (payload.image === PLACEHOLDER_IMAGE) delete payload.image;
-          delete payload.slug;
-          const { error } = await supabase.from("products").update(payload as any).eq("id", row.existingId!);
+        let productId = r.existingId;
+        if (r.action === "create") {
+          const { data, error } = await supabase
+            .from("products")
+            .insert(r.payload as any)
+            .select("id")
+            .single();
           if (error) throw error;
+          productId = data.id;
+          created++;
         } else {
-          if (!payload.slug) delete payload.slug;
-          const { data, error } = await supabase.from("products").insert(payload as any).select("id").single();
+          const { error } = await supabase.from("products").update(r.payload).eq("id", productId!);
           if (error) throw error;
-          row.existingId = data.id;
+          updated++;
         }
 
-        if (row.categoryIds.length && row.existingId) {
-          await supabase.from("product_category_assignments").delete().eq("product_id", row.existingId);
-          await supabase.from("product_category_assignments").insert(
-            row.categoryIds.map((category_id) => ({ product_id: row.existingId!, category_id })),
-          );
+        if (productId && r.raw.categories !== undefined) {
+          await supabase.from("product_category_assignments").delete().eq("product_id", productId);
+          if (r.categoryIds.length) {
+            await supabase
+              .from("product_category_assignments")
+              .insert(r.categoryIds.map((category_id) => ({ product_id: productId!, category_id })));
+          }
         }
-        ok++;
-      } catch (e: any) {
-        failures.push(`Line ${row.line} (${row.values.name}): ${e.message ?? "failed"}`);
+      } catch (e) {
+        console.error("Import row failed", r.line, e);
+        failed++;
       }
-      done++;
-      setProgress(Math.round((done / valid.length) * 100));
+      setProgress(Math.round(((i + 1) / usable.length) * 100));
     }
 
     setImporting(false);
-    if (failures.length) {
-      console.error("Import failures", failures);
-      toast.error(`${ok} imported, ${failures.length} failed. See console for details.`);
-    } else {
-      toast.success(`${ok} products imported`);
-    }
-    onImported();
+    toast[failed ? "warning" : "success"](
+      `${created} added, ${updated} updated${failed ? `, ${failed} failed` : ""}`,
+    );
     reset();
-    if (!failures.length) setOpen(false);
+    onDone();
+    if (!failed) onOpenChange(false);
   };
+
+  const counts = rows
+    ? {
+        create: rows.filter((r) => r.action === "create").length,
+        update: rows.filter((r) => r.action === "update").length,
+        skip: rows.filter((r) => r.action === "skip").length,
+      }
+    : null;
 
   return (
     <Dialog
       open={open}
-      onOpenChange={(o) => {
-        setOpen(o);
-        if (!o) reset();
+      onOpenChange={(v) => {
+        if (!importing) {
+          if (!v) reset();
+          onOpenChange(v);
+        }
       }}
     >
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full sm:w-auto">
-          <FileSpreadsheet className="mr-2 h-4 w-4" />
-          Import / Bulk Edit
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import products from CSV</DialogTitle>
-          <DialogDescription>
-            Export what you have, edit it in Excel or Sheets, then upload it back. Rows matched by slug (or exact name)
-            are updated, everything else is created.
-          </DialogDescription>
+          <DialogTitle className="flex items-center gap-2">
+            <FileSpreadsheet className="h-5 w-5" /> Import & bulk edit products
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Button variant="outline" size="sm" onClick={downloadTemplate}>
-            <Download className="mr-2 h-4 w-4" /> Blank template
-          </Button>
-          <Button variant="outline" size="sm" onClick={exportCurrent}>
-            <Download className="mr-2 h-4 w-4" /> Export current catalog
-          </Button>
-        </div>
+        <div className="space-y-4">
+          <Alert>
+            <AlertDescription className="text-xs leading-relaxed">
+              Export the catalogue, edit it in Excel or Google Sheets, then upload it back. Rows are
+              matched by <strong>slug</strong>, then by <strong>name</strong>: matches are updated,
+              everything else is added. Blank cells leave the existing value alone.
+              <br />
+              Columns: {COLUMNS.join(", ")}. Use <code>categories</code> with pipe separated slugs,
+              e.g. <code>pens|writing</code>.
+            </AlertDescription>
+          </Alert>
 
-        <label className="flex flex-col items-center justify-center gap-2 border-2 border-dashed rounded-lg p-6 cursor-pointer hover:bg-muted/50 transition-colors">
-          <Upload className="h-6 w-6 text-muted-foreground" />
-          <span className="text-sm text-muted-foreground">
-            {parsing ? "Reading file..." : fileName || "Click to choose a .csv file"}
-          </span>
-          <input
-            type="file"
-            accept=".csv,text/csv"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-              e.target.value = "";
-            }}
-          />
-        </label>
-
-        {rows.length > 0 && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="secondary">{rows.length} rows read</Badge>
-              <Badge className="bg-primary/15 text-primary hover:bg-primary/15">{creates.length} new</Badge>
-              <Badge className="bg-blue-500/15 text-blue-600 hover:bg-blue-500/15">{updates.length} updates</Badge>
-              {invalid.length > 0 && <Badge variant="destructive">{invalid.length} blocked</Badge>}
-            </div>
-
-            <div className="border rounded-lg max-h-72 overflow-y-auto text-sm">
-              {rows.map((r) => (
-                <div key={r.line} className="flex gap-3 items-start px-3 py-2 border-b last:border-0">
-                  <span className="text-xs text-muted-foreground w-10 shrink-0 pt-0.5">#{r.line}</span>
-                  {r.action === "skip" ? (
-                    <AlertTriangle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
-                  ) : r.action === "update" ? (
-                    <RefreshCw className="h-4 w-4 text-blue-600 shrink-0 mt-0.5" />
-                  ) : (
-                    <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  )}
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{r.values.name || "(no name)"}</p>
-                    <p className="text-xs text-muted-foreground">
-                      KSh {r.values.price} · stock {r.values.stock} · {r.values.category}
-                    </p>
-                    {r.errors.map((e, i) => (
-                      <p key={i} className="text-xs text-destructive">
-                        {e}
-                      </p>
-                    ))}
-                    {r.warnings.map((w, i) => (
-                      <p key={i} className="text-xs text-amber-600">
-                        {w}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {importing && <Progress value={progress} />}
-
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" onClick={reset} disabled={importing}>
-                Clear
-              </Button>
-              <Button onClick={runImport} disabled={importing || valid.length === 0}>
-                {importing ? `Importing ${progress}%` : `Import ${valid.length} rows`}
-              </Button>
-            </div>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={downloadTemplate} className="flex-1">
+              <Download className="h-4 w-4 mr-2" /> Export current catalogue (CSV)
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              disabled={parsing || importing}
+              onClick={() => fileRef.current?.click()}
+            >
+              {parsing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4 mr-2" />
+              )}
+              Choose CSV file
+            </Button>
+            <input
+              ref={fileRef}
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleFile(f);
+              }}
+            />
           </div>
-        )}
+
+          {rows && counts && (
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-muted-foreground">{fileName}</span>
+                <Badge className="bg-emerald-600">{counts.create} new</Badge>
+                <Badge className="bg-blue-600">{counts.update} updates</Badge>
+                {counts.skip > 0 && <Badge variant="destructive">{counts.skip} blocked</Badge>}
+              </div>
+
+              <div className="border rounded-md max-h-64 overflow-y-auto divide-y text-xs">
+                {rows.map((r) => (
+                  <div key={r.line} className="flex items-start gap-2 p-2">
+                    {r.errors.length ? (
+                      <AlertTriangle className="h-3.5 w-3.5 text-destructive shrink-0 mt-0.5" />
+                    ) : (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">
+                        Line {r.line}: {r.raw.name || "(no name)"}{" "}
+                        <span className="text-muted-foreground font-normal">
+                          {r.action === "update" ? "will update" : r.action === "create" ? "will be added" : "skipped"}
+                        </span>
+                      </p>
+                      {r.errors.map((e) => (
+                        <p key={e} className="text-destructive">{e}</p>
+                      ))}
+                      {r.warnings.map((w) => (
+                        <p key={w} className="text-amber-600">{w}</p>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Button
+                className="w-full"
+                disabled={importing || counts.create + counts.update === 0}
+                onClick={runImport}
+              >
+                {importing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" /> Importing… {progress}%
+                  </>
+                ) : (
+                  `Import ${counts.create + counts.update} row(s)`
+                )}
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
