@@ -11,6 +11,8 @@ import CountdownTimer from "./CountdownTimer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { productStock, variantStock, backorderLabel } from "@/lib/stock";
+import RestockNotifyDialog from "./RestockNotifyDialog";
 
 interface ProductCardProps {
   product: Product;
@@ -22,6 +24,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
   const [imageLoaded, setImageLoaded] = useState(false);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(undefined);
+  const [notifyOpen, setNotifyOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const hasMultipleMedia = product.media && product.media.length > 0;
@@ -40,6 +43,10 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
   const saleActive = isOnSale(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
   const baseEffectivePrice = getEffectivePrice(product.price, product.originalPrice, product.saleStartsAt, product.saleEndsAt);
   const displayPrice = selectedVariant ? selectedVariant.price : baseEffectivePrice;
+  const stockInfo = productStock(product, selectedVariant);
+  const soldOut = stockInfo.state === "out_of_stock";
+  const onBackorder = stockInfo.state === "backorder";
+  const alternativesHref = `/shop?q=${encodeURIComponent(product.name.split(" ").slice(0, 2).join(" "))}`;
 
   useEffect(() => {
     setImageLoaded(false);
@@ -64,7 +71,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
       "url": productUrl,
       "priceCurrency": "KES",
       "price": displayPrice,
-      "availability": "https://schema.org/InStock",
+      "availability": soldOut ? "https://schema.org/OutOfStock" : onBackorder ? "https://schema.org/BackOrder" : "https://schema.org/InStock",
       "seller": {
         "@type": "Organization",
         "name": "ARIS"
@@ -97,12 +104,18 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             alt={`${product.name} - ${product.description} - Buy at ARIS Nairobi Kenya`}
             loading="lazy"
             onLoad={() => setImageLoaded(true)}
-            className={`max-h-full max-w-full object-contain p-2 ${!isMobile ? 'transition-all duration-300 group-hover:scale-105' : ''} ${
+            className={`max-h-full max-w-full object-contain p-2 ${soldOut ? "opacity-45 grayscale" : ""} ${!isMobile ? 'transition-all duration-300 group-hover:scale-105' : ''} ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
           />
 
           <Watermark size="sm" />
+
+          {soldOut && (
+            <span className="absolute inset-x-0 bottom-0 bg-foreground/85 py-1 text-center text-[10px] font-bold uppercase tracking-wider text-background xs:text-xs">
+              Out of stock
+            </span>
+          )}
 
 
           {/* Sale badge (top-left) */}
@@ -140,14 +153,14 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
 
           {/* Variant Selection - compact dropdown keeps card height consistent */}
           {hasVariants && Object.entries(variantGroups).map(([type, variants]) => {
-            const allOut = variants.every((v) => v.stock <= 0);
+            const allOut = variants.every((v) => !variantStock(v).purchasable);
             return (
               <div key={type} className="mb-1.5">
                 <Select
                   value={selectedVariant && variants.some((v) => v.id === selectedVariant.id) ? selectedVariant.id : undefined}
                   onValueChange={(val) => {
                     const v = variants.find((x) => x.id === val);
-                    if (v && v.stock > 0) setSelectedVariant(v);
+                    if (v && variantStock(v).purchasable) setSelectedVariant(v);
                   }}
                   disabled={allOut}
                 >
@@ -156,7 +169,8 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
                   </SelectTrigger>
                   <SelectContent className="max-h-60">
                     {variants.map((v) => {
-                      const outOfStock = v.stock <= 0;
+                      const vInfo = variantStock(v);
+                      const outOfStock = !vInfo.purchasable;
                       return (
                         <SelectItem
                           key={v.id}
@@ -199,31 +213,65 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
                 KSh {displayPrice.toFixed(0)}
               </p>
             )}
+            {onBackorder && (
+              <p className="mt-1 text-[10px] font-medium leading-tight text-amber-600 xs:text-[11px]">
+                {backorderLabel(stockInfo.etaDays)}
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter className="p-2 xs:p-3 sm:p-4 pt-0">
-          <Button 
-            className="w-full h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90 touch-manipulation"
-            onClick={() => {
-              if (hasVariants && !selectedVariant) {
-                toast.error("Please select an option first");
-                return;
-              }
-              onAddToCart(product, selectedVariant);
-            }}
-          >
-            <ShoppingCart className="mr-1.5 h-3.5 w-3.5 xs:h-4 xs:w-4" />
-            <span className="hidden xs:inline">
-              {hasVariants && !selectedVariant ? "Select Option" : "Add to Cart"}
-            </span>
-            <span className="xs:hidden">
-              {hasVariants && !selectedVariant ? "Select" : "Add"}
-            </span>
-          </Button>
+          {soldOut ? (
+            <div className="grid w-full grid-cols-2 gap-1.5">
+              <Button
+                variant="outline"
+                className="h-8 px-1 text-[11px] xs:h-9 xs:text-xs sm:h-10 sm:text-sm"
+                onClick={() => setNotifyOpen(true)}
+              >
+                Notify
+              </Button>
+              <Button
+                variant="secondary"
+                asChild
+                className="h-8 px-1 text-[11px] xs:h-9 xs:text-xs sm:h-10 sm:text-sm"
+              >
+                <Link to={alternativesHref}>Alternatives</Link>
+              </Button>
+            </div>
+          ) : (
+            <Button
+              className="w-full h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm transition-all duration-200 active:scale-95 bg-primary hover:bg-primary/90 touch-manipulation"
+              onClick={() => {
+                if (hasVariants && !selectedVariant) {
+                  toast.error("Please select an option first");
+                  return;
+                }
+                if (onBackorder) toast.info(backorderLabel(stockInfo.etaDays));
+                onAddToCart(product, selectedVariant);
+              }}
+            >
+              <ShoppingCart className="mr-1.5 h-3.5 w-3.5 xs:h-4 xs:w-4" />
+              <span className="hidden xs:inline">
+                {hasVariants && !selectedVariant ? "Select Option" : onBackorder ? "Pre-order" : "Add to Cart"}
+              </span>
+              <span className="xs:hidden">
+                {hasVariants && !selectedVariant ? "Select" : onBackorder ? "Pre-order" : "Add"}
+              </span>
+            </Button>
+          )}
         </CardFooter>
       </Card>
 
       {/* Media Viewer Dialog */}
+      <RestockNotifyDialog
+        open={notifyOpen}
+        onClose={() => setNotifyOpen(false)}
+        productId={product.id}
+        productName={product.name}
+        variantId={selectedVariant?.id}
+        variantLabel={selectedVariant ? `${selectedVariant.variant_type}: ${selectedVariant.variant_value}` : null}
+      />
+
       <ProductMediaViewer
         product={product}
         open={viewerOpen}
