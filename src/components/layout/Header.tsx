@@ -20,7 +20,6 @@ import {
   IconPriceDrop,
   IconCustomers,
   IconCart,
-  IconSearch,
   getCategoryIcon,
 } from "@/components/icons/aris-icons";
 
@@ -47,7 +46,6 @@ const Header = ({ cartItemCount }: HeaderProps) => {
   const { tree } = useCategoryTree();
   const [menuOpen, setMenuOpen] = useState(false);
   const [megaOpen, setMegaOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
