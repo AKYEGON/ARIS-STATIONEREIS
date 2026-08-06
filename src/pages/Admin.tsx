@@ -190,7 +190,9 @@ const Admin = () => {
     is_featured: false,
     display_order: "0",
     saleStartsAt: "",
-    saleEndsAt: ""
+    saleEndsAt: "",
+    stockStatus: "active",
+    backorderEtaDays: ""
   });
   const [productCategories, setProductCategories] = useState<ProductCategory[]>([]);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
@@ -836,7 +838,9 @@ const Admin = () => {
       is_featured: false,
         display_order: "0",
       saleStartsAt: "",
-      saleEndsAt: ""
+      saleEndsAt: "",
+      stockStatus: "active",
+      backorderEtaDays: ""
     });
     setSelectedCategoryIds([]);
     setSelectedImageFile(null);
@@ -911,7 +915,11 @@ const Admin = () => {
         is_featured: formData.is_featured,
         display_order: parseInt(formData.display_order) || 0,
         sale_starts_at: formData.saleStartsAt ? new Date(formData.saleStartsAt).toISOString() : null,
-        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null
+        sale_ends_at: formData.saleEndsAt ? new Date(formData.saleEndsAt).toISOString() : null,
+        stock_status: formData.stockStatus,
+        backorder_eta_days: formData.stockStatus === "backorder" && formData.backorderEtaDays
+          ? parseInt(formData.backorderEtaDays)
+          : null
       };
 
 
@@ -1027,6 +1035,10 @@ const Admin = () => {
           original_price: formData.originalPrice ? parseFloat(formData.originalPrice) : null,
           cost_price: effectiveCost,
           stock: formData.stock ? parseInt(formData.stock) : 0,
+          stock_status: formData.stockStatus,
+          backorder_eta_days: formData.stockStatus === "backorder" && formData.backorderEtaDays
+            ? parseInt(formData.backorderEtaDays)
+            : null,
           brand: formData.brand.trim() || null,
           category: selectedCategoryIds.length > 0
             ? (productCategories.find(c => c.id === selectedCategoryIds[0])?.name || "")
@@ -1147,7 +1159,9 @@ const Admin = () => {
       is_featured: product.is_featured || false,
       display_order: (product.display_order || 0).toString(),
       saleStartsAt: product.saleStartsAt ? product.saleStartsAt.slice(0, 16) : "",
-      saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : ""
+      saleEndsAt: product.saleEndsAt ? product.saleEndsAt.slice(0, 16) : "",
+      stockStatus: (product as any).stockStatus || "active",
+      backorderEtaDays: (product as any).backorderEtaDays?.toString() || ""
     });
     setSelectedImageFile(null);
     setImageUrl(product.image);
@@ -1855,6 +1869,29 @@ const Admin = () => {
                         onChange={(e) => setFormData({...formData, stock: e.target.value})}
                         placeholder="0"
                       />
+                    </div>
+                    <div>
+                      <Label htmlFor="add-stock-status">Availability</Label>
+                      <select
+                        id="add-stock-status"
+                        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={formData.stockStatus}
+                        onChange={(e) => setFormData({ ...formData, stockStatus: e.target.value })}
+                      >
+                        <option value="active">Active (sell while stock lasts)</option>
+                        <option value="out_of_stock">Out of stock (no orders)</option>
+                        <option value="backorder">Backorder (keep taking orders)</option>
+                      </select>
+                      {formData.stockStatus === "backorder" && (
+                        <Input
+                          className="mt-2"
+                          type="number"
+                          min={1}
+                          placeholder="Ships in how many days?"
+                          value={formData.backorderEtaDays}
+                          onChange={(e) => setFormData({ ...formData, backorderEtaDays: e.target.value })}
+                        />
+                      )}
                     </div>
                     <div>
                       <Label>Categories</Label>
@@ -2921,6 +2958,29 @@ const Admin = () => {
                   placeholder="0"
                 />
               </div>
+                    <div>
+                      <Label htmlFor="edit-stock-status">Availability</Label>
+                      <select
+                        id="edit-stock-status"
+                        className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        value={formData.stockStatus}
+                        onChange={(e) => setFormData({ ...formData, stockStatus: e.target.value })}
+                      >
+                        <option value="active">Active (sell while stock lasts)</option>
+                        <option value="out_of_stock">Out of stock (no orders)</option>
+                        <option value="backorder">Backorder (keep taking orders)</option>
+                      </select>
+                      {formData.stockStatus === "backorder" && (
+                        <Input
+                          className="mt-2"
+                          type="number"
+                          min={1}
+                          placeholder="Ships in how many days?"
+                          value={formData.backorderEtaDays}
+                          onChange={(e) => setFormData({ ...formData, backorderEtaDays: e.target.value })}
+                        />
+                      )}
+                    </div>
               <div>
                 <Label>Categories</Label>
                 <CategoryPicker
