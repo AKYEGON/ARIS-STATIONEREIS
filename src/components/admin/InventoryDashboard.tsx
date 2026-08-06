@@ -303,7 +303,7 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                   const hasVariants = (product.variants?.length || 0) > 0;
                   const totalStock = effectiveStock(product);
                   const lowStock = totalStock <= 5;
-                  const profit = calculateProfit(product.price, product.cost_price);
+                  const profit = calculateProfit(Number(product.price ?? 0), Number(product.cost_price ?? 0));
                   const marginPct = product.price > 0 ? (profit / product.price) * 100 : 0;
                   const isExpanded = expanded.has(product.id);
                   return (
@@ -351,9 +351,9 @@ export const InventoryDashboard = ({ userRole = 'admin' }: InventoryDashboardPro
                         </div>
                       </TableCell>
                       {userRole === 'admin' && (
-                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">KSh {product.cost_price.toFixed(0)}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-xs sm:text-sm">KSh {Number(product.cost_price ?? 0).toFixed(0)}</TableCell>
                       )}
-                      <TableCell className="hidden md:table-cell text-xs sm:text-sm">KSh {product.price.toFixed(0)}</TableCell>
+                      <TableCell className="hidden md:table-cell text-xs sm:text-sm">KSh {Number(product.price ?? 0).toFixed(0)}</TableCell>
                       {userRole === 'admin' && (
                         <TableCell className="p-2 sm:p-4">
                           <div className="flex flex-col leading-tight">

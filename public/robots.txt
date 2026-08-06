@@ -1,5 +1,5 @@
 # ARIS - Robots.txt
-# https://arisstationaries.co.ke
+# https://www.arisstationaries.co.ke
 
 User-agent: Googlebot
 Allow: /
@@ -15,6 +15,14 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# TikTok / Instagram in-app link previews
+User-agent: Bytespider
+Allow: /
+
+User-agent: TikTokSpider
+Allow: /
+
+
 User-agent: *
 Allow: /
 
@@ -27,4 +35,4 @@ Disallow: /checkout
 Disallow: /brochure
 
 # Sitemap
-Sitemap: https://arisstationaries.co.ke/sitemap.xml
+Sitemap: https://www.arisstationaries.co.ke/sitemap.xml

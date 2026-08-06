@@ -53,7 +53,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
   }, [product.image]);
 
   // Generate product URL for SEO
-  const productUrl = `https://arisstationaries.co.ke/products/${product.id}`;
+  const productUrl = `https://www.arisstationaries.co.ke/product/${product.slug || product.id}`;
   
   // Product Schema for SEO
   const productSchema = {
@@ -61,7 +61,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
     "@type": "Product",
     "name": product.name,
     "description": product.description,
-    "image": product.image.startsWith("http") ? product.image : `https://arisstationaries.co.ke${product.image}`,
+    "image": product.image.startsWith("http") ? product.image : `https://www.arisstationaries.co.ke${product.image}`,
     "brand": {
       "@type": "Brand",
       "name": "ARIS"
@@ -183,7 +183,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
                               {v.variant_value}
                             </span>
                             <span className="text-muted-foreground tabular-nums">
-                              {outOfStock ? "Out of stock" : `KSh ${v.price.toFixed(0)}`}
+                              {outOfStock ? "Out of stock" : `KSh ${Number(v.price ?? 0).toFixed(0)}`}
                             </span>
                           </span>
                         </SelectItem>
@@ -199,7 +199,7 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
             {!selectedVariant && saleActive ? (
               <div className="flex flex-col gap-0">
                 <p className="text-[10px] xs:text-xs text-muted-foreground line-through leading-tight">
-                  Was KSh {product.originalPrice!.toFixed(0)}
+                  Was KSh {Number(product.originalPrice ?? 0).toFixed(0)}
                 </p>
                 <p className="text-sm xs:text-base sm:text-lg font-bold text-primary leading-tight">
                   KSh {displayPrice.toFixed(0)}

@@ -17,6 +17,7 @@ import Deals from "./pages/Deals";
 import NotFound from "./pages/NotFound";
 import ProductDetail from "./pages/ProductDetail";
 import CategoryLanding from "./pages/CategoryLanding";
+import SubcategoryLanding from "./pages/SubcategoryLanding";
 import ReviewSubmit from "./pages/ReviewSubmit";
 import ScrollToTop from "./components/common/ScrollToTop";
 import LegalPage from "./pages/LegalPage";
@@ -52,6 +53,7 @@ const App = () => {
                 <Route path="/offers" element={<Navigate to="/deals" replace />} />
                 <Route path="/product/:slug" element={<ProductDetail />} />
                 <Route path="/category/:slug" element={<CategoryLanding />} />
+                <Route path="/category/:parentSlug/:slug" element={<SubcategoryLanding />} />
                 <Route path="/review/:token" element={<ReviewSubmit />} />
                 <Route path="/school-list" element={<SchoolList />} />
                 <Route path="/about" element={<LegalPage />} />

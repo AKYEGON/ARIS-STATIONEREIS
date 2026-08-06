@@ -20,7 +20,7 @@ export function QuickSaleSuccessDialog({ open, onClose, saleData }: QuickSaleSuc
   const orderRef = saleData.orderId ? saleData.orderId.slice(0, 8).toUpperCase() : '';
   const customerNameEncoded = encodeURIComponent(saleData.customerName);
   const customerPhoneEncoded = saleData.customerPhone !== 'N/A' ? encodeURIComponent(saleData.customerPhone) : '';
-  const reviewLink = `https://arisstationaries.co.ke/testimonials?review=true&name=${customerNameEncoded}&phone=${customerPhoneEncoded}`;
+  const reviewLink = `https://www.arisstationaries.co.ke/testimonials?review=true&name=${customerNameEncoded}&phone=${customerPhoneEncoded}`;
   
   // Match the exact same message format as the "Delivered" status template
   const reviewMessage = saleData.customerName && saleData.customerName !== 'Walk-in Customer'
