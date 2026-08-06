@@ -19,6 +19,8 @@ export interface ProductVariant {
   sku: string | null;
   is_active: boolean;
   display_order: number;
+  stock_status?: string | null;
+  backorder_eta_days?: number | null;
 }
 
 export interface Product {
@@ -29,6 +31,8 @@ export interface Product {
   originalPrice?: number;
   costPrice?: number;
   stock?: number;
+  stockStatus?: string | null;
+  backorderEtaDays?: number | null;
   image: string;
   brand?: string | null;
   category: string;

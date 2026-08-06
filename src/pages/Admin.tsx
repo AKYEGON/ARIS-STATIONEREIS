@@ -299,6 +299,8 @@ const Admin = () => {
         saleEndsAt: (p as any).sale_ends_at || null,
         costPrice: p.cost_price ? Number(p.cost_price) : 0,
         stock: p.stock || 0,
+        stockStatus: (p as any).stock_status || 'active',
+        backorderEtaDays: (p as any).backorder_eta_days ?? null,
         category: p.category,
         brand: (p as any).brand || null,
         image: p.image,
