@@ -73,10 +73,11 @@ const Header = ({ cartItemCount }: HeaderProps) => {
             </span>
           </Link>
 
-          {/* Persistent search, desktop */}
-          <div className="hidden flex-1 justify-center lg:flex">
+          {/* Persistent search, tablet + desktop */}
+          <div className="hidden min-w-0 flex-1 justify-center md:flex">
             <SearchBar className="w-full max-w-xl" />
           </div>
+
 
           {/* Desktop nav */}
           <nav className="hidden shrink-0 items-center gap-1 lg:flex">
