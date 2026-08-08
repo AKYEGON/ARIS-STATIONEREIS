@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { isOnSale, getEffectivePrice } from "@/components/products/SaleBadge";
 import { productStock, variantStock, backorderLabel } from "@/lib/stock";
 import RestockNotifyDialog from "@/components/products/RestockNotifyDialog";
+import { useCategoryTree } from "@/hooks/use-category-tree";
 
 const formatProduct = (p: any): Product & { slug?: string } => ({
   id: p.id,
