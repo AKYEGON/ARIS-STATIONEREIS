@@ -114,7 +114,7 @@ const HeroCarousel = () => {
                   width={1600}
                   height={575}
                   loading={i === 0 ? "eager" : "lazy"}
-                  fetchPriority={i === 0 ? "high" : "auto"}
+                  {...({ fetchpriority: i === 0 ? "high" : "auto" } as any)}
                   decoding="async"
                   className={`absolute inset-0 h-full w-full object-contain transition-all duration-700 ease-out ${
                     i === index ? "scale-100 opacity-100" : "scale-[1.03] opacity-0"
