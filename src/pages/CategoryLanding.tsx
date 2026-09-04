@@ -10,45 +10,16 @@ import ProductCard from "@/components/products/ProductCard";
 import CategoryIcon from "@/components/products/CategoryIcon";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
-import { toast } from "sonner";
-
-interface CategoryRow {
-  id: string;
-  name: string;
-  slug: string;
-  icon: string | null;
-}
-
-const BASE_URL = "https://arisstationaries.co.ke";
-
-const formatProduct = (p: any): Product & { slug?: string } => ({
-  id: p.id,
-  name: p.name,
-  description: p.description || "",
-  price: Number(p.price),
-  originalPrice: p.original_price ? Number(p.original_price) : undefined,
-  saleStartsAt: p.sale_starts_at || null,
-  saleEndsAt: p.sale_ends_at || null,
-  stock: p.stock ?? 0,
-  stockStatus: p.stock_status || 'active',
-  backorderEtaDays: p.backorder_eta_days ?? null,
-  category: p.category,
-  image: p.image,
-  is_featured: p.is_featured,
-  display_order: p.display_order,
-  slug: p.slug,
-  media: ((p as any).media || []).map((m: any) => ({
-    ...m,
-    media_type: m.media_type as "image" | "video",
-  })),
-  variants: ((p as any).variants || [])
-    .filter((v: any) => v.is_active)
-    .map((v: any) => ({
-      ...v,
-      price: Number(v.price),
-      cost_price: Number(v.cost_price),
-    })),
-});
+import { useCategoryTree } from "@/hooks/use-category-tree";
+import {
+  BASE_URL,
+  CategoryRecord,
+  categoryPath,
+  fetchProductsForCategories,
+  findBySlug,
+  metaFor,
+} from "@/lib/categories";
+import { Product } from "@/types/product";
 
 const CategoryLanding = () => {
   const { slug } = useParams<{ slug: string }>();
