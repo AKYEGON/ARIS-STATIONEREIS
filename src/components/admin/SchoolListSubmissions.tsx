@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClipboardList, Download, MessageCircle, RefreshCw } from "lucide-react";
+import { ClipboardList, Download, FileText, MessageCircle, RefreshCw } from "lucide-react";
 import { formatPhoneForWhatsApp } from "@/types/communication";
+import { SchoolListQuoteDialog, type QuoteLine } from "./SchoolListQuoteDialog";
 
 interface Submission {
   id: string;
@@ -27,7 +28,12 @@ interface Submission {
   status: string;
   admin_notes: string | null;
   created_at: string;
+  quote_items: QuoteLine[] | null;
+  quote_total: number | null;
+  quote_discount: number | null;
+  order_id: string | null;
 }
+
 
 const STATUSES = ["new", "reviewing", "quoted", "converted", "closed"];
 
