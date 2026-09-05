@@ -221,7 +221,15 @@ export const SchoolListSubmissions = () => {
           </div>
         ))}
       </CardContent>
+
+      <SchoolListQuoteDialog
+        submission={quoteFor}
+        open={!!quoteFor}
+        onClose={() => setQuoteFor(null)}
+        onSaved={fetchRows}
+      />
     </Card>
+
   );
 };
 
