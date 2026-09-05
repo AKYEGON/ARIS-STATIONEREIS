@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Shield, MapPin, Mail, Instagram, ArrowUpRight, HelpCircle, ChevronDown } from "lucide-react";
-import icon from "@/assets/aris-icon.png.asset.json";
+import lockup from "@/assets/aris-lockup.png.asset.json";
 import { useCategoryTree } from "@/hooks/use-category-tree";
 
 // Inline brand marks (lucide has no official WhatsApp / TikTok glyphs)
@@ -100,16 +100,18 @@ const Footer = () => {
           <div className="grid gap-0 lg:grid-cols-12 lg:gap-8">
             {/* Brand */}
             <div className="pb-6 lg:col-span-4 lg:pb-0">
-              <div className="flex items-center gap-3">
-                <div className="flex-shrink-0 rounded-xl bg-white p-2 shadow-lg shadow-primary/10">
-                  <img src={icon.url} alt="ARIS" className="h-10 w-auto" />
-                </div>
-                <div className="flex flex-col leading-none">
-                  <span className="font-display text-2xl font-black tracking-tight text-primary">ARIS</span>
-                  <span className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-primary/80">
-                    Spend less. Study better.
-                  </span>
-                </div>
+              <div className="flex flex-col items-start">
+                <Link to="/" aria-label="ARIS Stationeries home" className="inline-block rounded-xl bg-white px-3 py-2.5 shadow-lg shadow-primary/10">
+                  <img
+                    src={lockup.url}
+                    alt="ARIS Stationeries"
+                    className="h-11 w-auto sm:h-12"
+                    loading="lazy"
+                  />
+                </Link>
+                <span className="mt-3 text-[10px] font-medium uppercase tracking-[0.18em] text-primary/80">
+                  Spend less. Study better.
+                </span>
               </div>
               <p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">
                 Course equipment and stationery for Kenyan university students. Packed at our Nairobi
