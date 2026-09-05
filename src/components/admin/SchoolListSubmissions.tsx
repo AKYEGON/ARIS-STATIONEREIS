@@ -58,7 +58,7 @@ export const SchoolListSubmissions = () => {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) toast.error("Failed to load submissions");
-    else setRows((data || []) as Submission[]);
+    else setRows((data || []) as unknown as Submission[]);
     setLoading(false);
   };
 
