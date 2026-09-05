@@ -50,6 +50,8 @@ export const SchoolListSubmissions = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({});
+  const [quoteFor, setQuoteFor] = useState<Submission | null>(null);
+
 
   const fetchRows = async () => {
     setLoading(true);
