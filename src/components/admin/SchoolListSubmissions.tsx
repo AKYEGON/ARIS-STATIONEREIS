@@ -183,10 +183,15 @@ export const SchoolListSubmissions = () => {
                   {s.file_name || "Attachment"}
                 </Button>
               )}
+              <Button size="sm" className="h-7 text-xs" onClick={() => setQuoteFor(s)}>
+                <FileText className="h-3.5 w-3.5 mr-1" />
+                {s.quote_items && s.quote_items.length > 0 ? "Edit quote" : "Build quote"}
+              </Button>
               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => whatsapp(s)}>
                 <MessageCircle className="h-3.5 w-3.5 mr-1" />
                 WhatsApp
               </Button>
+
               <Select value={s.status} onValueChange={(v) => setStatus(s.id, v)}>
                 <SelectTrigger className="h-7 w-[130px] text-xs">
                   <SelectValue />
