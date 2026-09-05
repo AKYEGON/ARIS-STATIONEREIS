@@ -1317,6 +1317,11 @@ export type Database = {
           file_url: string | null
           id: string
           list_text: string | null
+          order_id: string | null
+          quote_discount: number
+          quote_items: Json
+          quote_total: number | null
+          quoted_at: string | null
           school_or_course: string | null
           status: string
           updated_at: string
@@ -1331,6 +1336,11 @@ export type Database = {
           file_url?: string | null
           id?: string
           list_text?: string | null
+          order_id?: string | null
+          quote_discount?: number
+          quote_items?: Json
+          quote_total?: number | null
+          quoted_at?: string | null
           school_or_course?: string | null
           status?: string
           updated_at?: string
@@ -1345,11 +1355,24 @@ export type Database = {
           file_url?: string | null
           id?: string
           list_text?: string | null
+          order_id?: string | null
+          quote_discount?: number
+          quote_items?: Json
+          quote_total?: number | null
+          quoted_at?: string | null
           school_or_course?: string | null
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "school_list_submissions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       stock_movements: {
         Row: {

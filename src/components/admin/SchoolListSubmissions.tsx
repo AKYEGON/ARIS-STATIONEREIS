@@ -12,8 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ClipboardList, Download, MessageCircle, RefreshCw } from "lucide-react";
+import { ClipboardList, Download, FileText, MessageCircle, RefreshCw } from "lucide-react";
 import { formatPhoneForWhatsApp } from "@/types/communication";
+import { SchoolListQuoteDialog, type QuoteLine } from "./SchoolListQuoteDialog";
 
 interface Submission {
   id: string;
@@ -27,7 +28,12 @@ interface Submission {
   status: string;
   admin_notes: string | null;
   created_at: string;
+  quote_items: QuoteLine[] | null;
+  quote_total: number | null;
+  quote_discount: number | null;
+  order_id: string | null;
 }
+
 
 const STATUSES = ["new", "reviewing", "quoted", "converted", "closed"];
 
@@ -44,6 +50,8 @@ export const SchoolListSubmissions = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({});
+  const [quoteFor, setQuoteFor] = useState<Submission | null>(null);
+
 
   const fetchRows = async () => {
     setLoading(true);
@@ -52,7 +60,7 @@ export const SchoolListSubmissions = () => {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) toast.error("Failed to load submissions");
-    else setRows((data || []) as Submission[]);
+    else setRows((data || []) as unknown as Submission[]);
     setLoading(false);
   };
 
@@ -151,6 +159,12 @@ export const SchoolListSubmissions = () => {
                 </Badge>
               )}
               <Badge className={`text-[10px] ${STATUS_STYLE[s.status] || ""}`}>{s.status}</Badge>
+              {s.quote_total != null && s.quote_total > 0 && (
+                <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                  Quote KSh {Math.round(s.quote_total).toLocaleString()}
+                </Badge>
+              )}
+
               <span className="ml-auto text-[11px] text-muted-foreground">
                 {new Date(s.created_at).toLocaleString()}
               </span>
@@ -169,10 +183,15 @@ export const SchoolListSubmissions = () => {
                   {s.file_name || "Attachment"}
                 </Button>
               )}
+              <Button size="sm" className="h-7 text-xs" onClick={() => setQuoteFor(s)}>
+                <FileText className="h-3.5 w-3.5 mr-1" />
+                {s.quote_items && s.quote_items.length > 0 ? "Edit quote" : "Build quote"}
+              </Button>
               <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => whatsapp(s)}>
                 <MessageCircle className="h-3.5 w-3.5 mr-1" />
                 WhatsApp
               </Button>
+
               <Select value={s.status} onValueChange={(v) => setStatus(s.id, v)}>
                 <SelectTrigger className="h-7 w-[130px] text-xs">
                   <SelectValue />
@@ -202,7 +221,15 @@ export const SchoolListSubmissions = () => {
           </div>
         ))}
       </CardContent>
+
+      <SchoolListQuoteDialog
+        submission={quoteFor}
+        open={!!quoteFor}
+        onClose={() => setQuoteFor(null)}
+        onSaved={fetchRows}
+      />
     </Card>
+
   );
 };
 
