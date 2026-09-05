@@ -159,6 +159,12 @@ export const SchoolListSubmissions = () => {
                 </Badge>
               )}
               <Badge className={`text-[10px] ${STATUS_STYLE[s.status] || ""}`}>{s.status}</Badge>
+              {s.quote_total != null && s.quote_total > 0 && (
+                <Badge variant="outline" className="text-[10px] border-primary/40 text-primary">
+                  Quote KSh {Math.round(s.quote_total).toLocaleString()}
+                </Badge>
+              )}
+
               <span className="ml-auto text-[11px] text-muted-foreground">
                 {new Date(s.created_at).toLocaleString()}
               </span>
