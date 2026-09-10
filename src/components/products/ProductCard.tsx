@@ -52,44 +52,8 @@ const ProductCard = ({ product, onAddToCart, compact = false }: ProductCardProps
     setImageLoaded(false);
   }, [product.image]);
 
-  // Generate product URL for SEO
-  const productUrl = `https://www.arisstationaries.co.ke/product/${product.slug || product.id}`;
-  
-  // Product Schema for SEO
-  const productSchema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "description": product.description,
-    "image": product.image.startsWith("http") ? product.image : `https://www.arisstationaries.co.ke${product.image}`,
-    "brand": {
-      "@type": "Brand",
-      "name": "ARIS"
-    },
-    "offers": {
-      "@type": "Offer",
-      "url": productUrl,
-      "priceCurrency": "KES",
-      "price": displayPrice,
-      "availability": soldOut ? "https://schema.org/OutOfStock" : onBackorder ? "https://schema.org/BackOrder" : "https://schema.org/InStock",
-      "seller": {
-        "@type": "Organization",
-        "name": "ARIS"
-      }
-    },
-    ...(product.originalPrice && product.originalPrice > product.price ? {
-      "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    } : {})
-  };
-
   return (
     <>
-      {/* JSON-LD Product Schema for SEO */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
-      
       <Card className="overflow-hidden flex flex-col h-full shadow-sm">
         <Link
           to={`/product/${(product as any).slug || product.id}`}

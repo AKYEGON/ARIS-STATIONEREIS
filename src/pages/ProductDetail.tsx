@@ -464,7 +464,25 @@ const ProductDetail = () => {
               </h1>
             </div>
 
-            <div className="flex items-baseline flex-wrap gap-3">
+            <div
+              className="flex items-baseline flex-wrap gap-3"
+              itemScope
+              itemType="https://schema.org/Offer"
+            >
+              <meta itemProp="priceCurrency" content="KES" />
+              <meta itemProp="price" content={Number(displayPrice || 0).toFixed(2)} />
+              <meta itemProp="url" content={fullUrl} />
+              <meta
+                itemProp="availability"
+                content={
+                  soldOut
+                    ? "https://schema.org/OutOfStock"
+                    : onBackorder
+                      ? "https://schema.org/BackOrder"
+                      : "https://schema.org/InStock"
+                }
+              />
+              <meta itemProp="itemCondition" content="https://schema.org/NewCondition" />
               <span className="text-2xl sm:text-3xl font-bold text-primary">
                 KSh {displayPrice.toFixed(0)}
               </span>
