@@ -210,13 +210,21 @@ const ProductDetail = () => {
     image: fullImage,
     sku: product.id,
     mpn: product.id,
+    productID: product.id,
+    url: fullUrl,
     category: product.category,
-    brand: { "@type": "Brand", name: "ARIS" },
+    brand: { "@type": "Brand", name: product.brand || "ARIS" },
     offers: {
       "@type": "Offer",
       url: fullUrl,
       priceCurrency: "KES",
-      price: displayPrice,
+      price: Number(displayPrice || 0).toFixed(2),
+      priceSpecification: {
+        "@type": "UnitPriceSpecification",
+        priceCurrency: "KES",
+        price: Number(displayPrice || 0).toFixed(2),
+        valueAddedTaxIncluded: true,
+      },
       availability: soldOut
         ? "https://schema.org/OutOfStock"
         : onBackorder
