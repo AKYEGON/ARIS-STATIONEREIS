@@ -7,6 +7,7 @@ import CategoryStrip from "@/components/home/CategoryStrip";
 import DealsCarousel from "@/components/home/DealsCarousel";
 import PopularStrip from "@/components/home/PopularStrip";
 import DeliveryTrustStrip from "@/components/home/DeliveryTrustStrip";
+import HomeFaq from "@/components/home/HomeFaq";
 
 const Index = () => {
   const { addToCart, getCartItemCount } = useCart();
@@ -15,10 +16,10 @@ const Index = () => {
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "ARIS Stationeries",
-    url: "https://arisstationaries.co.ke",
+    url: "https://www.arisstationaries.co.ke",
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://arisstationaries.co.ke/shop?q={search_term_string}",
+      target: "https://www.arisstationaries.co.ke/shop?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
   };
@@ -40,6 +41,7 @@ const Index = () => {
         <DealsCarousel onAddToCart={addToCart} />
         <PopularStrip onAddToCart={addToCart} />
         <DeliveryTrustStrip />
+        <HomeFaq />
       </main>
 
       <Footer />

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_COLUMNS } from "@/lib/publicCatalog";
 import { BogoOffer } from "@/types/bogo";
 import { Product } from "@/types/product";
 import { CartItem } from "@/types/product";
@@ -40,8 +41,8 @@ export const useBogoOffers = () => {
         .from("bogo_offers")
         .select(
           `*,
-           product:products!bogo_offers_product_id_fkey(*),
-           free_product:products!bogo_offers_free_product_id_fkey(*)`,
+           product:products!bogo_offers_product_id_fkey(${PUBLIC_PRODUCT_COLUMNS}),
+           free_product:products!bogo_offers_free_product_id_fkey(${PUBLIC_PRODUCT_COLUMNS})`,
         )
         .eq("is_active", true);
 

@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_SELECT } from "@/lib/publicCatalog";
 import { Product } from "@/types/product";
 
 export interface CategoryRecord {
@@ -75,10 +76,10 @@ export const formatProduct = (p: any): Product => ({
   media: (p.media || []).map((m: any) => ({ ...m, media_type: m.media_type as "image" | "video" })),
   variants: (p.variants || [])
     .filter((v: any) => v.is_active)
-    .map((v: any) => ({ ...v, price: Number(v.price), cost_price: Number(v.cost_price) })),
+    .map((v: any) => ({ ...v, price: Number(v.price), cost_price: Number(v.cost_price) || 0 })),
 });
 
-const SELECT = `*, media:product_media(*), variants:product_variants(*)`;
+const SELECT = PUBLIC_PRODUCT_SELECT;
 
 /**
  * Products for one or more categories. Unions the legacy products.category text

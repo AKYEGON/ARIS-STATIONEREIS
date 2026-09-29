@@ -2,6 +2,7 @@ import Watermark from "@/components/common/Watermark";
 import { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_SELECT } from "@/lib/publicCatalog";
 import { Product, ProductVariant } from "@/types/product";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -44,7 +45,7 @@ const formatProduct = (p: any): Product & { slug?: string } => ({
     .map((v: any) => ({
       ...v,
       price: Number(v.price),
-      cost_price: Number(v.cost_price),
+      cost_price: Number(v.cost_price) || 0,
     })),
 });
 
@@ -70,7 +71,7 @@ const ProductDetail = () => {
     try {
       const { data, error } = await supabase
         .from("products")
-        .select(`*, media:product_media(*), variants:product_variants(*)`)
+        .select(PUBLIC_PRODUCT_SELECT)
         .eq("slug", slug)
         .maybeSingle();
 
@@ -81,7 +82,7 @@ const ProductDetail = () => {
         if (isUuid) {
           const { data: byId } = await supabase
             .from("products")
-            .select(`*, media:product_media(*), variants:product_variants(*)`)
+            .select(PUBLIC_PRODUCT_SELECT)
             .eq("id", slug)
             .maybeSingle();
           row = byId || null;
@@ -106,7 +107,7 @@ const ProductDetail = () => {
 
       const { data: relData } = await supabase
         .from("products")
-        .select(`*, media:product_media(*), variants:product_variants(*)`)
+        .select(PUBLIC_PRODUCT_SELECT)
         .eq("category", p.category)
         .neq("id", p.id)
         .limit(8);

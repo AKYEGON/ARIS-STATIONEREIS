@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_SELECT } from "@/lib/publicCatalog";
 import { Product, ProductVariant } from "@/types/product";
 import ProductCard from "@/components/products/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -65,7 +66,7 @@ const PopularStrip = ({ onAddToCart }: Props) => {
       if (orderedIds.length > 0) {
         const { data } = await supabase
           .from("products")
-          .select("*, media:product_media(*), variants:product_variants(*)")
+          .select(PUBLIC_PRODUCT_SELECT)
           .in("id", orderedIds);
         rows = data || [];
       }
@@ -73,7 +74,7 @@ const PopularStrip = ({ onAddToCart }: Props) => {
       if (rows.length < LIMIT) {
         const { data: fill } = await supabase
           .from("products")
-          .select("*, media:product_media(*), variants:product_variants(*)")
+          .select(PUBLIC_PRODUCT_SELECT)
           .eq("is_featured", true)
           .order("display_order", { ascending: true })
           .limit(LIMIT);

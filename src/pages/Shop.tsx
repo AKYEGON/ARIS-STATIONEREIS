@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_SELECT } from "@/lib/publicCatalog";
 import { Product, ProductVariant } from "@/types/product";
 import { smartMatch } from "@/lib/smart-search";
 import { useCategoryTree, CategoryNode } from "@/hooks/use-category-tree";
@@ -71,7 +72,7 @@ const Shop = () => {
     const [prodRes, assignRes] = await Promise.all([
       supabase
         .from("products")
-        .select("*, media:product_media(*), variants:product_variants(*)")
+        .select(PUBLIC_PRODUCT_SELECT)
         .order("is_featured", { ascending: false })
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: false }),

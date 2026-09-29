@@ -19,6 +19,15 @@ function getPublicClient() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
 
+// src/lib/publicCatalog.ts
+var PUBLIC_PRODUCT_COLUMNS = "id,name,slug,description,price,original_price,stock,stock_status,backorder_eta_days,image,brand,category,is_featured,display_order,sale_starts_at,sale_ends_at";
+var PUBLIC_VARIANT_COLUMNS = "id,product_id,variant_type,variant_value,color_hex,price,stock,sku,is_active,display_order,stock_status,backorder_eta_days";
+var PUBLIC_MEDIA_COLUMNS = "id,product_id,media_url,media_type,display_order,created_at";
+var PUBLIC_PRODUCT_SELECT = `${PUBLIC_PRODUCT_COLUMNS}, media:product_media(${PUBLIC_MEDIA_COLUMNS}), variants:product_variants(${PUBLIC_VARIANT_COLUMNS})`;
+function catalogSearchTerm(query) {
+  return query.replace(/[%_,.()"'\\]/g, " ").replace(/\s+/g, " ").trim();
+}
+
 // src/lib/mcp/tools/search-products.ts
 var search_products_default = defineTool({
   name: "search_products",
@@ -33,7 +42,8 @@ var search_products_default = defineTool({
   handler: async ({ query, category, limit }) => {
     const supabase = getPublicClient();
     let q = supabase.from("products").select("id, name, slug, price, original_price, category, image, stock, description, is_featured").order("is_featured", { ascending: false }).order("display_order", { ascending: true }).limit(limit ?? 20);
-    if (query) q = q.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+    const term = query ? catalogSearchTerm(query) : "";
+    if (term) q = q.or(`name.ilike.%${term}%,description.ilike.%${term}%`);
     if (category) q = q.eq("category", category);
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
@@ -57,12 +67,12 @@ var get_product_default = defineTool2({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ slug }) => {
     const supabase = getPublicClient();
-    const { data: product, error } = await supabase.from("products").select("*").eq("slug", slug).maybeSingle();
+    const { data: product, error } = await supabase.from("products").select(PUBLIC_PRODUCT_COLUMNS).eq("slug", slug).maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     if (!product) return { content: [{ type: "text", text: `No product with slug '${slug}'` }], isError: true };
     const [{ data: variants }, { data: media }] = await Promise.all([
-      supabase.from("product_variants").select("*").eq("product_id", product.id),
-      supabase.from("product_media").select("*").eq("product_id", product.id).order("display_order")
+      supabase.from("product_variants").select(PUBLIC_VARIANT_COLUMNS).eq("product_id", product.id),
+      supabase.from("product_media").select(PUBLIC_MEDIA_COLUMNS).eq("product_id", product.id).order("display_order")
     ]);
     const payload = { product, variants: variants ?? [], media: media ?? [] };
     return {

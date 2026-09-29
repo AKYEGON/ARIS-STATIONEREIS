@@ -8,6 +8,7 @@ import { Bundle } from "@/types/bundle";
 import { Product, ProductVariant } from "@/types/product";
 import { BogoOffer } from "@/types/bogo";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_COLUMNS, PUBLIC_PRODUCT_SELECT } from "@/lib/publicCatalog";
 import { useCart } from "@/contexts/CartContext";
 import { isOnSale } from "./SaleBadge";
 
@@ -54,12 +55,12 @@ const OffersSection = () => {
         const [bundlesRes, productsRes, bogoRes] = await Promise.all([
           supabase
             .from("bundles")
-            .select(`*, items:bundle_items(*, product:products(*))`)
+            .select(`*, items:bundle_items(*, product:products(${PUBLIC_PRODUCT_COLUMNS}))`)
             .eq("is_active", true)
             .order("display_order", { ascending: false }),
           supabase
             .from("products")
-            .select(`*, media:product_media(*), variants:product_variants(*)`)
+            .select(PUBLIC_PRODUCT_SELECT)
             .not("original_price", "is", null)
             .not("sale_ends_at", "is", null)
             .order("sale_ends_at", { ascending: true }),
@@ -94,7 +95,7 @@ const OffersSection = () => {
         if (bogoProductIds.size > 0) {
           const { data: bogoProducts } = await supabase
             .from("products")
-            .select("*, media:product_media(*), variants:product_variants(*)")
+            .select(PUBLIC_PRODUCT_SELECT)
             .in("id", Array.from(bogoProductIds));
           productById = new Map(
             (bogoProducts || []).map((p: any) => [p.id, formatProduct(p)]),

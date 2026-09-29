@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,23 +7,29 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { CartProvider } from "./contexts/CartContext";
 import Index from "./pages/Index";
-import Cart from "./pages/Cart";
-import Admin from "./pages/Admin";
-import Auth from "./pages/Auth";
-import ResetPassword from "./pages/ResetPassword";
-import Shop from "./pages/Shop";
-import Testimonials from "./pages/Testimonials";
-import Offers from "./pages/Offers";
-import Deals from "./pages/Deals";
-import NotFound from "./pages/NotFound";
-import ProductDetail from "./pages/ProductDetail";
-import CategoryLanding from "./pages/CategoryLanding";
-import SubcategoryLanding from "./pages/SubcategoryLanding";
-import ReviewSubmit from "./pages/ReviewSubmit";
 import ScrollToTop from "./components/common/ScrollToTop";
-import LegalPage from "./pages/LegalPage";
-import SchoolList from "./pages/SchoolList";
 import PixelRouteTracker from "./components/common/PixelRouteTracker";
+
+const Cart = lazy(() => import("./pages/Cart"));
+const Admin = lazy(() => import("./pages/Admin"));
+const Auth = lazy(() => import("./pages/Auth"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Shop = lazy(() => import("./pages/Shop"));
+const Testimonials = lazy(() => import("./pages/Testimonials"));
+const Deals = lazy(() => import("./pages/Deals"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ProductDetail = lazy(() => import("./pages/ProductDetail"));
+const CategoryLanding = lazy(() => import("./pages/CategoryLanding"));
+const SubcategoryLanding = lazy(() => import("./pages/SubcategoryLanding"));
+const ReviewSubmit = lazy(() => import("./pages/ReviewSubmit"));
+const LegalPage = lazy(() => import("./pages/LegalPage"));
+const SchoolList = lazy(() => import("./pages/SchoolList"));
+
+const PageFallback = () => (
+  <div className="flex min-h-screen items-center justify-center">
+    <p className="text-lg">Loading...</p>
+  </div>
+);
 
 
 const queryClient = new QueryClient();
@@ -38,6 +45,7 @@ const App = () => {
             <BrowserRouter>
               <ScrollToTop />
               <PixelRouteTracker />
+              <Suspense fallback={<PageFallback />}>
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/cart" element={<Cart />} />
@@ -65,6 +73,7 @@ const App = () => {
                 <Route path="*" element={<NotFound />} />
                 {/*Comment  */}
               </Routes>
+              </Suspense>
             </BrowserRouter>
           </CartProvider>
         </TooltipProvider>

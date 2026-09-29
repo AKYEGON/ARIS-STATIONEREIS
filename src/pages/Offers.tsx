@@ -6,6 +6,7 @@ import BundleCard from "@/components/products/BundleCard";
 import SEO from "@/components/common/SEO";
 import { Bundle } from "@/types/bundle";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_COLUMNS } from "@/lib/publicCatalog";
 
 const Offers = () => {
   const { addBundleToCart, getCartItemCount } = useCart();
@@ -24,7 +25,7 @@ const Offers = () => {
           *,
           items:bundle_items(
             *,
-            product:products(*)
+            product:products(${PUBLIC_PRODUCT_COLUMNS})
           )
         `)
         .eq("is_active", true)

@@ -1,6 +1,7 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { getPublicClient } from "../supabase";
+import { catalogSearchTerm } from "../../publicCatalog";
 
 export default defineTool({
   name: "search_products",
@@ -22,7 +23,8 @@ export default defineTool({
       .order("display_order", { ascending: true })
       .limit(limit ?? 20);
 
-    if (query) q = q.or(`name.ilike.%${query}%,description.ilike.%${query}%`);
+    const term = query ? catalogSearchTerm(query) : "";
+    if (term) q = q.or(`name.ilike.%${term}%,description.ilike.%${term}%`);
     if (category) q = q.eq("category", category);
 
     const { data, error } = await q;

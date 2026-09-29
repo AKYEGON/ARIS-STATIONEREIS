@@ -33,14 +33,15 @@ const today = new Date().toISOString().split("T")[0];
 // No <lastmod> on static routes: build time is not a page-specific timestamp.
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "daily", priority: "1.0" },
+  { path: "/shop", changefreq: "daily", priority: "0.9" },
   { path: "/deals", changefreq: "daily", priority: "0.9" },
   { path: "/testimonials", changefreq: "weekly", priority: "0.8" },
-  { path: "/students", changefreq: "weekly", priority: "0.8" },
-  { path: "/cart", changefreq: "monthly", priority: "0.3" },
-  { path: "/auth", changefreq: "monthly", priority: "0.1" },
-  { path: "/reset-password", changefreq: "monthly", priority: "0.1" },
-  { path: "/admin", changefreq: "monthly", priority: "0.1" },
-  { path: "/brochure", changefreq: "monthly", priority: "0.1" },
+  { path: "/school-list", changefreq: "weekly", priority: "0.6" },
+  { path: "/about", changefreq: "monthly", priority: "0.4" },
+  { path: "/contact", changefreq: "monthly", priority: "0.4" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.2" },
+  { path: "/returns", changefreq: "yearly", priority: "0.2" },
+  { path: "/terms", changefreq: "yearly", priority: "0.2" },
 ];
 
 function buildXml(entries: SitemapEntry[]) {

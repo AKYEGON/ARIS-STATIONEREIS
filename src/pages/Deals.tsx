@@ -11,6 +11,7 @@ import { Bundle } from "@/types/bundle";
 import { Product, ProductVariant } from "@/types/product";
 import { BogoOffer } from "@/types/bogo";
 import { supabase } from "@/integrations/supabase/client";
+import { PUBLIC_PRODUCT_COLUMNS, PUBLIC_PRODUCT_SELECT } from "@/lib/publicCatalog";
 import { Flame, Package, Gift } from "lucide-react";
 import { isOnSale } from "@/components/products/SaleBadge";
 
@@ -51,7 +52,7 @@ const Deals = () => {
       const [bundlesRes, productsRes, bogoRes] = await Promise.all([
         supabase
           .from("bundles")
-          .select(`*, items:bundle_items(*, product:products(*))`)
+          .select(`*, items:bundle_items(*, product:products(${PUBLIC_PRODUCT_COLUMNS}))`)
           .eq("is_active", true)
           .order("display_order", { ascending: false }),
         // Every product with a live price cut, exactly like the homepage carousel.
@@ -59,12 +60,12 @@ const Deals = () => {
         // discounts - which is most of them - never reached this page.)
         supabase
           .from("products")
-          .select(`*, media:product_media(*), variants:product_variants(*)`)
+          .select(PUBLIC_PRODUCT_SELECT)
           .not("original_price", "is", null)
           .order("sale_ends_at", { ascending: true, nullsFirst: false }),
         supabase
           .from("bogo_offers")
-          .select(`*, product:products!bogo_offers_product_id_fkey(*), free_product:products!bogo_offers_free_product_id_fkey(*)`)
+          .select(`*, product:products!bogo_offers_product_id_fkey(${PUBLIC_PRODUCT_COLUMNS}), free_product:products!bogo_offers_free_product_id_fkey(${PUBLIC_PRODUCT_COLUMNS})`)
           .eq("is_active", true)
           .order("display_order", { ascending: false }),
       ]);
@@ -92,7 +93,7 @@ const Deals = () => {
         if (productIds.size > 0) {
           const { data: relProducts } = await supabase
             .from("products")
-            .select("*")
+            .select(PUBLIC_PRODUCT_COLUMNS)
             .in("id", Array.from(productIds));
           const byId = new Map((relProducts || []).map((p: any) => [p.id, formatProduct(p)]));
           setBogo(

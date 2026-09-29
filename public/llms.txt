@@ -1,0 +1,28 @@
+# ARIS Stationeries
+
+> Stationery and course equipment for Kenyan university students. Picked in Nairobi, delivered countrywide. Prices are in Kenyan shillings. Checkout is WhatsApp and M-Pesa.
+
+The website is a JavaScript app. Product names and prices are not in the raw HTML. Use the read-only catalog API below instead of scraping pages.
+
+## Catalog API
+
+- Endpoint: https://ryiwclzfoctbgmkhgept.supabase.co/functions/v1/mcp
+- Protocol: Model Context Protocol (streamable HTTP)
+- Auth: none
+- Tools: search_products, get_product, list_categories, list_deals, list_testimonials
+
+`get_product` takes the slug from a product URL, for example `foolscaps-3-scaps-ksh-10-73dbaa` from `/product/foolscaps-3-scaps-ksh-10-73dbaa`.
+
+## Pages
+
+- Home: https://www.arisstationaries.co.ke/
+- Shop: https://www.arisstationaries.co.ke/shop
+- Deals: https://www.arisstationaries.co.ke/deals
+- Reviews: https://www.arisstationaries.co.ke/testimonials
+- School list: https://www.arisstationaries.co.ke/school-list
+- Sitemap: https://www.arisstationaries.co.ke/sitemap.xml
+
+## Contact
+
+- WhatsApp: https://wa.me/254119774470
+- Email: arisstationeries@gmail.com
