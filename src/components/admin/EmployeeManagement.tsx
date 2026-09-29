@@ -11,6 +11,7 @@ import { Switch } from "@/components/ui/switch";
 import { Trash2, Users, Shield, UserCheck, UserPlus, Clock, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { readEdgeFunctionError, type StaffRole } from "@/lib/staffAuth";
 
 interface RegisteredUser {
   id: string;
@@ -35,7 +36,7 @@ export const EmployeeManagement = () => {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
-    role: "employee" as "employee" | "manager" | "agent"
+    role: "employee" as StaffRole
   });
   const [agentZones, setAgentZones] = useState<{id: string; name: string}[]>([]);
   const [selectedZoneId, setSelectedZoneId] = useState("");
@@ -57,27 +58,28 @@ export const EmployeeManagement = () => {
     if (data) setAgentZones(data);
   };
 
+  const invokeStaff = async (body: Record<string, unknown>) => {
+    const { data, error } = await supabase.functions.invoke("manage-staff", { body });
+    if (error) throw new Error(await readEdgeFunctionError(error));
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('manage-staff', {
-        body: { action: 'list-users' }
-      });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-
+      const data = await invokeStaff({ action: "list-users" });
       setUsers(data.users || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching users:", error);
-      toast.error("Failed to load users");
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to load users");
     } finally {
       setLoading(false);
     }
   };
 
   const pendingUsers = users.filter(u => !u.roles.some(r => ["employee", "manager", "admin", "agent"].includes(r)));
-  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager", "agent"].includes(r)));
+  const staffMembers = users.filter(u => u.roles.some(r => ["employee", "manager", "admin", "agent"].includes(r)));
 
   const handleApprove = async () => {
     if (!approveDialogUser || !formData.name) {
@@ -92,27 +94,22 @@ export const EmployeeManagement = () => {
 
     setApproveLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('manage-staff', {
-        body: {
-          action: 'approve',
-          user_id: approveDialogUser.id,
-          name: formData.name,
-          phone: formData.phone || null,
-          role: formData.role,
-          zone_id: formData.role === "agent" ? selectedZoneId : undefined,
-        }
+      await invokeStaff({
+        action: "approve",
+        user_id: approveDialogUser.id,
+        name: formData.name,
+        phone: formData.phone || null,
+        role: formData.role,
+        zone_id: formData.role === "agent" ? selectedZoneId : undefined,
       });
-
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
 
       toast.success(`${formData.name} approved as ${formData.role}!`);
       setApproveDialogUser(null);
       setFormData({ name: "", phone: "", role: "employee" });
       setSelectedZoneId("");
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to approve user");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to approve user");
     } finally {
       setApproveLoading(false);
     }
@@ -134,18 +131,14 @@ export const EmployeeManagement = () => {
     }
   };
 
-  const handleUpdateRole = async (member: RegisteredUser, newRole: "employee" | "manager" | "agent") => {
+  const handleUpdateRole = async (member: RegisteredUser, newRole: StaffRole) => {
     try {
-      const { data, error } = await supabase.functions.invoke('manage-staff', {
-        body: { action: 'update-role', user_id: member.id, role: newRole }
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      await invokeStaff({ action: "update-role", user_id: member.id, role: newRole });
 
       toast.success(`Role updated to ${newRole}`);
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update role");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to update role");
     }
   };
 
@@ -153,22 +146,28 @@ export const EmployeeManagement = () => {
     if (!zoneEditMember) return;
     setZoneSaving(true);
     try {
-      const { data, error } = await supabase.functions.invoke('manage-staff', {
-        body: {
-          action: 'set-zone',
-          user_id: zoneEditMember.id,
-          zone_id: zoneEditValue === "none" ? null : zoneEditValue,
-        }
+      await invokeStaff({
+        action: "set-zone",
+        user_id: zoneEditMember.id,
+        zone_id: zoneEditValue === "none" ? null : zoneEditValue,
       });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
       toast.success("Zone updated");
       setZoneEditMember(null);
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update zone");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to update zone");
     } finally {
       setZoneSaving(false);
+    }
+  };
+
+  const handleConfirmEmail = async (member: RegisteredUser) => {
+    try {
+      await invokeStaff({ action: "confirm-email", user_id: member.id });
+      toast.success(`Email confirmed for ${member.email}`);
+      fetchUsers();
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to confirm email");
     }
   };
 
@@ -177,16 +176,12 @@ export const EmployeeManagement = () => {
     if (!confirm(`Remove ${name} from staff? They will lose all access.`)) return;
 
     try {
-      const { data, error } = await supabase.functions.invoke('manage-staff', {
-        body: { action: 'remove', user_id: member.id }
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      await invokeStaff({ action: "remove", user_id: member.id });
 
       toast.success(`${name} removed from staff`);
       fetchUsers();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to remove staff member");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to remove staff member");
     }
   };
 
@@ -269,6 +264,7 @@ export const EmployeeManagement = () => {
                   <TableRow>
                     <TableHead>Email</TableHead>
                     <TableHead className="hidden sm:table-cell">Signed Up</TableHead>
+                    <TableHead className="hidden sm:table-cell">Email</TableHead>
                     <TableHead className="text-right w-[100px]">Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -283,6 +279,11 @@ export const EmployeeManagement = () => {
                       </TableCell>
                       <TableCell className="hidden sm:table-cell text-xs sm:text-sm text-muted-foreground">
                         {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant={user.email_confirmed_at ? "secondary" : "outline"} className="text-[10px]">
+                          {user.email_confirmed_at ? "Confirmed" : "Unconfirmed"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right p-2 sm:p-4">
                         <Button
@@ -321,7 +322,7 @@ export const EmployeeManagement = () => {
                   <TableHead>Role</TableHead>
                   <TableHead className="hidden md:table-cell">Zone</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right w-[110px]">Actions</TableHead>
+                  <TableHead className="text-right w-[160px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -333,7 +334,13 @@ export const EmployeeManagement = () => {
                   </TableRow>
                 ) : (
                   staffMembers.map((member) => {
-                    const currentRole = member.roles.includes("manager") ? "manager" : member.roles.includes("agent") ? "agent" : "employee";
+                    const currentRole: StaffRole = member.roles.includes("admin")
+                      ? "admin"
+                      : member.roles.includes("manager")
+                        ? "manager"
+                        : member.roles.includes("agent")
+                          ? "agent"
+                          : "employee";
                     const isAgent = currentRole === "agent";
                     return (
                       <TableRow key={member.id}>
@@ -353,7 +360,7 @@ export const EmployeeManagement = () => {
                         <TableCell className="p-2 sm:p-4">
                           <Select
                             value={currentRole}
-                            onValueChange={(value: "employee" | "manager" | "agent") => handleUpdateRole(member, value)}
+                            onValueChange={(value: StaffRole) => handleUpdateRole(member, value)}
                           >
                             <SelectTrigger className="h-7 sm:h-8 text-[10px] sm:text-xs w-[90px] sm:w-[110px]">
                               <SelectValue />
@@ -362,6 +369,7 @@ export const EmployeeManagement = () => {
                               <SelectItem value="employee">Employee</SelectItem>
                               <SelectItem value="manager">Manager</SelectItem>
                               <SelectItem value="agent">Agent</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
                             </SelectContent>
                           </Select>
                         </TableCell>
@@ -408,6 +416,17 @@ export const EmployeeManagement = () => {
                                 className="h-7 w-7 sm:h-8 sm:w-8"
                               >
                                 <MapPin className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                            )}
+                            {!member.email_confirmed_at && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                title="Confirm their email so they can sign in"
+                                onClick={() => handleConfirmEmail(member)}
+                                className="h-7 sm:h-8 px-2 text-[10px] sm:text-xs"
+                              >
+                                Confirm email
                               </Button>
                             )}
                             <Button
@@ -464,7 +483,7 @@ export const EmployeeManagement = () => {
               <Label htmlFor="approve-role" className="text-xs sm:text-sm">Role</Label>
               <Select
                 value={formData.role}
-                onValueChange={(value: "employee" | "manager" | "agent") => {
+                onValueChange={(value: StaffRole) => {
                   setFormData({ ...formData, role: value });
                   if (value !== "agent") setSelectedZoneId("");
                 }}
@@ -476,6 +495,7 @@ export const EmployeeManagement = () => {
                   <SelectItem value="employee">Employee - Orders + Quick Sale</SelectItem>
                   <SelectItem value="manager">Manager - Orders, Inventory, Sales (no profit)</SelectItem>
                   <SelectItem value="agent">Agent - Zone-only order access</SelectItem>
+                  <SelectItem value="admin">Admin - Full access, including team</SelectItem>
                 </SelectContent>
               </Select>
             </div>

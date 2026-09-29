@@ -1,4 +1,7 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.81.1";
+
+// Keep in sync with STAFF_ROLES in src/lib/staffAuth.ts.
+const ASSIGNABLE_ROLES = ["admin", "employee", "manager", "agent"];
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -22,12 +25,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseClient = createClient(supabaseUrl, serviceRoleKey);
-    
-    const anonClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!);
-    const { data: { user: caller }, error: authError } = await anonClient.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
+    const supabaseClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    if (!anonKey) {
+      return new Response(JSON.stringify({ error: "Server is missing the anon key" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const anonClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const { data: { user: caller }, error: authError } = await anonClient.auth.getUser(token);
 
     if (authError || !caller) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -118,7 +133,6 @@ Deno.serve(async (req) => {
     // Approve user - assign role and create employee profile
     if (action === "approve") {
       const { user_id, role, name, phone, zone_id } = body;
-      const ALLOWED_STAFF_ROLES = ["employee", "manager", "agent"];
 
       if (!user_id || !role || !name) {
         return new Response(JSON.stringify({ error: "user_id, role, and name are required" }), {
@@ -127,8 +141,15 @@ Deno.serve(async (req) => {
         });
       }
 
-      if (!ALLOWED_STAFF_ROLES.includes(role)) {
-        return new Response(JSON.stringify({ error: "Invalid role. Allowed: employee, manager, agent" }), {
+      if (user_id === caller.id) {
+        return new Response(JSON.stringify({ error: "You cannot change your own access" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!ASSIGNABLE_ROLES.includes(role)) {
+        return new Response(JSON.stringify({ error: "Invalid role. Allowed: admin, employee, manager, agent" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -142,16 +163,35 @@ Deno.serve(async (req) => {
       }
 
       // Check if already has a staff role
-      const { data: existingRole } = await supabaseClient
+      const { data: existingRoles, error: existingError } = await supabaseClient
         .from("user_roles")
-        .select("*")
+        .select("role")
         .eq("user_id", user_id)
-        .in("role", ["employee", "manager", "agent"])
-        .maybeSingle();
+        .in("role", ASSIGNABLE_ROLES)
+        .limit(1);
 
-      if (existingRole) {
+      if (existingError) {
+        return new Response(JSON.stringify({ error: "Failed to check existing role: " + existingError.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (existingRoles && existingRoles.length > 0) {
         return new Response(JSON.stringify({ error: "This user already has a staff role" }), {
           status: 409,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Approval is the trust gate. Confirm the email here so a missing or
+      // undelivered confirmation message cannot block the first sign-in.
+      const { error: confirmError } = await supabaseClient.auth.admin.updateUserById(user_id, {
+        email_confirm: true,
+      });
+      if (confirmError) {
+        return new Response(JSON.stringify({ error: "Failed to confirm email: " + confirmError.message }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -210,7 +250,6 @@ Deno.serve(async (req) => {
 
     if (action === "update-role") {
       const { user_id, role } = body;
-      const ALLOWED_STAFF_ROLES = ["employee", "manager", "agent"];
 
       if (!user_id || !role) {
         return new Response(JSON.stringify({ error: "user_id and role are required" }), {
@@ -219,8 +258,15 @@ Deno.serve(async (req) => {
         });
       }
 
-      if (!ALLOWED_STAFF_ROLES.includes(role)) {
-        return new Response(JSON.stringify({ error: "Invalid role. Allowed: employee, manager, agent" }), {
+      if (user_id === caller.id) {
+        return new Response(JSON.stringify({ error: "You cannot change your own access" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!ASSIGNABLE_ROLES.includes(role)) {
+        return new Response(JSON.stringify({ error: "Invalid role. Allowed: admin, employee, manager, agent" }), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -230,7 +276,7 @@ Deno.serve(async (req) => {
         .from("user_roles")
         .delete()
         .eq("user_id", user_id)
-        .in("role", ["employee", "manager", "agent"]);
+        .in("role", ASSIGNABLE_ROLES);
 
       const { error } = await supabaseClient
         .from("user_roles")
@@ -238,6 +284,38 @@ Deno.serve(async (req) => {
 
       if (error) {
         return new Response(JSON.stringify({ error: "Failed to update role: " + error.message }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "confirm-email") {
+      const { user_id } = body;
+
+      if (!user_id) {
+        return new Response(JSON.stringify({ error: "user_id is required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (user_id === caller.id) {
+        return new Response(JSON.stringify({ error: "You cannot change your own access" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { error: confirmError } = await supabaseClient.auth.admin.updateUserById(user_id, {
+        email_confirm: true,
+      });
+      if (confirmError) {
+        return new Response(JSON.stringify({ error: "Failed to confirm email: " + confirmError.message }), {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -258,11 +336,18 @@ Deno.serve(async (req) => {
         });
       }
 
+      if (user_id === caller.id) {
+        return new Response(JSON.stringify({ error: "You cannot change your own access" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
       await supabaseClient
         .from("user_roles")
         .delete()
         .eq("user_id", user_id)
-        .in("role", ["employee", "manager", "agent"]);
+        .in("role", ASSIGNABLE_ROLES);
 
       // Also remove agent zone assignments
       await supabaseClient

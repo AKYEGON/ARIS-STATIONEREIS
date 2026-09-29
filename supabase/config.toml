@@ -12,3 +12,10 @@ verify_jwt = false
 [functions.marketplace-api]
 verify_jwt = false
 
+# manage-staff checks the caller itself (getUser + user_roles.admin).
+# The gateway's legacy JWT check rejects ES256 user tokens issued after a
+# signing-key rotation, so Team list/approve never runs. Same setting as the
+# other functions that authenticate in code.
+[functions.manage-staff]
+verify_jwt = false
+

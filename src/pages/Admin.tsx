@@ -50,6 +50,7 @@ import { FlashSalesTab } from "@/components/admin/FlashSalesTab";
 import { ReviewRequestFunnel } from "@/components/admin/ReviewRequestFunnel";
 import { MarketplaceApiKeysTab } from "@/components/admin/MarketplaceApiKeysTab";
 import { ShieldCheck, KeyRound, ClipboardList } from "lucide-react";
+import { highestStaffRole, PENDING_APPROVAL_NOTICE } from "@/lib/staffAuth";
 
 interface OrderItem {
   product_name: string;
@@ -345,26 +346,16 @@ const Admin = () => {
         .select("role")
         .eq("user_id", session.user.id);
 
-      if (error || !data || data.length === 0) {
-        toast.error("Access denied. No staff privileges.");
-        navigate("/");
+      if (error) {
+        toast.error("Could not verify staff access. Try signing in again.");
+        navigate("/auth");
         return;
       }
 
-      // Determine highest role: admin > manager > agent > employee
-      const roles = data.map(r => r.role);
-      let detectedRole: UserRole = 'employee';
-      if (roles.includes('admin')) {
-        detectedRole = 'admin';
-      } else if (roles.includes('manager')) {
-        detectedRole = 'manager';
-      } else if (roles.includes('agent')) {
-        detectedRole = 'agent';
-      } else if (roles.includes('employee')) {
-        detectedRole = 'employee';
-      } else {
-        toast.error("Access denied. No staff privileges.");
-        navigate("/");
+      const detectedRole = highestStaffRole((data || []).map((row) => row.role));
+      if (!detectedRole) {
+        await supabase.auth.signOut();
+        navigate("/auth", { replace: true, state: { notice: PENDING_APPROVAL_NOTICE } });
         return;
       }
 

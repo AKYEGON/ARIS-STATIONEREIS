@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,14 +10,18 @@ import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { highestStaffRole, interpretSignup, signInErrorMessage } from "@/lib/staffAuth";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { getCartItemCount } = useCart();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [tab, setTab] = useState("signin");
+  const [notice, setNotice] = useState<string | null>(null);
 
   const handleForgotPassword = async () => {
     if (!email) {
@@ -32,42 +36,109 @@ const Auth = () => {
       if (error) throw error;
       toast.success("Password reset link sent! Check your email.");
       setShowForgotPassword(false);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send reset link");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to send reset link");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/admin");
+    const stateNotice = (location.state as { notice?: string } | null)?.notice;
+    if (stateNotice) setNotice(stateNotice);
+  }, [location.state]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const routeExistingSession = async () => {
+      const hash = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
+      const params = new URLSearchParams(hash);
+      const description = params.get("error_description");
+      if (description) {
+        toast.error(description.replace(/\+/g, " "));
       }
-    });
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+      if (cancelled || !session) return;
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id);
+
+      if (cancelled) return;
+      if (error) {
+        toast.error("Could not verify staff access. Try signing in again.");
+        return;
+      }
+
+      if (highestStaffRole((data || []).map((row) => row.role))) {
+        navigate("/admin", { replace: true });
+        return;
+      }
+
+      // A confirmed signup still has no staff role. Drop the session so /auth
+      // does not bounce them through /admin and back.
+      await supabase.auth.signOut();
+      if (!cancelled) {
+        setNotice("Your email is confirmed, but an admin still needs to approve this account before the dashboard will open.");
+        setTab("signin");
+      }
+    };
+
+    routeExistingSession();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setNotice(null);
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/admin`
-        }
+          // Confirmation does not grant a role. Land on this page, which
+          // explains the approval step, instead of the protected dashboard.
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
       });
 
-      if (error) throw error;
+      const outcome = interpretSignup({
+        error: error ? { message: error.message } : null,
+        user: data.user,
+        session: data.session,
+      });
 
-      toast.success("Account created! Please wait for admin approval, then log in.");
-      setEmail("");
-      setPassword("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to sign up");
+      if (outcome.kind === "error") {
+        toast.error(outcome.message);
+        return;
+      }
+
+      if (outcome.kind === "pending_approval") {
+        await supabase.auth.signOut();
+      }
+
+      if (outcome.kind === "already_registered") {
+        toast.error(outcome.message);
+        setTab("signin");
+      } else {
+        toast.success(outcome.message);
+        setEmail("");
+        setPassword("");
+        setTab("signin");
+      }
+      setNotice(outcome.message);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error && error.message ? error.message : "Failed to sign up");
     } finally {
       setLoading(false);
     }
@@ -76,19 +147,37 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setNotice(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
       if (error) throw error;
 
+      const userId = data.user?.id ?? data.session?.user.id;
+      if (!userId) throw new Error("Sign in did not return an account");
+
+      const { data: roles, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+
+      if (rolesError) throw rolesError;
+
+      if (!highestStaffRole((roles || []).map((row) => row.role))) {
+        await supabase.auth.signOut();
+        setNotice("Signed in, but this account has no staff role yet. Ask an admin to approve it from the Team tab, then sign in again.");
+        return;
+      }
+
       toast.success("Logged in successfully!");
       navigate("/admin");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to sign in");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "";
+      toast.error(signInErrorMessage(message));
     } finally {
       setLoading(false);
     }
@@ -102,10 +191,17 @@ const Auth = () => {
         <Card className="w-full max-w-[95vw] sm:max-w-md">
           <CardHeader className="p-4 sm:p-6">
             <CardTitle className="text-xl sm:text-2xl text-primary">Admin Access</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">Sign in or create an account to access the admin panel</CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
+              Staff sign in. New accounts stay closed until an admin approves them.
+            </CardDescription>
           </CardHeader>
           <CardContent className="p-4 sm:p-6 pt-0">
-            <Tabs defaultValue="signin" className="w-full">
+            {notice && (
+              <p className="mb-3 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs sm:text-sm text-foreground">
+                {notice}
+              </p>
+            )}
+            <Tabs value={tab} onValueChange={setTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10">
                 <TabsTrigger value="signin" className="text-sm">Sign In</TabsTrigger>
                 <TabsTrigger value="signup" className="text-sm">Sign Up</TabsTrigger>
@@ -180,6 +276,9 @@ const Auth = () => {
                   <Button type="submit" className="w-full bg-primary hover:bg-primary/90 h-10 sm:h-11" disabled={loading}>
                     {loading ? "Creating account..." : "Create Account"}
                   </Button>
+                  <p className="text-[11px] sm:text-xs text-muted-foreground leading-snug">
+                    Creating an account only sends a request. Confirm the email if one arrives, then wait for an admin to approve you before signing in.
+                  </p>
                 </form>
               </TabsContent>
             </Tabs>
